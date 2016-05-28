@@ -1,468 +1,289 @@
 <!DOCTYPE html>
 <html>
-<title>Cmd Git</title>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Contents</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/bootstrap.css"/>
+    <link type="text/css" rel="stylesheet" href="assets/css/bootstrap-responsive.css"/>
+    <link type="text/css" rel="stylesheet" href="assets/css/pilcrow.css"/>
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <link type="text/css" rel="stylesheet" href="assets/css/style.css"/>
+    <style>
+    body {
+      background: url('assets/img/textured_paper.png') repeat top left;
+      background-color: #f6f6f6;
+    }
+    </style>
+  </head>
+<body>
 
-<xmp theme="united" style="display:none;">
-Contents
-==
-
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span3"><ul class="nav nav-list">
+    <li class="sidebar-header-1"><a href="#contents">Contents</a></li>
+    <li class="sidebar-header-1"><a href="#reading-notebook_with_decorative_cover-">Reading :notebook_with_decorative_cover:</a></li>
+    <li class="sidebar-header-1"><a href="#repos">Repos</a></li>
+    <li class="sidebar-header-1"><a href="#github">GitHub</a></li>
+    <li class="sidebar-header-1"><a href="#commands">Commands</a></li>
+    <li class="sidebar-header-2"><a href="#tag-1234-">Tag :1234:</a></li>
+    <li class="sidebar-header-4"><a href="#list-all-tags">List all tags</a></li>
+    <li class="sidebar-header-4"><a href="#tag-a-commit">Tag a commit</a></li>
+    <li class="sidebar-header-4"><a href="#delete-remote-tags">Delete remote tags</a></li>
+    <li class="sidebar-header-4"><a href="#push-tag-to-remote">Push tag to remote</a></li>
+    <li class="sidebar-header-4"><a href="#rename-tag">Rename tag</a></li>
+    <li class="sidebar-header-4"><a href="#move-tag-from-one-commit-to-another-commit">Move tag from one commit to another commit</a></li>
+    <li class="sidebar-header-2"><a href="#remote-cloud-">Remote :cloud:</a></li>
+    <li class="sidebar-header-4"><a href="#list-all-remote">List all remote</a></li>
+    <li class="sidebar-header-4"><a href="#rename-remote">Rename remote</a></li>
+    <li class="sidebar-header-2"><a href="#branch-tanabata_tree-">Branch :tanabata_tree:</a></li>
+    <li class="sidebar-header-4"><a href="#list-all-branches">List all branches</a></li>
+    <li class="sidebar-header-4"><a href="#create-a-branch">Create a branch</a></li>
+    <li class="sidebar-header-4"><a href="#create-branch-from-commit">Create branch from commit</a></li>
+    <li class="sidebar-header-4"><a href="#push-the-branch-to-remote">Push the branch to remote</a></li>
+    <li class="sidebar-header-4"><a href="#rename-local-branch">Rename local branch</a></li>
+    <li class="sidebar-header-4"><a href="#rename-remote-branch">Rename remote branch</a></li>
+    <li class="sidebar-header-4"><a href="#delete-a-branch">Delete a branch</a></li>
+    <li class="sidebar-header-2"><a href="#commit-pencil2-">Commit :pencil2:</a></li>
+    <li class="sidebar-header-4"><a href="#undo-last-commit">Undo last commit</a></li>
+    <li class="sidebar-header-4"><a href="#squash-last-n-commits-into-one-commit">Squash last n commits into one commit</a></li>
+    <li class="sidebar-header-4"><a href="#move-last-commits-into-new-branch">Move last commits into new branch</a></li>
+    <li class="sidebar-header-4"><a href="#pick">Pick</a></li>
+    <li class="sidebar-header-2"><a href="#reflog">Reflog</a></li>
+    <li class="sidebar-header-4"><a href="#show-reflog">Show reflog</a></li>
+    <li class="sidebar-header-4"><a href="#get-commit">Get commit</a></li>
+    <li class="sidebar-header-2"><a href="#revert">Revert</a></li>
+    <li class="sidebar-header-4"><a href="#amend">Amend</a></li>
+    <li class="sidebar-header-2"><a href="#checkout-checkered_flag-">Checkout :checkered_flag:</a></li>
+    <li class="sidebar-header-4"><a href="#checkout-a-tag">Checkout a tag</a></li>
+    <li class="sidebar-header-4"><a href="#checkout-a-branch">Checkout a branch</a></li>
+    <li class="sidebar-header-4"><a href="#checkout-a-commit">Checkout a commit</a></li>
+    <li class="sidebar-header-2"><a href="#stash-package-">Stash :package:</a></li>
+    <li class="sidebar-header-4"><a href="#stash">Stash</a></li>
+    <li class="sidebar-header-4"><a href="#list-all-stashes">List all stashes</a></li>
+    <li class="sidebar-header-4"><a href="#apply-a-stash">Apply a stash</a></li>
+    <li class="sidebar-header-2"><a href="#rebase-wind_chime-">Rebase :wind_chime:</a></li>
+    <li class="sidebar-header-4"><a href="#rebase">rebase</a></li>
+    <li class="sidebar-header-2"><a href="#-gitignore-honey_pot-">.gitignore :honey_pot:</a></li>
+    <li class="sidebar-header-4"><a href="#untrack">Untrack</a></li>
+    <li class="sidebar-header-2"><a href="#index-card_index-">Index :card_index:</a></li>
+    <li class="sidebar-header-4"><a href="#remove-untracked-files">Remove untracked files</a></li>
+    <li class="sidebar-header-4"><a href="#remove-file-from-index">Remove file from index</a></li>
+    <li class="sidebar-header-4"><a href="#reset-the-index-to-match-the-most-recent-commit">Reset the index to match the most recent commit</a></li>
+    <li class="sidebar-header-4"><a href="#reset-the-index-and-the-working-directory-to-match-the-most-recent-commit">Reset the index and the working directory to match the most recent commit</a></li>
+    <li class="sidebar-header-2"><a href="#misc-ghost-">Misc :ghost:</a></li>
+    <li class="sidebar-header-4"><a href="#conflicting-git-rebase">Conflicting git rebase</a></li>
+    <li class="sidebar-header-4"><a href="#resolve-git-merge-conflict">Resolve git merge conflict</a></li>
+    <li class="sidebar-header-4"><a href="#theirs">theirs</a></li>
+    <li class="sidebar-header-4"><a href="#merge-from-master-into-feature-branch-after-push">Merge from master into feature branch after push</a></li>
+    <li class="sidebar-header-2"><a href="#licence">Licence</a></li>
+</ul>
+      </div>
+      <div class="span9 main"><h1 id="contents"><a class="header-link" href="#contents"></a>Contents</h1>
 <!-- TOC depthFrom:1 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Reading :notebook_with_decorative_cover:](#reading-notebookwithdecorativecover)
-- [Repos](#repos)
-- [GitHub](#github)
-- [Commands](#commands)
-  - [Tag :1234:](#tag-1234)
-  - [Remote :cloud:](#remote-cloud)
-  - [Branch :tanabata_tree:](#branch-tanabatatree)
-  - [Commit :pencil2:](#commit-pencil2)
-  - [Reflog](#reflog)
-  - [Revert](#revert)
-  - [Checkout :checkered_flag:](#checkout-checkeredflag)
-  - [Stash :package:](#stash-package)
-  - [Rebase :wind_chime:](#rebase-windchime)
-  - [.gitignore :honey_pot:](#gitignore-honeypot)
-  - [Index :card_index:](#index-cardindex)
-  - [Misc :ghost:](#misc-ghost)
-
+<ul class="list">
+<li><a href="#reading-notebookwithdecorativecover">Reading :notebook_with_decorative_cover:</a></li>
+<li><a href="#repos">Repos</a></li>
+<li><a href="#github">GitHub</a></li>
+<li><a href="#commands">Commands</a><ul class="list">
+<li><a href="#tag-1234">Tag :1234:</a></li>
+<li><a href="#remote-cloud">Remote :cloud:</a></li>
+<li><a href="#branch-tanabatatree">Branch :tanabata_tree:</a></li>
+<li><a href="#commit-pencil2">Commit :pencil2:</a></li>
+<li><a href="#reflog">Reflog</a></li>
+<li><a href="#revert">Revert</a></li>
+<li><a href="#checkout-checkeredflag">Checkout :checkered_flag:</a></li>
+<li><a href="#stash-package">Stash :package:</a></li>
+<li><a href="#rebase-windchime">Rebase :wind_chime:</a></li>
+<li><a href="#gitignore-honeypot">.gitignore :honey_pot:</a></li>
+<li><a href="#index-cardindex">Index :card_index:</a></li>
+<li><a href="#misc-ghost">Misc :ghost:</a></li>
+</ul>
+</li>
+</ul>
 <!-- /TOC -->
-
-# Reading :notebook_with_decorative_cover:
-
-- [Atlassian Git Tutorial](https://www.atlassian.com/git/tutorials/setting-up-a-repository)
-- [git-cheat-sheet](https://github.com/arslanbilal/git-cheat-sheet)
-- [Learn Enough Git to Be Dangerous](http://www.learnenough.com/git-tutorial)
-- [Git Workflows for Pros: A Good Git Guide](http://www.toptal.com/git/git-workflows-for-pros-a-good-git-guide)
-- [Git from the inside out](https://codewords.recurse.com/issues/two/git-from-the-inside-out)
-- [git-game](https://github.com/git-game/git-game)
-- [Introduction to Git - talk by Scott Chacon](https://www.youtube.com/watch?v=xbLVvrb2-fY)
-- [Git Tutorial – Git Fu With The Command Line](http://www.raywenderlich.com/74258/git-tutorial-intermediate)
-- [Git Immersion](http://gitimmersion.com/)
-
-# Repos
-
-- [gitflow](https://github.com/nvie/gitflow) Git extensions to provide high-level repository operations for Vincent Driessen's branching model
-- [diff-so-fancy](https://github.com/so-fancy/diff-so-fancy) Good-lookin' diffs with diff-highlight and more
-
-# GitHub
-
-- [gitify](https://github.com/ekonstantinidis/gitify) GitHub Notifications on your menu bar.
-- [twitter-for-github](https://github.com/bevacqua/twitter-for-github) Twitter handles for GitHub
-- [octotree](https://github.com/buunguyen/octotree) Code tree for GitHub and GitLab
-- [isometric-contributions](https://github.com/jasonlong/isometric-contributions) Render an isometric pixel art version of your contribution graph in Chrome and Safari.
-- [github-s3](https://github.com/hyperoslo/github-s3) Shell scripts that make it really easy to archive and restore repositories between GitHub and AWS S3
-- [mention-bot](https://github.com/facebook/mention-bot) Automatically mention potential reviewers on pull requests.
-- [github-extended](https://github.com/onmyway133/github-extended) A Chrome extension to discover more repositories
-
-# Commands
-
-## Tag :1234:
-
-#### List all tags
-
-```
-git tag
-```
-
-#### Tag a commit
-
-```
-git tag -a v1.4 -m "my version 1.4"
-```
-
-#### Delete remote tags
-
-- [How to delete a remote tag?](http://stackoverflow.com/a/5480292/1418457)
-
-```
-git push --delete origin tagname
-```
-
-```
-git push origin :tagname
-```
-
-#### Push tag to remote
-
-- [Push a tag to a remote repository using Git?](http://stackoverflow.com/a/5195913/1418457)
-
-```
-git push origin tagname
-```
-
-#### Rename tag
-
-- [How do you rename a Git tag?](http://stackoverflow.com/a/5719854/1418457)
-
-```
-git tag new old
-git tag -d old
+<h1 id="reading-notebook_with_decorative_cover-"><a class="header-link" href="#reading-notebook_with_decorative_cover-"></a>Reading :notebook_with_decorative_cover:</h1>
+<ul class="list">
+<li><a href="https://www.atlassian.com/git/tutorials/setting-up-a-repository">Atlassian Git Tutorial</a></li>
+<li><a href="https://github.com/arslanbilal/git-cheat-sheet">git-cheat-sheet</a></li>
+<li><a href="http://www.learnenough.com/git-tutorial">Learn Enough Git to Be Dangerous</a></li>
+<li><a href="http://www.toptal.com/git/git-workflows-for-pros-a-good-git-guide">Git Workflows for Pros: A Good Git Guide</a></li>
+<li><a href="https://codewords.recurse.com/issues/two/git-from-the-inside-out">Git from the inside out</a></li>
+<li><a href="https://github.com/git-game/git-game">git-game</a></li>
+<li><a href="https://www.youtube.com/watch?v=xbLVvrb2-fY">Introduction to Git - talk by Scott Chacon</a></li>
+<li><a href="http://www.raywenderlich.com/74258/git-tutorial-intermediate">Git Tutorial – Git Fu With The Command Line</a></li>
+<li><a href="http://gitimmersion.com/">Git Immersion</a></li>
+</ul>
+<h1 id="repos"><a class="header-link" href="#repos"></a>Repos</h1>
+<ul class="list">
+<li><a href="https://github.com/nvie/gitflow">gitflow</a> Git extensions to provide high-level repository operations for Vincent Driessen&#39;s branching model</li>
+<li><a href="https://github.com/so-fancy/diff-so-fancy">diff-so-fancy</a> Good-lookin&#39; diffs with diff-highlight and more</li>
+</ul>
+<h1 id="github"><a class="header-link" href="#github"></a>GitHub</h1>
+<ul class="list">
+<li><a href="https://github.com/ekonstantinidis/gitify">gitify</a> GitHub Notifications on your menu bar.</li>
+<li><a href="https://github.com/bevacqua/twitter-for-github">twitter-for-github</a> Twitter handles for GitHub</li>
+<li><a href="https://github.com/buunguyen/octotree">octotree</a> Code tree for GitHub and GitLab</li>
+<li><a href="https://github.com/jasonlong/isometric-contributions">isometric-contributions</a> Render an isometric pixel art version of your contribution graph in Chrome and Safari.</li>
+<li><a href="https://github.com/hyperoslo/github-s3">github-s3</a> Shell scripts that make it really easy to archive and restore repositories between GitHub and AWS S3</li>
+<li><a href="https://github.com/facebook/mention-bot">mention-bot</a> Automatically mention potential reviewers on pull requests.</li>
+<li><a href="https://github.com/onmyway133/github-extended">github-extended</a> A Chrome extension to discover more repositories</li>
+</ul>
+<h1 id="commands"><a class="header-link" href="#commands"></a>Commands</h1>
+<h2 id="tag-1234-"><a class="header-link" href="#tag-1234-"></a>Tag :1234:</h2>
+<h4 id="list-all-tags"><a class="header-link" href="#list-all-tags"></a>List all tags</h4>
+<pre class="hljs"><code>git <span class="hljs-keyword">tag</span></code></pre><h4 id="tag-a-commit"><a class="header-link" href="#tag-a-commit"></a>Tag a commit</h4>
+<pre class="hljs"><code>git <span class="hljs-keyword">tag</span> <span class="hljs-title">-a</span> v1.<span class="hljs-number">4</span> -m <span class="hljs-string">"my version 1.4"</span></code></pre><h4 id="delete-remote-tags"><a class="header-link" href="#delete-remote-tags"></a>Delete remote tags</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/5480292/1418457">How to delete a remote tag?</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-built_in">push</span> --<span class="hljs-built_in">delete</span> <span class="hljs-built_in">origin</span> tagname</code></pre><pre class="hljs"><code>git <span class="hljs-built_in">push</span> <span class="hljs-built_in">origin</span> :tagname</code></pre><h4 id="push-tag-to-remote"><a class="header-link" href="#push-tag-to-remote"></a>Push tag to remote</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/5195913/1418457">Push a tag to a remote repository using Git?</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-built_in">push</span> <span class="hljs-built_in">origin</span> tagname</code></pre><h4 id="rename-tag"><a class="header-link" href="#rename-tag"></a>Rename tag</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/5719854/1418457">How do you rename a Git tag?</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-keyword">tag</span> <span class="hljs-title">new</span> old
+git <span class="hljs-keyword">tag</span> <span class="hljs-title">-d</span> old
 git push origin :refs/tags/old
-git push --tags
-```
-
-#### Move tag from one commit to another commit
-
-- [How can I move a tag on a git branch to a different commit?](http://stackoverflow.com/a/8044605/1418457)
-
-```
-git push origin :refs/tags/<tagname>
+git push --tags</code></pre><h4 id="move-tag-from-one-commit-to-another-commit"><a class="header-link" href="#move-tag-from-one-commit-to-another-commit"></a>Move tag from one commit to another commit</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/8044605/1418457">How can I move a tag on a git branch to a different commit?</a></li>
+</ul>
+<pre class="hljs"><code>git push origin <span class="hljs-symbol">:refs/tags/&lt;tagname&gt;</span>
 git tag -fa tagname
-git push origin master --tags
-```
-
-## Remote :cloud:
-
-#### List all remote
-
-```
-git remote
-```
-
-#### Rename remote
-
-- [Renaming a remote](https://help.github.com/articles/renaming-a-remote/)
-
-```
-git remote rename old new
-```
-
-## Branch :tanabata_tree:
-
-#### List all branches
-
-```
-git branch
-```
-
-#### Create a branch
-
-- [Create a new branch with git and manage branches](https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches)
-
-Create the branch on your local machine and switch in this branch
-
-```
-git checkout -b branch_name
-```
-
-
-#### Create branch from commit
-
-- [Branch from a previous commit using git](http://stackoverflow.com/a/2816728/1418457)
-
-```
-git branch branch_name sha1_of_commit
-```
-
-#### Push the branch to remote
-
-```
-git push origin branch_name
-```
-
-#### Rename local branch
-
-- [How do you rename the local branch?](http://stackoverflow.com/a/6591218/1418457)
-
-Rename other branch
-
-```
-git branch -m old new
-```
-
-Rename current branch
-
-```
-git branch -m new
-```
-
-#### Rename remote branch
-
-- [Rename master branch for both local and remote Git repositories](http://stackoverflow.com/a/16220970/1418457)
-
-```
-git branch -m old new                # Rename branch locally    
-git push origin :old                 # Delete the old branch    
-git push --set-upstream origin new   # Push the new branch, set local branch to track the new remote
-```
-
-#### Delete a branch
-
-- [Delete a Git branch both locally and remotely](http://stackoverflow.com/a/10999165/1418457)
-
-```
-git branch -D the_local_branch
-```
-
-```
-git push origin :the_remote_branch
-```
-
-## Commit :pencil2:
-
-#### Undo last commit
-
-- [How do you undo the last commit?](http://stackoverflow.com/a/6866485/1418457)
-
-```
-git reset --hard HEAD~1
-```
-
-#### Squash last n commits into one commit
-
-- [Squash my last X commits together using Git](http://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git)
-
-```
-git rebase -i HEAD~5
-```
-
-```
-git reset --soft HEAD~5
+git push origin master --tags</code></pre><h2 id="remote-cloud-"><a class="header-link" href="#remote-cloud-"></a>Remote :cloud:</h2>
+<h4 id="list-all-remote"><a class="header-link" href="#list-all-remote"></a>List all remote</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> remote</code></pre><h4 id="rename-remote"><a class="header-link" href="#rename-remote"></a>Rename remote</h4>
+<ul class="list">
+<li><a href="https://help.github.com/articles/renaming-a-remote/">Renaming a remote</a></li>
+</ul>
+<pre class="hljs"><code>git remote <span class="hljs-keyword">rename</span> <span class="hljs-keyword">old</span> <span class="hljs-keyword">new</span></code></pre><h2 id="branch-tanabata_tree-"><a class="header-link" href="#branch-tanabata_tree-"></a>Branch :tanabata_tree:</h2>
+<h4 id="list-all-branches"><a class="header-link" href="#list-all-branches"></a>List all branches</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> branch</code></pre><h4 id="create-a-branch"><a class="header-link" href="#create-a-branch"></a>Create a branch</h4>
+<ul class="list">
+<li><a href="https://github.com/Kunena/Kunena-Forum/wiki/Create-a-new-branch-with-git-and-manage-branches">Create a new branch with git and manage branches</a></li>
+</ul>
+<p>Create the branch on your local machine and switch in this branch</p>
+<pre class="hljs"><code>git checkout -<span class="hljs-selector-tag">b</span> branch_name</code></pre><h4 id="create-branch-from-commit"><a class="header-link" href="#create-branch-from-commit"></a>Create branch from commit</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/2816728/1418457">Branch from a previous commit using git</a></li>
+</ul>
+<pre class="hljs"><code><span class="hljs-symbol">git</span> <span class="hljs-keyword">branch </span><span class="hljs-keyword">branch_name </span>sha1_of_commit</code></pre><h4 id="push-the-branch-to-remote"><a class="header-link" href="#push-the-branch-to-remote"></a>Push the branch to remote</h4>
+<pre class="hljs"><code>git <span class="hljs-built_in">push</span> <span class="hljs-built_in">origin</span> branch_name</code></pre><h4 id="rename-local-branch"><a class="header-link" href="#rename-local-branch"></a>Rename local branch</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/6591218/1418457">How do you rename the local branch?</a></li>
+</ul>
+<p>Rename other branch</p>
+<pre class="hljs"><code>git branch -m <span class="hljs-keyword">old</span> <span class="hljs-keyword">new</span></code></pre><p>Rename current branch</p>
+<pre class="hljs"><code>git branch -m <span class="hljs-keyword">new</span></code></pre><h4 id="rename-remote-branch"><a class="header-link" href="#rename-remote-branch"></a>Rename remote branch</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/16220970/1418457">Rename master branch for both local and remote Git repositories</a></li>
+</ul>
+<pre class="hljs"><code>git branch -m old <span class="hljs-built_in">new</span>                # Rename branch locally    
+git <span class="hljs-built_in">push</span> <span class="hljs-built_in">origin</span> :old                 # Delete the old branch    
+git <span class="hljs-built_in">push</span> --set-upstream <span class="hljs-built_in">origin</span> <span class="hljs-built_in">new</span>   # Push the <span class="hljs-built_in">new</span> branch, set <span class="hljs-built_in">local</span> branch to <span class="hljs-built_in">track</span> the <span class="hljs-built_in">new</span> remote</code></pre><h4 id="delete-a-branch"><a class="header-link" href="#delete-a-branch"></a>Delete a branch</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/10999165/1418457">Delete a Git branch both locally and remotely</a></li>
+</ul>
+<pre class="hljs"><code><span class="hljs-symbol">git</span> <span class="hljs-keyword">branch </span>-D the_local_branch</code></pre><pre class="hljs"><code>git <span class="hljs-built_in">push</span> <span class="hljs-built_in">origin</span> :the_remote_branch</code></pre><h2 id="commit-pencil2-"><a class="header-link" href="#commit-pencil2-"></a>Commit :pencil2:</h2>
+<h4 id="undo-last-commit"><a class="header-link" href="#undo-last-commit"></a>Undo last commit</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/6866485/1418457">How do you undo the last commit?</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-keyword">reset</span> <span class="hljs-comment">--hard HEAD~1</span></code></pre><h4 id="squash-last-n-commits-into-one-commit"><a class="header-link" href="#squash-last-n-commits-into-one-commit"></a>Squash last n commits into one commit</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git">Squash my last X commits together using Git</a></li>
+</ul>
+<pre class="hljs"><code>git rebase -<span class="hljs-selector-tag">i</span> HEAD~<span class="hljs-number">5</span></code></pre><pre class="hljs"><code>git <span class="hljs-keyword">reset</span> <span class="hljs-comment">--soft HEAD~5</span>
+git <span class="hljs-keyword">add</span> .
+git <span class="hljs-keyword">commit</span> -m <span class="hljs-string">"Update"</span>
+git push -f origin <span class="hljs-keyword">master</span></code></pre><h4 id="move-last-commits-into-new-branch"><a class="header-link" href="#move-last-commits-into-new-branch"></a>Move last commits into new branch</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/1628563/move-the-most-recent-commits-to-a-new-branch-with-git">Move the most recent commit(s) to a new branch with Git</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-keyword">branch </span>newbranch
+git reset --hard HEAD~<span class="hljs-number">3</span> <span class="hljs-comment"># Go back 3 commits. You *will* lose uncommitted work.*1</span>
+git checkout newbranch</code></pre><h4 id="pick"><a class="header-link" href="#pick"></a>Pick</h4>
+<ul class="list">
+<li><a href="http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html">CHERRY-PICKING EXPLAINED</a></li>
+</ul>
+<pre class="hljs"><code>git cherry-pick <span class="hljs-built_in">hash</span>_commit_A <span class="hljs-built_in">hash</span>_commit_B</code></pre><h2 id="reflog"><a class="header-link" href="#reflog"></a>Reflog</h2>
+<ul class="list">
+<li><a href="https://www.atlassian.com/git/tutorials/rewriting-history/git-reflog">git-reflog</a></li>
+<li><a href="http://www.ocpsoft.org/tutorials/git/use-reflog-and-cherry-pick-to-restore-lost-commits/">Use “git reflog” and “git cherry-pick” to restore lost commits</a></li>
+</ul>
+<h4 id="show-reflog"><a class="header-link" href="#show-reflog"></a>Show reflog</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> reflog</code></pre><h4 id="get-commit"><a class="header-link" href="#get-commit"></a>Get commit</h4>
+<pre class="hljs"><code>git <span class="hljs-keyword">reset</span> <span class="hljs-comment">--hard 0254ea7</span></code></pre><pre class="hljs"><code><span class="hljs-symbol">git</span> cherry-pick <span class="hljs-number">12944</span><span class="hljs-built_in">d8</span></code></pre><h2 id="revert"><a class="header-link" href="#revert"></a>Revert</h2>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/21718540/1418457">Revert previous commits</a></li>
+</ul>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> revert --<span class="hljs-literal">no</span>-commit 0766c053..HEAD
+git commit</code></pre><h4 id="amend"><a class="header-link" href="#amend"></a>Amend</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/179123/edit-an-incorrect-commit-message-in-git">Edit an incorrect commit message in Git</a></li>
+</ul>
+<pre class="hljs"><code>git <span class="hljs-keyword">commit</span> <span class="hljs-comment">--amend</span></code></pre><pre class="hljs"><code><span class="hljs-comment">git</span> <span class="hljs-comment">commit</span> <span class="hljs-literal">-</span><span class="hljs-literal">-</span><span class="hljs-comment">amend</span> <span class="hljs-literal">-</span><span class="hljs-literal">-</span><span class="hljs-comment">no</span><span class="hljs-literal">-</span><span class="hljs-comment">edit</span></code></pre><pre class="hljs"><code><span class="hljs-attribute">git</span> commit --amend -m <span class="hljs-string">"New commit message"</span></code></pre><ul class="list">
+<li><a href="http://stackoverflow.com/questions/8981194/changing-git-commit-message-after-push-given-that-no-one-pulled-from-remote">Changing git commit message after push</a></li>
+</ul>
+<pre class="hljs"><code>git commit --amend -m <span class="hljs-string">"New commit message"</span>
+git push --force <span class="hljs-params">&lt;repository&gt;</span> <span class="hljs-params">&lt;branch&gt;</span></code></pre><h2 id="checkout-checkered_flag-"><a class="header-link" href="#checkout-checkered_flag-"></a>Checkout :checkered_flag:</h2>
+<h4 id="checkout-a-tag"><a class="header-link" href="#checkout-a-tag"></a>Checkout a tag</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> checkout tagname</code></pre><pre class="hljs"><code>git checkout -<span class="hljs-selector-tag">b</span> newbranchname tagname</code></pre><h4 id="checkout-a-branch"><a class="header-link" href="#checkout-a-branch"></a>Checkout a branch</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> checkout destination_branch</code></pre><p>Use -m if there is merge conflict</p>
+<pre class="hljs"><code>git checkout -m <span class="hljs-keyword">master</span> <span class="hljs-title">// from</span> feature branch to <span class="hljs-literal">master</span></code></pre><h4 id="checkout-a-commit"><a class="header-link" href="#checkout-a-commit"></a>Checkout a commit</h4>
+<pre class="hljs"><code>git checkout commit_<span class="hljs-built_in">hash</span></code></pre><pre class="hljs"><code>git checkout -<span class="hljs-selector-tag">b</span> newbranchname HEAD~<span class="hljs-number">4</span></code></pre><pre class="hljs"><code>git checkout -<span class="hljs-selector-tag">b</span> newbranchname commit_hash</code></pre><pre class="hljs"><code>git checkout commit_hash <span class="hljs-built_in">file</span></code></pre><h2 id="stash-package-"><a class="header-link" href="#stash-package-"></a>Stash :package:</h2>
+<ul class="list">
+<li><a href="https://git-scm.com/book/en/v1/Git-Tools-Stashing">6.3 Git Tools - Stashing</a></li>
+</ul>
+<h4 id="stash"><a class="header-link" href="#stash"></a>Stash</h4>
+<pre class="hljs"><code>git stash <span class="hljs-keyword">save</span> <span class="hljs-string">"stash name"</span></code></pre><pre class="hljs"><code><span class="hljs-attribute">git</span> stash</code></pre><h4 id="list-all-stashes"><a class="header-link" href="#list-all-stashes"></a>List all stashes</h4>
+<pre class="hljs"><code>git stash <span class="hljs-built_in">list</span></code></pre><h4 id="apply-a-stash"><a class="header-link" href="#apply-a-stash"></a>Apply a stash</h4>
+<pre class="hljs"><code>git stash <span class="hljs-keyword">pop</span></code></pre><pre class="hljs"><code>git stash <span class="hljs-built_in">apply</span></code></pre><pre class="hljs"><code><span class="hljs-selector-tag">git</span> <span class="hljs-selector-tag">stash</span> <span class="hljs-selector-tag">apply</span> <span class="hljs-selector-tag">stash</span>@<span class="hljs-keyword">{2}</span></code></pre><h2 id="rebase-wind_chime-"><a class="header-link" href="#rebase-wind_chime-"></a>Rebase :wind_chime:</h2>
+<h4 id="rebase"><a class="header-link" href="#rebase"></a>rebase</h4>
+<pre class="hljs"><code>git rebase <span class="hljs-keyword">base</span> <span class="hljs-comment">// rebase the current branch onto base</span></code></pre><h2 id="-gitignore-honey_pot-"><a class="header-link" href="#-gitignore-honey_pot-"></a>.gitignore :honey_pot:</h2>
+<h4 id="untrack"><a class="header-link" href="#untrack"></a>Untrack</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/19095988/1418457">Making git “forget” about a file that was tracked but is now in .gitignore</a></li>
+</ul>
+<pre class="hljs"><code>git rm -r --cached .
 git add .
-git commit -m "Update"
-git push -f origin master
-```
-
-#### Move last commits into new branch
-
-- [Move the most recent commit(s) to a new branch with Git](http://stackoverflow.com/questions/1628563/move-the-most-recent-commits-to-a-new-branch-with-git)
-
-```
-git branch newbranch
-git reset --hard HEAD~3 # Go back 3 commits. You *will* lose uncommitted work.*1
-git checkout newbranch
-```
-
-#### Pick
-
-- [CHERRY-PICKING EXPLAINED](http://think-like-a-git.net/sections/rebase-from-the-ground-up/cherry-picking-explained.html)
-
-```
-git cherry-pick hash_commit_A hash_commit_B
-```
-
-## Reflog
-
-- [git-reflog](https://www.atlassian.com/git/tutorials/rewriting-history/git-reflog)
-- [Use “git reflog” and “git cherry-pick” to restore lost commits](http://www.ocpsoft.org/tutorials/git/use-reflog-and-cherry-pick-to-restore-lost-commits/)
-
-
-#### Show reflog
-
-```
-git reflog
-```
-
-#### Get commit
-
-```
-git reset --hard 0254ea7
-```
-
-```
-git cherry-pick 12944d8
-```
-
-## Revert
-
-- [Revert previous commits](http://stackoverflow.com/a/21718540/1418457)
-
-```
-git revert --no-commit 0766c053..HEAD
-git commit
-```
-
-#### Amend
-
-- [Edit an incorrect commit message in Git](http://stackoverflow.com/questions/179123/edit-an-incorrect-commit-message-in-git)
-
-```
-git commit --amend
-```
-
-```
-git commit --amend --no-edit
-```
-
-```
-git commit --amend -m "New commit message"
-```
-
-- [Changing git commit message after push](http://stackoverflow.com/questions/8981194/changing-git-commit-message-after-push-given-that-no-one-pulled-from-remote)
-
-```
-git commit --amend -m "New commit message"
-git push --force <repository> <branch>
-```
-
-## Checkout :checkered_flag:
-
-#### Checkout a tag
-
-```
-git checkout tagname
-```
-
-```
-git checkout -b newbranchname tagname
-```
-
-#### Checkout a branch
-
-```
-git checkout destination_branch
-```
-
-Use -m if there is merge conflict
-
-```
-git checkout -m master // from feature branch to master
-```
-
-#### Checkout a commit
-
-```
-git checkout commit_hash
-```
-
-```
-git checkout -b newbranchname HEAD~4
-```
-
-```
-git checkout -b newbranchname commit_hash
-```
-
-```
-git checkout commit_hash file
-```
-
-## Stash :package:
-
-- [6.3 Git Tools - Stashing](https://git-scm.com/book/en/v1/Git-Tools-Stashing)
-
-#### Stash
-
-```
-git stash save "stash name"
-```
-
-```
-git stash
-```
-
-#### List all stashes
-
-```
-git stash list
-```
-
-#### Apply a stash
-
-
-```
-git stash pop
-```
-
-```
-git stash apply
-```
-
-```
-git stash apply stash@{2}
-```
-
-## Rebase :wind_chime:
-
-#### rebase
-```
-git rebase base // rebase the current branch onto base
-```
-
-## .gitignore :honey_pot:
-
-#### Untrack
-
-- [Making git “forget” about a file that was tracked but is now in .gitignore](http://stackoverflow.com/a/19095988/1418457)
-
-```
-git rm -r --cached .
-git add .
-git commit -am "Remove ignored files"
-```
-
-## Index :card_index:
-
-#### Remove untracked files
-
-```
-git clean
-```
-
-#### Remove file from index
-
-```
-git reset file
-```
-
-#### Reset the index to match the most recent commit
-
-```
-git reset
-```
-
-#### Reset the index and the working directory to match the most recent commit
-
-```
-git reset --hard
-```
-
-## Misc :ghost:
-
-#### Conflicting git rebase
-
-- [How to get “their” changes in the middle of conflicting Git rebase?](http://stackoverflow.com/questions/8146289/how-to-get-their-changes-in-the-middle-of-conflicting-git-rebase)
-
-```
-git checkout --ours foo/bar.java
-git add foo/bar.java
-```
-
-#### Resolve git merge conflict
-
-- [Resolve Git merge conflicts in favor of their changes during a pull](http://stackoverflow.com/questions/10697463/resolve-git-merge-conflicts-in-favor-of-their-changes-during-a-pull)
-
-#### theirs
-
-- [Is there a “theirs” version of “git merge -s ours”?](http://stackoverflow.com/questions/173919/is-there-a-theirs-version-of-git-merge-s-ours)
-
-```
-git pull -X theirs
-```
-
-```
-git checkout --theirs path/to/the/conflicted_file.php
-```
-
-```
-git checkout --theirs .
-git add .
-```
-
-```
-git checkout branchA
-git merge -X theirs branchB
-```
-
-#### Merge from master into feature branch after push
-
-- [Git merge master into feature branch](http://stackoverflow.com/a/16957483/1418457)
-
-```
-git checkout feature1
-git merge --no-ff master
-```
-</xmp>
-
-<script src="http://strapdownjs.com/v/0.2/strapdown.js"></script>
+git commit -am <span class="hljs-string">"Remove ignored files"</span></code></pre><h2 id="index-card_index-"><a class="header-link" href="#index-card_index-"></a>Index :card_index:</h2>
+<h4 id="remove-untracked-files"><a class="header-link" href="#remove-untracked-files"></a>Remove untracked files</h4>
+<pre class="hljs"><code><span class="hljs-attribute">git</span> clean</code></pre><h4 id="remove-file-from-index"><a class="header-link" href="#remove-file-from-index"></a>Remove file from index</h4>
+<pre class="hljs"><code>git <span class="hljs-keyword">reset</span> <span class="hljs-keyword">file</span></code></pre><h4 id="reset-the-index-to-match-the-most-recent-commit"><a class="header-link" href="#reset-the-index-to-match-the-most-recent-commit"></a>Reset the index to match the most recent commit</h4>
+<pre class="hljs"><code>git <span class="hljs-built_in">reset</span></code></pre><h4 id="reset-the-index-and-the-working-directory-to-match-the-most-recent-commit"><a class="header-link" href="#reset-the-index-and-the-working-directory-to-match-the-most-recent-commit"></a>Reset the index and the working directory to match the most recent commit</h4>
+<pre class="hljs"><code>git <span class="hljs-keyword">reset</span> <span class="hljs-comment">--hard</span></code></pre><h2 id="misc-ghost-"><a class="header-link" href="#misc-ghost-"></a>Misc :ghost:</h2>
+<h4 id="conflicting-git-rebase"><a class="header-link" href="#conflicting-git-rebase"></a>Conflicting git rebase</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/8146289/how-to-get-their-changes-in-the-middle-of-conflicting-git-rebase">How to get “their” changes in the middle of conflicting Git rebase?</a></li>
+</ul>
+<pre class="hljs"><code><span class="hljs-symbol">git</span> checkout --ours foo/<span class="hljs-keyword">bar.java
+</span><span class="hljs-symbol">git</span> <span class="hljs-keyword">add </span>foo/<span class="hljs-keyword">bar.java</span></code></pre><h4 id="resolve-git-merge-conflict"><a class="header-link" href="#resolve-git-merge-conflict"></a>Resolve git merge conflict</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/10697463/resolve-git-merge-conflicts-in-favor-of-their-changes-during-a-pull">Resolve Git merge conflicts in favor of their changes during a pull</a></li>
+</ul>
+<h4 id="theirs"><a class="header-link" href="#theirs"></a>theirs</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/questions/173919/is-there-a-theirs-version-of-git-merge-s-ours">Is there a “theirs” version of “git merge -s ours”?</a></li>
+</ul>
+<pre class="hljs"><code>git pull -<span class="hljs-keyword">X</span> theirs</code></pre><pre class="hljs"><code>git checkout <span class="hljs-comment">--theirs path/to/the/conflicted_file.php</span></code></pre><pre class="hljs"><code>git checkout --theirs .
+git add .</code></pre><pre class="hljs"><code>git checkout branchA
+git <span class="hljs-keyword">merge</span> -<span class="hljs-keyword">X</span> theirs branchB</code></pre><h4 id="merge-from-master-into-feature-branch-after-push"><a class="header-link" href="#merge-from-master-into-feature-branch-after-push"></a>Merge from master into feature branch after push</h4>
+<ul class="list">
+<li><a href="http://stackoverflow.com/a/16957483/1418457">Git merge master into feature branch</a></li>
+</ul>
+<pre class="hljs"><code>git checkout feature1
+git <span class="hljs-built_in">merge</span> <span class="hljs-comment">--no-ff master</span></code></pre><h2 id="licence"><a class="header-link" href="#licence"></a>Licence</h2>
+<p>This project is released under the MIT license. See LICENSE.md.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
+</body>
 </html>
