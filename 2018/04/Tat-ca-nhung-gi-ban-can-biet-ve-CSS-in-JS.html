@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Tất cả những gì bạn cần biết về CSS-in-JS · Learn and Share</title><meta name="description" content="Tất cả những gì bạn cần biết về CSS-in-JS - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Tất cả những gì bạn cần biết về CSS-in-JS"><meta property="og:image" content="https://cdn-images-1.medium.com/max/2000/1*OH0dDfJAGv6aEGFk2zLAxw.jpeg"><meta property="og:description" content="TL;DR:Thinking in components — No longer do you have to maintain bunch of style-sheets. CSS-in-JS abstracts the CSS model to the component level, rather than the document level (modularity)."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Tất cả những gì bạn cần biết về CSS-in-JS</h1><h2 class="post-subtitle"></h2><header class="post-info">Apr 30, 2018<div class="tags"><a href="/tags/javascript" class="tag-link">#javascript</a><a href="/tags/css" class="tag-link">#css</a></div><div class="fb-ir-time"><time dateTime="2018-04-30T08:19:00.000Z" class="op-modified"></time><time dateTime="2018-04-30T08:19:00.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://cdn-images-1.medium.com/max/2000/1*OH0dDfJAGv6aEGFk2zLAxw.jpeg"></div><div class="wrap"><div class="post-content"><p>TL;DR:<strong>Thinking in components — </strong>No longer do you have to maintain bunch of style-sheets. CSS-in-JS abstracts the CSS model to the component level, rather than the document level (modularity).</p>
+<a id="more"></a>
+<h4 id="Styled-React-Component-Example"><a href="#Styled-React-Component-Example" class="headerlink" title="Styled React Component Example"></a>Styled React Component Example</h4><p><img src="https://cdn-images-1.medium.com/max/1600/1*DFwkvCRyz9K0Mbl59r2hMg.png" alt=""></p>
+<hr>
+<p>You probably heard terms like <a href="http://cssinjs.org/?v=v9.1.0" target="_blank" rel="noopener"><strong>CSS-in-JS</strong></a>, <a href="https://www.styled-components.com" target="_blank" rel="noopener"><strong>Styled Components</strong></a>, <a href="https://github.com/FormidableLabs/radium" target="_blank" rel="noopener"><strong><em>Radium</em></strong></a>, <a href="https://github.com/Khan/aphrodite" target="_blank" rel="noopener"><strong>Aphrodite</strong></a> and you’re left there hanging <strong>“why is this a thing? — </strong>I’m perfectly happy with <strong>CSS-in-CSS</strong> (<strong><em>CSS</em> in <em>.css</em></strong>).<strong>”</strong></p>
+<p>I’m here to shine some light on why this is a thing and hopefully we will least understand the concept and understand why it’s a thing. With that said — please feel free to use CSS-in-CSS — on no terms are you obligated to use CSS-in-JS. <strong>Whatever works best for you and makes you happy is hands down the best solution, always-always!</strong></p>
+<p>CSS-in-JS is a delicate and controversial topic — I’m advocating having an open mind and weighing if this makes sense to you — ask yourself <strong>“will it improve my workflow?” —**</strong>in the end — that’s the only thing that matters — use tools that make you happier and more productive!**</p>
+<p>I’ve always felt awkward having to maintain a huge folder of stylesheets. I would like to try different approaches. I’ve seen many people asking if there are new styling ideas. CSS-in-JS is so far the best concept.</p>
+<p>Let’s give CSS-in-JS a shot.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*bsbmmLcGl2kSJSuKW-JFqw.png" alt="Small-To-Medium size project CSS"></p>
+<hr>
+<h3 id="What-is-CSS-in-JS"><a href="#What-is-CSS-in-JS" class="headerlink" title="What is CSS-in-JS?"></a>What is CSS-in-JS?</h3><blockquote>
+<p><a href="https://medium.com/@oleg008/jss-is-css-d7d41400b635" target="_blank" rel="noopener">JSS is a more powerful abstraction</a> over CSS. It uses JavaScript as a language to describe styles in a declarative and maintainable way. It is a <a href="http://cssinjs.org/performance" target="_blank" rel="noopener">high performance</a> JS to CSS compiler which works at runtime and server-side. This core library is low level and framework agnostic. It is about 6KB (minified and gzipped) and is extensible via <a href="http://cssinjs.org/plugins" target="_blank" rel="noopener">plugins</a> API. —<a href="http://cssinjs.org/" target="_blank" rel="noopener"> source</a></p>
+</blockquote>
+<p>Keep in mind <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style" target="_blank" rel="noopener"><strong>Inline styles</strong></a> <strong>and CSS-in-JS are not the same!</strong> They’re different — Quick demonstration time!</p>
+<h3 id="How-Inline-Styles-Works"><a href="#How-Inline-Styles-Works" class="headerlink" title="How Inline Styles Works"></a><a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style" target="_blank" rel="noopener">How Inline Styles Works</a></h3><script src="//gist.github.com/5812bd9006c91b9eb0fe08e3678d88c8.js"></script>
+<p>In the browser this will get attached to the DOM node like so:</p>
+<script src="//gist.github.com/02b07c1daa4816eb2a51eb8d1b494f3e.js"></script>
+<h3 id="How-CSS-in-JS-works"><a href="#How-CSS-in-JS-works" class="headerlink" title="How CSS-in-JS works"></a>How CSS-in-JS works</h3><script src="//gist.github.com/769908d4e065b363258d9ae733febac2.js"></script>
+<p>In the browser this will gets attached to the DOM like so:</p>
+<script src="//gist.github.com/e76c2883a81a11ee16f4b12906572e2a.js"></script>
+<h3 id="Difference"><a href="#Difference" class="headerlink" title="Difference"></a>Difference</h3><p>See the slight difference? CSS-in-JS attached a <code>&lt;style&gt;</code> tag on top of the DOM while inline styles just attached the properties to the DOM node.</p>
+<p><strong><em>Why does this matter?</em></strong></p>
+<p><strong>Not all CSS features can be aliased with JavaScript event handlers </strong>, many pseudo selectors (like :disabled, :before, :nth-child) aren’t possible, styling the html and body tags isn’t supported etc.</p>
+<p><strong>With CSS-in-JS</strong>, you have all the power of CSS at your fingertips. Since actual CSS is generated, you can use every media query and pseudo selector you can think of. Some libraries (like jss, styled-components) even add support for neat, non-CSS-native features like nesting!</p>
+<p><a href="https://mxstbr.blog/2016/11/inline-styles-vs-css-in-js/" target="_blank" rel="noopener"><strong>Brilliant article going in depth on how they’re different.</strong></a></p>
+<p>“Just write the darn CSS in CSS and be done with it.”</p>
+<p>Yes — while that’s the case for how it’s been done for a long-long time — <strong>the challenge is modern web is written in components not pages.</strong></p>
+<p><strong>CSS was never actually made for component based approaches</strong>. CSS-in-JS solves exactly this problem. Shout-out to <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue</a> for solving this problem beautifully even tho Vues styles have no access to components state.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*jk3SeXoIgOfymKO-8JO23A.gif" alt="Here’s Bob Ross painting rocks to cool down the tension 😄"></p>
+<h3 id="What-are-the-benefits-of-using-CSS-in-JS"><a href="#What-are-the-benefits-of-using-CSS-in-JS" class="headerlink" title="What are the benefits of using CSS-in-JS?"></a>What are the benefits of using CSS-in-JS?</h3><ul>
+<li><strong>Thinking in components — </strong>No longer do you have to maintain bunch of style-sheets. CSS-in-JS abstracts the CSS model to the component level, rather than the document level (modularity).</li>
+<li>CSS-in-JS <strong>leverages the full power of the JavaScript ecosystem</strong> to <em>enhance</em> CSS.</li>
+<li>“<strong>True rules isolation</strong>” — Scoped selectors are not enough. CSS has properties which are inherited automatically from the parent element, if not explicitly defined. Thanks to <a href="http://cssinjs.org/jss-isolate" target="_blank" rel="noopener">jss-isolate</a> plugin, JSS rules will not inherit properties.</li>
+<li><strong>Scoped selectors </strong>— CSS has just one global namespace. It is impossible to avoid selector collisions in non-trivial applications. Naming conventions like BEM might help within one project, but will not when integrating third-party code. JSS generates unique class names by default when it compiles JSON representation to CSS.</li>
+<li><strong>Vendor Prefixing</strong> —The CSS rules are automatically vendor prefixed, so you don’t have to think about it.</li>
+<li><strong>Code sharing </strong>— Easily share constants and functions between JS and CSS.</li>
+<li><strong>Only the styles which are currently</strong> in use on your screen are also in the DOM (<a href="https://github.com/cssinjs/react-jss" target="_blank" rel="noopener">react-jss</a>).</li>
+<li><a href="https://en.wikipedia.org/wiki/Dead_code_elimination" target="_blank" rel="noopener"><strong>Dead code elimination</strong></a></li>
+<li><strong>Unit tests</strong> for CSS!</li>
+</ul>
+<h3 id="What-are-the-drawbacks-of-using-CSS-in-JS"><a href="#What-are-the-drawbacks-of-using-CSS-in-JS" class="headerlink" title="What are the drawbacks of using CSS-in-JS?"></a>What are the drawbacks of using CSS-in-JS?</h3><ul>
+<li><strong>Learning curve</strong>.</li>
+<li><strong>New dependencies.</strong></li>
+<li><strong>Harder for newer teammates to adapt to the code-base</strong>. People who are new to front-end have to learn “more” things.</li>
+<li><strong>Challenging</strong> the status quo. (not necessarily a con)</li>
+</ul>
+<p>The pros out-weight the cons heavily — let’s give CSS-in-JS a shot! <strong>Nothing to lose!</strong></p>
+<hr>
+<h3 id="Most-popular-CSS-in-JS-libaries"><a href="#Most-popular-CSS-in-JS-libaries" class="headerlink" title="Most popular CSS-in-JS libaries"></a>Most popular CSS-in-JS libaries</h3><p><em>Will provide a quick hello world example for all the popular CSS-in-JS libraries— help yourself to choose which one you like the most based on the syntax.</em></p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*xXIXJeI3l6_k-rXg6cqNjw.png" alt="NPM trends"></p>
+<h4 id="Styled-Components"><a href="#Styled-Components" class="headerlink" title="Styled Components"></a><a href="https://www.styled-components.com/" target="_blank" rel="noopener">Styled Components</a></h4><p><img src="https://cdn-images-1.medium.com/max/1600/1*QvSrt0RgwuOKYlLHLjkDQw.png" alt=""></p>
+<script src="//gist.github.com/5888c4756651dfef1e1015b822d09b27.js"></script>
+<h3 id="JSS-React"><a href="#JSS-React" class="headerlink" title="JSS-React"></a><a href="https://github.com/cssinjs/react-jss" target="_blank" rel="noopener">JSS-React</a></h3><p><img src="https://cdn-images-1.medium.com/max/1600/1*z7kPKLW6meQuC5sznIYnkQ.png" alt=""></p>
+<script src="//gist.github.com/c90a6455e9dd7dce7b579b06d2e61413.js"></script>
+<h3 id="glamorous"><a href="#glamorous" class="headerlink" title="glamorous"></a><a href="https://glamorous.rocks/" target="_blank" rel="noopener">glamorous</a></h3><p><img src="https://cdn-images-1.medium.com/max/1600/1*tWuxJKAhaod4WNsm3MkMgQ.png" alt=""></p>
+<script src="//gist.github.com/47c1dc52980ed0197db2ceb5ebbb9ac0.js"></script>
+<h4 id="Radium-caveat-uses-inline-styles"><a href="#Radium-caveat-uses-inline-styles" class="headerlink" title="Radium (caveat: uses inline styles)"></a><a href="http://formidable.com/open-source/radium/" target="_blank" rel="noopener">Radium</a> (caveat: uses inline styles)</h4><p><img src="https://cdn-images-1.medium.com/max/1600/1*UsS6OxCfH6r7JLWx-wNeIQ.png" alt=""></p>
+<script src="//gist.github.com/14b38638841f6c0539127ad52358d099.js"></script>
+<p>Note: Radium uses <a href="https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841" target="_blank" rel="noopener">decorators</a>!</p>
+<h4 id="Aphrodite"><a href="#Aphrodite" class="headerlink" title="Aphrodite"></a><a href="https://github.com/Khan/aphrodite" target="_blank" rel="noopener">Aphrodite</a></h4><script src="//gist.github.com/f7d862549b680f766e68751e0f3f77d1.js"></script>
+<h4 id="Stylotron"><a href="#Stylotron" class="headerlink" title="Stylotron"></a><a href="https://github.com/rtsao/styletron" target="_blank" rel="noopener">Stylotron</a></h4><p><img src="https://cdn-images-1.medium.com/max/1600/1*a0c0iulx7pZFScn0fsAn0w.png" alt=""></p>
+<script src="//gist.github.com/9919c99b28ca4a063a3245efc1e4dddd.js"></script>
+<p>These are really simple examples which demonstrate the core functionality. All of the libraries have much more functionality included — for example, <strong>theming</strong>, <strong>dynamic props</strong>, <strong>server side rendering</strong> and much more!</p>
+<p><a href="https://medium.com/object-partners/css-in-js-benefits-drawback-and-tooling-80286b03f9aa" target="_blank" rel="noopener">Excellent post</a> going in depth about all of the features CSS-in-JS enables.</p>
+<p><a href="https://github.com/tuchk4/awesome-css-in-js" target="_blank" rel="noopener"><strong>Here’s the full list — go and give all the libraries a quick try!</strong></a></p>
+<p>Hate it or love it — <strong>CSS-in-JS deserves a chance!</strong></p>
+<h4 id="Convinced-CSS-in-JS-is-not-for-me-There’s-another-option-—-CSS-Modules"><a href="#Convinced-CSS-in-JS-is-not-for-me-There’s-another-option-—-CSS-Modules" class="headerlink" title="Convinced CSS-in-JS is not for me? There’s another option — CSS Modules!"></a><a href="https://glenmaddern.com/articles/css-modules" target="_blank" rel="noopener">Convinced CSS-in-JS is not for me? There’s another option — CSS Modules!</a></h4><p>Thanks for reading!</p>
+<span>Source: </span><a href="https://hackernoon.com/all-you-need-to-know-about-css-in-js-984a72d48ebc" target="_blank" title="https://hackernoon.com/all-you-need-to-know-about-css-in-js-984a72d48ebc" class="post-from">https://hackernoon.com/all-you-need-to-know-about-css-in-js-984a72d48ebc</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html" class="prev">NEXT</a><a href="/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html';
+var disqus_title = 'Tất cả những gì bạn cần biết về CSS-in-JS';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

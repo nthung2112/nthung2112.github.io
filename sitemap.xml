@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/07/Using-MySQL-with-Node-js-the-mysql-JavaScript-Client.html</loc>
+    
+    <lastmod>2018-05-18T01:03:22.966Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-Higher-Order-Function-HOF-va-Currying-qua-mot-so-vi-du-3.html</loc>
+    
+    <lastmod>2018-05-18T01:02:21.693Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Nhung-khai-niem-Javascript-ban-can-biet-khi-phong-van.html</loc>
+    
+    <lastmod>2018-05-18T01:01:57.921Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/05/Gioi-thieu-Progressive-Web-App.html</loc>
+    
+    <lastmod>2018-05-18T00:43:05.756Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Gioi-thieu-ve-redux-saga.html</loc>
+    
+    <lastmod>2018-04-30T11:52:22.931Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html</loc>
+    
+    <lastmod>2018-04-30T11:52:12.794Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Thinking-in-React.html</loc>
+    
+    <lastmod>2018-04-30T10:03:55.328Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html</loc>
+    
+    <lastmod>2018-04-30T08:31:59.004Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html</loc>
+    
+    <lastmod>2018-04-30T08:31:39.212Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-ve-mot-so-khai-niem-trong-Git.html</loc>
+    
+    <lastmod>2018-04-30T08:06:42.823Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Progressive-Web-App-tuong-lai-cua-nen-tang-web.html</loc>
+    
+    <lastmod>2018-04-30T08:06:42.807Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html</loc>
+    
+    <lastmod>2018-04-30T08:06:42.792Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html</loc>
+    
+    <lastmod>2018-04-30T08:06:42.792Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html</loc>
+    
+    <lastmod>2018-04-25T11:06:06.716Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html</loc>
+    
+    <lastmod>2018-04-25T10:44:38.060Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html</loc>
+    
+    <lastmod>2018-03-25T15:14:28.961Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html</loc>
+    
+    <lastmod>2018-03-25T07:39:52.137Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html</loc>
+    
+    <lastmod>2018-03-25T04:12:04.733Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/Cai-thien-toc-do-Web-App-voi-Tinder.html</loc>
+    
+    <lastmod>2018-03-24T03:25:31.654Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/The-Cost-Of-JavaScript.html</loc>
+    
+    <lastmod>2017-12-25T03:39:22.196Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/JavaScript-Start-up-Performance.html</loc>
+    
+    <lastmod>2017-12-16T07:59:58.668Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html</loc>
+    
+    <lastmod>2017-12-15T15:29:08.323Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/React-Inline-Functions-and-Performance.html</loc>
+    
+    <lastmod>2017-12-12T15:03:58.752Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/Cai-thien-toc-do-Web-App-voi-Pinterest.html</loc>
+    
+    <lastmod>2017-12-12T15:03:58.744Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/12/22-React-projects-open-source.html</loc>
+    
+    <lastmod>2017-12-12T15:03:58.737Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/The-Front-End-Checklist.html</loc>
+    
+    <lastmod>2017-11-30T14:56:01.153Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/React-Component-Patterns.html</loc>
+    
+    <lastmod>2017-11-30T14:56:01.140Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Nghien-cuu-cai-thien-toc-do-web-app-voi-React-va-Preact-Treebo.html</loc>
+    
+    <lastmod>2017-11-15T01:33:31.147Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Cach-chinh-xac-100-de-cau-truc-ung-dung-React.html</loc>
+    
+    <lastmod>2017-11-15T01:22:22.141Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Lam-the-nao-de-to-chuc-tot-hon-nhung-ung-dung-React.html</loc>
+    
+    <lastmod>2017-11-13T16:49:59.849Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Lam-the-nao-de-cau-truc-cac-components-trong-React.html</loc>
+    
+    <lastmod>2017-11-13T16:46:09.489Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Cach-hoat-dong-cua-JavaScript-Quan-ly-bo-nho-4-cach-xu-ly-memory-leaks-thong-dung.html</loc>
+    
+    <lastmod>2017-11-13T16:31:14.306Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Giai-thich-React-Lifecycle-componentDidMakeSense.html</loc>
+    
+    <lastmod>2017-11-04T16:45:48.181Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Huong-dan-xay-dung-ung-dung-React-Redux-CRUD.html</loc>
+    
+    <lastmod>2017-11-04T16:40:27.398Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Lam-the-nao-de-ket-hop-NodeJS-Back-End-voi-ReactJS-Front-End.html</loc>
+    
+    <lastmod>2017-11-04T16:36:30.636Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Di-an-va-hieu-nhung-dieu-co-ban-cua-Express-js.html</loc>
+    
+    <lastmod>2017-11-04T16:33:58.328Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/11/Tong-hop-cac-cheatsheets-tot-nhat-cua-Front-end.html</loc>
+    
+    <lastmod>2017-11-04T16:31:09.386Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/10/Cac-nguyen-tac-co-ban-cua-Redux.html</loc>
+    
+    <lastmod>2017-10-10T15:48:47.120Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P2.html</loc>
+    
+    <lastmod>2017-10-01T10:01:15.067Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P1.html</loc>
+    
+    <lastmod>2017-10-01T09:59:54.207Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/10/Cac-ky-thuat-SEO-toi-thieu-ma-developer-can-nam-vung-trong-lap-trinh-web.html</loc>
+    
+    <lastmod>2017-10-01T08:40:38.907Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Tao-loading-Facebook-bang-CSS-that-don-gian.html</loc>
+    
+    <lastmod>2017-10-01T08:27:03.106Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Redux-that-la-don-gian-Phan-2.html</loc>
+    
+    <lastmod>2017-10-01T08:24:53.492Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Redux-that-la-don-gian-Phan-1.html</loc>
+    
+    <lastmod>2017-10-01T08:24:53.481Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Mot-bo-phim-hoat-hinh-gioi-thieu-ve-Redux.html</loc>
+    
+    <lastmod>2017-10-01T08:24:53.462Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Truy-cap-va-thay-doi-cac-bien-CSS-voi-Javascript.html</loc>
+    
+    <lastmod>2017-09-09T01:20:21.873Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Cheatsheet-co-ban-ve-Flexbox.html</loc>
+    
+    <lastmod>2017-09-06T00:55:37.240Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/09/Mot-so-SASS-Mixins-nen-su-dung.html</loc>
+    
+    <lastmod>2017-09-05T01:12:39.032Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Huong-dan-toan-tap-ve-Flexbox.html</loc>
+    
+    <lastmod>2017-09-05T01:12:39.022Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Cach-thuc-hoat-dong-cua-Flexbox.html</loc>
+    
+    <lastmod>2017-08-31T15:55:28.617Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Optimizing-React-Apps-in-Practice.html</loc>
+    
+    <lastmod>2017-08-31T01:00:24.154Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Explaining-Value-vs-Reference-in-Javascript.html</loc>
+    
+    <lastmod>2017-08-31T00:53:23.895Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-5.html</loc>
+    
+    <lastmod>2017-08-24T00:53:11.555Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-4.html</loc>
+    
+    <lastmod>2017-08-24T00:53:04.969Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-3.html</loc>
+    
+    <lastmod>2017-08-24T00:52:55.335Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-2.html</loc>
+    
+    <lastmod>2017-08-24T00:52:47.992Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-1.html</loc>
+    
+    <lastmod>2017-08-24T00:52:40.637Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Tro-thanh-Functional-Programmer-Phan-6.html</loc>
+    
+    <lastmod>2017-08-23T16:30:49.096Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Nodejs-la-gi.html</loc>
+    
+    <lastmod>2017-08-21T15:44:24.511Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/3-Reasons-why-I-stopped-using-React-setState.html</loc>
+    
+    <lastmod>2017-08-21T15:44:01.374Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Use-const-Until-You-Have-to-Use-let.html</loc>
+    
+    <lastmod>2017-08-21T15:42:19.465Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Our-Best-Practices-for-Writing-React-Components.html</loc>
+    
+    <lastmod>2017-08-21T15:42:19.451Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/How-to-use-Memoize-to-cache-JavaScript-function-results.html</loc>
+    
+    <lastmod>2017-08-21T15:42:19.418Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Giai-thich-keyword-new-trong-Javascript.html</loc>
+    
+    <lastmod>2017-08-20T17:47:47.594Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/What-I%E2%80%99ve-Learned-Over-5-Years-as-a-Software-Developer.html</loc>
+    
+    <lastmod>2017-08-20T17:47:33.433Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/Master-the-JavaScript-Interview.html</loc>
+    
+    <lastmod>2017-08-20T17:47:13.879Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/07/10-react-mini-patterns.html</loc>
+    
+    <lastmod>2017-08-20T16:43:56.760Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/about/index.html</loc>
+    
+    <lastmod>2017-08-20T15:08:41.686Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/A-Jade-Tutorial-for-Beginners.html</loc>
+    
+    <lastmod>2017-08-20T15:07:42.818Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/01/Javascript-Bat-ngo-ve-mang-trong-javascript.html</loc>
+    
+    <lastmod>2017-08-20T14:51:37.207Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/01/Javascript-Tim-hieu-ve-async-va-await-don-gian.html</loc>
+    
+    <lastmod>2017-08-20T14:51:30.727Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/01/Javascript-Tim-hieu-ve-call-apply-va-bind.html</loc>
+    
+    <lastmod>2017-08-20T14:51:23.254Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/01/Javascript-Tim-hieu-ve-tu-khoa-this.html</loc>
+    
+    <lastmod>2017-08-20T14:51:16.099Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/08/reducing-css-bundle-size-with-webpack.html</loc>
+    
+    <lastmod>2017-08-20T14:50:45.892Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/2017/07/How-to-Create-a-Reddit-Clone-Using-React-and-Firebase.html</loc>
+    
+    <lastmod>2017-08-20T14:50:38.595Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/categories/index.html</loc>
+    
+    <lastmod>2017-03-09T14:16:54.197Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nth-blogs.herokuapp.com/tags/index.html</loc>
+    
+    <lastmod>2017-03-09T14:16:54.197Z</lastmod>
+    
+  </url>
+  
+</urlset>

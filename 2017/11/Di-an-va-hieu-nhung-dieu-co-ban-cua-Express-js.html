@@ -1,0 +1,116 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Đi ăn và hiểu những điều cơ bản của Express.js · Learn and Share</title><meta name="description" content="Đi ăn và hiểu những điều cơ bản của Express.js - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Đi ăn và hiểu những điều cơ bản của Express.js"><meta property="og:image" content="https://cdn-images-1.medium.com/max/2000/1*iMkFu1T52fkSnlZDlCrvkQ.jpeg"><meta property="og:description" content="If you have ever visited a sit-down restaurant, then you can understand the basics of Express. But if you are just starting to build your first Node.js back end…you might be in for a bumpy ride.
+Yes — it is certainly easier to learn Node if you have past experience with JavaScript. But the challenges you will face while building a back end are completely different than the ones you face while using JavaScript on the front end.
+When I learned Node, I chose the hard way. I studied eBooks, written tutorials, and videos over and over until I finally understood why I was doing what I was doing.
+There is an easier way. I am going to use a restaurant analogy to explain four key parts of your first Express app. Express.js is a popular framework for organizing your code, and I would recommend it for any beginner. I’ll explain further in a moment."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Đi ăn và hiểu những điều cơ bản của Express.js</h1><h2 class="post-subtitle"></h2><header class="post-info">Nov 4, 2017<div class="tags"><a href="/tags/nodejs" class="tag-link">#nodejs</a><a href="/tags/expressjs" class="tag-link">#expressjs</a></div><div class="fb-ir-time"><time dateTime="2017-11-04T16:25:21.000Z" class="op-modified"></time><time dateTime="2017-11-04T16:25:21.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://cdn-images-1.medium.com/max/2000/1*iMkFu1T52fkSnlZDlCrvkQ.jpeg"></div><div class="wrap"><div class="post-content"><p>If you have ever visited a sit-down restaurant, then you can understand the basics of Express. But if you are just starting to build your first Node.js back end…you might be in for a bumpy ride.</p>
+<p>Yes — it is certainly easier to learn Node if you have past experience with JavaScript. But the challenges you will face while building a back end are completely different than the ones you face while using JavaScript on the front end.</p>
+<p>When I learned Node, I chose the hard way. I studied eBooks, written tutorials, and videos over and over until I finally understood <strong>why</strong> I was doing what I was doing.</p>
+<p>There is an easier way. I am going to use a restaurant analogy to explain four key parts of your first Express app. <a href="https://expressjs.com/" target="_blank" rel="noopener">Express.js</a> is a popular framework for organizing your code, and I would recommend it for any beginner. I’ll explain further in a moment.<br><a id="more"></a><br>Here are the four key parts we will cover:</p>
+<ol>
+<li>The require statements</li>
+<li>Middleware</li>
+<li>Routing</li>
+<li>App.listen()/ Starting the server</li>
+</ol>
+<p>In this analogy, you are a restaurant owner looking to hire a general manager — the person who creates all the processes and manages the place so that it runs smoothly and customers leave happy.</p>
+<p>Here is a preview of what is next:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*gWVqib20b1NNzB6vrM-U6w.png" alt=""></p>
+<p>By the end, you will understand the functionality of every part of a basic Express app.</p>
+<h3 id="Step-1-hiring-the-manager-require-statements"><a href="#Step-1-hiring-the-manager-require-statements" class="headerlink" title="Step 1: hiring the manager (require statements)"></a>Step 1: hiring the manager (require statements)</h3><p>In this example, you are the restaurant owner. And you need to hire an expert to run the day-to-day operations of your new restaurant. You certainly aren’t an expert, and you can’t leave it to the waitstaff and kitchen to figure out.</p>
+<p>If you want to run an efficient and safe restaurant, you need someone to keep your staff working at maximum efficiency. Express is the new manager.</p>
+<p>The first part is pretty straightforward. Like with any other NPM package, you need to npm install the express module and then use a <strong>require</strong> statement to load the module.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*VjyG-yoVn9aUYJ_cdN6RYA.png" alt=""></p>
+<p>Unlike many other NPM packages, you also need to use this line:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> app = express();</span><br></pre></td></tr></table></figure>
+<p>This is because you need a variable to hold your new Express application. Express is not a default part of Node.</p>
+<h3 id="Step-2-making-decisions-at-the-restaurant-middleware"><a href="#Step-2-making-decisions-at-the-restaurant-middleware" class="headerlink" title="Step 2: making decisions at the restaurant (middleware)"></a>Step 2: making decisions at the restaurant (middleware)</h3><p>Let’s take a step back here. What are some common routines that happen at restaurants? There are three that immediately jump into my head:</p>
+<ol>
+<li>Seating new customers</li>
+<li>Taking food orders</li>
+<li>Presenting the check at the end of the meal</li>
+</ol>
+<p>For each one, there are a series of checks that you need to run before you can execute the action. For example, before you seat customers you need to know:</p>
+<ol>
+<li>Are they wearing a shirt and shoes (and pants)? Otherwise, they cannot be seated.</li>
+<li>If they want to sit at the bar, are they 21 years old (if you are in the United States)?</li>
+</ol>
+<p>This ain’t a beach bar! Similarly, in your code, you will need to validate that requests have certain criteria before they can continue. For example, if a person tries to log in to your site:</p>
+<ol>
+<li>Do they have an account?</li>
+<li>Did they enter the correct password?</li>
+</ol>
+<p>This is where the concept of <strong>middleware</strong> comes in. Middleware functions allow you to take action on any incoming request and modify it before sending back a response.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*8HIzvtX-DA3C26uv.png" alt=""></p>
+<p>In your restaurant, you need a series of rules to decide if you should seat incoming people or not. Let’s say a couple walks through your door. You have one rule before giving them a table: are they wearing a shirt and shoes?</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*Gqix0p7PBNJ5htTY3sT7OQ.png" alt=""></p>
+<p>First, you start with <a href="http://expressjs.com/en/api.html#app.use" target="_blank" rel="noopener">app.use()</a>. This means that these are simply rules that need to be applied for the routes coming up next. They are not a GET, POST, PUT or DELETE.</p>
+<p>In line 4, you have an anonymous function with the parameters req, res and next. For the purposes of this code block, you are just inspecting the request (req) to see if it has shirt and shoes.</p>
+<p>You also need to use the next() function at the end because you are simply validating clothing here. Later, in the routes, you will allow the guests to get an actual table.</p>
+<p>In lines 5 and 6, you check if they have a shirt and shoes.</p>
+<p>And in lines 7–9, you only proceed if they have both.</p>
+<p>The code block above is missing one important thing: A <strong>path</strong>. This is the specific string included with the request. And since it is missing a path, it will run on every single request.</p>
+<p>Can you imagine? When customers entered the restaurant… ordered food… asked for the check… employees would be forced to look up and down at them to make sure they were clothed! That is a quick way to go out of business.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*fjZKIJYmTIxQmVMURYTW9g.png" alt=""></p>
+<p>So, we change line 4 in the example above. Now, we will only run this code when a user requests along the ‘/table’ route.</p>
+<p>The full explanation:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*d1OPYjAlr6mUWtjtMRbk6g.png" alt=""></p>
+<h3 id="Step-3-executing-common-routines-routing"><a href="#Step-3-executing-common-routines-routing" class="headerlink" title="Step 3: executing common routines (routing)"></a>Step 3: executing common routines (routing)</h3><p>Let’s continue with the seating example. So far, we only know how to validate whether someone should be seated or not. But we do not actually know how to lead them to a table and sit them down.</p>
+<p>This is where <strong>routes</strong> come in. Routes allow us to script specific actions based on the <strong>path</strong>. The options are GET, POST, PUT and DELETE, but we will focus on GET and POST for now.</p>
+<p>In the context of a restaurant, we need to create a GET request in order to choose a specific table and seat the guests. GETs do not modify or add to your database. They just retrieve information based on specific parameters.</p>
+<p>In this case, let’s say that you need to create a procedure to seat a party of two. The number 2 came from the customer <strong>request.</strong></p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*pGvgMABGA1xzrSL9EFGQmQ.png" alt=""></p>
+<p>Okay, before I explain: Yes, this is only sending a message at the end. It has not actually found a specific table to seat the customer yet. I would need to search an array for an open table, have more of a back story…that is outside of the scope of this tutorial.</p>
+<p>In line 12, we define the procedure for finding a table when a guest <strong>requests</strong> along the ‘/table’ <strong>route</strong>. Just like the middleware example above, we have request and response parameters available. It also has a <strong>parameter</strong>, amount. This is two, in this example.</p>
+<p>In fact, everything after the function declaration in line 12 is technically <strong>middleware</strong> since it modifies a user request. You will see in the diagram at the end.</p>
+<p>In line 13, we access the number of people in the party from the <strong>parameters</strong> of the request object. That is not declared anywhere since the request came from the user, and we do not have any front-end code. So here is what the request might look like if this was a real app:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">req = &#123;</span><br><span class="line">  params: &#123;</span><br><span class="line">    amount: <span class="number">2</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>In line 13, our party variable accesses the amount <strong>property</strong> of the params <strong>object</strong> within the <strong>request</strong>.</p>
+<p>Finally in line 14, we send a <strong>response</strong> back to the customer: we are looking for the appropriately sized table.</p>
+<p>That is a lot at once. Here is a diagram:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*k7DkIw1cheKYBwu_AC4SAA.png" alt=""></p>
+<h3 id="Step-3-5-making-your-restaurant-efficient-router"><a href="#Step-3-5-making-your-restaurant-efficient-router" class="headerlink" title="Step 3.5: making your restaurant efficient (router)"></a>Step 3.5: making your restaurant efficient (router)</h3><p>Now you can trace the full path from request to response. But as your app grows in size, you will not want to code the rules for each route individually. You will find that some routes share the same rules, so you need to find a way to apply one set of rules to multiple routes.</p>
+<p>In terms of seating, you can either seat your customers at the bar or at a table. Those have rules in common like shirt + shoes, but seating at the bar requires every member of the party to be 21.</p>
+<p>And, in terms of serving customers, you will need to use a slightly different procedure for serving the appetizer, main course, and dinner. But, those three routes have plenty in common as well.</p>
+<p>This is where the <strong>router</strong> comes in. The router lets you group your routes so that you can create common rules.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*6Irrxz4EmHaPgVm0JRgVLg.png" alt=""></p>
+<p>We need to create middleware to cover each of these cases. I will just cover the seating cases for now since it will overwrite the code above.</p>
+<p>Here is the full code snippet:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*Pih87WdfXU_PEXkcbsaAIw.png" alt=""></p>
+<p>I am going to cover each part individually.</p>
+<p>In line 4, we declare our router.</p>
+<p>In lines 6 and 14, we now have seatingRouter.use() in place of app.use() to indicate that this <strong>middleware</strong> is only related to seatingRouter routes.</p>
+<p>Finally, in line 21, we add more middleware to show that every seatingRouter route begins with ‘/seating’. So, if someone requested a seat at the bar, the full path would be ‘/seating/bar.’ This may feel a little out of order, since you might expect the path to be defined when you create the router in line 4. That is normal!</p>
+<p>Here is that in diagram form:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*-1x9T6VvBCQihyzwqgnGIA.png" alt=""></p>
+<p>And, when you add a GET route, it goes above the last statement where you assign routes to the router.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*EPEUF9z94mMlCYXMB6HENA.png" alt=""></p>
+<h3 id="Step-4-opening-for-business-ports"><a href="#Step-4-opening-for-business-ports" class="headerlink" title="Step 4: opening for business (ports)"></a>Step 4: opening for business (ports)</h3><p>Okay, last part. So far, you have hired a manager, defined what to do before accepting customer requests, and determined what to do with specific customer requests once they come in. Now, you just need to determine the address for the location where all this will happen.</p>
+<p>Your server has <strong>ports</strong> that are kind of like the address for the restaurant itself.Since your server can handle many types of restaurants (or server-side scripts) at once, you need to tell it where each script should run.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*xGoTkrNMLnwyh7zR2wbbVA.png" alt=""></p>
+<p>In the example above, the port is 3000 and it is located on your computer. So if you type:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[https:<span class="comment">//localhost:3000/](https://localhost:3000/)</span></span><br></pre></td></tr></table></figure>
+<p>into your browser, and you are running your Node app, the server knows to run the specific script. In this case, as soon as you enter the URL, you will log the message in the console and be able to use any of your <strong>routes</strong>. If the restaurant itself is your entire app, then it is now open for business at the address 3000.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*kl9doAbsvsaQNJdFWhc2-Q.png" alt=""></p>
+<span>Source: </span><a href="https://medium.freecodecamp.org/going-out-to-eat-and-understanding-the-basics-of-express-js-f034a029fb66" target="_blank" title="https://medium.freecodecamp.org/going-out-to-eat-and-understanding-the-basics-of-express-js-f034a029fb66" class="post-from">https://medium.freecodecamp.org/going-out-to-eat-and-understanding-the-basics-of-express-js-f034a029fb66</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/11/Tong-hop-cac-cheatsheets-tot-nhat-cua-Front-end.html" class="prev">NEXT</a><a href="/2017/10/Cac-nguyen-tac-co-ban-cua-Redux.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/11/Di-an-va-hieu-nhung-dieu-co-ban-cua-Express-js.html';
+var disqus_title = 'Đi ăn và hiểu những điều cơ bản của Express.js';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/11/Di-an-va-hieu-nhung-dieu-co-ban-cua-Express-js.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

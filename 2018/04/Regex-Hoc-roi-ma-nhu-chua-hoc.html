@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> [Regex] Học rồi mà như chưa học · Learn and Share</title><meta name="description" content="[Regex] Học rồi mà như chưa học - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="[Regex] Học rồi mà như chưa học"><meta property="og:image" content="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/6vd8jy0f8_1442490508regex.jpg"><meta property="og:description" content="Người dẫn lại bài này cũng được phen lao đao khi lục lọi lại mớ kiến thức cơ bản cũ. Đối với sự nghiệp của một coder thì phải được thực hiện liên tục, nếu không sẽ rất dễ quên và lóng ngóng dù chỉ là những kiến thức cơ bản nhất. Dẫu biết rằng search là sẽ thấy nhưng nhiều phen cũng không khỏi thẹn vì giải thích sai cho đàn em =)) Cũng may đọc lại được bài của cu em công ty, kiến thức lại nhanh chóng được khỏa lấp, vì kiến thức nội bộ nên xin được trích lại bài chia sẻ của em nó để đây cho đỡ quên.!"></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">[Regex] Học rồi mà như chưa học</h1><h2 class="post-subtitle"></h2><header class="post-info">Apr 25, 2018<div class="tags"><a href="/tags/regex" class="tag-link">#regex</a></div><div class="fb-ir-time"><time dateTime="2018-04-25T10:23:00.000Z" class="op-modified"></time><time dateTime="2018-04-25T10:23:00.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/6vd8jy0f8_1442490508regex.jpg"></div><div class="wrap"><div class="post-content"><p>Người dẫn lại bài này cũng được phen lao đao khi lục lọi lại mớ kiến thức cơ bản cũ. Đối với sự nghiệp của một coder thì phải được thực hiện liên tục, nếu không sẽ rất dễ quên và lóng ngóng dù chỉ là những kiến thức cơ bản nhất. Dẫu biết rằng <strong>search là sẽ thấy</strong> nhưng nhiều phen cũng không khỏi thẹn vì giải thích sai cho đàn em =)) Cũng may đọc lại được bài của cu em công ty, kiến thức lại nhanh chóng được khỏa lấp, vì kiến thức nội bộ nên xin được trích lại bài chia sẻ của em nó để đây cho đỡ quên.!</p>
+<a id="more"></a>
+<h3 id="1-Tua-de"><a href="#1-Tua-de" class="headerlink" title="1. Tựa đề"></a>1. Tựa đề</h3><p>Mình vẫn còn nhớ cái hôm đấy. Trong khi mãi ngắm nhìn những dòng code đến hoa mắt là lúc mặt trời đã lặn khuất sau những toà nhà đô thị từ lúc nào cũng không ai hay. Bên ngoài mưa gió bão bùng, lúc mà mình đang cố release cho cái dự án lụt không cần nước, cho nó có thể chạy được.</p>
+<p><a href="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/8bnypsnck8_image.png" target="_blank" rel="noopener"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/8bnypsnck8_image.png" alt="alt text"></a></p>
+<p>Nhưng hôm đấy cũng không nằm ngoài dự tính, nó vẫn bị fail như bao lần trước, lần này nguyên nhân là do validate dữ liệu bị sai. Lúc đấy phải cần fix luôn ngay nhưng thật không may là anh phụ trách làm phần đấy đã tốc biến về nhà lúc nào không rõ. Còn bản thân thì chả biết tí tẹo về regex cả. Mọi thứ dường như bế tắc!<br><a href="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/hfcqpp7kjz_image%20%281%29.png" target="_blank" rel="noopener"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/hfcqpp7kjz_image%20%281%29.png" alt="alt text"></a></p>
+<p>Đã đến lúc mình phải đọc cái regex mà anh kia đã viết! Nhìn những dòng đấy chỉ có thể thốt lên “wth, mình đang đọc cái nồi gì thế này”. Thật không thể nếu bạn chả có kiến thức gì về nó cả. Thực ra mình và nhiều người hay mắc tật lúc cần làm gì là chỉ cần search từ khoá trên anh google rồi copy vào code của mình, tuy không hiểu rõ nhưng thấy nó chạy ổn thì ok. Đến lúc lỗi lên thì chả biết fix thế nào. Cũng vì nguyên nhân đấy mà mình mới biết là đang làm một cách sai lầm và mù quáng và bắt đầu học một cách đúng đắn hơn. Trước mắt là phải tìm hiểu về regex xem nó có gì mà nhìn vào đã thấy sợ rồi.<br><a href="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/4syn5tlsc4_image%20%282%29.png" target="_blank" rel="noopener"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/4syn5tlsc4_image%20%282%29.png" alt="alt text"></a></p>
+<p>Bạn đã từng bao giờ rơi vào trường hợp như mình chưa, cần kiểm tra định dạng một chuỗi có hợp lệ, hoặc tìm kiếm một chuỗi nằm trong một chuỗi dài khác. Đa số các bạn cần dùng đến việc validate (xác minh) tính hợp lệ của dữ liệu đều đã từ gặp phải câu hỏi đấy.</p>
+<blockquote>
+<p>Nếu bạn gặp trường hợp lúc đấy giải pháp đầu tiên bạn nghĩ đến là gì nếu chưa biết gì về regex?</p>
+</blockquote>
+<p>Có thể nó sẽ trở thành một bài toán khá hóc búa nếu bạn chỉ xử lý thuần tuý bằng cách duyệt chuỗi mà không có công cụ và thư viện xử lý.</p>
+<blockquote>
+<p>Vậy regex là gì? Nó giải quyết bài toán không tưởng ở trên như thế nào? Nó cao siêu và ảo diệu ra sao?</p>
+</blockquote>
+<p>Chúng ta hãy cùng đi tìm hiểu nào!<br><a href="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/86ziaz9buq_ByN7VztCMAEj-wr.png_large.png" target="_blank" rel="noopener"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/86ziaz9buq_ByN7VztCMAEj-wr.png_large.png" alt="alt text"></a></p>
+<h3 id="2-Gioi-thieu"><a href="#2-Gioi-thieu" class="headerlink" title="2. Giới thiệu"></a>2. Giới thiệu</h3><p>Theo anh <a href="https://en.wikipedia.org/wiki/Regular_expression" target="_blank" rel="noopener">wiki</a> <img src="https://assets-cdn.github.com/images/icons/emoji/trollface.png" alt=":trollface:" title=":trollface:"></p>
+<blockquote>
+<p>Biểu thức chính quy (regular expression, viết tắt là regexp, regex hay regxp) là một chuỗi miêu tả một bộ các chuỗi khác, theo những quy tắc cú pháp nhất định.</p>
+</blockquote>
+<p>Cùng điểm một chút về lịch sử nhỉ.</p>
+<blockquote>
+<p>Khái niệm regex được bắt đầu đưa ra từ những năm 1950 khi mà nhà toán học người Mỹ Stephen Cole Kleene chính thức mô tả một ngôn ngữ chính quy Khái niệm này được sử dụng phổ biến trong các tiện ích xử lý văn bản Unix. Sau đấy, từ những năm 1980, tồn tại các cú pháp khác nhau để tạo ra các biểu thức chính quy. Các chuẩn được đưa ra và sử dụng rộng rãi nhất là cú pháp Perl</p>
+</blockquote>
+<p>Mỗi lần mình tìm hiểu xong một thời gian không dùng đến, lúc quay lại đọc đều có cảm giác như mới :).</p>
+<h3 id="3-Cong-dung"><a href="#3-Cong-dung" class="headerlink" title="3. Công dụng"></a>3. Công dụng</h3><p>Regex được sử dụng với rất nhiều mục đích khác nhau nhưng thường được dùng nhiều với mục đích đối sánh văn bản và kiểm tra cú pháp trong các trình biên tập văn bản và các tiện ích tìm kiếm và xử lý văn bản dựa trên các mẫu được quy định.</p>
+<blockquote>
+<p>Ví dụ: Nếu bạn muốn tạo bộ lọc và muốn loại bỏ dữ liệu là những trang web mà người khác tạo ra, bạn có thể sử dụng biểu thức chính quy để loại trừ bất kỳ dữ liệu nào từ toàn bộ dải địa chỉ IP người khác sử dụng. Giả sử các địa chỉ IP đó có dải từ 198.51.100.1 - 198.51.100.25. Thay vì nhập 25 địa chỉ IP khác nhau, bạn có thể tạo biểu thức chính quy như 198.51.100.\d* để đối sánh với toàn bộ dải địa chỉ.</p>
+</blockquote>
+<h3 id="4-Cach-dung"><a href="#4-Cach-dung" class="headerlink" title="4. Cách dùng"></a>4. Cách dùng</h3><h4 id="Cac-ki-tu-dac-biet"><a href="#Cac-ki-tu-dac-biet" class="headerlink" title="Các kí tự đặc biệt"></a>Các kí tự đặc biệt</h4><p>Bảng 4.1 Các kí tự đặc biệt trong biểu thức chính quy.</p>
+<table>
+<thead>
+<tr>
+<th>Kí tự (kí hiệu, cờ)</th>
+<th>Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\</td>
+<td>Tìm với luật dưới đây:  Một dấu gạch chéo ngược sẽ biến một kí tự thường liền kế phía sau thành một kí tự đặc biệt, tức là nó không được sử dụng để tìm kiếm thông thường nữa. Ví dụ,  trường hợp kí tự ‘b’ không có dấu gạch chéo ngược này sẽ được khớp với các kí tự ‘b’ in thường, nhưng khi nó có thêm dấu gạch chéo ngược, ‘\b’ thì nó sẽ không khớp với bất kì kí tự nào nữa, lúc này nó trở thành kí tự đặc biệt. Xem thêm phần word boundary character để biết thêm chi tiết.  Tuy nhiên nếu đứng trước một kí tự đặc biệt thì nó sẽ biến kí tự này thành một kí tự thường, tức là bạn có thể tìm kiếm kí tự đặc biệt này trong xâu chuỗi của bạn như các kí tự thường khác. Ví dụ, mẫu /a<em>/ có ‘’ là kí tự đặc biệt và mẫu này sẽ bị phụ thuộc vào kí tự này, nên được hiểu là sẽ tìm khớp  với 0 hoặc nhiều kí tự a. Nhưng, với mẫu /a</em>/ thì kí tự ‘’ lúc này được hiểu là kí tự thường nên mẫu này sẽ tìm kiếm xâu con là ‘a*’.  Đừng quên \ cũng là một kí tự đặc biệt, khi cần so khớp chính nó ta cũng phải đánh dấu nó là kí tự đặc biệt bằng cách đặt \ ở trước ().</td>
+</tr>
+<tr>
+<td>^</td>
+<td>Khớp các kí tự đứng đầu một chuỗi. Nếu có nhiều cờ này thì nó còn khớp được cả các kí tự đứng đầu của mỗi dòng (sau kí tự xuống dòng).  Ví dụ, /^A/ sẽ không khớp được với ‘A’ trong “an A” vì ‘A’ lúc này không đứng đầu chuỗi, nhưng nó sẽ khớp “An E” vì lúc này ‘A’ đã đứng đầu chuỗi. Ý nghĩa của ‘^’ sẽ thay đổi khi nó xuất hiện như một kí tự đầu tiên trong một lớp kí tự, xem phần complemented character sets để biết thêm chi tiết.</td>
+</tr>
+<tr>
+<td>$</td>
+<td>So khớp ở cuối chuỗi. Nếu gắn cờ multiline (đa dòng), nó sẽ khớp ngay trước kí tự xuống dòng.Ví dụ, /t$/ không khớp với ‘t’ trong chuỗi “eater” nhưng lại khớp trong chuỗi “eat”.</td>
+</tr>
+<tr>
+<td>*</td>
+<td>Cho phép kí tự trước nó lặp lại 0 lần hoặc nhiều lần. Tương đương với cách viết {0,}.Ví dụ, /bo*/ khớp với ‘boooo’ trong chuỗi “A ghost booooed” nhưng không khớp trong chuỗi “A birth warbled”.</td>
+</tr>
+<tr>
+<td>+</td>
+<td>Cho phép kí tự trước nó lặp lại 1 lần hoặc nhiều lần. Tương đương với cách viết {1,}.Ví dụ, /a+/ khớp với ‘a’ trong chuỗi “candy” và khớp với tất cả kí tự a liền nhau trong chuỗi “caaaaaaandy”.</td>
+</tr>
+<tr>
+<td>?</td>
+<td>Cho phép kí tự trước nó lặp lại 0 lần hoặc 1 lần duy nhất. Tương đương với cách viết {0,1}.Ví dụ, /e?le?/ khớp với ‘el’ trong chuỗi “angel” và ‘le’ trong chuỗi “angle” hay ‘l’ trong “oslo”.Nếu sử dụng kí tự này ngay sau bất kì kí tự định lượng nào trong số *,+,? hay {}, đều làm bộ định lượng “chán ăn” (dừng so khớp sau ngay khi tìm được kí tự phù hợp), trái ngược với đức tính “tham lam” vốn sẵn của chúng (khớp tất cả kí tự chúng tìm thấy). Ví dụ, áp dụng biểu mẫu /\d+/ cho “123abc” ta được “123”. Nhưng áp /\d+?/ cho chính chuỗi trên ta chỉ nhận được kết quả là “1”.Bạn có thể đọc thêm trong mục x(?=y) và x(?!y) của bảng này.</td>
+</tr>
+<tr>
+<td>.</td>
+<td>Dấu . khớp với bất kì kí tự đơn nào ngoại trừ kí tự xuống dòng.Ví dụ, /.n/ khớp với ‘an’ và ‘on’ trong chuỗi “no, an apple is on the tree”, nhưng không khớp với ‘no’.</td>
+</tr>
+<tr>
+<td>(x)</td>
+<td>Khớp ‘x’ và nhớ kết quả so khớp này, như ví dụ ở dưới. Các dấu ngoặc tròn được gọi là các dấu ngoặc có nhớ.Biểu mẫu /(foo) (bar) \1 \2/ khớp với ‘foo’ và ‘bar’ trong chuỗi “foo bar foo bar”. \1 và \2 trong mẫu khớp với 2 từ cuối.Chú ý rằng \1, \2, \n được sử dụng để so khớp các phần trong regex, nó đại diện cho nhóm so khớp đằng trước. Ví dụ: /(foo) (bar) \1 \2/ tương đương với biểu thức /(foo) (bar) foo bar/. Cú pháp $1, $2, $n còn được sử dụng trong việc thay thế các phần của một regex. Ví dụ: ‘bar foo’.replace(/(…) (…)/, ‘$2 $1’) sẽ đảo vị trí 2 từ ‘bar’ và ‘foo’ cho nhau.</td>
+</tr>
+<tr>
+<td>(?:x)</td>
+<td>Khớp ‘x’ nhưng không nhớ kết quả so khớp. Những dấu ngoặc tròn được gọi là những dấu ngoặc không nhớ, nó cho phép bạn định nghĩa những biểu thức con cho những toán tử so khớp. Xem xét biểu thức đơn giản /(?:foo){1,2}/. Nếu biểu thức này được viết là /foo{1,2}/, {1,2} sẽ chỉ áp dụng cho kí tự ‘o’ ở cuối chuỗi ‘foo’. Với những dấu ngoặc không nhớ, {1,2} sẽ áp dụng cho cả cụm ‘foo’.</td>
+</tr>
+<tr>
+<td>x(?=y)</td>
+<td>Chỉ khớp ‘x’ nếu ‘x’ theo sau bởi ‘y’.Ví dụ, /Jack(?=Sprat)/ chỉ khớp với ‘Jack’ nếu đằng sau nó là ‘Sprat’. /Jack(?=Sprat</td>
+</tr>
+<tr>
+<td>x(?!y)</td>
+<td>Chỉ khớp ‘x’ nếu ‘x’ không được theo sau bởi ‘y’.Ví dụ: /\d+(?!.)/ chỉ khớp với số không có dấu . đằng sau. Biểu thức /\d+(?!.)/.exec(“3.141”)​ cho kết quả là ‘141’ mà không phải ‘3.141’.</td>
+</tr>
+<tr>
+<td>x</td>
+<td>y</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td>Kí tự đứng trước phải xuất hiện n lần. n phải là một số nguyên dương.Ví dụ, /a{2}/ không khớp với ‘a’ trong “candy”, nhưng nó khớp với tất cả kí tự ‘a’ trong “caandy”, và khớp với 2 kí tự ‘a’ đầu tiên trong “caaandy”.</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>Kí tự đứng trước phải xuất hiện từ n đến m lần. n và m là số nguyên dương và n &lt;= m. Nếu m bị bỏ qua, nó tương đương như ∞.Ví dụ, /a{1,3}/ không khớp bất kì kí tự nào trong “cndy”, kí tự ‘a’ trong “candy”, 2 kí tự ‘a’ đầu tiên trong “caandy”, và 3 kí tự ‘a’ đầu tiên trong “caaaaaaandy”. Lưu ý là “caaaaaaandy” chỉ khớp với 3 kí tự ‘a’ đầu tiên mặc dù chuỗi đó chứa 7 kí tự ‘a’.</td>
+</tr>
+<tr>
+<td>[xyz]</td>
+<td>Lớp kí tự. Loại mẫu này dùng để so khớp với một kí tự bất kì trong dấu ngoặc vuông, bao gồm cả escape sequences. Trong lớp kí tự, dấu chấm (.) và dấu hoa thị (*) không còn là kí tự đặc biệt nên ta không cần kí tự thoát đứng trước nó. Bạn có thể chỉ định một khoảng kí tự bằng cách sử dụng một kí tự gạch nối (-) như trong ví dụ dưới đây:Mẫu [a-d] so khớp tương tự như mẫu [abcd], khớp với ‘b’ trong “brisket” và ‘c’ trong “city”. Mẫu /[a-z.]+/ và /[\w.]+/ khớp với toàn chuỗi “test.i.ng”.</td>
+</tr>
+<tr>
+<td>[^xyz]</td>
+<td>Lớp kí tự phủ định. Khi kí tự ^ đứng đầu tiên trong dấu ngoặc vuông, nó phủ định mẫu này.Ví dụ, [^abc] tương tự như [^a-c], khớp với ‘r’ trong “brisket” và ‘h’ trong “chop” là kí tự đầu tiên không thuộc khoảng a đến c.</td>
+</tr>
+<tr>
+<td>[\b]</td>
+<td>Khớp với kí tự dịch lùi - backspace (U+0008). Bạn phải đặt trong dấu ngoặc vuông nếu muốn so khớp một kí tự dịch lùi. (Đừng nhầm lẫn với mẫu \b).</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>Khớp với kí tự biên. Kí tự biên là một kí tự giả, nó khớp với vị trí mà một kí tự không được theo sau hoặc đứng trước bởi một kí tự khác. Tương đương với mẫu (^\w</td>
+</tr>
+<tr>
+<td>\B</td>
+<td>Khớp với kí tự không phải kí tự biên. Mẫu này khớp tại vị trí mà kí tự trước và kí tự sau nó cùng kiểu: hoặc cả hai là kí tự hoặc cả hai không phải là kí tự. Bắt đầu và kết thúc chuỗi không được xem là những kí tự.Ví dụ, /\B../ khớp với ‘oo’ trong “noonday”, và /y\B./ khớp với ‘ye’ trong “possibly yesterday.”</td>
+</tr>
+<tr>
+<td>\cX</td>
+<td>X là một kí tự trong khoảng A tới Z. Mẫu này khớp với một kí tự điều khiển trong một chuỗi.Ví dụ: /\cM/ khớp với control-M (U+000D) trong chuỗi.</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>Khớp với một kí tự số. Tương đương với mẫu [0-9].Ví dụ: /\d/ hoặc /[0-9]/ khớp với ‘2’ trong chuỗi “B2 is the suite number.”</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>Khớp với một kí tự không phải là kí tự số. Tương đương với mẫu [^0-9].Ví dụ; /\D/ hoặc /[^0-9]/ khớp với ‘B’ trong “B2 is the suite number.”</td>
+</tr>
+<tr>
+<td>\f</td>
+<td>Khớp với kí tự phân trang - form feed (U+000C).</td>
+</tr>
+<tr>
+<td>\n</td>
+<td>Khớp với kí tự xuống dòng - line feed (U+000A).</td>
+</tr>
+<tr>
+<td>\r</td>
+<td>Khớp với kí tự quay đầu dòng -  carriage return (U+000D).</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>Khớp với một kí tự khoảng trắng, bao gồm trống - space, tab, phân trang - form feed, phân dòng - line feed. Tương đương với [ \f\n\r\t\v​\u00a0\u1680​\u180e\u2000​\u2001\u2002​\u2003\u2004​\u2005\u2006​\u2007\u2008​\u2009\u200a​\u2028\u2029​​\u202f\u205f​\u3000].Ví dụ: /\s\w*/ khớp với ‘ bar’ trong “foo bar.”</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>Khớp với một kí tự không phải khoảng trắng. Tương đương với [^ \f\n\r\t\v​\u00a0\u1680​\u180e\u2000​\u2001\u2002​\u2003\u2004​\u2005\u2006​\u2007\u2008​\u2009\u200a​\u2028\u2029​\u202f\u205f​\u3000].Ví dụ: /\S\w*/ khớp với ‘foo’ trong chuỗi “foo bar.”</td>
+</tr>
+<tr>
+<td>\t</td>
+<td>Khớp với kí tự tab (U+0009).</td>
+</tr>
+<tr>
+<td>\v</td>
+<td>Khớp với kí tự vertical tab (U+000B).</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>Khớp với tất cả kí tự là chữ, số và gạch dưới. Tương đương với mẫu [A-Za-z0-9_].Ví dụ, /\w/ khớp với ‘a’ trong “apple,” ‘5’ trong “$5.28,” và ‘3’ trong “3D.”</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>Khớp với tất cả kí tự không phải là chữ. Tương đương với mẫu [^A-Za-z0-9_].Ví dụ, /\W/ hoặc /[^A-Za-z0-9_]/ khớp với ‘%’ trong “50%.”</td>
+</tr>
+<tr>
+<td>\n</td>
+<td>Trong đó, n là một số nguyên dương, một tham chiếu ngược tới chuỗi khớp thứ n trong biểu thức (đếm từ trái sang, bắt đầu bằng 1).Ví dụ, /apple(,)\sorange\1/ hay /apple(,)\sorange,/ khớp với ‘apple, orange,’ trong chuỗi “apple, orange, cherry, peach.”</td>
+</tr>
+<tr>
+<td>\0</td>
+<td>Khớp với kí tự NULL (U+0000). Lưu ý: không được thêm bất kì một kí tự số nào sau 0, vì \0 là một biểu diễn hệ bát phân escape sequence.</td>
+</tr>
+<tr>
+<td>\xhh</td>
+<td>Khớp với kí tự với mã code là hh (2 số trong hệ thập lục phân)</td>
+</tr>
+<tr>
+<td>\uhhhh</td>
+<td>Khớp với kí tự có mã hhhh (4 số trong hệ thập lục phân).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Lam-viec-voi-bieu-thuc-chinh-quy"><a href="#Lam-viec-voi-bieu-thuc-chinh-quy" class="headerlink" title="Làm việc với biểu thức chính quy"></a>Làm việc với biểu thức chính quy</h4><p>Bảng 4.2 Những phương thức được sử dụng trong biểu thức chính quy</p>
+<table>
+<thead>
+<tr>
+<th>Phương thức</th>
+<th>Mô tả</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exec</td>
+<td>Một phương thức của RegExp dùng để tìm kiếm chuỗi phù hợp với mẫu so khớp. Nó trả về một mảng chứa kết quả tìm kiếm.</td>
+</tr>
+<tr>
+<td>test</td>
+<td>Một phương thức của RegExp dùng để kiểm tra mẫu có khớp với chuỗi hay không. Nó trả về giá trị true hoặc false.</td>
+</tr>
+<tr>
+<td>match</td>
+<td>Một phương thức của chuỗi dùng để tìm kiếm chuỗi phù hợp với mẫu so khớp. Nó trả về một mảng chứa kết quả tìm kiếm hoặc null nếu không tìm thấy.</td>
+</tr>
+<tr>
+<td>search</td>
+<td>Một phương thức của chuỗi dùng để tìm kiếm chuỗi phù hợp với mẫu so khớp và trả về vị trí của chuỗi đó hoặc -1 nếu không tìm thấy.</td>
+</tr>
+<tr>
+<td>replace</td>
+<td>Một phương thức của chuỗi dùng để tìm kiếm một chuỗi theo mẫu so khớp và thay thế chuỗi con được khớp với một chuỗi thay thế.</td>
+</tr>
+<tr>
+<td>split</td>
+<td>Một phương thức của chuỗi dùng một biểu mẫu chính quy hoặc một chuỗi bất biến để ngắt chuỗi đó thành một mảng các chuỗi con.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Vi-du"><a href="#Vi-du" class="headerlink" title="Ví dụ"></a>Ví dụ</h4><p>Mã hóa escapse chuỗi người dùng nhập vào bằng một hàm thay thế đơn giản sử dụng biểu thức chính quy:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">escapeRegExp</span>(<span class="params">string</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">return</span> string.replace(<span class="regexp">/[.*+?^$&#123;&#125;()|[\]\\]/g</span>, <span class="string">"\\$&amp;"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/hh3gywbz2y_image%20%283%29.png" target="_blank" rel="noopener"><img src="https://s3-ap-southeast-1.amazonaws.com/kipalog.com/hh3gywbz2y_image%20%283%29.png" alt="alt text"></a></p>
+<p>Bạn có thể sử dụng trang web <a href="https://regex101.com/" target="_blank" rel="noopener">Regex101.com</a> , dán một đoạn regex vào đấy, nó sẽ giải thích đoạn mã đấy làm gì.</p>
+<h4 id="Luu-y"><a href="#Luu-y" class="headerlink" title="Lưu ý"></a>Lưu ý</h4><p>Giữ biểu thức chính quy của bạn đơn giản. Regex đơn giản giúp người dùng khác hiểu và sửa đổi dễ dàng hơn.</p>
+<p>Biểu thức chính quy về bản chất đối sánh rất nhiều dữ liệu: nếu bạn không chỉ định cho regex biết không nên đối sánh dữ liệu nào, chúng sẽ đối sánh với những gì bạn chỉ định và bất kỳ ký tự liền kề nào. Ví dụ: site đối sánh với mysite, yoursite, theirsite, parasite–bất kỳ chuỗi có chứa “site”. Nếu bạn cần thực hiện đối sánh cụ thể, hãy thiết lập cấu trúc regex của bạn cho phù hợp. Ví dụ: nếu bạn chỉ cần đối sánh với chuỗi “site”, hãy thiết lập cấu trúc regex của bạn để “site” vừa là bắt đầu chuỗi vừa là kết thúc chuỗi: ^site$.</p>
+<h3 id="5-Tham-khao"><a href="#5-Tham-khao" class="headerlink" title="5. Tham khảo"></a>5. Tham khảo</h3><p><a href="https://support.google.com/analytics/answer/1034324?hl=vi&amp;ref_topic=1034375%0Ahttps://developer.mozilla.org/vi/docs/Web/JavaScript/Guide/Regular_Expressions%0Ahttps://en.wikipedia.org/wiki/Regular_expression" target="_blank" rel="noopener">Analytics Trợ giúp</a><br>Nguồn N.T.Giáp - Kaopiz</p>
+<span>Source: </span><a href="https://kipalog.com/posts/Regex--Hoc-roi-ma-nhu-chua-hoc" target="_blank" title="https://kipalog.com/posts/Regex--Hoc-roi-ma-nhu-chua-hoc" class="post-from">https://kipalog.com/posts/Regex--Hoc-roi-ma-nhu-chua-hoc</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html" class="prev">NEXT</a><a href="/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html';
+var disqus_title = '[Regex] Học rồi mà như chưa học';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

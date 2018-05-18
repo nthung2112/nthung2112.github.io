@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Kiến trúc tổng quan của Angular 2/4  - P1 · Learn and Share</title><meta name="description" content="Kiến trúc tổng quan của Angular 2/4  - P1 - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Kiến trúc tổng quan của Angular 2/4  - P1"><meta property="og:image"><meta property="og:description" content="Đôi điều về Angular 2
+Hiểu đơn giản là một framework để giúp lập trình viên xây dựng các ứng dụng client với HTML và JavaScript/Typescript …
+Việc render HTML templates sẽ được thực hiện bởi Angularized-markup, việc cần làm của một developer là viết các component để quản lý template, thêm mới các xử lý logic bên trong các service, đóng gói component và service thành một module.
+Một ứng dụng Angular2 được chạy dựa trên việc bootstrapping root module vào Angular’s bootstrapper."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Kiến trúc tổng quan của Angular 2/4  - P1</h1><h2 class="post-subtitle"></h2><header class="post-info">Oct 1, 2017<div class="tags"><a href="/tags/angular" class="tag-link">#angular</a><a href="/tags/architecture" class="tag-link">#architecture</a></div><div class="fb-ir-time"><time dateTime="2017-10-01T08:43:49.000Z" class="op-modified"></time><time dateTime="2017-10-01T08:43:49.000Z" class="op-published"></time></div></header></div><div class="wrap"><div class="post-content"><h2 id="Doi-dieu-ve-Angular-2"><a href="#Doi-dieu-ve-Angular-2" class="headerlink" title="Đôi điều về Angular 2"></a>Đôi điều về Angular 2</h2><ul>
+<li>Hiểu đơn giản là một framework để giúp lập trình viên xây dựng các ứng dụng client với HTML và JavaScript/Typescript …</li>
+<li>Việc render HTML templates sẽ được thực hiện bởi Angularized-markup, việc cần làm của một developer là viết các component để quản lý template, thêm mới các xử lý logic bên trong các service, đóng gói component và service thành một module.</li>
+<li><p>Một ứng dụng Angular2 được chạy dựa trên việc bootstrapping root module vào Angular’s bootstrapper.<br><img src="https://viblo.asia/uploads/a1b02db2-8d40-425f-91e8-6a6193547b5d.png" alt=""></p>
+<a id="more"></a>
+<p>Dựa vào sơ đồ kiến trúc trên ta có thể liệt kê ra 8 thành phần chính tạo ra một ứng dụng Angular 2:</p>
+</li>
+<li>Module</li>
+<li>Component</li>
+<li>Template</li>
+<li>Metadata</li>
+<li>Data Binding</li>
+<li>Service</li>
+<li>Directive</li>
+<li>Dependency Injection</li>
+</ul>
+<h2 id="Modules"><a href="#Modules" class="headerlink" title="Modules"></a>Modules</h2><p><img src="https://viblo.asia/uploads/523f82f0-b104-431e-a5af-acb7bcc8e83c.png" alt=""><br>Angular apps sử dụng hệ thống module, hay còn gọi là <em>Angular modules</em> hoặc <em>NgModules</em>.<br>Trong bài viết này chủ yếu là giới thiệu các modules; Để tìm hiểu sâu hơn xin vui lòng tham khảo <a href="https://angular.io/docs/ts/latest/guide/ngmodule.html" target="_blank" rel="noopener">Angular modules</a>.<br>Mỗi ứng dụng Angular đều phải có ít nhất một Angular module class, là <em>root module</em>, hay còn được đặt tên theo quy ước là <em>AppModule</em>.</p>
+<p>Trong các ứng dụng nhỏ, đôi khi chỉ có duy nhất 1 module chính là <em>root module</em> , tuy nhiên ở hầu hết các ứng dụng, còn có thêm nhiều feature modules.<br>Dù là <em>root</em> hay là <em>feature</em> module, thì mỗi class đều có @NgModule decorator.</p>
+<blockquote>
+<p>Decorators là design pattern thường được dùng để thay đổi hành vi, chức năng của JavaScript classes. Angular cung cấp sẵn nhiều decorators gắn các metadata vào các classes để dễ dàng biết được ý nghĩa và cách thức hoạt động.</p>
+</blockquote>
+<p><em>NgModule</em> là một decorator function (single metadata object) có các thuộc tính mô tả các module. Các thuộc tính quan trọng là:</p>
+<ul>
+<li><em>declarations</em> - Khai báo các View classes thuộc về module. Angular có 3 loại view classes: components, directives, pipes.</li>
+<li><em>exports</em> - Một tập con của <em>declarations</em> khả dụng trong component templates của các module khác.</li>
+<li><em>imports</em> - Các module khác được exported các classes cần thiết bởi component templates được <em>declarations</em> bên trong module này.</li>
+<li><em>providers</em> - Tạo ra các global collection of services có thể truy cập ở mọi ngõ ngách của ứng dụng.</li>
+<li><em>bootstrap</em> - Main application view, hay còn được gọi là <em>root component</em>, chứa tất cả các app views. Duy nhất <em>root module</em> có thuộc tính bootstrap.</li>
+</ul>
+<p>Dưới đây là một <em> root module</em> đơn giản:</p>
+<p><strong>app/app.module.ts</strong></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; NgModule &#125;      <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; BrowserModule &#125; <span class="keyword">from</span> <span class="string">'@angular/platform-browser'</span>;</span><br><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  imports:      [ BrowserModule ],</span><br><span class="line">  providers:    [ Logger ],</span><br><span class="line">  declarations: [ AppComponent ],</span><br><span class="line">  exports:      [ AppComponent ],</span><br><span class="line">  bootstrap:    [ AppComponent ]</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> AppModule &#123; &#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Trong trường hợp này, thuộc tính export của AppComponent chỉ đơn giản mô tả cách export; nó thì không cần thiết trong thực tế. Một <em>root module</em> không có lý do gì để export bất cứ điều gì, đơn giản là các component khác ko cần thiết phải import <em>root module</em>.</p>
+</blockquote>
+<p>Khởi chạy ứng dụng bằng cách bootstrapping <em>root module</em>. Trong quá trình development, chúng ta sẽ bootstrap AppModule trong file <strong>main.ts</strong>.</p>
+<p><strong>app/main.ts</strong></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; platformBrowserDynamic &#125; <span class="keyword">from</span> <span class="string">'@angular/platform-browser-dynamic'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; AppModule &#125; <span class="keyword">from</span> <span class="string">'./app.module'</span>;</span><br><span class="line"></span><br><span class="line">platformBrowserDynamic().bootstrapModule(AppModule);</span><br></pre></td></tr></table></figure>
+<h3 id="Angular-modules-vs-JavaScript-modules"><a href="#Angular-modules-vs-JavaScript-modules" class="headerlink" title="Angular modules vs. JavaScript modules"></a>Angular modules vs. JavaScript modules</h3><p><strong>Angular Module</strong>: Class decorator với @NgModule — đây là 1 một tính tăng cơ bản Angular.</p>
+<p><strong>Javascript Module</strong>: JavaScript cũng có một hệ thống module để quản lý các JavaScript objects. Nó hoàn toàn khác biệt và không liên quan tới Angular module system.</p>
+<blockquote>
+<p>Trong JavaScript mỗi file là một module và tất cả các đối tượng được định nghĩa trong file đều thuộc về module đó. Các module khai báo đối tượng public bằng cách sử dụng từ khóa export. Các module JavaScript khác sử dụng từ khóa import để truy cập vào đối tượng public từ các module khác.</p>
+</blockquote>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; NgModule &#125;     <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; AppComponent &#125; <span class="keyword">from</span> <span class="string">'./app.component'</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> AppModule &#123; &#125;</span><br></pre></td></tr></table></figure>
+<p>Tìm hiểu thêm về <a href="http://exploringjs.com/es6/ch_modules.html" target="_blank" rel="noopener">Javascript Module</a>.</p>
+<h3 id="Angular-libraries"><a href="#Angular-libraries" class="headerlink" title="Angular libraries"></a>Angular libraries</h3><p><img src="https://viblo.asia/uploads/998f1c91-dc05-4e19-9d1c-2195c10886ca.png" alt=""></p>
+<p>Angular được ví như 1 con tàu chuyên chở các JavaScript modules. Cũng có thể ví là các library modules.</p>
+<p>Mỗi Angular library name đều bắt đầu với tiền tố @angular.<br>Bạn cài đặt chúng với npm package manager và import các phần lại bằng câu lệnh JavaScript import.</p>
+<p>Lấy ví dụ, import Angular’s Component decorator từ <strong>@angular/core</strong> library như sau:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Component &#125; <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br></pre></td></tr></table></figure>
+<p>Bạn cũng có thể import <em>Angular modules</em> từ <em>Angular libraries</em> sử dụng câu lệnh JavaScript import:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; BrowserModule &#125; <span class="keyword">from</span> <span class="string">'@angular/platform-browser'</span>;</span><br></pre></td></tr></table></figure>
+<p>Trong ví dụ về <em>root module</em> bên trên, application module cần <em>BrowserModule</em>. Để truy cập tới <em>BrowserModule</em>, ta thêm vào @NgModule metadata imports:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">imports:      [ BrowserModule ],</span><br></pre></td></tr></table></figure>
+<p>Theo cách này, ta đang sử dụng cả Angular and JavaScript module systems cùng nhau.</p>
+<h2 id="Components"><a href="#Components" class="headerlink" title="Components"></a>Components</h2><p><img src="https://viblo.asia/uploads/3735f092-68b6-4cb4-ac1e-0c28e5f6d85c.png" alt=""><br>Một component điều khiển từng chức năng trên màn hình view.<br>Ví dụ, view sau được điều khiển bởi các components:</p>
+<ul>
+<li>The app root với navigation links.</li>
+<li>The list of heroes.</li>
+<li>The hero editor.</li>
+</ul>
+<p>Chúng ta cần định nghĩa component’s application logic—những gì sẽ support trên view—bên trong một class. Class sẽ tương tác với view thông qua API của các properties và methods.</p>
+<p>Ví dụ, <strong>HeroListComponent</strong> có một heroes property trả về 1 mảng các heroes lấy từ service. <strong>HeroListComponent</strong> cũng có sẵn phương thức selectHero() để get các thuộc tính của selectedHero khi người dùng chọn user từ danh sách.</p>
+<p><strong>app/hero-list.component.ts (class)</strong></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> HeroListComponent <span class="keyword">implements</span> OnInit &#123;</span><br><span class="line">  heroes: Hero[];</span><br><span class="line">  selectedHero: Hero;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">constructor</span>(<span class="params"><span class="keyword">private</span> service: HeroService</span>) &#123; &#125;</span><br><span class="line"></span><br><span class="line">  ngOnInit() &#123;</span><br><span class="line">    <span class="keyword">this</span>.heroes = <span class="keyword">this</span>.service.getHeroes();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  selectHero(hero: Hero) &#123; <span class="keyword">this</span>.selectedHero = hero; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Angular creates, updates, và destroys components cùng với user di chuyển xuyên suốt trong application. App có thể lấy các action ở từng thời điểm tron lifecycle thông qua lifecycle hooks, như ngOnInit() được khai báo bên trên.</p>
+<h2 id="Templates"><a href="#Templates" class="headerlink" title="Templates"></a>Templates</h2><p><img src="https://viblo.asia/uploads/c4425a98-9a0e-4635-a25f-3dd5103b8b23.png" alt=""><br>Chúng ta định nghĩa component’s view với template của nó. Một template là mã code HTML giúp Angular render component.</p>
+<p>Một template có thể có đôi chút khác biệt với HTML thông thường, đây là 1 ví dụ cho template của HeroListComponent:</p>
+<p><strong>app/hero-list.component.html</strong></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>Hero List<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>Pick a hero from the list<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> *<span class="attr">ngFor</span>=<span class="string">"let hero of heroes"</span> (<span class="attr">click</span>)=<span class="string">"selectHero(hero)"</span>&gt;</span></span><br><span class="line">    &#123;&#123;hero.name&#125;&#125;</span><br><span class="line">  <span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">hero-detail</span> *<span class="attr">ngIf</span>=<span class="string">"selectedHero"</span> [<span class="attr">hero</span>]=<span class="string">"selectedHero"</span>&gt;</span><span class="tag">&lt;/<span class="name">hero-detail</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Mặc dù template này sử dụng các thành phần cơ bản HTML như <code>&lt;h2&gt;</code> và <code>&lt;p&gt;</code>, nhưng cũng có đôi chút khác biệt như <code>*ngFor</code>, <code></code>, <code>(click)</code>, <code>[hero]</code>, và <code>&lt;hero-detail&gt;</code> sử dụng <em>Angular’s template syntax</em>.</p>
+<p>Trên dòng cuối cùng của template, <code>&lt;hero-detail&gt;</code> tag là custom element thể hiện cho new component, HeroDetailComponent.</p>
+<p>HeroDetailComponent là một component khác với HeroListComponent chúng ta đang xem. HeroDetailComponent mô tả chi tiết từng hero, mà người dùng đã <strong>select</strong> từ HeroListComponent. HeroDetailComponent là con (<em>child</em>) của HeroListComponent.<br><img src="https://viblo.asia/uploads/d0f19d36-3916-4721-9e7f-1b872b74f3c4.png" alt=""></p>
+<blockquote>
+<p>Element <hero-detail> có thể được code thoải mái giữa native HTML elements</hero-detail></p>
+</blockquote>
+<h2 id="Metadata"><a href="#Metadata" class="headerlink" title="Metadata"></a>Metadata</h2><p><img src="https://viblo.asia/uploads/9bdc0dbb-5bfc-43ec-a307-26fd72eda43e.png" alt=""><br><strong>Metadata</strong> giúp Angular biết cách xử lý các class.</p>
+<p>Quay trở lại code HeroListComponent bên trên, ta thấy rằng đó chỉ đơn giản là 1 class, ko có dấu ấn gì của 1 framework cả, no “Angular” omg</p>
+<p>Thực tế, HeroListComponent thực chất chỉ là 1 class. Nó không phải là 1 component cho tới khi ta khai báo nó với Angular.</p>
+<p>Để khai báo với Angular rằng HeroListComponent là 1 component, ta sẽ gắn thẻ <strong>metadata</strong> vào class này.</p>
+<p>Trong TypeScript, việc gắn thẻ <strong>metadata</strong> sử dụng decorator. Dưới đây là metadata cho HeroListComponent:</p>
+<p><strong>app/hero-list.component.ts (metadata)</strong></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  moduleId: <span class="built_in">module</span>.id,</span><br><span class="line">  selector:    <span class="string">'hero-list'</span>,</span><br><span class="line">  templateUrl: <span class="string">'hero-list.component.html'</span>,</span><br><span class="line">  providers:  [ HeroService ]</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> HeroListComponent <span class="keyword">implements</span> OnInit &#123;</span><br><span class="line"><span class="comment">/* . . . */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><em>Decorator</em> ở đây chính là @Component, định nghĩa class ngay bên dưới như một <em>component class</em>.</p>
+<p>@Component decorator khởi tạo một object với các thông tin mà <em>Angular</em> cần thể tạo và biểu diễn một component &amp; view.</p>
+<p>Dưới đây là một số option cấu hình cho @Component:</p>
+<ul>
+<li>moduleId: Tập hợp các source dựa trên address (module.id) với module-relative URLs như templateUrl.</li>
+<li>selector: CSS selector ra lệnh cho Angular create và insert một thể hiện component khi nó tìm thấy <hero-list> tag trong parent HTML. Ví dụ, nếu một app’s HTML có chứa <hero-list></hero-list>, thì Angular sẽ inserts một instance của HeroListComponent view giữa các tags.</hero-list></li>
+<li>templateUrl: module-relative address của component’s HTML template.</li>
+<li>providers: Mảng các dependency injection providers cho services cần thiết để component hoạt động. Đây là 1 cách khai báo với Angular rằng, component’s constructo yêu cầu 1 HeroService để nó có thể thu được danh sách các heroes phục vụ việc hiển thị lên màn hình.</li>
+</ul>
+<p><img src="https://viblo.asia/uploads/8e49084e-55a7-4f71-98e6-d3a12c5729ff.png" alt=""></p>
+<p><strong>Metadata</strong> trong @Component giúp Angular biết cách lấy những thành phần chính tạo nên component.<br><strong>Template</strong>, <strong>Metadata</strong>, và <strong>Component</strong> được sử dụng cùng với nhau với mục đích tạo nên <strong>View</strong>.<br>Ngoài @Component, chúng ta còn có @Injectable, @Input, và @Output là những <em>decorators</em> rất hay được sử dụng.</p>
+<h2 id="Tham-khao"><a href="#Tham-khao" class="headerlink" title="Tham khảo"></a>Tham khảo</h2><p><a href="https://angular.io/docs/ts/latest/guide/architecture.html" target="_blank" rel="noopener">https://angular.io/docs/ts/latest/guide/architecture.html</a></p>
+<span>Source: </span><a href="https://viblo.asia/p/angular-2-architecture-overview-p1-eXaRlwbeGmx" target="_blank" title="https://viblo.asia/p/angular-2-architecture-overview-p1-eXaRlwbeGmx" class="post-from">https://viblo.asia/p/angular-2-architecture-overview-p1-eXaRlwbeGmx</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P2.html" class="prev">NEXT</a><a href="/2017/10/Cac-ky-thuat-SEO-toi-thieu-ma-developer-can-nam-vung-trong-lap-trinh-web.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P1.html';
+var disqus_title = 'Kiến trúc tổng quan của Angular 2/4  - P1';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P1.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

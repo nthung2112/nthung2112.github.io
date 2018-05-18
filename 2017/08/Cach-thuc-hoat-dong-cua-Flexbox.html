@@ -1,0 +1,95 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc · Learn and Share</title><meta name="description" content="Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc"><meta property="og:image" content="https://cdn-images-1.medium.com/max/2000/1*zyzR64aw4rDPsoG-ZwZ9rQ.png"><meta property="og:description" content="Flexbox hứa hẹn sẽ giải quyết nhiều vấn đề hiện đang tồn tại trong CSS thuần (ví dụ như căn chỉnh chiều dọc).
+Nhưng để có thể làm chủ và sử dụng được flexbox thì lại là việc không hề dễ dàng.
+Nguyên tắc cơ bản của Flexbox là làm cho việc dàn trang linh hoạt và trực quan hơn.
+Để thực hiện được điều này, các thành phần bao ngoài (containers) được tự quyết định cách phân bố các phần tử con (items) – bao gồm cả kích thước và khoảng cách giữa chúng.
+Điều này về nguyên tắc nghe có vẻ tốt. Nhưng chúng ta hãy xem nó có vẻ như trong thực tế."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc</h1><h2 class="post-subtitle"></h2><header class="post-info">Aug 31, 2017<div class="tags"><a href="/tags/css" class="tag-link">#css</a><a href="/tags/flexbox" class="tag-link">#flexbox</a></div><div class="fb-ir-time"><time dateTime="2017-08-31T02:45:26.000Z" class="op-modified"></time><time dateTime="2017-08-31T02:45:26.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://cdn-images-1.medium.com/max/2000/1*zyzR64aw4rDPsoG-ZwZ9rQ.png"></div><div class="wrap"><div class="post-content"><p>Flexbox hứa hẹn sẽ giải quyết nhiều vấn đề hiện đang tồn tại trong CSS thuần (ví dụ như căn chỉnh chiều dọc).</p>
+<p>Nhưng để có thể làm chủ và sử dụng được flexbox thì lại là việc không hề dễ dàng.</p>
+<p>Nguyên tắc cơ bản của Flexbox là làm cho việc dàn trang linh hoạt và trực quan hơn.</p>
+<p>Để thực hiện được điều này, các thành phần bao ngoài (containers) được tự quyết định cách phân bố các phần tử con (items) – bao gồm cả kích thước và khoảng cách giữa chúng.</p>
+<p>Điều này về nguyên tắc nghe có vẻ tốt. Nhưng chúng ta hãy xem nó có vẻ như trong thực tế.<br><a id="more"></a><br>Trong bài viết này, chúng ta sẽ nghiên cứu 5 thuộc tính nổi trội nhất của Flexbox, khám phá chức năng cũng như cách sử dụng chúng và kết quả đạt được.</p>
+<h3 id="Thuoc-tinh-1-Display-Flex"><a href="#Thuoc-tinh-1-Display-Flex" class="headerlink" title="Thuộc tính #1: Display: Flex"></a>Thuộc tính #1: Display: Flex</h3><p>Hãy xem ví dụ trang web dưới đây:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*ifusEqwI87nBKXgK9oZ_7A.gif" alt=""></p>
+<p>Có 4 thẻ divs kích cỡ khách nhau được đánh dấu với các màu khác nhau đặt trong thẻ div container màu xám. Mặc định mỗi thẻ div sẽ có thuộc tính là <code>display: block</code>. Mỗi ô vuông vì vậy sẽ chiếm hết bề ngang của mỗi dòng.</p>
+<p>Để bắt đầu với Flexbox, bạn cần đưa <strong>container</strong> của bạn về dạng của <strong>flex container</strong> như sau:</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#container</span> &#123;</span><br><span class="line">  <span class="attribute">display</span>: flex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*L2W-ziqU45a1BNWV79ijDQ.gif" alt=""></p>
+<p>Chưa có thay đổi gì ngoài việc các thẻ div hiển thị trên cùng một dòng. Tuy nhiên đây lại là một sự thay đổi rất đáng kể. <strong>Chúng ta đặt tên cho vùng xung quanh đó gọi là <em>flex context</em>.</strong></p>
+<p>Bây giờ bạn có thể bắt đầu định vị trí cho chúng mà không gặp nhiều khó khăn như khi sử dụng CSS thông thường</p>
+<h3 id="Thuoc-tinh-2-Flex-Direction"><a href="#Thuoc-tinh-2-Flex-Direction" class="headerlink" title="Thuộc tính #2: Flex Direction"></a>Thuộc tính #2: Flex Direction</h3><p>Một Flexbox container có hai trục: <strong>một trục chính</strong> và <strong>một trục dọc</strong>, mặc định hiển thị như dưới đây:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*_Ruy6jFG7gUpSf76IUcJTQ.png" alt=""></p>
+<p><strong>Mặc định, các items được sắp xếp theo hướng của trục chính, từ trái qua phải</strong>. Đây là lí do tại sao các ô vuông hiển thị trên cùng một dòng khi bạn sử dụng <code>display: flex</code>.</p>
+<p>Tuy nhiên, bạn có thể thay đổi trục chính bằng thuộc tính <code>Flex-direction</code>.</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#container</span> &#123;</span><br><span class="line">  <span class="attribute">display</span>: flex;</span><br><span class="line">  <span class="attribute">flex-direction</span>: column;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*4yKnG2-vuPF5XA-BmXADLQ.gif" alt=""></p>
+<p>Có một sự khác biệt quan trọng tạo ra ở đây: <code>flex-direction: column</code>  không sắp xếp các ô vuông trên trục dọc (across axis) thay vì trục chính (main axis). <strong>Nó làm trục chính thay đổi, xoay từ ngang thành dọc.</strong></p>
+<p>Bạn có thể sắp xếp flex-direction theo một số cách khác như: <em>row-reverse</em> and <em>column-reverse.</em></p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*PBr_ncouIehALaEOWmSbpQ.gif" alt=""></p>
+<h3 id="Thuoc-tinh-3-Justify-Content"><a href="#Thuoc-tinh-3-Justify-Content" class="headerlink" title="Thuộc tính #3: Justify Content"></a>Thuộc tính #3: Justify Content</h3><p><em>Justify-content</em> sắp xếp các items theo theo <strong>main axis.</strong></p>
+<p>Chúng ta sẽ nghiên cứu chi tiết hơn về sự khác nhau giữa trục chính và trục dọc. Trước hết, hãy quay lại với flex-direction: row.</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#container</span> &#123;</span><br><span class="line">  <span class="attribute">display</span>: flex;</span><br><span class="line">  <span class="attribute">flex-direction</span>: row;</span><br><span class="line">  <span class="attribute">justify-content</span>: flex-start;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Bạn có năm thuộc tính để sử dụng với <em>justify-content</em>:</p>
+<ol>
+<li>Flex-start</li>
+<li>Flex-end</li>
+<li>Center</li>
+<li>Space-between</li>
+<li>Space-around</li>
+</ol>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*2-6Tw8jqWrMKOfIugKyuDA.gif" alt=""></p>
+<p>Sự khác nhau giữa space-around và space-between hơi khó để nhận ra. <strong>Với space-between, các ô vuông sẽ được căn cách đều nhau, không bao gồm khoảng cách giữa ô vuông đầu và cuối với container</strong></p>
+<p>Space-around đặt một khoảng cách ở hai bên cạnh mỗi ô vuông — có nghĩa là <strong>khoảng cách giữa ô vuông ngoài cùng phía đầu và cuối với container sẽ bằng một nửa khoảng cách giữa các ô vuông với nhau</strong> (Giả sử mỗi ô vuông đều có một giá trị căn lề bằng nhau và không bị ghi đè, vì vậy khoảng cách giữa 2 ô vuông sẽ gấp đôi).</p>
+<p>Chú ý: Hãy nhớ rằng thuộc tính <strong>justify-content hoạt động theo trục chính</strong>, và <strong>flex-direction làm thay đổi trục chính</strong>. Đây là điều quan trọng nhất để bạn chuyển sang phần tiếp theo…</p>
+<h3 id="Thuoc-tinh-4-Align-Items"><a href="#Thuoc-tinh-4-Align-Items" class="headerlink" title="Thuộc tính #4: Align Items"></a>Thuộc tính #4: Align Items</h3><p>Nếu như bạn đã nắm được thuộc tính justify-content, align-items sẽ không khó khăn.</p>
+<p>Trong khi justify-content hoạt động theo trục chính, <strong>align-items áp dụng đối với trục dọc.</strong></p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*_Ruy6jFG7gUpSf76IUcJTQ.png" alt=""></p>
+<p>Hãy thiết lập lại <em>flex-direction</em> thành row, để hai trục hiển thị như hình trên.</p>
+<p>Sau đó, bắt đầu đi sâu vào giá trị của align-items.</p>
+<ol>
+<li>flex-start</li>
+<li>flex-end</li>
+<li>center</li>
+<li>stretch</li>
+<li>baseline</li>
+</ol>
+<p>Ba giá trị đầu tiên chính xác là giống như <em>justify-content</em>, vì vậy không có gì quá lạ ở đây.</p>
+<p>Tuy nhiên, hai giá trị kế tiếp có một chút khác biệt.</p>
+<p>Với giá trị stretch, các items sẽ chiếm toàn bộ trục chính, và baseline, đáy của những tags paragraph sẽ được canh đều.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*htfdNmRIIFu_veRaFOj5qA.gif" alt=""></p>
+<p>(Chú ý với <code>align-items: stretch</code>, Tôi đã phải đặt chiều cao của ô vuông là auto. Nếu không, thuộc tính chiều cao sẽ ghi đè lên stretch.)</p>
+<p>Với baseline, hãy lưu ý rằng nếu bạn bỏ đi tags paragraph, các ô vuông sẽ được căn lề dưới như hình sau:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*6dd9KnKMUN49lFsbHlJi6A.png" alt=""></p>
+<p>Để minh họa rõ hơn cho trục chính và trục dọc với nó, hãy kết hợp thuộc tính justify-content và align-items và xem sự khác biệt giữa 2 giá trị center của thuộc tính flex-direction:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*6mq-Uay7t6NhdF2E41Do0g.gif" alt=""></p>
+<p><strong>Với dòng, các ô vuông được thiết lập dọc theo một trục chính ngang. Với cột, chúng xếp dọc theo trục chính thẳng đứng.</strong></p>
+<p>Các ô vuông được căn giữa cả theo trục ngang và dọc trong 2 trường hợp, cả 2 trường hợp đều ko thay đổi!</p>
+<h3 id="Thuoc-tinh-5-Align-Self"><a href="#Thuoc-tinh-5-Align-Self" class="headerlink" title="Thuộc tính #5: Align Self"></a>Thuộc tính #5: Align Self</h3><p><em>Align-self</em> cho phép bạn thao tác thủ công liên kết của một phần tử riêng biệt.</p>
+<p>Nó sẽ đè lên thuộc tính <em>align-items</em> của 1 ô vuông. Tất cả thuộc tính đều như nhau, bởi vì mặc định nó là <em>auto</em>, nên các ô vuông sẽ theo thuộc tính <em>align-items</em> của container bao nó.</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-id">#container</span> &#123;</span><br><span class="line">  <span class="attribute">align-items</span>: flex-start;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-class">.square</span><span class="selector-id">#one</span> &#123;</span><br><span class="line">  <span class="attribute">align-self</span>: center;</span><br><span class="line">&#125;</span><br><span class="line">// Only this square will be centered.</span><br></pre></td></tr></table></figure>
+<p>Hãy xem kết quả. Bạn sẽ đặt thuộc tính <em>align-self</em> cho 2 ô vuông, và thuộc tính <code>align-items: center</code> và <code>flex-direction: row</code> với các ô vuông còn lại.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*HIADl1oL6pxXb2dMh_pXSQ.gif" alt=""></p>
+<h3 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h3><p>Mặc dù chỉ là những tìm hiểu cơ bản về Flexbox, tôi tin những điều này cũng cung cấp cho bạn những kiến thức để dàn trang một cách cơ bản nhất cũng như sắp xếp nội dung chính bài viết của bạn.</p>
+<p>Cảm ơn vì đã đọc!</p>
+<span>Source: </span><a href="https://medium.freecodecamp.org/an-animated-guide-to-flexbox-d280cf6afc35" target="_blank" title="https://medium.freecodecamp.org/an-animated-guide-to-flexbox-d280cf6afc35" class="post-from">https://medium.freecodecamp.org/an-animated-guide-to-flexbox-d280cf6afc35</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/08/Huong-dan-toan-tap-ve-Flexbox.html" class="prev">NEXT</a><a href="/2017/08/Tro-thanh-Functional-Programmer-Phan-6.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/08/Cach-thuc-hoat-dong-cua-Flexbox.html';
+var disqus_title = 'Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/08/Cach-thuc-hoat-dong-cua-Flexbox.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

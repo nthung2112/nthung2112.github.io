@@ -1,0 +1,171 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Cách chính xác 100% để cấu trúc ứng dụng React · Learn and Share</title><meta name="description" content="Cách chính xác 100% để cấu trúc ứng dụng React - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Cách chính xác 100% để cấu trúc ứng dụng React"><meta property="og:image"><meta property="og:description" content="When it comes to structuring a React app, the ideal structure is the one that allows you to move around your code with the least amount of effort.
+In this post, I’d like to tell you how _I_ structure my React apps, and what drove my decisions. Along the way I’ll mention some options I don’t use because they don’t suit me, but that might serve you well.
+I’d also like to hear how you do things and what you’ve found works well down in the comments."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Cách chính xác 100% để cấu trúc ứng dụng React</h1><h2 class="post-subtitle"></h2><header class="post-info">Nov 13, 2017<div class="tags"><a href="/tags/react" class="tag-link">#react</a><a href="/tags/javascript" class="tag-link">#javascript</a></div><div class="fb-ir-time"><time dateTime="2017-11-13T16:51:55.000Z" class="op-modified"></time><time dateTime="2017-11-13T16:51:55.000Z" class="op-published"></time></div></header></div><div class="wrap"><div class="post-content"><p>When it comes to structuring a React app, the ideal structure is the one that allows you to move around your code with the least amount of effort.</p>
+<p>In this post, I’d like to tell you how _I_ structure my React apps, and what drove my decisions. Along the way I’ll mention some options I don’t use because they don’t suit me, but that might serve you well.</p>
+<p>I’d also like to hear how you do things and what you’ve found works well down in the comments.<br><a id="more"></a></p>
+<h3 id="What-works-for-you"><a href="#What-works-for-you" class="headerlink" title="What works for you"></a>What works for you</h3><p>Maybe this was always obvious to you, but it’s only just clicked for me: the structure of an app has nothing to do with computers.</p>
+<p>Imagine for a moment an app with only one file for all your components, reducers, the store, utilities, everything.</p>
+<p>A terrible idea, of course. Now, have a think about <em>why</em> the above would be a bad thing.</p>
+<p>We both know you didn’t really stop and ponder, so I’ll just tell you what I think. The problem with this giant file is that it’s going to be difficult to navigate. But what if you could have bookmarks for each area of the code, maybe one bookmark per function. Maybe the ability to have <em>nested</em> bookmarks. How about a table of contents for all of these bookmarks?</p>
+<p>This might seem like a daft thought experiment, but I think it’s worth establishing that the <em>only</em> thing you’re trying to do when deciding on a file structure is to maximise how easily you can navigate through your code. Your ‘files’ are nothing more than markers to parts of the code that will wind up being a single chunk of JS at the end of the day.</p>
+<p>And this is why you can never get a straight answer to the question “what’s the best way to structure my app” — it depends so much on your own navigation habits and preferences that it’s not a question anyone else can answer for you.</p>
+<hr>
+<p>To work out what the 100% correct application structure was <em>for me</em>, I set out to quantify my most common code-related activities:</p>
+<ul>
+<li><strong>Create a new component</strong>. Usually this is a copy/paste of some existing component.</li>
+<li><strong>Import one module into another</strong>. Here I mean the actual typing out of import { SomeComponent } from ‘../blah/de/blah.js’;.</li>
+<li><strong>Jump to source</strong>. This is when I’m looking at a file, and it has a reference to something external, say a <headernav> component, and I jump to where that component is defined.</headernav></li>
+<li><strong>Open a known file</strong>. Probably doesn’t need a description, but I want my bullet points to look nice and uniform, so this is where I think in my head “I want to open the header nav”, so I use a keyboard shortcut and type the file name to open it. Dammit, now this is the bullet point with the longest description and it didn’t even need one in the first place.</li>
+<li><strong>Browse for a file I don’t know the name of</strong>. Maybe I didn’t work on the little widget that shows the drop down below the user profile photo and don’t know what it’s called. So I want to go browsing the directory structure for this component.</li>
+<li><strong>Change tab to another open file</strong>. This is exactly what it sounds like. I currently have 7 files open, and I want to switch from one tab to another, by clicking on a tab name (or using the keyboard).</li>
+</ul>
+<p>Next, I had a think about how often I do each of these things. I went back and counted the components I’ve created in the last year, the average number of imports per file, and took some wild guesses at the others, to come up with the following:</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*Pmm5N4hr9cANciDL5nbDpw.png" alt="">Sorted by the order that I thought of the things</p>
+<p>With this data in my hot little hands, I was ready to objectively look at all the aspects of structuring a React app. Let us go through them one by one.</p>
+<h4 id="Directory-structure"><a href="#Directory-structure" class="headerlink" title="Directory structure"></a>Directory structure</h4><p>As a general rule, if a module (a utility, component, etc.) is only used within another module, then I want it nested in the directory structure like so:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*dUdTcjW1krgImFrhZoPjkA.png" alt=""></p>
+<p><code>&lt;HeaderNav&gt;</code> will only be referenced from within the <code>&lt;Header&gt;</code> component, so it lives as a child. A <code>&lt;Button&gt;</code> could be referenced from anywhere, so it lives at the top level.</p>
+<p>That rule is great, but I also know that following a super strict set of rules here can be annoying. Technically everything resides under App and under Page too. But I’m not going to represent that in my directory structure, because I don’t want to.</p>
+<p>This might sound flippant but it’s quite fundamental. If following your own rules creates a structure that is <em>harder</em> to navigate, you’ve taken your eyes off the prize.</p>
+<p>Outside of components, I don’t think directory structure is very important. You can agonise over whether your reducers and your action creators should be in the same directory as your services until you’re a shade of blue. But if you ask me, any basic structure with sane folder names (actionCreators, reducers, data, etc.) is all you need.</p>
+<p>This may be the first point where we differ in our needs and wants. I have established that I rarely open files by browsing through a directory structure, so naturally I apply a lower importance to directory structures. I’ve also never worked on a project with more than a few hundred components.</p>
+<p>If you rely more heavily on navigating a directory structure, or you’re Facebook with 30,000 components, then your needs will likely vary.</p>
+<p>Another thing: I would suggest naming your components in a ‘fully qualified’ (and globally unique) way. For example, HeaderNav is inside Header, so you could argue that it could just be named Nav. If that suits you, cool. But I open files by typing their names, and look at the text on tabs to switch files. In both these cases, having a fully qualified name is useful.</p>
+<p>And of course if you’re following BEM where the block matches the component name, you’re going to need globally unique component names anyway.</p>
+<h4 id="What-about-container-components"><a href="#What-about-container-components" class="headerlink" title="What about container components?"></a>What about container components?</h4><p>Container components are a tricky one, because they’re sort of components, but sort of not.</p>
+<p>I see two broad approaches to fitting container components into your structure:</p>
+<ol>
+<li>Treat them exactly like presentational components</li>
+<li>Leave them out of the directory structure. They will live ‘in the background’, just providing data to a component</li>
+</ol>
+<p>In the <strong>first case</strong>, you would actually reference the container component in your markup. So, with the example of a header component that has its own container, it might be included like so:</p>
+<script src="//gist.github.com/https://medium.com/media/463238924efd0f86ee8d206d99fa1ce1?postId=3ede534ef1ed.js"></script>
+<p>So here I’m passing through some specific data to the <page> and <footer> components, while it’s quite clear that the <headercontainer> is going to look after its own data needs.</headercontainer></footer></page></p>
+<p>If this is how you roll, the logical structure will be something like this:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*wZl20Yi2C6ZLuJJ-Qrr2-Q.png" alt=""></p>
+<p>The <strong>second option</strong> is to leave container components out of the structure; to think of them like implementation details of the component that they wrap.</p>
+<p>So maybe your <header> would wrap itself in a container component at the point of export. Something like this:</header></p>
+<script src="//gist.github.com/https://medium.com/media/ec9911836643c07a0b9642d1db1a2d86?postId=3ede534ef1ed.js"></script>
+<p>And then you reference it like this:</p>
+<script src="//gist.github.com/https://medium.com/media/d12d29a5607a3e07472e8e67af156841?postId=3ede534ef1ed.js"></script>
+<p>The downside is that it isn’t immediately clear that <header> will be provided data from somewhere else. The upside is one less step in the component hierarchy.</header></p>
+<p>If this is how you want to do things, you can then just have the container as a function that lives in the same directory as the component it provides data to:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*0WuTztg_evQbRcc3VP8OYQ.png" alt=""></p>
+<p>(Also note that I exported the ‘raw’ Header as well as the default export of the container-wrapped Header. The former is for unit tests, and your linter might tell you that you’re being confusing by exporting a non-default constant with the same name as the file. I tend to agree with the linter.)</p>
+<hr>
+<p>I have used the first approach in a medium sized project and it worked quite well. I recently tried out the second example in a new project (that only has 6 container components) and it didn’t quite feel right, so I’ll stick with the first option.</p>
+<p>I see no problem with either approach.</p>
+<p>Side note: I think there’s a fine art to recognising the point at which it makes sense to say “you know what, it doesn’t really matter” and moving on with your day. <a href="http://blog.capwatkins.com/the-sliding-scale-of-giving-a-fuck" target="_blank" rel="noopener">This article nails it</a> and is a nice short read. (Warning: there’s a swear word in the title of that article, so don’t click the link if you’re offended by the word fuck.)</p>
+<h4 id="Self-contained-components"><a href="#Self-contained-components" class="headerlink" title="Self-contained components"></a>Self-contained components</h4><p>My rule: if I have a project with more components than a Klein bottle has sides, I put each component in a directory along with a CSS file and a test. This rule is common for good reason, but even if you do have everything neatly tucked away in the same directory, you’re still quite free to make one huge mistake…</p>
+<p>Take a look at your nearest file that contains a component. At the top of that file you will probably see a list of all other files that the component relies on as a neat set of imports.</p>
+<p>Unless, that is, you share CSS classes between components. Then you also have a bunch of dependencies that aren’t listed.</p>
+<p>Sure, you will save 7 seconds by using that .modal-wrapper class in your <dropdown> component because it already had the shadow you wanted, but oh boy do you even know the world of pain that you have just inflicted upon your future self…</dropdown></p>
+<p>[deleted scene: 14 paragraph rant about why this is a bad idea]</p>
+<p>Trying to convince some people to not share CSS classes between components is like trying to convince people to “avoid using global variables in JavaScript” or “vaccinate your chickens” — some folks just aren’t gonna listen.</p>
+<p>CSS-module users are no doubt wiggling their butts feeling pretty darn pleased with themselves right now. And they have good reason to be — they have a setup that can enforce the explicit import of CSS classes. If you care about keeping your CSS tightly coupled with your components, you should be using CSS modules too.</p>
+<h4 id="File-naming"><a href="#File-naming" class="headerlink" title="File naming"></a>File naming</h4><p>One rule that I find immensely useful is this:</p>
+<blockquote>
+<p>name your file the same as the thing you’re exporting from that file</p>
+</blockquote>
+<p>To some this is not even worth typing out it’s so obvious. But I’ve seen plenty of code where this isn’t the case and boy does it make it slow to move around.</p>
+<p>(Don’t forget, <em>all of this is personal</em>. When I say “slow to move around”, it’s totally OK for you to think “it wouldn’t make it slow for me”, and therefore decide that there is no point in naming a file the same as its default export.)</p>
+<p>Something I do very often is open a file by typing its name. If I have a utility function called toString then I fully expect that I will have a <em>file</em> called toString that I can open by typing exactly that. Something else that I do very often is switch tabs to a file that I already have open. For this I’ll expect that tab to have “toString.js” as it’s name.</p>
+<p>Structures like the below make me want to curl up in a ball in a fireplace that is in use:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*EXRWu1imSsSJ_OJu2Udjew.png" alt=""></p>
+<p>It staggers me that some people are happy to work like this.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*FXqIEm2b8ZnLW0OC1AzXww.png" alt=""></p>
+<p>Even if your IDE is clever and puts the directory in the tab name for non-unique filenames, you still have a bunch of redundancy there, and will run out of tab room sooner, and you still can’t type the filename to open it. I don’t even need to try this approach to know I won’t like it. Like my cousin’s new band, <em>Mass Spectrometer</em> that “don’t really fit into any known genre”. Get someone else to drive you to the gig.</p>
+<p>Having said that, I understand that there is reasoning behind this — it means your import statement is this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">**<span class="keyword">import</span>** Link **<span class="keyword">from</span>** <span class="string">'../Link'</span>;</span><br></pre></td></tr></table></figure>
+<p>Instead of this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">**<span class="keyword">import</span>** Link **<span class="keyword">from</span>** <span class="string">'../Link/Link'</span>;</span><br></pre></td></tr></table></figure>
+<p>It’s a clear trade-off. Shorter import statements vs file names that match exports.</p>
+<p>Let’s me just look this up… I import a module into another module, on average, 18 times a week. I open a file by typing its name roughly 840 times a week, and I look for a name on a tab roughly 1,892 times a week.</p>
+<p>So I’ll take one extra (auto-completed) word in my import path, thanks.</p>
+<p>Savvy readers will be shouting at their screens: there are two solutions to this that allow you have the file name match the thing being exported, <em>and</em> avoid having to type it twice in the import statement.</p>
+<p><strong>The first</strong> is to put an index.js file in every directory that exports a component, like so:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*N1Urd1IUNrCUPrbFIoIlBA.png" alt=""></p>
+<p>Since <a href="https://nodejs.org/api/modules.html#modules_all_together" target="_blank" rel="noopener">Node will look for an</a> <a href="https://nodejs.org/api/modules.html#modules_all_together" target="_blank" rel="noopener">index.js</a> <a href="https://nodejs.org/api/modules.html#modules_all_together" target="_blank" rel="noopener">file</a> when resolving an import path, a path to ../Link is really a path to ../Link/index.js which is a file that points to the actual component file.</p>
+<p>If typing fewer characters in your imports is important, then maybe an extra file for every directory sounds like good value. I think it’s a bad deal and I will repeat one more time that it’s seriously OK to have a different opinion on the matter.</p>
+<p><strong>The second</strong> ‘solution’ is this monstrosity:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*jHV85E1ZAdR2VRP-BoGZCw.png" alt=""></p>
+<p>By this point you will know that if Node doesn’t find ../Link/index.js it’s going to check to see if ../Link/package.json exists. If it does, it’s going to resolve to the value of the main property.</p>
+<p>I think you have to really really hate typing one extra word in your import statements to go as far as creating a package.json file for every component. It’s just <em>weird</em>. And the more weird shit you put in your code, the weirder you become.</p>
+<p>These two types of ‘redirecting’ files both mean that your import statement no longer points to the file where the thing is defined.</p>
+<p>In the olden days, this would break the ability to ‘jump to source’ — something that is crucial to me being able to move throughout my code with ease and speed. WebStorm is clever and will resolve these hops (it will ‘know’ that I don’t want to jump into the index.js file, I want to jump all the way to the Link.js file), but if your text editor isn’t so clever, this might leave you with a lot of index.js files open, or jumping to source might not work at all.</p>
+<p>So before subscribing to an approach, try it out and see if it’s going to be a hindrance to the way you work.</p>
+<h4 id="js-vs-jsx-extensions"><a href="#js-vs-jsx-extensions" class="headerlink" title=".js vs .jsx extensions"></a>.js vs .jsx extensions</h4><p>Until recently I’d always used .jsx extensions for any file that contained JSX, and used .js for anything that was vanilla JavaScript. This gave a clear distinction when opening/viewing files and as a bonus, you’ll get proper JSX syntax highlighting in GitHub.</p>
+<p>However Facebook suggests <a href="https://github.com/facebookincubator/create-react-app/issues/87#issuecomment-234627904" target="_blank" rel="noopener"><em>not</em> using the .jsx extension</a>, so I’ve recently been using just .js and I’m glad I didn’t waste too much time weighing the pros and cons because it makes zero difference to me.</p>
+<p>I recommend flipping a coin to decide.</p>
+<h4 id="Index-files-for-utils"><a href="#Index-files-for-utils" class="headerlink" title="Index files for utils"></a>Index files for utils</h4><p>As a result of writing this article, and really thinking about what matters to me, I have actually made a change to one small aspect of my personal preference for app structure.</p>
+<p>I used to create an index.js file for my utils, like so:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*mjCnATVib2XNXvWUs8uMVw.png" alt=""></p>
+<p>So that I could import multiple utilities in one go like this:</p>
+<script src="//gist.github.com/https://medium.com/media/317c2f29ff6fab2a5cfa28efdb758b65?postId=3ede534ef1ed.js"></script>
+<p>So neat!</p>
+<p>Whenever I added a new util (0.8 times per week) I would simply add the util file and a new entry in the index file. Whenever I saw a PR that added a util and forgot to add it to index.js I would remind the developer to add that in. I would also occasionally discover utilities that weren’t in index.js, so would have to add them myself. Such an elegant solution.</p>
+<p>For some reason it took until September 2017 for me to realise that this only <em>added</em> complexity. And that actually ditching the index.js and doing this was better:</p>
+<script src="//gist.github.com/https://medium.com/media/9867e01dd197336b4969702c5c48404f?postId=3ede534ef1ed.js"></script>
+<p>It’s fewer lines, one less file, and one less thing to explain to new developers.</p>
+<p>But those long import paths burn my eyes, so let’s take a look at a couple of solutions. There are two of them, as is often the case with couples.</p>
+<p><strong>Solution one</strong> is to use <a href="https://webpack.js.org/configuration/resolve/#resolve-alias" target="_blank" rel="noopener">Webpack’s alias resolving</a> to refer to my utils directory without a relative path. Here I’ve mapped Utils to src/app/utils; the result is pretty, and aligns nicely with the way I import other utilities.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*5i9uDzXkAUFpJqvhEkULdA.png" alt="">Capital ‘U’ by convention to differentiate it from npm packages</p>
+<p>In the olden days this would confuse some text editors because they wouldn’t know what or where Utils/formatDate was. My IDE is clever and reads my Webpack config (it actually <a href="https://blog.jetbrains.com/webstorm/2017/06/webstorm-2017-2-eap-172-2827/" target="_blank" rel="noopener">runs webpack under the hood</a>), and makes the connection to the correct file (so I can jump to source, get autocomplete, etc).</p>
+<p>(The theme continues: the tools we use and the way we use them should most definitely be taken into account when thinking about how to structure our apps.)</p>
+<p>So… it’s a beautiful, neat, solution. But what’s behind the scenes?</p>
+<script src="//gist.github.com/https://medium.com/media/a0e6459055c30a8a50454b151b70f201?postId=3ede534ef1ed.js"></script>
+<p>This is a nice solution but it has two negative impacts.</p>
+<ol>
+<li>It adds <strong>complexity</strong>. We now have more moving parts to achieve the exact same outcome.</li>
+<li>It reduces <strong>clarity</strong>. Someone unfamiliar with your Webpack config can’t look at an import statement and know what it’s referring to.</li>
+</ol>
+<p><strong>The second</strong> <strong>solution</strong> is to convince myself that I don’t care about the dots and leave them as they are.</p>
+<p>To convince myself, I thought about how often I type out an import path, and as it turns out it’s exactly as often as I make coffee. Then I thought about how really, it’s not so hard to type eight dots and five slashes, compared to the time it takes to put the little coffee pod in the machine, measure out a teaspoon of sugar into a cup, milk the cow just a little bit (shout out to Daisy) and press the picture of a cup.</p>
+<p>The trade-offs between these two options are representative of many different decisions (in life, and in programming), so this feels like a good time to debut my clarity/obscurity-simplicity/complexity matrix.</p>
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*1E4bcDylUocokBcbENXedQ.png" alt="">ClObSiCo for short</p>
+<p>For me, the decision between these two is a close call. In the end though, I will favour clarity and simplicity wherever possible, so even though having ../../../../ in an import statement is an eyesore, it is the clear and simple winner.</p>
+<h4 id="Index-files-for-components"><a href="#Index-files-for-components" class="headerlink" title="Index files for components"></a>Index files for components</h4><p>It’s not my cup of tea, but another thing you might like to do in the battle against the import dots is to create a library for your components.</p>
+<p>Maybe this gets your motor running:</p>
+<script src="//gist.github.com/https://medium.com/media/bc9df168c97178118813f9cd68a18869?postId=3ede534ef1ed.js"></script>
+<p>You already know how to do this in your Webpack config:</p>
+<script src="//gist.github.com/https://medium.com/media/0cc44e665fe48539d6976a1e0ed1f8b0?postId=3ede534ef1ed.js"></script>
+<p>Then in your components directory add an index.js file with a row for each component like so:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*rbFT4XPm9ljA_bAGcVcL_w.png" alt=""></p>
+<p>Boom.</p>
+<h4 id="n-exports-per-file"><a href="#n-exports-per-file" class="headerlink" title="n exports per file"></a>n exports per file</h4><p>Having one export per file — where the thing being exported and the filename are the same — works <em>a lot</em> of the time and I think is a good general rule for components and utility functions.</p>
+<p>But I don’t think this works for constants. I also like to start with a single file for all action creators, until it becomes a burden. Same for reducers. In my experience it doesn’t make much difference whether you have eight, 10-line reducers in a single file or eight different files.</p>
+<p>If you think it has a significant impact on how quickly you can locate a particular piece of code, then do what works for you. Heck, maybe <a href="https://medium.com/@scbarrus/the-ducks-file-structure-for-redux-d63c41b7035c" target="_blank" rel="noopener">Redux ducks</a> make your boat float. Sure, whatever.</p>
+<h3 id="What-works-for-the-team"><a href="#What-works-for-the-team" class="headerlink" title="What works for the team"></a>What works for the team</h3><p>Now seems like a good time to explain the title of this post. If you’re working on a project that is just you, then you might be able to find a React structure that is 100% correct, for you. In fact I think it’s well worth aiming for this.</p>
+<p>But the more people there are on a team, the less likely it is that you’ll find something ‘optimal’, and the more likely other factors will come into play.</p>
+<p>The big one is compromise. Be aware of <a href="https://en.m.wikipedia.org/wiki/Distinction_bias" target="_blank" rel="noopener">distinction bias</a>. You can probably tell from the above that for some items I would be happy to go another way if a team member expressed a strong preference. If someone <em>really</em> wanted to use .jsx extensions or have a Utils alias, I’d be cool with that because although it’s not my preference, it won’t reduce my ability to work quickly. But if someone <em>really really</em> wanted every damn file to be named index.js then it’d be on like Donkey Kong.</p>
+<p>Another consideration: if you have, say, 30 developers on a team and you’re starting a new project, you might want to structure it as closely to previous projects as possible, no use reinventing the wheel. Or maybe you’ll want to learn from past mistakes and have a different structure, fix that badly-invented wheel.</p>
+<p>Another little thing: as your team gets bigger, git conflicts will become a bigger part of your day, and erring on the side of smaller files will be a benefit.</p>
+<p>If you have a mixture of skill levels on the team, that should encourage you to favour simplicity and clarity. On the flip side, if you have a team of seasoned front end engineers (mmm, seasoned), then go nuts and make it as complex as you like. As long as everyone is on the same wavelength, it doesn’t matter how <a href="https://i.imgur.com/4R6GyYC.gifv" target="_blank" rel="noopener">weird it looks from the outside</a>.</p>
+<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><p>I have a confession to make. I always struggle with summaries. It’s like, I just wrote you a whole blog post, what more do you want from me!</p>
+<p>So it’s not a summary, but I think the most interesting aspect of all the different approaches to application structure is the way people deal with disagreements. There’s a whole class of internet comments that can be summarised as “I disagree and that makes me ANGRY”. Which is a pity, because when two reasonable people disagree, there’s very often something interesting going on, just waiting to be discovered.</p>
+<p>And since I’m already doing a terrible job of wrapping this up, how about a movie recommendation? If you liked <em>District 9</em>, and haven’t watched <em>Chappie</em> yet, then watching <em>Chappie</em> is something you should immediately go and do.</p>
+<p>Thanks for reading. Bye!</p>
+<span>Source: </span><a href="https://hackernoon.com/the-100-correct-way-to-structure-a-react-app-or-why-theres-no-such-thing-3ede534ef1ed" target="_blank" title="https://hackernoon.com/the-100-correct-way-to-structure-a-react-app-or-why-theres-no-such-thing-3ede534ef1ed" class="post-from">https://hackernoon.com/the-100-correct-way-to-structure-a-react-app-or-why-theres-no-such-thing-3ede534ef1ed</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/11/Nghien-cuu-cai-thien-toc-do-web-app-voi-React-va-Preact-Treebo.html" class="prev">NEXT</a><a href="/2017/11/Lam-the-nao-de-to-chuc-tot-hon-nhung-ung-dung-React.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/11/Cach-chinh-xac-100-de-cau-truc-ung-dung-React.html';
+var disqus_title = 'Cách chính xác 100% để cấu trúc ứng dụng React';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/11/Cach-chinh-xac-100-de-cau-truc-ung-dung-React.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

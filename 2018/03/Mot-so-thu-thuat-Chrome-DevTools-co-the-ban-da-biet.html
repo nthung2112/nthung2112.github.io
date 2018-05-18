@@ -1,0 +1,63 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Một số thủ thuật Chrome DevTools có thể bạn đã biết · Learn and Share</title><meta name="description" content="Một số thủ thuật Chrome DevTools có thể bạn đã biết - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Một số thủ thuật Chrome DevTools có thể bạn đã biết"><meta property="og:image" content="https://cdn-images-1.medium.com/max/2000/1*7B6B7FIxj18TSeYxh1ssLA.png"><meta property="og:description" content="1. Drag-and-drop in the Elements panelIn the Elements panel, you can drag and drop any HTML element and change its position across the page"></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Một số thủ thuật Chrome DevTools có thể bạn đã biết</h1><h2 class="post-subtitle"></h2><header class="post-info">Mar 25, 2018<div class="tags"><a href="/tags/tips" class="tag-link">#tips</a><a href="/tags/chorme" class="tag-link">#chorme</a></div><div class="fb-ir-time"><time dateTime="2018-03-25T07:54:00.000Z" class="op-modified"></time><time dateTime="2018-03-25T07:54:00.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://cdn-images-1.medium.com/max/2000/1*7B6B7FIxj18TSeYxh1ssLA.png"></div><div class="wrap"><div class="post-content"><h3 id="1-Drag-and-drop-in-the-Elements-panel"><a href="#1-Drag-and-drop-in-the-Elements-panel" class="headerlink" title="1. Drag-and-drop in the Elements panel"></a>1. Drag-and-drop in the Elements panel</h3><p>In the Elements panel, you can drag and drop any HTML element and change its position across the page</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*YJ4pbintkGmF67YSLH7UEQ.gif" alt="Drag-and-drop in the Elements panel"></p>
+<a id="more"></a>
+<h3 id="2-Reference-the-currently-selected-element-in-the-Console"><a href="#2-Reference-the-currently-selected-element-in-the-Console" class="headerlink" title="2. Reference the currently selected element in the Console"></a>2. Reference the currently selected element in the Console</h3><p>Select a node in the Elements panel, and type $0 in the console to reference it.</p>
+<p>If you’re using jQuery, you can enter $($0) to access the jQuery API on this element.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*Ua9Z12CO8LYWcx5L2zpQAw.gif" alt="Reference the currently selected element in the Console"></p>
+<h3 id="3-Use-the-value-of-the-last-operation-in-the-Console"><a href="#3-Use-the-value-of-the-last-operation-in-the-Console" class="headerlink" title="3. Use the value of the last operation in the Console"></a>3. Use the value of the last operation in the Console</h3><p>Use $_ to reference the return value of the previous operation executed in the Console</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*zxJYnGdu8QUPGSiW.gif" alt="Use the value of the last operation in the Console"></p>
+<h3 id="4-Add-CSS-and-edit-the-element-state"><a href="#4-Add-CSS-and-edit-the-element-state" class="headerlink" title="4. Add CSS and edit the element state"></a>4. Add CSS and edit the element state</h3><p>In the Elements panel there are two super useful buttons.</p>
+<p>The first lets you add a new CSS property with any selector you want, but pre-filling the currently selected element:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*SVTP4Rl82XYNc4Kp.gif" alt="Add CSS rules"></p>
+<p>The second one lets you trigger a state for the selected element, so you can see the styles applied when it’s active, hovered, or on focus.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*1nCZIzP73fr2xAwQ.png" alt="Edit the element state"></p>
+<h3 id="5-Save-to-file-the-modified-CSS"><a href="#5-Save-to-file-the-modified-CSS" class="headerlink" title="5. Save to file the modified CSS"></a>5. Save to file the modified CSS</h3><p>Click the name of the CSS file that you edited. The inspector opens it into the Sources pane, and from there you can save it with the live edits you applied.</p>
+<p>This trick does not work for new selectors added using +, or into the element.style properties, but only for modified, existing ones.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*7Q-CbjzcXYR20dbtmyMbJw.gif" alt="Save to file the modified CSS"></p>
+<h3 id="6-Screenshot-a-single-element"><a href="#6-Screenshot-a-single-element" class="headerlink" title="6. Screenshot a single element"></a>6. Screenshot a single element</h3><p>Select an element and press cmd-shift-p (or ctrl-shift-p in Windows) to open the Command Menu, and select <strong>Capture node screenshot</strong></p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*CjWhHTmoZbCeMXSw.gif" alt="Screenshot a single element"></p>
+<h3 id="7-Find-an-element-using-CSS-selectors"><a href="#7-Find-an-element-using-CSS-selectors" class="headerlink" title="7. Find an element using CSS selectors"></a>7. Find an element using CSS selectors</h3><p>Pressing cmd-f (ctrl-f in Windows) opens the search box in the Elements panel.</p>
+<p>You can type any string in there to match the source code, or you can also use CSS selectors to have Chrome generate an image for you:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*ipqpirAGqDRlEbes.gif" alt="Find an element using CSS selectors"></p>
+<h3 id="8-Shift-enter-in-the-Console"><a href="#8-Shift-enter-in-the-Console" class="headerlink" title="8. Shift-enter in the Console"></a>8. Shift-enter in the Console</h3><p>To write commands that span over multiple lines in the Console, press shift-enter.</p>
+<p>Once you’re ready, press enter at the end of the script to execute it:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*QizwVdkFs7FC1kv1.gif" alt="Shift-enter in the Console to write multiline commands"></p>
+<p>You can clear the console using the <em>Clear</em> button on the top-left of the console, or by pressing ctrl-l or cmd-k.</p>
+<h3 id="9-Go-to…"><a href="#9-Go-to…" class="headerlink" title="9. Go to…"></a>9. Go to…</h3><p>In the Sources panel:</p>
+<ul>
+<li>cmd-o (ctrl-o in Windows), shows all the files loaded by your page.</li>
+<li>cmd-shift-o (ctrl-shift-o in Windows) shows the functions (or classes) in the current file.</li>
+<li>cmd-l (ctrl-l in Windows) goes to a specific line.</li>
+</ul>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*mxGuyBT02JoiSlb-.png" alt="Go to file"></p>
+<h3 id="10-Watch-Expression"><a href="#10-Watch-Expression" class="headerlink" title="10. Watch Expression"></a>10. Watch Expression</h3><p>Instead of writing again and again a variable name or an expression you are going to check a lot during a debug session, add it to the <em>Watch Expression</em> list.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*gSpZcWiUho4z9DoW.gif" alt="Watch Expression"></p>
+<h3 id="11-XHR-Fetch-debugging"><a href="#11-XHR-Fetch-debugging" class="headerlink" title="11. XHR/Fetch debugging"></a>11. XHR/Fetch debugging</h3><p>From the debugger open the <strong>XHR/Fetch Breakpoints</strong> panel.</p>
+<p>You can set it to break any time a XHR/Fetch call is sent, or just on specific ones:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*r_-hBTOJ23eSDX-g.png" alt="XHR/Fetch debugging"></p>
+<h3 id="12-Debug-on-DOM-modifications"><a href="#12-Debug-on-DOM-modifications" class="headerlink" title="12. Debug on DOM modifications"></a>12. Debug on DOM modifications</h3><p>Right-click an element and enable <em>Break on Subtree Modifications.</em> Whenever a script traverses that element’s children and modifies them, the debugger stops automatically to let you inspect what’s happening.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/0*VYABHtIwKZ5eeu-p.png" alt="Debug on DOM modifications"></p>
+<span>Source: </span><a href="https://medium.freecodecamp.org/cool-chrome-devtools-tips-and-tricks-you-wish-you-knew-already-f54f65df88d2" target="_blank" title="https://medium.freecodecamp.org/cool-chrome-devtools-tips-and-tricks-you-wish-you-knew-already-f54f65df88d2" class="post-from">https://medium.freecodecamp.org/cool-chrome-devtools-tips-and-tricks-you-wish-you-knew-already-f54f65df88d2</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html" class="prev">NEXT</a><a href="/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html';
+var disqus_title = 'Một số thủ thuật Chrome DevTools có thể bạn đã biết';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

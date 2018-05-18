@@ -1,0 +1,439 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web · Learn and Share</title><meta name="description" content="Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web"><meta property="og:image"><meta property="og:description" content="Trong khi đang làm việc tại công ty Basic (1 công ty của Nhật hoạt động trong lĩnh vực Web &amp;amp; Media Marketing, vận hành 2 website ferret và ferretOne), tôi được giao nhiệm vụ tối ưu hoá công cụ tìm kiếm cho website phocase (1 website bán phụ kiện điện thoại), để hoàn thành công việc này tôi đã phải tìm hiểu và học thêm các kiến thức, tiện đây xin được tổng hợp lại và chia sẻ với các bạn những điều cần nhớ về SEO với vai trò là 1 kỹ sư.
+TLDR; Bài viết này dành cho nhiều đối tượng nên tương đối dài, hãy chọn lọc các kiến thức cần thiết cho mình thôi nhé :v"></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web</h1><h2 class="post-subtitle"></h2><header class="post-info">Oct 1, 2017<div class="tags"><a href="/tags/seo" class="tag-link">#seo</a></div><div class="fb-ir-time"><time dateTime="2017-10-01T08:28:15.000Z" class="op-modified"></time><time dateTime="2017-10-01T08:28:15.000Z" class="op-published"></time></div></header></div><div class="wrap"><div class="post-content"><p>Trong khi đang làm việc tại công ty Basic (1 công ty của Nhật hoạt động trong lĩnh vực Web &amp; Media Marketing, vận hành 2 website <a href="https://ferret-plus.com" target="_blank" rel="noopener">ferret</a> và <a href="https://ferret-one.com" target="_blank" rel="noopener">ferretOne</a>), tôi được giao nhiệm vụ tối ưu hoá công cụ tìm kiếm cho website <a href="https://phocase.jp" target="_blank" rel="noopener">phocase</a> (1 website bán phụ kiện điện thoại), để hoàn thành công việc này tôi đã phải tìm hiểu và học thêm các kiến thức, tiện đây xin được tổng hợp lại và chia sẻ với các bạn những điều cần nhớ về SEO với vai trò là 1 kỹ sư.</p>
+<p><strong>TLDR</strong>; Bài viết này dành cho nhiều đối tượng nên tương đối dài, hãy chọn lọc các kiến thức cần thiết cho mình thôi nhé :v<br><a id="more"></a></p>
+<h3 id="★-Ban-co-the-nhan-duoc-gi-khi-doc-bai-viet-nay"><a href="#★-Ban-co-the-nhan-duoc-gi-khi-doc-bai-viet-nay" class="headerlink" title="★ Bạn có thể nhận được gì khi đọc bài viết này ?"></a>★ Bạn có thể nhận được gì khi đọc bài viết này ?</h3><ul>
+<li>Sự tương tác giữa các Marketer và Director trở nên dễ dàng hơn</li>
+<li>Nhận biết các đoạn code mà vô tình làm giảm thứ hạng của website trên bộ máy tìm kiếm</li>
+<li>Đề xuất các giải pháp SEO có thể thực hiện được ở phía Developer</li>
+<li>Nắm bắt được bức tranh/bối cảnh SEO năm 2017</li>
+</ul>
+<h2 id="Nam-bat-chinh-xac-tai-lieu-duoc-Google-chinh-thuc-cong-khai"><a href="#Nam-bat-chinh-xac-tai-lieu-duoc-Google-chinh-thuc-cong-khai" class="headerlink" title="Nắm bắt chính xác tài liệu được Google chính thức công khai"></a>Nắm bắt chính xác tài liệu được Google chính thức công khai</h2><p>Có thể tìm kiếm rất nhiều thông tin trên các trang web, nhưng tối thiểu thì hãy thực hiện những chính sách được Google đưa ra về rule của 1 website.</p>
+<p><a href="https://static.googleusercontent.com/media/www.google.com/en//webmasters/docs/search-engine-optimization-starter-guide.pdf" target="_blank" rel="noopener">Search Engine Optimization Starter Guide</a></p>
+<p>Ngoài ra bạn cũng có thể tìm hiểu thêm các thông tin tại website chính thức của Google: <a href="https://webmasters.googleblog.com" target="_blank" rel="noopener">Official news on crawling and indexing sites for the Google index</a></p>
+<h3 id="★-Kiem-tra-lai-cac-bien-phap-SEO-truoc-do-de-nam-duoc-cac-thong-tin-huu-ich"><a href="#★-Kiem-tra-lai-cac-bien-phap-SEO-truoc-do-de-nam-duoc-cac-thong-tin-huu-ich" class="headerlink" title="★ Kiểm tra lại các biện pháp SEO trước đó để nắm được các thông tin hữu ích"></a>★ Kiểm tra lại các biện pháp SEO trước đó để nắm được các thông tin hữu ích</h3><p>Hãy tìm kiếm trong <strong>Search Console Help</strong> các từ khoá liên quan tới các công việc đã thực hiện từ trước, rất có thể bạn sẽ phát hiện ra những kỹ thuật bị bỏ sót mà mình không hề nghĩ tới.</p>
+<p>Chẳng hạn nếu như bạn có sử dụng thẻ alt với ảnh trên website, thì tôi khuyên bạn nên thử tìm kiếm trong <strong>Search Console Help</strong> các ảnh đã được đánh tag trước đó.<br>Việc nhồi nhét quá nhiều keyword trong thẻ alt có thể khiến search engineer đưa vào danh sách spam, đây cũng có thể là cách để bạn phòng tránh việc đó.<br><a href="http://support.google.com/webmasters/" target="_blank" rel="noopener">Search Console Help</a></p>
+<h1 id="Chinh-sach-cua-Google-doi-voi-Mobile-Site"><a href="#Chinh-sach-cua-Google-doi-voi-Mobile-Site" class="headerlink" title="Chính sách của Google đối với Mobile Site"></a>Chính sách của Google đối với Mobile Site</h1><h2 id="Mobile-First-Index-MFI"><a href="#Mobile-First-Index-MFI" class="headerlink" title="Mobile First Index (MFI)"></a>Mobile First Index (MFI)</h2><p>Ngày 5/11/2016, Google chính thức công bố chính sách của mình đối với Mobile site: <a href="https://webmasters.googleblog.com/2016/11/mobile-first-indexing.html" target="_blank" rel="noopener">Mobile-first Indexing</a></p>
+<p>Về cơ bản, cho tới thời điểm hiện tại ngoài rank được đánh cho các website hướng PC Desktop, Google còn bổ sung thêm rank cho các website chú trọng nội dung và thiết kế tới SP (Smart phone)</p>
+<p>Ngày 5/4/2017, Tại hội nghị <a href="https://www.stonetemple.com/next10x-conference/" target="_blank" rel="noopener">Next10x Conference</a>, Các kỹ sư của Google đã chính thức công bố mục tiêu áp dụng vào trong năm nay, tuy nhiên chưa công bố chính thức khoảng thời gian.</p>
+<ul>
+<li><p>Trước khi áp dụng MFI (Hiện tại)</p>
+<ul>
+<li>PC Search: Hiển thị theo trình tự của rank cho nội dung PC site</li>
+<li>SP Search: Hiển thị theo trình tự của rank cho nội dung PC site</li>
+</ul>
+</li>
+<li><p>Sau khi áp dụng MFI (Chưa xác định thời gian)</p>
+<ul>
+<li>PC Search: Hiển thị theo trình tự chú trọng vào rank cho nội dung SP site (Không có nghĩa là không tính đến rank của PC site)</li>
+<li>SP Search: Hiển thị theo trình tự của rank cho nội dung SP site</li>
+</ul>
+</li>
+</ul>
+<h3 id="★-Cac-site-co-kha-nang-chiu-anh-huong"><a href="#★-Cac-site-co-kha-nang-chiu-anh-huong" class="headerlink" title="★ Các site có khả năng chịu ảnh hưởng"></a>★ Các site có khả năng chịu ảnh hưởng</h3><ul>
+<li>Có sự khác biện lớn giữa phiên bản <strong>PC và SP</strong></li>
+<li>Còn nhiều thông tin tồn tại trên phiên bản cho PC nhưng lại ko có trên phiên bản SP</li>
+<li>Đã hỗ trợ và có chiến lược SEO cho PC site nhưng lại chưa có cho SP site</li>
+<li>Ngoài header vs footer ra, các nội dung chính là khác nhau</li>
+<li>Cấu trúc HTML khác nhau</li>
+<li>Tốc độ hiển thị cho SP site quá chậm</li>
+</ul>
+<h2 id="Mobile-Friendly"><a href="#Mobile-Friendly" class="headerlink" title="Mobile Friendly"></a>Mobile Friendly</h2><p>Ngày 21/4/2015, Google công bố : thứ tự xuất hiện trên kết quả tìm kiếm có liên quan tới UI, UX trong trường hợp truy cập trang web trên Smart Phone Device<br><a href="https://webmasters.googleblog.com/2015/04/rolling-out-mobile-friendly-update.html" target="_blank" rel="noopener">Rolling out the mobile-friendly update</a></p>
+<blockquote>
+<p>Chỉ ảnh hưởng tới thứ tự xuất hiện kết quả tìm kiếm trên Mobile Device<br>Ảnh hưởng trong phạm vi toàn bộ các ngôn ngữ trên thế giới<br>Áp dụng cho các page riêng rẽ, chứ không phải toàn bộ trang web</p>
+</blockquote>
+<p>Nếu như website đó không được coi là Mobile Friendly sẽ có thứ tự thấp và không được ưu tiên xuất hiện trên kết quả tìm kiếm. Điều này có tác động trực tiếp tới doanh thu của các website thương mại điện tử (EC site)</p>
+<p>Sử dụng website sau, có thể kiểm tra tính thân thiện với thiết bị mobile của 1 trang web<br><a href="https://www.google.com/webmasters/tools/mobile-friendly/" target="_blank" rel="noopener">Mobile Friendly Check</a></p>
+<h3 id="★-Cac-hang-muc-can-kiem-tra"><a href="#★-Cac-hang-muc-can-kiem-tra" class="headerlink" title="★ Các hạng mục cần kiểm tra"></a>★ Các hạng mục cần kiểm tra</h3><ul>
+<li>Font size có thích hợp (&gt;= 16px) không?</li>
+<li>Có sử dụng thẻ meta và chỉ định viewport cho mobile không?</li>
+<li>Khoảng cách của các liên kết có bị quá hẹp không? (phòng ngừa lỗi)</li>
+<li>Nội dung trang web có bị tràn ra ngoài màn hình không?</li>
+<li>Website có được hiển thị trong vòng 3s không? (Nếu việc hiển thị tốn quá &gt; 3s, thì 40% người dùng sẽ thoát trang web đó)</li>
+</ul>
+<p>Đối với các website không thoả mãn tối thiểu các điều kiện trên sẽ có thể có có thứ hạng thấp trong kết quả tìm kiếm.</p>
+<h3 id="★-Mobile-Friendly-Support-amp-Yeu-cau-craw-lai-website"><a href="#★-Mobile-Friendly-Support-amp-Yeu-cau-craw-lai-website" class="headerlink" title="★ Mobile Friendly Support &amp; Yêu cầu craw lại website"></a>★ Mobile Friendly Support &amp; Yêu cầu craw lại website</h3><p>Bằng cách sử dụng <strong>GoogleSearchConsole</strong>, bạn có thể nắm rõ được chi tiết các thành phần trên website mình không thoả mãn các hạng mục kiểm tra phía trên.<br><a href="https://www.google.com/webmasters/tools/home" target="_blank" rel="noopener">Google Webmaster Home</a></p>
+<p>Sau khi giải quyết các vấn đề trên, hãy gửi yêu cầu cho Google crawl lại các URL đó.<br>Chi tiết các bạn có thể tham khảo link sau về việc <a href="https://support.google.com/webmasters/answer/6065812?hl=vi" target="_blank" rel="noopener">Yêu cầu Google crawl lại các URL</a></p>
+<h3 id="★-Cac-hang-muc-de-danh-gia-ve-UX"><a href="#★-Cac-hang-muc-de-danh-gia-ve-UX" class="headerlink" title="★ Các hạng mục để đánh giá về UX"></a>★ Các hạng mục để đánh giá về UX</h3><ul>
+<li>First view của trang web sẽ được hiển thị trong vòng 1 giây (Google recommended)</li>
+<li>Chuẩn bị riêng biệt kích thước hình ảnh với PC Site, để giảm dung lượng của một trang web</li>
+<li>Sử dụng công cụ YUI Compressor và JSMin để rút ngắn đoạn code dài như thư viện</li>
+<li>Thiết lập các nội dung có thể tab được lớn hơn 48px</li>
+</ul>
+<p>Để xác nhận tốc độ hiển thị của web site, bạn có thể dụng công cụ: <a href="https://developers.google.com/speed/pagespeed/insights/" target="_blank" rel="noopener">PageSpeed Insights</a></p>
+<h3 id="★-Chuyen-tiep-quang-cao"><a href="#★-Chuyen-tiep-quang-cao" class="headerlink" title="★ Chuyển tiếp quảng cáo"></a>★ Chuyển tiếp quảng cáo</h3><p>Đối với các quảng cáo chuyển tiếp thì đến khi hiển thị target page, thì hiển thị quảng cáo với link [<strong>Skip this page</strong>] giống như ảnh bên dưới, từ tháng 11 năm 2016 sẽ vi phạm điều luật của Google.</p>
+<p><img src="https://viblo.asia/uploads/87d34608-62a4-4e35-a038-f2b0e1c33321.png" alt=""></p>
+<p>Quote: <a href="https://london3.jp/2014/12/skip/" target="_blank" rel="noopener">https://london3.jp/2014/12/skip/</a></p>
+<h3 id="★-Cac-tac-dong-dan-toi-viec-giam-thu-hang-rank"><a href="#★-Cac-tac-dong-dan-toi-viec-giam-thu-hang-rank" class="headerlink" title="★ Các tác động dẫn tới việc giảm thứ hạng rank"></a>★ Các tác động dẫn tới việc giảm thứ hạng rank</h3><ul>
+<li>Nội dung chính nằm trong Popup (kể cả Modal)</li>
+<li>Trước khi dẫn tới main content (nội dung chính) của website thì hiển thị quảng cáo giống trong ảnh trên</li>
+<li>First view có chưa quảng cáo với kích thước lớn, nếu không scroll thì không thấy được nội dung chính</li>
+</ul>
+<h3 id="★-Cac-tac-dong-khong-anh-huong-toi-thu-hang-rank"><a href="#★-Cac-tac-dong-khong-anh-huong-toi-thu-hang-rank" class="headerlink" title="★ Các tác động không ảnh hưởng tới thứ hạng rank"></a>★ Các tác động không ảnh hưởng tới thứ hạng rank</h3><ul>
+<li>Pop-up cấp quyền sử dụng Cookie</li>
+<li>Các hiển thị như xác minh độ tuổi với cơ sở dựa vào pháp luật</li>
+<li>Các page mà chỉ một bộ phận cụ thể người dùng được hiển thị, chẳng hạn như một trang đăng nhập.</li>
+<li>Banner quảng cáo Pop-up mà không chiếm nhiều diện tích màn hình</li>
+</ul>
+<p>Hơn nữa, trong cuộc đối thoại giữa Google với người sử dụng có câu hỏi:</p>
+<blockquote>
+<p>Về nội dung Pop-up (Quảng cáo) thì, liệu có khả năng nội dung ẩn bên trong nó lại được Googlebot ưu tiên ko ?</p>
+</blockquote>
+<p>Về phía Google đã trả lời là:「Chính xác là có khả năng đó」, như vậy thì việc hiển thị quảng cáo dù là = Pop-up hay Modal cũng là không nên.</p>
+<h1 id="Cai-dat-XML-Sitemap-amp-Dang-ky-RSS-Feed"><a href="#Cai-dat-XML-Sitemap-amp-Dang-ky-RSS-Feed" class="headerlink" title="Cài đặt XML Sitemap &amp; Đăng ký RSS Feed"></a>Cài đặt XML Sitemap &amp; Đăng ký RSS Feed</h1><p>Công việc này đã được Google hướng dẫn rất chi tiết tại link sau:<br><a href="https://webmasters.googleblog.com/2014/10/best-practices-for-xml-sitemaps-rssatom.html" target="_blank" rel="noopener">Best practices for XML sitemaps &amp; RSS/Atom feeds</a></p>
+<h2 id="RSS-Atom-Register-va-PubSubHubbub-PuSH"><a href="#RSS-Atom-Register-va-PubSubHubbub-PuSH" class="headerlink" title="RSS, Atom Register và PubSubHubbub(PuSH)"></a>RSS, Atom Register và PubSubHubbub(PuSH)</h2><p>Được sử dụng như Sitemap, có format tương tự RSS và Atom trong RSS Reader.。</p>
+<h3 id="★-Loi-ich-khi-dang-ky-Feed"><a href="#★-Loi-ich-khi-dang-ky-Feed" class="headerlink" title="★ Lợi ích khi đăng ký Feed"></a>★ Lợi ích khi đăng ký Feed</h3><ul>
+<li>Chỉ URL được cập nhật gần đây nhất được đăng ký.</li>
+<li>Tần suất Crawl cao hơn Sitemap thông thường</li>
+</ul>
+<p>Việc thông báo cho Google các Page được create/update gần đây nhất là một phương pháp sử dụng Feed có tần suất Crawl cao hơn một cách hiệu quả.</p>
+<h3 id="★-Thuc-hien-index-theo-thoi-gian-thuc-dua-vao-PubSubHubbub-PuSH"><a href="#★-Thuc-hien-index-theo-thoi-gian-thuc-dua-vao-PubSubHubbub-PuSH" class="headerlink" title="★ Thực hiện index theo thời gian thực dựa vào PubSubHubbub (PuSH)"></a>★ Thực hiện index theo thời gian thực dựa vào PubSubHubbub (PuSH)</h3><p>Một cách để thực hiện index realtime khác đó là: Sử dụng phương thức PubSubHubbub (hay còn gọi là PuSH) giúp thông báo tới Google các thay đổi tại thời điểm mà các trang được update.</p>
+<p><a href="https://github.com/pubsubhubbub" target="_blank" rel="noopener">Danh sách các repository thực hiện việc implement <strong>PuSH</strong> được viết trên nhiều ngôn ngữ lập trình</a></p>
+<p>Trường hợp code bằng PHP, có thể sử dụng file được Download từ thư viện sau đây:<br>pubsubhubbub-php-master/library/publisher.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">require_once</span> <span class="string">'./publisher.php'</span> ;</span><br><span class="line">$publisher = <span class="keyword">new</span> Publisher(<span class="string">'http://pubsubhubbub.appspot.com/'</span>);</span><br><span class="line">$publisher-&gt;publish_update(<span class="string">'http://example.com/article/1'</span>);</span><br></pre></td></tr></table></figure>
+<h2 id="Dang-ky-Sitemap"><a href="#Dang-ky-Sitemap" class="headerlink" title="Đăng ký Sitemap"></a>Đăng ký Sitemap</h2><h3 id="★-HTML-Sitemap"><a href="#★-HTML-Sitemap" class="headerlink" title="★ HTML Sitemap"></a>★ HTML Sitemap</h3><ul>
+<li>Sitemap cho người sử dụng truy cập trang web</li>
+<li>Thường xuyên quản lý để tránh các liên kết lỗi</li>
+<li>Việc phân loại sẵn các Category giúp cải thiện khả năng sử dụng</li>
+</ul>
+<h3 id="★-XML-Sitemap"><a href="#★-XML-Sitemap" class="headerlink" title="★ XML Sitemap"></a>★ XML Sitemap</h3><p>Việc tạo sẵn một Sitemap có định dạng XML chính là công cụ đắc lực, trợ giúp Search Engine index website của bạn<br>Dưới đây là các loại Sitemap:</p>
+<table>
+<thead>
+<tr>
+<th>Loại File XML</th>
+<th>Vai trò</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sitemap.xml</td>
+<td>Mô tả cấu trúc website, bao gồm cả mobile sitemap</td>
+</tr>
+<tr>
+<td>movie.xml</td>
+<td>Hiển thị các nội dung video trong tìm kiếm</td>
+</tr>
+<tr>
+<td>image.xml</td>
+<td>Hiển thị các nội dung ảnh trong tìm kiếm</td>
+</tr>
+<tr>
+<td>news.xml</td>
+<td>Khai báo các tệp tin được gửi tới Google News</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Với mỗi file XML được cài đặt chính xác, góp phần xúc tiến việc index website của bạn</li>
+<li>Tuy nhiên nếu crawler không visit, chúng ta cần thực hiện cải thiện lại Sitemap đã tạo trước đó</li>
+<li>Trên SP site việc giới hạn quyền truy cập webiste mobile trên device = .htaccess có thể khiến Search Engine Bot không vô được, vì vậy hãy cho phép Googlebot-Mobile có quyền truy cập.</li>
+</ul>
+<p>Trong thực tế, đối với việc create/submit Sitemap chúng ta có thể tham khảo thêm tại link <a href="https://support.google.com/webmasters/answer/183668?hl=vi" target="_blank" rel="noopener">Build and submit a sitemap</a> , có hướng dẫn chi tiết các loại tool giúp tạo và test sitemap, rất tiện lợi.</p>
+<h3 id="★-Video-Image-Sitemap"><a href="#★-Video-Image-Sitemap" class="headerlink" title="★ Video, Image Sitemap"></a>★ Video, Image Sitemap</h3><p>Việc Crawler thu thập thông tin tìm kiếm liên quan tới Video và Ảnh là tương đối khó khăn, do đó chúng ta cần sử dụng Sitemap chuyên dụng có chứa thông tin cho Video và Image.<br>Về cách create thì bạn có thể tạo file XML chỉ chứa các video và ảnh mới tạo hoặc bổ sung chúng vào 1 file XML đã tồn tại đều ok, tuy nhiên hãy thiết lập một sitemap chứa nhiều thông tin.<br><a href="https://www.sitemaps.org/index.html" target="_blank" rel="noopener">Sitemap Protocol</a> : Video extension, Title, Duration, Description</p>
+<p>Hơn nữa, bằng cách sử dụng Video Sitemap, khi tiến hành tìm kiếm Video lẫn Image trong Search Engine, Video có thể được tìm thấy trong kết quả.<br>Ví dụ file movie.xml như sau:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xmlns:video=&quot;http://www.google.com/schemas/sitemap-video/1.1&quot;</span><br></pre></td></tr></table></figure>
+<p>Khi vận hành 1 EC site (Website thương mại điện tử) sử dụng Image Sitemap, doanh nghiệp có thể thu hút và tiếp cận được đối tượng người dùng tìm kiếm sản phẩm muốn mua bằng ảnh trên máy tìm kiếm.</p>
+<h1 id="Nhung-dieu-can-luu-y-khi-su-dung-tag-HTML"><a href="#Nhung-dieu-can-luu-y-khi-su-dung-tag-HTML" class="headerlink" title="Những điều cần lưu ý khi sử dụng tag HTML"></a>Những điều cần lưu ý khi sử dụng tag HTML</h1><h2 id="【Title】"><a href="#【Title】" class="headerlink" title="【Title】"></a>【Title】</h2><p>Trong SEO, thẻ <strong>Title</strong> là một trong số những thẻ tag có tầm ảnh hưởng nhất, Trong 1 page chỉ được có 1 thẻ <strong>title</strong> trong <strong>head</strong> tag.<br>index.html</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;Page title&lt;/title&gt;</span><br><span class="line">&lt;/head&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Nếu trong thẻ title có từ khóa tìm kiếm của user sẽ được bôi đậm trên kết quả tìm kiếm</li>
+<li>Mỗi Page nên có 1 thẻ title với nội dung khác nhau</li>
+<li>Trên kết quả tìm kiếm của Search Engine sẽ chỉ hiển thị tối đa ~32 ký tự trong nội dung của thẻ <strong>title</strong></li>
+<li>Nếu trong thẻ <strong>title</strong> có chứa các từ khóa không cần thiết sẽ làm giảm trọng số của từ khóa mong muốn được tìm kiếm</li>
+<li>Nên lựa chọn nội dung của thẻ <strong>title</strong> sao cho dựa vào đó có thể đoán được phần nào nội dung của web page</li>
+</ul>
+<p>Cần lưu ý rằng trên Search Engine sẽ chỉ hiển thị khoảng <strong>32</strong> ký tự cho tiêu đề (title) của 1 website, và thậm chí là <strong>24</strong> ký tự khi người dùng tìm kiếm trên thiết bị di dộng.<br>Nếu đặt tiêu đề cho page không liên quan tới nội dung của page sẽ làm giảm lượng người dùng truy cập, dẫn tới rank website bị giảm. Cho dù người dùng có truy cập vào nhưng do nội dung chính và tiêu đề không giống nhau, họ sẽ mau chóng rời đi -&gt; tỷ lệ bounce rate sẽ ngày càng tăng.</p>
+<h2 id="【Description】"><a href="#【Description】" class="headerlink" title="【Description】"></a>【Description】</h2><p>Trước tiên khi thiết lập Description, nội dung hiển thị trên search engine sẽ thay đổi tại đây:</p>
+<p><img src="https://viblo.asia/uploads/fe0e1e65-10cb-4092-a44f-1298ae8fda93.png" alt=""></p>
+<p>Việc thêm mô tả cho nội dung mà người dùng mong muốn tìm kiếm, góp phần làm tăng tỷ lệ <strong>click rate</strong> trên search result.<br>Tuy nhiên nếu xét về mức độ ảnh hưởng về ranking trong thứ hạng xuất hiện trên Search Engine thì có vẻ là không lớn lắm.</p>
+<p>Hơn nữa ở thời điểm hiện tại dù không có mô tả rõ ràng cho page thì Google cũng hiện thị Description mà nó tự động tạo ra cho web page.</p>
+<p>Dựa vào các mô tả mà Google tự động sinh ra cho trang web, với các trường hợp đưa ra Description phán đoán chính xác thông tin trên website:</p>
+<ul>
+<li>Khuyến khích để Google tự động tạo <strong>description</strong> cho web page</li>
+<li>Các page khác nhau phải có nội dung khác nhau</li>
+<li>Nội dung <strong>description</strong> cần nhất quán với <strong>title</strong> tag</li>
+<li>Trên search engine chỉ hiển thị khoảng <strong>124</strong> ký tự cho phần <strong>description</strong></li>
+<li>Khi tìm kiếm bằng thiết bị di động thì chỉ hiển thị khoảng <strong>80</strong> ký tự cho phần <strong>description</strong></li>
+<li>Không bắt buộc văn phong phải chính xác tuy nhiên nội dung của tag phải rõ ràng, chuẩn xác.</li>
+</ul>
+<p>Bạn có thể sử dụng tool sau để đánh giá <strong>description</strong> trên 1 web page: <a href="http://seolaboratory.jp/description/" target="_blank" rel="noopener">http://seolaboratory.jp/description/</a></p>
+<h2 id="【h1】"><a href="#【h1】" class="headerlink" title="【h1】"></a>【h1】</h2><p>Do việc lạm dụng thẻ <strong>h1</strong> quá nhiều dẫn tới Google đã hạ chỉ số đánh giá của nó, tuy nhiên do vẫn còn xuất hiện trên kết quả tìm kiếm, nên đối với SEO vẫn còn khá quan trọng.</p>
+<ul>
+<li>Mỗi page chỉ nên có 1 thẻ h1</li>
+<li>Mặc dù Google có công bố chính thức rằng có thể thiết lập nhiều thẻ <strong>h1</strong>, tuy nhiên nếu làm vậy sẽ gây khó khăn cho việc nhận biết chủ đề của nội dung web page</li>
+<li>Có thể thiết thể ảnh bên trong thẻ tag <strong>h1</strong></li>
+</ul>
+<p>/iphone6/?color=”white”</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;h1&gt;</span><br><span class="line">  &lt;img src=&quot;/images/iphone6_white.jpg&quot; alt=&quot;Danh sách bao da cho điện thoại iPhone 6 được nữ giới ưa chuộm&quot; /&gt;</span><br><span class="line">&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+<p>Với cách đặt ảnh như trên thì nó cũng được nhận diện như 1 phần của <strong>h1</strong> tag, do đó hãy mô tả chính xác ảnh bằng cách thêm nội dung vào thuộc tính <em>alt</em> (văn bản thay thế).</p>
+<h3 id="★-Keyword-truyen-tai-boi-TDH-Title-Description-H1"><a href="#★-Keyword-truyen-tai-boi-TDH-Title-Description-H1" class="headerlink" title="★ Keyword truyền tải bởi TDH (Title Description H1)"></a>★ Keyword truyền tải bởi TDH (Title Description H1)</h3><p>Nếu bạn đặt từ khóa mình muốn SEO trong tất cả các thẻ TDH（Title　Description　H1）sẽ là cách đầu tiên giúp Google nhận biết chính xác từ khóa cần SEO.<br>Do đó, cần xem xét 3 thẻ trên có chứa từ khóa mình cần lên top không?</p>
+<h2 id="Luu-y-voi-the【img】va-thuoc-tinh-【alt】"><a href="#Luu-y-voi-the【img】va-thuoc-tinh-【alt】" class="headerlink" title="Lưu ý với thẻ【img】và thuộc tính 【alt】"></a>Lưu ý với thẻ【img】và thuộc tính 【alt】</h2><p>Bằng cách sử dụng thuộc tính <em>alt</em> mô tả nội dung trong ảnh và video, thì người khiếm thị (Sử dụng tính năng đọc văn bản) hoặc người dùng có tốc độ mạng internet chậm cũng có thể dễ dàng nhận được thông tin về website của bạn, điều này được Google đánh giá rất cao.</p>
+<p>Tham khảo source code bên dưới về <strong>Google Search Console</strong><br>Nguồn: <a href="https://support.google.com/webmasters/answer/114016?hl=vi" target="_blank" rel="noopener">https://support.google.com/webmasters/answer/114016?hl=vi</a></p>
+<ul>
+<li>Cách sử dụng không tốt thẻ <strong>img</strong> với thuộc tính alt</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"puppy.jpg"</span> <span class="attr">alt</span>=<span class="string">""</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"puppy.jpg"</span> <span class="attr">alt</span>=<span class="string">"puppy dog baby </span></span></span><br><span class="line"><span class="tag"><span class="string">dog pup pups puppies doggies pups litter puppies dog retriever </span></span></span><br><span class="line"><span class="tag"><span class="string"> labrador wolfhound setter pointer puppy jack russell terrier </span></span></span><br><span class="line"><span class="tag"><span class="string">puppies dog food cheap dogfood puppy food"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Việc nhồi nhét quá nhiều từ khóa vào thuộc tính <em>alt</em> dẫn tới việc bị google nhận diện thành Spam content.</p>
+<ul>
+<li>Cách sử dụng tối ưu thẻ <strong>img</strong> với thuộc tínhalt</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"puppy.jpg"</span> <span class="attr">alt</span>=<span class="string">"puppy"</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"puppy.jpg"</span> <span class="attr">alt</span>=<span class="string">"Dalmatian puppy playing fetch"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Nếu có thể thì tốt nhất hãy mô tả bằng câu văn thay vì chỉ sử dụng 1 từ khóa cho các <strong>img</strong> tag.</p>
+<h3 id="★-Cac-hang-muc-khac-duoc-khuyen-khi-khi-su-dung-the-【img】-Khong-bat-buoc"><a href="#★-Cac-hang-muc-khac-duoc-khuyen-khi-khi-su-dung-the-【img】-Khong-bat-buoc" class="headerlink" title="★ Các hạng mục khác được khuyến khi khi sử dụng thẻ 【img】 (Không bắt buộc)"></a>★ Các hạng mục khác được khuyến khi khi sử dụng thẻ 【img】 (Không bắt buộc)</h3><ul>
+<li>Thống nhất file name và nội dung thuộc tính alt</li>
+<li>Có thể thiết lập nội dung trong alt mà không có khoảng trắng</li>
+<li>Cố gắng thiết lập mô tả cho ảnh sao cho gần với nội dung trong bức ảnh đó nhất có thể</li>
+<li>Các ảnh tương tự nhau thì nên để trong cùng 1 thư mục host</li>
+<li>Nếu một ảnh giống nhau được sử dụng ở nhiều nơi, thì hãy mô tả thật chi tiết ảnh đó trên website của mình, khi đó Google sẽ nhận diện ảnh của site bạn là original image, và hiển thị trên search result !</li>
+</ul>
+<h3 id="★-Kha-nang-index-va-thu-thap-du-lieu-o-cung-thoi-diem"><a href="#★-Kha-nang-index-va-thu-thap-du-lieu-o-cung-thoi-diem" class="headerlink" title="★ Khả năng index và thu thập dữ liệu ở cùng thời điểm"></a>★ Khả năng index và thu thập dữ liệu ở cùng thời điểm</h3><p>【Khả năng thu thập dữ liệu】<br>Để crawler của GoogleBot dễ dàng thu thập dữ liệu, chúng ta cần</p>
+<ul>
+<li>Cấu trúc, sử dụng thẻ HTML phải đúng chuẩn</li>
+<li>Với các page có nội dung liên quan cần có liên kết tới nhau, để đảm bảo khả năng crawler trải dài trên toàn bộ website</li>
+</ul>
+<p>【Khả năng index - đánh chỉ mục tìm kiếm】<br>Nếu đã chuẩn bị sẵn các thuộc tính alt cho ảnh, âm thanh, video trên website của mình thì khi GoogleBot crawl sẽ index được chính xác nội dung của chúng.</p>
+<h2 id="【a】tag"><a href="#【a】tag" class="headerlink" title="【a】tag"></a>【a】tag</h2><p>Hãy thiết lập chuẩn xác anchor link (text), việc này sẽ giúp truyền tải thông tin tới Google dễ dàng hơn.</p>
+<h3 id="Cac-implement-co-the-anh-huong-toi-kha-nang-crawler"><a href="#Cac-implement-co-the-anh-huong-toi-kha-nang-crawler" class="headerlink" title="Các implement có thể ảnh hưởng tới khả năng crawler"></a>Các implement có thể ảnh hưởng tới khả năng crawler</h3><ul>
+<li>Sử dụng javascript để di chuyển tới link cần vô (Google có khả năng nhận biết điều đó)</li>
+<li>Tìm kiếm bên trong website bằng cách gửi form</li>
+<li>Link content sử dụng FLASH</li>
+</ul>
+<h2 id="【rel-”next”-or-“prev”】"><a href="#【rel-”next”-or-“prev”】" class="headerlink" title="【rel=”next” or “prev”】"></a>【rel=”next” or “prev”】</h2><p>Khi thiết lập Pagination cho website cần chỉ định thuộc tính rel với giá trị <em>next</em> hoặc <em>prev</em></p>
+<h3 id="★-rel-”prev-next”-duoc-xep-hang-uu-tien-hon-rel-”canonical”"><a href="#★-rel-”prev-next”-duoc-xep-hang-uu-tien-hon-rel-”canonical”" class="headerlink" title="★ rel=”prev/next” được xếp hạng ưu tiên hơn rel=”canonical”"></a>★ rel=”prev/next” được xếp hạng ưu tiên hơn rel=”canonical”</h3><p>Ví dụ vể rel=”canonical” cho mọi người dễ hiểu</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"canonical"</span> <span class="attr">href</span>=<span class="string">"http://example.com/wordpress/seo-plugin/"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Cho dù bạn có để link trên các page 2, 3, 4 về page 1 bằng thuộc tính canonical, thì next và prev vẫn được đánh giá ưu tiên hơn canonical, do đó với các URL không có parameter giống nhau như bên dưới sẽ không được tính là next và prev.</p>
+<ul>
+<li>Ví dụ chưa tối ưu</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">http://example.com/iphone7?page=1</span><br><span class="line">http://example.com/iphone7?color=red&amp;page=2</span><br><span class="line">http://example.com/iphone7?page=3</span><br><span class="line">http://example.com/iphone7?page=4</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Ví dụ tối ưu: được tính là next và prev</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// page=</span><br><span class="line">http://example.com/iphone7?color=red&amp;page=1</span><br><span class="line">http://example.com/iphone7?color=red&amp;page=2</span><br><span class="line">http://example.com/iphone7?color=red&amp;page=3</span><br><span class="line">http://example.com/iphone7?color=red&amp;page=4</span><br><span class="line"></span><br><span class="line">// viết tắt p=</span><br><span class="line">http://example.com/foo.html</span><br><span class="line">http://example.com/foo.html?p=2</span><br><span class="line">http://example.com/foo.html?p=3</span><br><span class="line"></span><br><span class="line">// Sử dụng URL path thay thế cho param page</span><br><span class="line">http://example.com/foo/1/</span><br><span class="line">http://example.com/foo/2/</span><br><span class="line">http://example.com/foo/3/</span><br></pre></td></tr></table></figure>
+<h3 id="★-Cac-diem-can-luu-y"><a href="#★-Cac-diem-can-luu-y" class="headerlink" title="★ Các điểm cần lưu ý"></a>★ Các điểm cần lưu ý</h3><ul>
+<li>1 page chỉ được phép có 1 next và 1 prev</li>
+<li>Absolute path thì ngon hơn Relative path URL (Không bắt buộc)</li>
+<li>Trường hợp hiển thị kết quả tìm kiếm của 1 page có sử dụng điều kiện filter, thì ở trong trang điều kiện đó cũng cần bổ sung thuốc tính next và prev</li>
+<li>Nếu bạn không muốn hiển thị một page trên kết quả tìm kiếm, hãy học cách sử dụng canonical</li>
+</ul>
+<h2 id="【rel-”nofollow”】"><a href="#【rel-”nofollow”】" class="headerlink" title="【rel=”nofollow”】"></a>【rel=”nofollow”】</h2><p>Với các target link có gắn thuộc tính rel=”nofollow” sẽ không được search engine visit. Thuộc tính này xuất hiện ở thẻ meta và thẻ a.<br>Hơn nữa, khi GoogleBot visit target link, nó cũng tính toán độ tin cậy của các target link trên website và đánh giá thứ hạng site đó.</p>
+<h3 id="★-Khuyen-khich-su-dung-“nofollow”-voi-link-tro-toi-cac-website-sau"><a href="#★-Khuyen-khich-su-dung-“nofollow”-voi-link-tro-toi-cac-website-sau" class="headerlink" title="★ Khuyến khích sử dụng “nofollow” với link trỏ tới các website sau"></a>★ Khuyến khích sử dụng “nofollow” với link trỏ tới các website sau</h3><ul>
+<li>Các bảng tin và ô comment có thể được người dùng nhập</li>
+<li>Liên kết tới bookmark site</li>
+<li>Liên kết tới ranking site</li>
+<li>Liên kết khi nhận được đánh giá bằng tiền</li>
+<li>powerd by… link</li>
+</ul>
+<h3 id="★-Cac-lien-ket-co-the-gay-anh-huong-xau-toi-website-can-luu-y"><a href="#★-Cac-lien-ket-co-the-gay-anh-huong-xau-toi-website-can-luu-y" class="headerlink" title="★ Các liên kết có thể gây ảnh hướng xấu tới website cần lưu ý"></a>★ Các liên kết có thể gây ảnh hướng xấu tới website cần lưu ý</h3><ul>
+<li>Các link mà người dùng không nhìn thấy, bị ẩn đi cũng như không click được</li>
+<li>Liên kết qua lại bằng các trang web hỗ trợ liên kết lẫn nhau</li>
+<li>Các liên kết đến các trang web được Google xác định là có mã nguồn độc hại</li>
+</ul>
+<h2 id="Su-dung【robots-txt】de-khong-bi-crawl-thua"><a href="#Su-dung【robots-txt】de-khong-bi-crawl-thua" class="headerlink" title="Sử dụng【robots.txt】để không bị crawl thừa"></a>Sử dụng【robots.txt】để không bị crawl thừa</h2><p>Nếu không muốn search engin crawl trong những trường hợp dưới đây, hãy thiết lập file <strong>robot.txt</strong></p>
+<ul>
+<li>Các web page có chất lượng thấp, các web page không muốn xuất hiện trên kết quả tìm kiếm</li>
+</ul>
+<p>File <strong>robots.txt</strong> được đặt ở thư mục gốc (root directory) của website, Các Bot search engine sẽ tự động đọc và lấy ra.</p>
+<p>Ví dụ về nội dung file <strong>robots.txt</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">User-Agent: *</span><br><span class="line">Disallow: /*/matome/</span><br><span class="line">Disallow: /ajax/*.json</span><br><span class="line">Disallow: /image/</span><br><span class="line">Disallow: /search</span><br></pre></td></tr></table></figure>
+<p>Hơn nữa Google cũng hỗ trợ tool kiểm tra file <strong>robots.txt</strong> : <a href="https://support.google.com/webmasters/answer/6062598?hl=vi" target="_blank" rel="noopener">Google robots.txt Tester</a></p>
+<h2 id="【rel-”noindex”】"><a href="#【rel-”noindex”】" class="headerlink" title="【rel=”noindex”】"></a>【rel=”noindex”】</h2><p>Hãy sử dụng nó khi bạn có chủ ý muốn 1 page nào đó trên website của mình không xuất hiện trên kết quả tìm kiếm của Google.</p>
+<h3 id="★-Diem-khac-biet-voi-robots-txt"><a href="#★-Diem-khac-biet-voi-robots-txt" class="headerlink" title="★ Điểm khác biệt với robots.txt"></a>★ Điểm khác biệt với robots.txt</h3><p>Sử dụng <strong>robots.txt</strong> đồng nghĩa với việc không cho Bot Search Enginer thu thập dữ liệu cũng như xếp hạng page đó.</p>
+<p>Trong khi sử dụng <strong>noindex</strong> thì sau một thời điểm nào đó khi link tới website của bạn được share nhiều trên mạng xã hội, thì SEO rank vẫn còn và link tới web page đó vẫn được xếp hạng.</p>
+<h3 id="★-Muc-dich-chinh-cua-viec-su-dung-“noindex”"><a href="#★-Muc-dich-chinh-cua-viec-su-dung-“noindex”" class="headerlink" title="★ Mục đích chính của việc sử dụng “noindex”"></a>★ Mục đích chính của việc sử dụng “noindex”</h3><ul>
+<li>Với các page chất lượng thấp, nếu có gắn thuộc tính <strong>noindex</strong> sẽ ko bị xếp hạng thấp website</li>
+<li>Support các page chưa được setting trong <strong>robots.txt</strong> cho tới thời điểm hiện tại</li>
+<li>404 Page (Thiết lập ở các page trả về status lỗi 404)</li>
+</ul>
+<p><em>Cách thức setting:</em></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name=”robots” content=”noindex”&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="★-Cach-kiem-tra-tinh-trang-index-cua-mot-website"><a href="#★-Cach-kiem-tra-tinh-trang-index-cua-mot-website" class="headerlink" title="★ Cách kiểm tra tình trạng index của một website"></a>★ Cách kiểm tra tình trạng index của một website</h3><p>Có thể dùng <a href="https://www.google.com/webmasters/tools/index-status" target="_blank" rel="noopener">Google Search Console - Index Status</a><br><img src="https://qiita-image-store.s3.amazonaws.com/0/69647/8c1cc73b-969a-00c3-6712-ebc76333e717.png" alt="image"></p>
+<h2 id="Hien-thi-Rich-snippets"><a href="#Hien-thi-Rich-snippets" class="headerlink" title="Hiển thị Rich snippets"></a>Hiển thị Rich snippets</h2><p><strong>Rich Snippets</strong> là đoạn thông tin đặc biệt dùng để hiển thị các thông tin thêm có trong những bài viết đặc biệt (bài đánh giá, sản phẩm, ứng dụng, công thức nấu ăn, địa chỉ công ty..v.v..) trên các máy tìm kiếm (Google, Yahoo, Bing) nhằm cung cấp thêm những thông tin giá trị đến người tìm kiếm giúp họ xác định kết quả tìm kiếm mà họ đang cần. Nhìn vào kết quả tìm kiếm sau, ta thấy có một điều rất đặc biệt: Xuất hiện ảnh thumbnail trong kết quả :v</p>
+<p><img src="https://viblo.asia/uploads/bdc6e3b1-aaf9-411e-a032-31cc42214397.jpg" alt=""></p>
+<p><strong>Rich Snippets</strong> có 10 loại phổ biến sau:</p>
+<ul>
+<li>Author</li>
+<li>Breadcrumbs</li>
+<li>Event</li>
+<li>Organizations</li>
+<li>People</li>
+<li>Products</li>
+<li>Recipes</li>
+<li>Review</li>
+<li>Software Application</li>
+<li>Facebook Share</li>
+</ul>
+<p>Việc sử dụng các markup bằng cấu trúc được công bố trên <strong>schema.org</strong> sẽ làm tăng khả năng hiển thị <strong>rich snippet</strong> trên kết quả tìm kiếm của google.<br>Hiện tại thì <strong>rich snippet</strong> không ảnh hưởng tới rank của 1 website, tuy nhiên có thể ảnh hưởng tới thứ hạng trong kết quả tìm kiếm: <a href="https://www.youtube.com/watch?v=QWL864VlW7I&amp;feature=youtu.be" target="_blank" rel="noopener">Google Webmaster Central office-hours hangout</a></p>
+<p>Ví dụ về 1 page có hiển thị <strong>snippets</strong></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">section</span> <span class="attr">itemscope</span> <span class="attr">itemtype</span>=<span class="string">"http://schema.org/Game"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Monster Hunter Game Series<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">span</span> <span class="attr">itemprop</span>=<span class="string">"name"</span>&gt;</span>Monster Hunter Double Cross<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">itemprop</span>=<span class="string">"description"</span>&gt;</span>Latest Monhan Series with 6 large main Monsters<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">itemprop</span>=<span class="string">"author"</span> <span class="attr">itemscope</span> <span class="attr">itemtype</span>=<span class="string">"http://schema.org/Corporation"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">itemprop</span>=<span class="string">"name"</span>&gt;</span>CONAMI<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">itemprop</span>=<span class="string">"email"</span>&gt;</span>example@conamikan.jp<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="Nhung-luu-y-ve-URL-Duong-dan"><a href="#Nhung-luu-y-ve-URL-Duong-dan" class="headerlink" title="Những lưu ý về URL (Đường dẫn)"></a>Những lưu ý về URL (Đường dẫn)</h1><h2 id="【Soft-404】"><a href="#【Soft-404】" class="headerlink" title="【Soft 404】"></a>【Soft 404】</h2><p>Tình trang một page có status=200 nhưng nội dung page đó lại cho biết URL này không tồn tại được gọi là <strong>soft 404</strong></p>
+<p>Chi tiết thêm về lỗi này bạn có thể tham khảo tại đây: <a href="https://support.google.com/webmasters/answer/181708?hl=vi" target="_blank" rel="noopener">https://support.google.com/webmasters/answer/181708?hl=vi</a></p>
+<p>Sử dụng Google Search Console, để dễ dàng confirm lại các page dính lỗi <strong>soft 404</strong><br><img src="https://viblo.asia/uploads/3b7f2325-7f12-4bb5-92eb-ee7f346daa95.png" alt=""></p>
+<p>Gần đây Google Bot có khả năng phân biệt được lỗi <strong>soft 404</strong>, nên sẽ ko có hình phạt nào được áp dụng với site dính lỗi này.</p>
+<ul>
+<li>Trả về status code = 404 khi có lỗi trong CakePHP</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">throw new NotFoundException();</span><br></pre></td></tr></table></figure>
+<p>Ngoài ra, bạn có thể tìm hiểu thêm về lỗi <strong>soft 404</strong> ở đây: <a href="https://www.suzukikenichi.com/blog/does-google-penalize-your-site-for-having-soft-404/" target="_blank" rel="noopener">https://www.suzukikenichi.com/blog/does-google-penalize-your-site-for-having-soft-404/</a></p>
+<h2 id="Chuan-hoa-URL"><a href="#Chuan-hoa-URL" class="headerlink" title="Chuẩn hóa URL"></a>Chuẩn hóa URL</h2><p>Việc hiển thị 1 web page có nội dung giống nhau nhưng với nhiều URL khác nhau trên trình duyệt xảy ra khá phổ biến. Tuy nhiên, nếu việc này xảy ra với Google search engine thì có thể website của bạn sẽ bị áp dụng các hình phạt làm giảm thứ hạng tìm kiếm. Chính vì lẽ đó chúng ta cần chuẩn hóa lại URL.</p>
+<h3 id="★-Cac-loi-ich-co-duoc-khi-quy-chuan-hoa-duong-dan"><a href="#★-Cac-loi-ich-co-duoc-khi-quy-chuan-hoa-duong-dan" class="headerlink" title="★ Các lợi ích có được khi quy chuẩn hóa đường dẫn"></a>★ Các lợi ích có được khi quy chuẩn hóa đường dẫn</h3><p>Giả sử: Việc url một website có chứa www và ko chưa www được coi là các page khác nhau<br>Vấn đề: Lúc này việc đánh giá rank cho website bị phân tán giữa các link có và ko có www<br>Hướng giải quyết: Có thể chuyển hướng (301 redirect) các page có www sang page ko có www</p>
+<h3 id="★-301-Redirect"><a href="#★-301-Redirect" class="headerlink" title="★ 301 Redirect"></a>★ 301 Redirect</h3><ul>
+<li>Wiki: <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes" target="_blank" rel="noopener">List of HTTP status codes</a></li>
+<li>Khi thay đổi tên miền/url, hãy sử dụng chuyển hướng 301 sang đường dẫn mới</li>
+<li>Từ sau khi thiết lập 301 Redirect, có thể mất tới một tháng đẻ Bot Search crawl lại website</li>
+</ul>
+<h3 id="★-Vi-du-su-dung-301-Redirect"><a href="#★-Vi-du-su-dung-301-Redirect" class="headerlink" title="★ Ví dụ sử dụng 301 Redirect"></a>★ Ví dụ sử dụng 301 Redirect</h3><ul>
+<li>Sử dụng 301 Redirect trong việc có và không có <strong>www</strong> trên URL</li>
+<li>Loại bỏ việc thêm <strong>index.html</strong> vào sau URL</li>
+<li>Trường hợp <strong>Pagination</strong>　/search/?page=1 và /search/ hiển thị nội dung giống nhau</li>
+<li>Trường hợp có và ko có dấu slash (/) sau URL. Ex: /search/ và /search</li>
+</ul>
+<p>Lưu ý khi code: tùy vào chức năng của trình duyệt web, nếu thực hiện điều hướng 301 từ 1 URL tới 1 URL nhất định thì việc di chuyển page này sẽ được lưu vào cache cho tới khi trình duyệt xóa nó đi.</p>
+<h2 id="【Canonical】"><a href="#【Canonical】" class="headerlink" title="【Canonical】"></a>【Canonical】</h2><p>Cùng một nội dung tương tự nhau (Có thể là 1 bài viết được chia làm nhiều phần), thì không chỉ người dùng mà Google Bot cũng muốn biết bài viết nào là bài viết gốc, câu trả lời cho vấn đề này chính là thuộc tính <strong>rel=”canonical”</strong>.</p>
+<p>Mặt khác chắc hẳn bạn cũng gặp phải trường hợp Single Page và Search Page có chứa 1 lượng lớn nội dung trùng lặp. Nhờ việc thiết lập <strong>canonical</strong> cho 1 page, mà ta có thể ngăn ngừa được việc Google đánh tụt thứ hạng tìm kiếm từ nội dung bị trùng lặp</p>
+<ul>
+<li>Ví dụ khi website có 2 phiên bản cho Desktop và Mobile:</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"canonical"</span> <span class="attr">href</span>=<span class="string">"http://www.example.com/"</span> /&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Ngoài <strong>canonical</strong>, còn có thể sử dụng đồng thời với <strong>alternate</strong> được giải thích chi tiết bên dưới.</p>
+<h3 id="★-Vi-du-ve-su-dung-Canonical"><a href="#★-Vi-du-ve-su-dung-Canonical" class="headerlink" title="★ Ví dụ về sử dụng Canonical"></a>★ Ví dụ về sử dụng Canonical</h3><ul>
+<li>Trên kết quả tìm kiếm xuất hiện nhiều page có content giống nhau</li>
+<li>Mobile page và Desktop page có nội dung tương tự nhau</li>
+<li>Thiết lập URL để Google Analytics tiến hành đo lường các thông số</li>
+<li>Khi công khai cùng 1 nội dung trên nhiều website</li>
+<li>Trường hợp không sử dụng 301 redirect</li>
+<li>Trường hợp sử dụng mirror site để giảm tải cho web/detect DDOS. (Tuyên nhiên việc này ko được khuyến khích sử dụng vì dễ bị nhận diện là spam)</li>
+</ul>
+<h2 id="【Alternate】"><a href="#【Alternate】" class="headerlink" title="【Alternate】"></a>【Alternate】</h2><p>Thẻ <strong>alternate</strong> được khuyến khích sử dụng khi bạn có :</p>
+<ul>
+<li>Một phiên bản website được phiên dịch hoàn toàn sang một ngôn ngữ khác</li>
+<li>2 trang với cấu trúc, nội dung tương tự nhau và chỉ có một vài điểm nhấn khác biệt về ngôn ngữ trong nội dung</li>
+</ul>
+<p><strong>Ví dụ:</strong></p>
+<ul>
+<li>Website example.com</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"alternate"</span> <span class="attr">href</span>=<span class="string">"http://example.com/"</span> /&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Khi sử dụng <strong>alternate</strong>, chúng ta thông báo cho Bot biết website cho smart phone là sp.example.com.</li>
+<li>Khi sử dụng <strong>canonical</strong>, chúng ta thông báo cho Bot biết phiên bản website chính thức của hệ thống là example.com</li>
+<li>Website sp.example.com</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"canonical"</span> <span class="attr">href</span>=<span class="string">"http://sp.example.com/"</span> /&gt;</span></span><br><span class="line">  ...</span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>canonical</strong> dùng để thông báo với Search Engine đâu là page gốc (original page). Có thể ví như quan hệ n:1<br><strong>alternate</strong> trở thành quan hệ 1:1 khi cùng tham chiếu tới <strong>canonical</strong> và <strong>alternate</strong></p>
+<p>Thuộc tính <strong>canonical</strong> và <strong>alternate</strong> trên website <a href="https://ferret-plus.com/1426" target="_blank" rel="noopener">https://ferret-plus.com/1426</a> đã giúp Bot Search Engine biết được phiên bản nào là website dành cho thiết bị di động.</p>
+<h2 id="Cloaking"><a href="#Cloaking" class="headerlink" title="Cloaking"></a>Cloaking</h2><p>Cloaking là sự che đậy hay che dấu một cái gì đó. Trong kỹ thuật SEO thì cloaking ám chỉ hành động của webmaster che dấu bot của search engine như Google crawl các nội dung mà người dùng nhìn thấy, đồng thời đề xuất cho các cậu Bot nhìn thấy các nội dung được Onpage optimize tốt nhằm mục đích đạt được các vị trí cao trên Search Engine.</p>
+<ul>
+<li>Việc tồn tại các thông tin trên website mà hiển thị giữa GoogleBot và người sử dụng khác biệt nhau sẽ ảnh hưởng tới thứ hạng hiển thị của website trên kết quả tìm kiếm. (Website có hành vi này sẽ bị google áp dụng các hình phạt)</li>
+<li>Website khi truy cập = PC hiện ra thông báo「Hãy truy cập bằng smart phone」, dù cho khi User-Agent là smart phone truy cập có hiển thị chính xác đi chăng nữa cũng rất có thể bị Google hiểu là Cloaking ???</li>
+<li>Website ở tình trạng bị hack cũng có thể bị đưa vào trạng thái Cloaking, hãy thường xuyên quan sát log để tìm ra các hành động khả nghi và tiến hành deploy lại nếu cần.</li>
+</ul>
+<h2 id="Danh-gia-do-on-dinh-cua-URL"><a href="#Danh-gia-do-on-dinh-cua-URL" class="headerlink" title="Đánh giá độ ổn định của URL"></a>Đánh giá độ ổn định của URL</h2><p>Các bộ máy tìm kiếm có tiêu chí để xếp hạng URL là: <strong>URL đã cung cấp thông tin cho người sử dụng trong một thời gian dài bao lâu?</strong>.<br>Do đó khi bạn thay đổi URL, sử dụng 301 Redirect thì cũng ko có gì đảm bảo là toàn bộ ranking của URL trên site cũ sẽ được chuyển hết sang URL site mới.</p>
+<h3 id="★-Cac-hang-muc-can-kiem-tra-khi-thiet-ke-URL"><a href="#★-Cac-hang-muc-can-kiem-tra-khi-thiet-ke-URL" class="headerlink" title="★ Các hạng mục cần kiểm tra khi thiết kế URL"></a>★ Các hạng mục cần kiểm tra khi thiết kế URL</h3><ul>
+<li>Có chứa ext của file như <strong>.php</strong> hay không ? Việc này sẽ gây ảnh hưởng nếu chuyển framework ví dụ từ CakePHP sang Rails chẳng hạn.</li>
+<li>Có thể dùng dấu <strong>-</strong> hoặc <strong>_</strong> trong URL, tuy nhiên Google khuyến khích sử dụng dấu <strong>-</strong> để phân tách từ khóa</li>
+<li>Toàn bộ ký tự trong URL phải được viết thường</li>
+<li>URL dài cũng không vấn đề (Sẽ giải thích sau)</li>
+<li>URL không nên chia quá nhiều cấp, nằm sâu trong nhiều directory</li>
+<li>Chứa từ khóa thì càng tốt (Có thể chứa tiếng Nhật)</li>
+<li>URL không die cho dù sau này có áp dùng nhiều thay đổi SEO đi chăng nữa</li>
+<li>Không sinh ra duplicated content</li>
+</ul>
+<h3 id="★-Dam-bao-viec-thiet-ke-URL-khong-sinh-ra-noi-dung-trung-lap"><a href="#★-Dam-bao-viec-thiet-ke-URL-khong-sinh-ra-noi-dung-trung-lap" class="headerlink" title="★ Đảm bảo việc thiết kế URL không sinh ra nội dung trùng lặp"></a>★ Đảm bảo việc thiết kế URL không sinh ra nội dung trùng lặp</h3><p>Web Page bên dưới sinh ra nội dung trùng lặp, dó đó kiểu thiết kế URL này không được khuyến khích<br>Ví dụ：Anime Home Page</p>
+<ul>
+<li>Hero list page</li>
+<li>All characters list page</li>
+</ul>
+<p>Khi đó giả sử ta có nhân vật tên là “yamada”, khi đó nội dung 2 trang sau là giống nhau và đều mô tả về “yamada”</p>
+<ul>
+<li>heros/yamada.html</li>
+<li>characters/yamada.html</li>
+</ul>
+<p>Cùng 1 nội dung nhưng lại khác URL là một thiết kế tồi và bị xếp vào duplicated content.</p>
+<h2 id="URL-dai-cung-khong-van-de"><a href="#URL-dai-cung-khong-van-de" class="headerlink" title="URL dài cũng không vấn đề"></a>URL dài cũng không vấn đề</h2><p>Theo Google công bố thì độ dài của URL có thể ngắn hoặc dài tùy ý</p>
+<blockquote>
+<p>Độ dài của URL thì không ảnh hưởng tới ranking<br>Tuy nhiên cần đủ để nhận diện được URL</p>
+</blockquote>
+<p>Mặc dù không ảnh hưởng tới SEO, tuy nhiên trình duyệt IE chỉ support URL có độ dài tối đa 2083 ký tự, nên hãy setting URL length &lt;= 2083</p>
+<h3 id="★-Cac-khuyen-khich-ve-URL"><a href="#★-Cac-khuyen-khich-ve-URL" class="headerlink" title="★ Các khuyến khích về URL"></a>★ Các khuyến khích về URL</h3><ul>
+<li>Vì URL là thứ hiển thị trên kết quả search, nên hãy chọn các từ đơn trong URL có liên quan tới nội dung bài viết</li>
+<li>Khi URL có chứa từ ngữ trùng với từ khóa mà user search thì sẽ được bôi đậm trên kết quả</li>
+<li>Search engine sử dụng dấu “<strong>-</strong>“ để tách từ, nên URL cũng nên sử dụng dấu “<strong>-</strong>“ để ngăn cách các từ khóa trong nó.</li>
+</ul>
+<p>Mặt khác việc sử dụng quá nhiều GET parameter như ?color=2 trong URL có thể khiến URL khó nhớ, dễ nhầm lẫn, và khó chia sẻ. Dẫn tới việc truy cập phải URL không chính xác nếu không đủ parameter.</p>
+<h2 id="Cau-truc-lien-ket-can-duoc-chu-trong-hon-cau-truc-thu-muc"><a href="#Cau-truc-lien-ket-can-duoc-chu-trong-hon-cau-truc-thu-muc" class="headerlink" title="Cấu trúc liên kết cần được chú trọng hơn cấu trúc thư mục"></a>Cấu trúc liên kết cần được chú trọng hơn cấu trúc thư mục</h2><p>Chúng ta có 2 đường dẫn sau:</p>
+<p><a href="https://viblo.asia/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html" target="_blank" rel="noopener">https://viblo.asia/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html</a><br><a href="https://viblo.asia/seo/seo-onpage/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html" target="_blank" rel="noopener">https://viblo.asia/seo/seo-onpage/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html</a></p>
+<p>Như bạn đã biết, hai đường dẫn trên đều là 2 đường dẫn tối ưu cho SEO. Đường dẫn thứ nhất là đường dẫn kiểu file name và đường dẫn thứ hai là đường dẫn theo kiểu thư mục. Câu hỏi đặt ra ở đây là đường dẫn nào tốt hơn?</p>
+<h3 id="★-Neu-cau-truc-thu-muc-qua-sau-co-the-khien-Bot-ko-crawl-duoc"><a href="#★-Neu-cau-truc-thu-muc-qua-sau-co-the-khien-Bot-ko-crawl-duoc" class="headerlink" title="★ Nếu cấu trúc thư mục quá sâu có thể khiến Bot ko crawl được"></a>★ Nếu cấu trúc thư mục quá sâu có thể khiến Bot ko crawl được</h3><p>Tham khảo link : <a href="https://support.google.com/webmasters/answer/156184?hl=vi" target="_blank" rel="noopener">https://support.google.com/webmasters/answer/156184?hl=vi</a><br>Google Bot sẽ crawl theo thứ tự từ nông tới sâu, dó đó URL ở các cấp sâu mà không được liên kết tới bởi page nào trong site có thể rơi vào tình trạng được crawl chậm và không được đánh index.<br>Với tư cách là developer, bạn đừng quên tạo các link trong site internal liên kết tới các page quan trọng của site.</p>
+<p>Lưu ý: Việc tạo cấu trúc thư mục đơn giản chỉ giúp cho Google Bot crawl dễ dàng hơn chứ không ảnh hưởng tới thứ hạng trên Search Result.</p>
+<h3 id="★-Cau-truc-lien-ket-anh-huong-toi-SEO"><a href="#★-Cau-truc-lien-ket-anh-huong-toi-SEO" class="headerlink" title="★ Cấu trúc liên kết ảnh hưởng tới SEO"></a>★ Cấu trúc liên kết ảnh hưởng tới SEO</h3><p>Cấu trúc liên kết được tóm gọn trong câu sau: “Khi bạn click vào liên kết bao nhiêu lần cũng vẫn access được page đó”.</p>
+<p>Cấu trúc link nếu vượt quá 5 cấp có thể khiến Google index chậm. Về cơ bản chỉ nên setting dưới 4 cấp đổ lại.</p>
+<p>Tham khảo: <a href="http://s-supporter.hatenablog.jp/entry/seo-difference-of-the-hierarchy#" target="_blank" rel="noopener">http://s-supporter.hatenablog.jp/entry/seo-difference-of-the-hierarchy#</a>ディレクトリ階層とリンク階層の違い</p>
+<h2 id="Luu-y-khi-them-Parameter-vao-URL"><a href="#Luu-y-khi-them-Parameter-vao-URL" class="headerlink" title="Lưu ý khi thêm Parameter vào URL"></a>Lưu ý khi thêm Parameter vào URL</h2><p>Theo kỹ sư John Muelle từ Google thì việc thêm params vào URL của các dynamic page để dễ dàng thay đổi nội dung được khuyến khích.</p>
+<blockquote>
+<p>Just wanted to add that from Google’s point of view, the clean, parameterized URL is generally preferred to any unnecessary URL-rewriting. If you want a nice-looking URL-line in search, use breadcrumb markup instead.</p>
+</blockquote>
+<p>Tuy nhiên trên kết quả search thì với những page động sử dụng params để thay đổi nội dung cần thiết lập thêm <strong>Canonical</strong> để tránh xảy ra hiện tượng duplicated content.</p>
+<h2 id="Dung-GET-params-se-lam-giam-index"><a href="#Dung-GET-params-se-lam-giam-index" class="headerlink" title="Dùng GET params sẽ làm giảm index"></a>Dùng GET params sẽ làm giảm index</h2><p>Việc sử dụng quá nhiều GET params có thể làm khả năng index giảm đi, do đó cần tránh thêm quá nhiều param là URL quá dài, hoặc thực hiển chuyển đổi url động sang url tĩnh với param ngắn hơn.</p>
+<h3 id="★-Chuyen-doi-URL-tinh"><a href="#★-Chuyen-doi-URL-tinh" class="headerlink" title="★ Chuyển đối URL tĩnh"></a>★ Chuyển đối URL tĩnh</h3><p>Việc chuyển đổi URL động sang tĩnh có thể hiểu đơn giản như sau: loại bỏ bớt GET params, chuyển nó vào path của URL</p>
+<p><strong>Ví dụ:</strong><br>Ta có 1 URL khá dài với 3 GET params</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://phocase.jp/iphone7/?color=3&amp;material=3&amp;category=cute</span><br></pre></td></tr></table></figure>
+<p>Ta sẽ đưa category vào path của URL, lúc này số lượng params chỉ còn là 2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://phocase.jp/iphone7/cute/?color=3&amp;material=3</span><br></pre></td></tr></table></figure>
+<h3 id="★-Cac-diem-can-luu-y-khi-chuyen-doi-sang-URL-tinh"><a href="#★-Cac-diem-can-luu-y-khi-chuyen-doi-sang-URL-tinh" class="headerlink" title="★ Các điểm cần lưu ý khi chuyển đổi sang URL tĩnh"></a>★ Các điểm cần lưu ý khi chuyển đổi sang URL tĩnh</h3><ul>
+<li>Loại bỏ các params không cần thiết</li>
+<li>Không quản lý param theo session ID</li>
+<li>Thực hiển chuyển đổi các params có thẻ đưa vào URL path</li>
+<li>Không nên đưa quá nhiều param vào URL path dẫn tới URL quá dài, giảm khả năng index cũng như crawl</li>
+<li>URL càng có ý nghĩa càng tốt</li>
+</ul>
+<h3 id="★-Cac-thuc-don-gian-de-thuc-chuyen-doi-tinh"><a href="#★-Cac-thuc-don-gian-de-thuc-chuyen-doi-tinh" class="headerlink" title="★ Các thức đơn giản để thực chuyển đổi tĩnh"></a>★ Các thức đơn giản để thực chuyển đổi tĩnh</h3><p>Để chuyển đổi sang URL tĩnh có thể implement lại routing của system, tuy nhiên cách đơn giản nhất là thiết lập lại file .htaccess</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">RewriteEngine On</span><br><span class="line"></span><br><span class="line">RewriteRule http://phocase.jp/([0-9]+)/$　http://phocase.jp/?color=$1 [L,NC]</span><br></pre></td></tr></table></figure>
+<p><a href="https://www.digitalocean.com/community/tutorials/how-to-create-temporary-and-permanent-redirects-with-apache-and-nginx" target="_blank" rel="noopener">How To Create Temporary and Permanent Redirects with Apache and Nginx</a></p>
+<h1 id="Cac-diem-can-luu-y-voi-Site-content"><a href="#Cac-diem-can-luu-y-voi-Site-content" class="headerlink" title="Các điểm cần lưu ý với Site content"></a>Các điểm cần lưu ý với Site content</h1><h2 id="Site-co-so-luong-index-lon"><a href="#Site-co-so-luong-index-lon" class="headerlink" title="Site có số lượng index lớn"></a>Site có số lượng index lớn</h2><p>Theo nguồn tin chính thức từ Google thì việc 1 website có quá nhiều page không được chú trọng vào nội dung sẽ được coi là 1 website vô nghĩa, chỉ nên tập trung vào 1 số lượng page có nội dung được chú trọng thay vì tạo ra hàng loạt các page có nội dung nghèo nàn.</p>
+<h3 id="★-Site-ranking"><a href="#★-Site-ranking" class="headerlink" title="★ Site ranking"></a>★ Site ranking</h3><ul>
+<li>Thông tin chỉ được tồn tại/sở hữu duy nhất bởi website</li>
+<li>Có chứ nhiều nội dung dễ hiểu như ảnh và video</li>
+<li>Mô tả thông tin chi tiết, rõ ràng và dễ hiểu</li>
+</ul>
+<p>Khi implement các page động thì số lượng page được index sẽ tăng lên, do đó cần xác định trước số lượng tối đa page sẽ được sinh ra.</p>
+<h3 id="★-Cach-thuc-doi-ung"><a href="#★-Cach-thuc-doi-ung" class="headerlink" title="★ Cách thức đối ứng"></a>★ Cách thức đối ứng</h3><ul>
+<li>Sử dụng chức năng URL parameter trong Google Search Console</li>
+<li>Sử dụng noindex content bằng file robots.txt<br><a href="https://valueagent.co.jp/blog/2959" target="_blank" rel="noopener">Japanese search quality guidelines</a></li>
+</ul>
+<h2 id="Ton-tai-noi-dung-huu-ich-voi-First-View-khong"><a href="#Ton-tai-noi-dung-huu-ich-voi-First-View-khong" class="headerlink" title="Tồn tại nội dung hữu ích với First View không?"></a>Tồn tại nội dung hữu ích với First View không?</h2><p>Khi truy cập 1 website mà ko thực hiện scroll xuống dưới, thì phạm vi người dùng quan sát được trên màn hình lúc này được gọi là <strong>First view</strong></p>
+<p>Về cơ bản First view có kích thước khoảng 500×950px thì cần lưu ý những điểm sau:</p>
+<h3 id="★-Cac-diem-can-luu-y-1"><a href="#★-Cac-diem-can-luu-y-1" class="headerlink" title="★ Các điểm cần lưu ý"></a>★ Các điểm cần lưu ý</h3><ul>
+<li>Không setting external link</li>
+<li>Setting keyword cho SEO vừa phải</li>
+<li>Thiết lập alt cho ảnh, và tên file ảnh phải có liên quan tới nội dung bức ảnh</li>
+</ul>
+<h2 id="Cac-cong-cu-ma-tac-gia-dang-su-dung"><a href="#Cac-cong-cu-ma-tac-gia-dang-su-dung" class="headerlink" title="Các công cụ mà tác giả đang sử dụng"></a>Các công cụ mà tác giả đang sử dụng</h2><ul>
+<li><a href="https://adwords.google.co.jp/KeywordPlanner" target="_blank" rel="noopener">https://adwords.google.co.jp/KeywordPlanner</a></li>
+<li><a href="http://www.related-keywords.com" target="_blank" rel="noopener">http://www.related-keywords.com</a></li>
+<li><a href="https://www.google.com/intl/ja_jp/analytics" target="_blank" rel="noopener">https://www.google.com/intl/ja_jp/analytics</a></li>
+<li><a href="https://www.similarweb.com" target="_blank" rel="noopener">https://www.similarweb.com</a></li>
+</ul>
+<span>Source: </span><a href="http://qiita.com/rorensu2236/items/a2cd209af4dda59557a5" target="_blank" title="http://qiita.com/rorensu2236/items/a2cd209af4dda59557a5" class="post-from">http://qiita.com/rorensu2236/items/a2cd209af4dda59557a5</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/10/Kien-truc-tong-quan-cua-Angular-2-4-P1.html" class="prev">NEXT</a><a href="/2017/09/Tao-loading-Facebook-bang-CSS-that-don-gian.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/10/Cac-ky-thuat-SEO-toi-thieu-ma-developer-can-nam-vung-trong-lap-trinh-web.html';
+var disqus_title = 'Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/10/Cac-ky-thuat-SEO-toi-thieu-ma-developer-can-nam-vung-trong-lap-trinh-web.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

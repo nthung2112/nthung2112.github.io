@@ -1,0 +1,621 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> The Front-End Checklist · Learn and Share</title><meta name="description" content="The Front-End Checklist - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="The Front-End Checklist"><meta property="og:image"><meta property="og:description" content="An Exhaustive List of all the Elements you need to have/test Before Launching your Website To Production.
+The Front-End Checklist is an exhaustive list of all elements you need to have / to test before launching your site / HTML page to production.
+It is based on Front-End developers’ years of experience, with additions coming from other open-source checklists. David Dias is the main author/creator and posted the guide to GitHub where it has taken off! The guide is also available below. Don’t forget to thank David for an awesome guide!"></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">The Front-End Checklist</h1><h2 class="post-subtitle"></h2><header class="post-info">Nov 28, 2017<div class="tags"><a href="/tags/javascript" class="tag-link">#javascript</a><a href="/tags/front-end" class="tag-link">#front-end</a></div><div class="fb-ir-time"><time dateTime="2017-11-28T03:36:59.000Z" class="op-modified"></time><time dateTime="2017-11-28T03:36:59.000Z" class="op-published"></time></div></header></div><div class="wrap"><div class="post-content"><h2 id="An-Exhaustive-List-of-all-the-Elements-you-need-to-have-test-Before-Launching-your-Website-To-Production"><a href="#An-Exhaustive-List-of-all-the-Elements-you-need-to-have-test-Before-Launching-your-Website-To-Production" class="headerlink" title="An Exhaustive List of all the Elements you need to have/test Before Launching your Website To Production."></a>An Exhaustive List of all the Elements you need to have/test Before Launching your Website To Production.</h2><p><img src="https://cdn-images-1.medium.com/max/1600/1*2ofbexCS_7UAL4gByI37oA.png" alt=""></p>
+<p>The <a href="https://github.com/thedaviddias/Front-End-Checklist" target="_blank" rel="noopener"><strong>Front-End Checklist</strong></a> is an exhaustive list of all elements you need to have / to test before launching your site / HTML page to production.</p>
+<p>It is based on Front-End developers’ years of experience, with additions coming from other open-source checklists. <a href="https://medium.com/@thedaviddias" target="_blank" rel="noopener"><strong>David Dias</strong></a> is the main author/creator and posted the guide to <a href="https://github.com/thedaviddias/Front-End-Checklist" target="_blank" rel="noopener"><strong>GitHub</strong></a> where it has taken off! The guide is also available below. Don’t forget to thank <a href="https://medium.com/@thedaviddias" target="_blank" rel="noopener">David</a> for an awesome guide!<br><a id="more"></a></p>
+<h3 id="Table-of-Contents"><a href="#Table-of-Contents" class="headerlink" title="Table of Contents"></a>Table of Contents</h3><ol>
+<li>Head</li>
+<li>HTML</li>
+<li>Webfonts</li>
+<li>CSS</li>
+<li>Images</li>
+<li>JavaScript</li>
+<li>Security</li>
+<li>Performance</li>
+<li>Accessibility</li>
+<li>SEO</li>
+</ol>
+<h3 id="How-To-Use"><a href="#How-To-Use" class="headerlink" title="How To Use"></a>How To Use</h3><p>All items in the Front-End Checklist are required for the majority of the projects, but some elements can be omitted or are not essential (in the case of an administration web app, you may not need RSS feed for example).</p>
+<p>Some resources possess an emoticon to help you understand which type of content / help you may find on the checklist:</p>
+<ul>
+<li>📖: documentation or article</li>
+<li>🛠: online tool / testing tool</li>
+<li>📹: media or video content</li>
+</ul>
+<hr>
+<h3 id="Head"><a href="#Head" class="headerlink" title="Head"></a>Head</h3><blockquote>
+<p><em>Notes: You can find</em> <a href="https://github.com/joshbuchea/HEAD" target="_blank" rel="noopener"><em>a list of everything</em></a> <em>that could be found in the</em> <em><head></head></em> <em>of an HTML document.</em></p>
+</blockquote>
+<h4 id="Meta-tag"><a href="#Meta-tag" class="headerlink" title="Meta tag"></a>Meta tag</h4><ul>
+<li>Doctype: The Doctype is HTML5 and is at the top of all your HTML pages.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Doctype HTML5 --&gt;</span></span><br><span class="line"><span class="meta">&lt;!doctype html&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://www.w3.org/TR/html5/syntax.html#determining-the-character-encoding" target="_blank" rel="noopener">Determining the character encoding — HTML5 W3C</a></p>
+</blockquote>
+<p><em>The next 3 meta tags (Charset, X-UA Compatible and Viewport) need to come first in the head.</em></p>
+<ul>
+<li>Charset: The charset declared (UTF-8) is declared correctly.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Set character encoding for the document --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>X-UA-Compatible: The X-UA-Compatible meta tag is present.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Instruct Internet Explorer to use its latest rendering engine --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"x-ua-compatible"</span> <span class="attr">content</span>=<span class="string">"ie=edge"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://msdn.microsoft.com/en-us/library/jj676915%28v=vs.85%29.aspx" target="_blank" rel="noopener">Specifying legacy document modes (Internet Explorer)</a></p>
+</blockquote>
+<ul>
+<li>Viewport: The viewport is declared correctly.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Viewport for responsive web design --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Title: A title is used on all pages (SEO: Google calculate the pixel width of the characters used in the title, cut off between 472 and 482 pixels. Average character limit would be around 55-characters).</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;!-- Document Title --&gt;</span><br><span class="line">&lt;title&gt;Page Title less than <span class="number">65</span> characters&lt;<span class="regexp">/title&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title" target="_blank" rel="noopener">Title — HTML — MDN</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://www.sistrix.com/serp-snippet-generator/" target="_blank" rel="noopener">SERP Snippet Generator</a></p>
+</blockquote>
+<ul>
+<li>Description: A meta description is provided, it is unique and doesn’t possess more than 150 characters.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Meta Description --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"Description of the page less than 150 characters"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖<a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/The_head_metadata_in_HTML#Adding_an_author_and_description" target="_blank" rel="noopener">Meta Description — HTML — MDN</a></p>
+</blockquote>
+<ul>
+<li>Favicons: Each favicon has been created and displays correctly. If you have only a favicon.ico, put it at the root of your site. Normally you won’t need to use any markup. However, it’s still good practice to link to it using the example below. Today, PNG format is recommended over .ico format (dimensions: 32x32px).</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Standard favicon --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"icon"</span> <span class="attr">type</span>=<span class="string">"image/x-icon"</span> <span class="attr">href</span>=<span class="string">"https://example.com/favicon.ico"</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- Recommended favicon format --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"icon"</span> <span class="attr">type</span>=<span class="string">"image/png"</span> <span class="attr">href</span>=<span class="string">"https://example.com/favicon.png"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>🛠 <a href="https://www.favicon-generator.org/" target="_blank" rel="noopener">Favicon Generator</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://realfavicongenerator.net/" target="_blank" rel="noopener">RealFaviconGenerator</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://github.com/audreyr/favicon-cheat-sheet" target="_blank" rel="noopener">Favicon Cheat Sheet</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://css-tricks.com/favicon-quiz/" target="_blank" rel="noopener">Favicons, Touch Icons, Tile Icons, etc. Which Do You Need? — CSS Tricks</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://caniuse.com/#feat=link-icon-png" target="_blank" rel="noopener">PNG favicons — caniuse</a></p>
+</blockquote>
+<ul>
+<li>Apple Touch Icon: Apple touch favicon apple-mobile-web-app-capable are present. <em>(Create your Apple Icon file with at least 200x200px dimension to support all dimensions that you may need)</em></li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Apple Touch Icon --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"apple-touch-icon"</span> <span class="attr">href</span>=<span class="string">"/custom-icon.png"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html" target="_blank" rel="noopener">Configuring Web Applications</a></p>
+</blockquote>
+<ul>
+<li>Windows Tiles:</li>
+<li>Windows tiles are present and linked.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Microsoft Tiles --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"msapplication-config"</span> <span class="attr">content</span>=<span class="string">"browserconfig.xml"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Minimum required xml markup for the browserconfig.xml file is as follows:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span> encoding=<span class="string">"utf-8"</span><span class="meta">?&gt;</span></span></span><br><span class="line"><span class="tag">&lt;<span class="name">browserconfig</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">msapplication</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">tile</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">square70x70logo</span> <span class="attr">src</span>=<span class="string">"small.png"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">square150x150logo</span> <span class="attr">src</span>=<span class="string">"medium.png"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">wide310x150logo</span> <span class="attr">src</span>=<span class="string">"wide.png"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">square310x310logo</span> <span class="attr">src</span>=<span class="string">"large.png"</span>/&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">tile</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;/<span class="name">msapplication</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">browserconfig</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://msdn.microsoft.com/en-us/library/dn320426%28v=vs.85%29.aspx" target="_blank" rel="noopener">Browser configuration schema reference</a></p>
+</blockquote>
+<ul>
+<li>Canonical: Use rel=”canonical” to avoid duplicate content.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- Helps prevent duplicate content issues --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"canonical"</span> <span class="attr">href</span>=<span class="string">"http://example.com/2017/09/a-new-article-to-red.html"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://support.google.com/webmasters/answer/139066?hl=en" target="_blank" rel="noopener">Use canonical URLs — Search Console Help — Google Support</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://webmasters.googleblog.com/2013/04/5-common-mistakes-with-relcanonical.html" target="_blank" rel="noopener">5 common mistakes with rel=canonical — Google Webmaster Blog</a></p>
+</blockquote>
+<h4 id="HTML-tags"><a href="#HTML-tags" class="headerlink" title="HTML tags"></a>HTML tags</h4><ul>
+<li>Language attribute: The lang attribute of your website is specified and related to the language of the current page.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">"en"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Direction attribute: The direction of lecture is specified on the html tag (It can be used on another HTML tag).</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">dir</span>=<span class="string">"rtl"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/dir" target="_blank" rel="noopener">dir — HTML — MDN</a></p>
+</blockquote>
+<ul>
+<li>Alternate language: The language tag of your website is specified and related to the language of the current page.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"alternate"</span> <span class="attr">href</span>=<span class="string">"https://es.example.com/"</span> <span class="attr">hreflang</span>=<span class="string">"es"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Conditional comments: Conditional comments are present for IE if needed.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://msdn.microsoft.com/en-us/library/ms537512%28v=vs.85%29.aspx" target="_blank" rel="noopener">About conditional comments (Internet Explorer) — MSDN — Microsoft</a></p>
+</blockquote>
+<ul>
+<li>RSS feed: If your project is a blog or has articles, an RSS link was provided.</li>
+<li>inline critical CSS: CSS which styles content that is immediately visible during pageload (“above the fold content”) is called “critical CSS”. It is embedded before your principal CSS call and between <style></style> in a single line (minified).</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://github.com/addyosmani/critical" target="_blank" rel="noopener">Critical by Addy Osmani on Github</a> automates this</p>
+</blockquote>
+<ul>
+<li>CSS order: All CSS files are loaded before any JavaScript files in the <head>. (Except the case where sometimes JS files are loaded asynchronously on top of your page).</head></li>
+</ul>
+<h4 id="Social-meta"><a href="#Social-meta" class="headerlink" title="Social meta"></a>Social meta</h4><p><em>Facebook OG</em> and <em>Twitter Cards</em> are, for any website, highly recommended. The other social media tags can be considered if you target a particular presence on those and want to ensure the display.</p>
+<ul>
+<li>Facebook Open Graph: All Facebook Open Graph (OG) are tested and no one is missing or with a false information. Images need to be at least 600 x 315 pixels, 1200 x 630 pixels recommended.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:type"</span> <span class="attr">content</span>=<span class="string">"website"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:url"</span> <span class="attr">content</span>=<span class="string">"https://example.com/page.html"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:title"</span> <span class="attr">content</span>=<span class="string">"Content Title"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:image"</span> <span class="attr">content</span>=<span class="string">"https://example.com/image.jpg"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:description"</span> <span class="attr">content</span>=<span class="string">"Description Here"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:site_name"</span> <span class="attr">content</span>=<span class="string">"Site Name"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">"og:locale"</span> <span class="attr">content</span>=<span class="string">"en_US"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://developers.facebook.com/docs/sharing/webmasters/" target="_blank" rel="noopener">A Guide to Sharing for Webmasters</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 Test your page with the <a href="https://developers.facebook.com/tools/debug/" target="_blank" rel="noopener">Facebook OG testing</a></p>
+</blockquote>
+<ul>
+<li>Twitter Card:</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:card"</span> <span class="attr">content</span>=<span class="string">"summary"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:site"</span> <span class="attr">content</span>=<span class="string">"@site_account"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:creator"</span> <span class="attr">content</span>=<span class="string">"@individual_account"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:url"</span> <span class="attr">content</span>=<span class="string">"https://example.com/page.html"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:title"</span> <span class="attr">content</span>=<span class="string">"Content Title"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:description"</span> <span class="attr">content</span>=<span class="string">"Content description less than 200 characters"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"twitter:image"</span> <span class="attr">content</span>=<span class="string">"https://example.com/image.jpg"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://developer.twitter.com/en/docs/tweets/optimize-with-cards/guides/getting-started" target="_blank" rel="noopener">Getting started with cards — Twitter Developers</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 Test your page with the <a href="https://cards-dev.twitter.com/validator" target="_blank" rel="noopener">Twitter card validator</a></p>
+</blockquote>
+<hr>
+<h3 id="HTML"><a href="#HTML" class="headerlink" title="HTML"></a>HTML</h3><h4 id="Best-practices"><a href="#Best-practices" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>HTML5 Semantic Elements: HTML5 Semantic Elements are used appropriately (header, section, footer, main…).</li>
+</ul>
+<blockquote>
+<p>📖 <a href="http://htmlreference.io/" target="_blank" rel="noopener">HTML Reference</a></p>
+</blockquote>
+<ul>
+<li>Error pages: Error 404 page and 5xx exist. Remember that the 5xx error pages need to have their CSS integrated (no external call on the current server).</li>
+<li>Noopener: In case you are using external links with target=”_blank”, your link should have a rel=”noopener” attribute to prevent tab nabbing. If you need to support older versions of Firefox, use rel=”noopener noreferrer”.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://mathiasbynens.github.io/rel-noopener/" target="_blank" rel="noopener">About rel=noopener</a></p>
+</blockquote>
+<ul>
+<li>Clean up comments: Unnecessary code needs to be removed before sending the page to production.</li>
+</ul>
+<h4 id="HTML-testing"><a href="#HTML-testing" class="headerlink" title="HTML testing"></a>HTML testing</h4><ul>
+<li>W3C compliant: All pages need to be tested with the W3C validator to identify possible issues in the HTML code.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://validator.w3.org/" target="_blank" rel="noopener">W3C validator</a></p>
+</blockquote>
+<ul>
+<li>HTML Lint: I use tools to help me analyze any issues I could have on my HTML code.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://dirtymarkup.com/" target="_blank" rel="noopener">Dirty markup</a></p>
+</blockquote>
+<ul>
+<li>Link checker: There are no broken links in my page, verify that you don’t have any 404 error.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://validator.w3.org/checklink" target="_blank" rel="noopener">W3C Link Checker</a></p>
+</blockquote>
+<ul>
+<li>Adblockers test: Your website shows your content correctly with adblockers enabled (You can provide a message encouraging people to disable their adblocker).</li>
+</ul>
+<hr>
+<h3 id="Webfonts"><a href="#Webfonts" class="headerlink" title="Webfonts"></a>Webfonts</h3><ul>
+<li>Webfont format: WOFF, WOFF2 and TTF are supported by all modern browsers.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://caniuse.com/#feat=woff" target="_blank" rel="noopener">WOFF — Web Open Font Format — Caniuse</a>.</p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://caniuse.com/#feat=woff2" target="_blank" rel="noopener">WOFF 2.0 — Web Open Font Format — Caniuse</a>.</p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://caniuse.com/#feat=ttf" target="_blank" rel="noopener">TTF/OTF — TrueType and OpenType font support</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://css-tricks.com/snippets/css/using-font-face/" target="_blank" rel="noopener">Using @font-face — CSS-Tricks</a></p>
+</blockquote>
+<ul>
+<li>Webfont size: Webfont sizes don’t exceed 2 MB (all variants included).</li>
+</ul>
+<hr>
+<h3 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h3><blockquote>
+<p><em>Notes: Take a look at</em> <a href="https://cssguidelin.es/" target="_blank" rel="noopener"><em>CSS guidelines</em></a> <em>and</em> <a href="https://sass-guidelin.es/" target="_blank" rel="noopener"><em>Sass Guidelines</em></a> <em>followed by most Front-End developers. If you have a doubt about CSS properties, you can visit</em> <a href="http://cssreference.io/" target="_blank" rel="noopener"><em>CSS Reference</em></a>_._</p>
+</blockquote>
+<ul>
+<li>Responsive Web Design: The website is using responsive web design.</li>
+<li>CSS Print: A print stylesheet is provided and is correct on each page.</li>
+<li>Preprocessors: Your page is using a CSS preprocessor (<a href="http://sass-lang.com/" target="_blank" rel="noopener">Sass</a> is preferred).</li>
+<li>Unique ID: If IDs are used, they are unique to a page.</li>
+<li>Reset CSS: A CSS reset (reset, normalize or reboot) is used and up to date. <em>(If you are using a CSS Framework like Bootstrap or Foundation, a Normalize is already included into it.)</em></li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://meyerweb.com/eric/tools/css/reset/" target="_blank" rel="noopener">Reset.css</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://necolas.github.io/normalize.css/" target="_blank" rel="noopener">Normalize.css</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://getbootstrap.com/docs/4.0/content/reboot/" target="_blank" rel="noopener">Reboot</a></p>
+</blockquote>
+<ul>
+<li>JS prefix: All classes (or id- used in JavaScript files) begin with js- and are not styled into the CSS files.</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"js-slider"</span> <span class="attr">class</span>=<span class="string">"my-slider"</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- Or --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"id-used-by-cms"</span> <span class="attr">class</span>=<span class="string">"js-slider my-slider"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Embedded or inline CSS: Avoid at all cost embeding CSS in <code>&lt;style&gt;</code> tags or using inline CSS: only use for valid reasons (e.g. background-image for slider, critical CSS).</li>
+<li>Vendor prefixes: CSS vendor prefixes are used and are generated accordingly with your browser support compatibility.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://autoprefixer.github.io/" target="_blank" rel="noopener">Autoprefixer CSS online</a></p>
+</blockquote>
+<h4 id="Performance"><a href="#Performance" class="headerlink" title="Performance"></a>Performance</h4><ul>
+<li>Concatenation: CSS files are concatenated in a single file. <em>(Not for HTTP/2)</em></li>
+<li>Minification: All CSS files are minified.</li>
+<li>Non-blocking: CSS files need to be non-blocking to prevent the DOM from taking time to load.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://github.com/filamentgroup/loadCSS" target="_blank" rel="noopener">loadCSS by filament group</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://gist.github.com/thedaviddias/c24763b82b9991e53928e66a0bafc9bf" target="_blank" rel="noopener">Example of preload CSS using loadCSS</a></p>
+</blockquote>
+<ul>
+<li>Unused CSS: Remove unused CSS.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://uncss-online.com/" target="_blank" rel="noopener">UnCSS Online</a> 🛠</p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://github.com/purifycss/purifycss" target="_blank" rel="noopener">PurifyCSS</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://developers.google.com/web/updates/2017/04/devtools-release-notes#coverage" target="_blank" rel="noopener">Chrome DevTools Coverage</a></p>
+</blockquote>
+<h4 id="CSS-testing"><a href="#CSS-testing" class="headerlink" title="CSS testing"></a>CSS testing</h4><ul>
+<li>Stylelint: All CSS or SCSS files are without any errors.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://stylelint.io/" target="_blank" rel="noopener">stylelint, a CSS linter</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://sass-guidelin.es/" target="_blank" rel="noopener">Sass guidelines</a></p>
+</blockquote>
+<ul>
+<li>Responsive web design: All pages were tested at the following breakpoints: 320px, 768px, 1024px (can be more / different according to your analytics).</li>
+<li>CSS Validator: The CSS was tested and pertinent errors were corrected.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://jigsaw.w3.org/css-validator/" target="_blank" rel="noopener">CSS Validator</a></p>
+</blockquote>
+<ul>
+<li>Desktop Browsers: All pages were tested on all current desktop browsers (Safari, Firefox, Chrome, Internet Explorer, EDGE…).</li>
+<li>Mobile Browsers: All pages were tested on all current mobile browsers (Native browser, Chrome, Safari…).</li>
+<li>OS: All pages were tested on all current OS (Windows, Android, iOS, Mac…).</li>
+<li>Pixel perfect: Pages are close to pixel perfect. Depending on the quality of the creatives, you may not be 100% accurate, but your page needs to be close to your template.</li>
+</ul>
+<blockquote>
+<p><a href="https://chrome.google.com/webstore/detail/perfectpixel-by-welldonec/dkaagdgjmgdmbnecmcefdhjekcoceebi?hl=en" target="_blank" rel="noopener"><em>Pixel Perfect — Chrome Extension</em></a></p>
+</blockquote>
+<ul>
+<li>Reading direction: All pages need to be tested for LTR and RTL languages if they need to be supported.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://hacks.mozilla.org/2015/09/building-rtl-aware-web-apps-and-websites-part-1/" target="_blank" rel="noopener">Building RTL-Aware Web Apps &amp; Websites: Part 1 — Mozilla Hacks</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://hacks.mozilla.org/2015/10/building-rtl-aware-web-apps-websites-part-2/" target="_blank" rel="noopener">Building RTL-Aware Web Apps &amp; Websites: Part 2 — Mozilla Hacks</a></p>
+</blockquote>
+<hr>
+<h3 id="Images"><a href="#Images" class="headerlink" title="Images"></a>Images</h3><blockquote>
+<p><em>Notes: For a complete understanding of image optimization, check the free ebook</em> <a href="https://images.guide/" target="_blank" rel="noopener"><em>Essential Image Optimization</em></a><em>from Addy Osmani.</em></p>
+</blockquote>
+<h4 id="Best-practices-1"><a href="#Best-practices-1" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>Optimization: All images are optimized to be rendered in the browser. WebP format could be used for critical pages (like Homepage).</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://github.com/imagemin/imagemin" target="_blank" rel="noopener">Imagemin</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 Use <a href="https://imageoptim.com/" target="_blank" rel="noopener">ImageOptim</a> to optimise your images for free.</p>
+</blockquote>
+<ul>
+<li>Picture/Srcset: You use picture/srcset to provide the most appropriate image for the current viewport of the user.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.sitepoint.com/how-to-build-responsive-images-with-srcset/" target="_blank" rel="noopener">How to Build Responsive Images with srcset</a></p>
+</blockquote>
+<ul>
+<li>Retina: You provide layout images 2x or 3x, support retina display.</li>
+<li>Sprite: Small images are in a sprite file (in the case of icons, they can be in an SVG sprite image).</li>
+<li>Width and Height: Set width and height attributes on <img> if the final rendered image size is known (can be omitted for CSS sizing).</li>
+<li>Alternative text: All <img> have an alternative text which describe the image visually.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://axesslab.com/alt-texts/" target="_blank" rel="noopener">Alt-texts: The Ultimate Guide</a></p>
+</blockquote>
+<ul>
+<li>Lazy loading: Images are lazyloaded (A noscript fallback is always provided).</li>
+</ul>
+<hr>
+<h3 id="JavaScript"><a href="#JavaScript" class="headerlink" title="JavaScript"></a>JavaScript</h3><h4 id="Best-practices-2"><a href="#Best-practices-2" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>JavaScript Inline: You don’t have any JavaScript code inline (mixed with your HTML code).</li>
+<li>Concatenation: JavaScript files are concatenated.</li>
+<li>Minification: JavaScript files are minified (you can add the .min suffix).</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://developers.google.com/speed/docs/insights/MinifyResources" target="_blank" rel="noopener">Minify Resources (HTML, CSS, and JavaScript)</a></p>
+</blockquote>
+<ul>
+<li>JavaScript security:</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet#Guidelines_for_Developing_Secure_Applications_Utilizing_JavaScript" target="_blank" rel="noopener">Guidelines for Developing Secure Applications Utilizing JavaScript</a></p>
+</blockquote>
+<ul>
+<li>Non-blocking: JavaScript files are loaded asynchronously using async or deferred using defer attribute.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://developers.google.com/speed/docs/insights/BlockingJS" target="_blank" rel="noopener">Remove Render-Blocking JavaScript</a></p>
+</blockquote>
+<ul>
+<li>Modernizr: If you need to target some specific features you can use a custom Modernizr to add classes in your <html> tag.</html></li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://modernizr.com/download?setclasses" target="_blank" rel="noopener">Customize your Modernizr</a></p>
+</blockquote>
+<h4 id="JavaScript-testing"><a href="#JavaScript-testing" class="headerlink" title="JavaScript testing"></a>JavaScript testing</h4><ul>
+<li>ESLint: No errors are flagged by ESLint (based on your configuration or standards rules).</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://eslint.org/" target="_blank" rel="noopener">ESLint — The pluggable linting utility for JavaScript and JSX</a></p>
+</blockquote>
+<hr>
+<h3 id="Security"><a href="#Security" class="headerlink" title="Security"></a>Security</h3><h4 id="Scan-and-check-your-web-site"><a href="#Scan-and-check-your-web-site" class="headerlink" title="Scan and check your web site"></a>Scan and check your web site</h4><blockquote>
+<p><a href="https://securityheaders.io/" target="_blank" rel="noopener">securityheaders.io</a></p>
+</blockquote>
+<blockquote>
+<p><a href="https://observatory.mozilla.org/" target="_blank" rel="noopener">Observatory by Mozilla</a></p>
+</blockquote>
+<blockquote>
+<p><a href="https://asafaweb.com/" target="_blank" rel="noopener">ASafaWeb — Automated Security Analyser for ASP.NET Websites</a></p>
+</blockquote>
+<h4 id="Best-practices-3"><a href="#Best-practices-3" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>HTTPS: HTTPS is used on every pages and for all external content (plugins, images…).</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://letsencrypt.org/" target="_blank" rel="noopener">Let’s Encrypt — Free SSL/TLS Certificates</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://www.ssllabs.com/ssltest/index.html" target="_blank" rel="noopener">Free SSL Server Test</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="http://caniuse.com/#feat=stricttransportsecurity" target="_blank" rel="noopener">Strict Transport Security</a></p>
+</blockquote>
+<ul>
+<li>HTTP Strict Transport Security (HSTS):</li>
+<li>The HTTP header is set to ‘Strict-Transport-Security’.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://hstspreload.org/" target="_blank" rel="noopener">Check HSTS preload status and eligibility</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/HTTP_Strict_Transport_Security_Cheat_Sheet" target="_blank" rel="noopener">HTTP Strict Transport Security Cheat Sheet — OWASP</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet" target="_blank" rel="noopener">Transport Layer Protection Cheat Sheet — OWASP</a></p>
+</blockquote>
+<ul>
+<li>Cross Site Request Forgery (CSRF): You ensure that requests made to your server-side are legitimate and originate from your website / app to prevent CSRF attacks.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/Cross-Site_Request_Forgery_%28CSRF%29_Prevention_Cheat_Sheet" target="_blank" rel="noopener">Cross-Site Request Forgery (CSRF) Prevention Cheat Sheet — OWASP</a></p>
+</blockquote>
+<ul>
+<li>Cross Site Scripting (XSS): Your page or website is free from XSS possible issues.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet" target="_blank" rel="noopener">XSS (Cross Site Scripting) Prevention Cheat Sheet — OWASP</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://www.owasp.org/index.php/DOM_based_XSS_Prevention_Cheat_Sheet" target="_blank" rel="noopener">DOM based XSS Prevention Cheat Sheet — OWASP</a></p>
+</blockquote>
+<ul>
+<li>Content Type Options: Prevents Google Chrome and Internet Explorer from trying to mime-sniff the content-type of a response away from the one being declared by the server.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://scotthelme.co.uk/hardening-your-http-response-headers/#x-content-type-options" target="_blank" rel="noopener">X-Content-Type-Options — Scott Helme</a></p>
+</blockquote>
+<ul>
+<li>X-Frame-Options (XFO): Protects your visitors against clickjacking attacks.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://scotthelme.co.uk/hardening-your-http-response-headers/#x-frame-options" target="_blank" rel="noopener">X-Frame-Options — Scott Helme</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://tools.ietf.org/html/rfc7034" target="_blank" rel="noopener">RFC7034 — HTTP Header Field X-Frame-Options</a></p>
+</blockquote>
+<hr>
+<h3 id="Performance-1"><a href="#Performance-1" class="headerlink" title="Performance"></a>Performance</h3><h4 id="Best-practices-4"><a href="#Best-practices-4" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>Weight page: The weight of each page is between 0 and 500 KB.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://tools.pingdom.com/" target="_blank" rel="noopener">Website Page Analysis</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://evilmartians.com/chronicles/size-limit-make-the-web-lighter" target="_blank" rel="noopener">Size Limit: Make the Web lighter</a></p>
+</blockquote>
+<ul>
+<li>Minified: Your HTML is minified.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://validator.w3.org/" target="_blank" rel="noopener">W3C Validator</a></p>
+</blockquote>
+<ul>
+<li>Lazy loading: Images, scripts and CSS need to be lazy loaded to improve the response time of the current page (See details in their respective sections).</li>
+<li>Cookie size: If you are using cookies be sure each cookie doesn’t exceed 4096 bytes and your domain name doesn’t have more than 20 cookies.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://tools.ietf.org/html/rfc6265" target="_blank" rel="noopener">Cookie specification: RFC 6265</a></p>
+</blockquote>
+<blockquote>
+<p>📖 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies" target="_blank" rel="noopener">Cookies</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="http://browsercookielimits.squawky.net/" target="_blank" rel="noopener">Browser Cookie Limits</a></p>
+</blockquote>
+<ul>
+<li>Third party components: Third party iframes or components relying on external JS (like sharing buttons) are replaced by static components when possible, thus limiting calls to external APIs and keeping your users activity private.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://simplesharingbuttons.com/" target="_blank" rel="noopener">Simple sharing buttons generator</a></p>
+</blockquote>
+<h4 id="Preparing-upcoming-requests"><a href="#Preparing-upcoming-requests" class="headerlink" title="Preparing upcoming requests"></a>Preparing upcoming requests</h4><blockquote>
+<p>📖 <a href="https://css-tricks.com/prefetching-preloading-prebrowsing/" target="_blank" rel="noopener">Explanation of the following techniques</a></p>
+</blockquote>
+<ul>
+<li>DNS resolution: DNS of third-party services that may be needed are resolved in advance during idle time using dns-prefetch.</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=<span class="string">"dns-prefetch"</span> href=<span class="string">"https://example.com"</span>&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Preconnection: DNS lookup, TCP handshake and TLS negociation with services that will be needed soon is done in advance during idle time using preconnect.</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=<span class="string">"preconnect"</span> href=<span class="string">"https://example.com"</span>&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Prefetching: Resources that will be needed soon (e.g. lazy loaded images) are requested in advance during idle time using prefetch.</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=<span class="string">"prefetch"</span> href=<span class="string">"image.png"</span>&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Preloading: Resources needed in the current page (e.g. scripts placed at the end of <body>) in advance using preload.</body></li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;link rel=<span class="string">"preload"</span> href=<span class="string">"app.js"</span>&gt;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>📖 <a href="https://medium.com/reloading/preload-prefetch-and-priorities-in-chrome-776165961bbf" target="_blank" rel="noopener">Difference between prefetch and preload</a></p>
+</blockquote>
+<h4 id="Performance-testing"><a href="#Performance-testing" class="headerlink" title="Performance testing"></a>Performance testing</h4><ul>
+<li>Google PageSpeed: All your pages were tested (not only the homepage) and have a score of at least 90/100.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://developers.google.com/speed/pagespeed/insights/" target="_blank" rel="noopener">Google PageSpeed</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://testmysite.withgoogle.com/" target="_blank" rel="noopener">Test your mobile speed with Google</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://www.webpagetest.org/" target="_blank" rel="noopener">WebPagetest — Website Performance and Optimization Test</a></p>
+</blockquote>
+<hr>
+<h3 id="Accessibility"><a href="#Accessibility" class="headerlink" title="Accessibility"></a>Accessibility</h3><blockquote>
+<p><em>Notes: You can watch the playlist</em> <a href="https://www.youtube.com/playlist?list=PLNYkxOF6rcICWx0C9LVWWVqvHlYJyqw7g" target="_blank" rel="noopener"><em>A11ycasts with Rob Dodson</em></a> _📹_</p>
+</blockquote>
+<h4 id="Best-practices-5"><a href="#Best-practices-5" class="headerlink" title="Best practices"></a>Best practices</h4><ul>
+<li>Progressive enhancement: Major functionality like main navigation and search should work without JavaScript enabled.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.youtube.com/watch?v=kBmvq2cE0D8" target="_blank" rel="noopener">Enable / Disable JavaScript in Chrome Developer Tools</a></p>
+</blockquote>
+<ul>
+<li>Color contrast: Color contrast should at least pass WCAG AA (AAA for mobile).</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="https://leaverou.github.io/contrast-ratio/" target="_blank" rel="noopener">Contrast ratio</a></p>
+</blockquote>
+<h4 id="Headings"><a href="#Headings" class="headerlink" title="Headings"></a>Headings</h4><ul>
+<li>H1: All pages have an H1 which is not the title of the website.</li>
+<li>Headings: Headings should be used properly in the right order (H1 to H6).</li>
+</ul>
+<blockquote>
+<p>📹 <a href="https://www.youtube.com/watch?v=vAAzdi1xuUY&amp;index=9&amp;list=PLNYkxOF6rcICWx0C9LVWWVqvHlYJyqw7g" target="_blank" rel="noopener">Why headings and landmarks are so important — A11ycasts #18</a></p>
+</blockquote>
+<h4 id="Landmarks"><a href="#Landmarks" class="headerlink" title="Landmarks"></a>Landmarks</h4><ul>
+<li>Role banner: <header> has role=”banner”.</header></li>
+<li>Role navigation: <nav> has role=”navigation”.</nav></li>
+<li>Role main: <main> has role=”main”.</main></li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://www.w3.org/WAI/GL/wiki/Using_ARIA_landmarks_to_identify_regions_of_a_page" target="_blank" rel="noopener">Using ARIA landmarks to identify regions of a page</a></p>
+</blockquote>
+<h4 id="Semantics"><a href="#Semantics" class="headerlink" title="Semantics"></a>Semantics</h4><ul>
+<li>Specific HTML5 input types are used: This is especially important for mobile devices that show customized keypads and widgets for different types.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="http://mobileinputtypes.com/" target="_blank" rel="noopener">Mobile Input Types</a></p>
+</blockquote>
+<h4 id="Form"><a href="#Form" class="headerlink" title="Form"></a>Form</h4><ul>
+<li>Label: A label is associated with each input form element. In case a label can’t be displayed, use aria-labelinstead.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute" target="_blank" rel="noopener">Using the aria-label attribute — MDN</a></p>
+</blockquote>
+<h4 id="Accessibility-testing"><a href="#Accessibility-testing" class="headerlink" title="Accessibility testing"></a>Accessibility testing</h4><ul>
+<li>Accessibility standards testing: Use the WAVE tool to test if your page respects the accessibility standards.</li>
+</ul>
+<blockquote>
+<p>🛠 <a href="http://wave.webaim.org/" target="_blank" rel="noopener">Wave testing</a></p>
+</blockquote>
+<ul>
+<li>Keyboard navigation: Test your website using only your keyboard in a previsible order. All interactive elements are reachable and usable.</li>
+<li>Screen-reader: All pages were tested in a screen-reader (VoiceOver, ChromeVox, NVDA or Lynx).</li>
+<li>Focus style: If the focus is disabled, it is replaced by visible state in CSS.</li>
+</ul>
+<blockquote>
+<p>📹 <a href="https://www.youtube.com/watch?v=srLRSQg6Jgg&amp;index=5&amp;list=PLNYkxOF6rcICWx0C9LVWWVqvHlYJyqw7g" target="_blank" rel="noopener">Managing Focus — A11ycasts #22</a></p>
+</blockquote>
+<hr>
+<h3 id="SEO"><a href="#SEO" class="headerlink" title="SEO"></a>SEO</h3><ul>
+<li>Google Analytics: Google Analytics is installed and correctly configured.</li>
+<li>Headings logic: Heading text helps to understand the content in the current page.</li>
+<li>sitemap.xml: A sitemap.xml exists and was submitted to Google Search Console (previously Google Webmaster Tools).</li>
+<li>robots.txt: The robots.txt is not blocking webpages.</li>
+</ul>
+<blockquote>
+<p>🛠 Test your robots.txt with <a href="https://www.google.com/webmasters/tools/robots-testing-tool" target="_blank" rel="noopener">Google Robots Testing Tool</a></p>
+</blockquote>
+<ul>
+<li>Structured Data: Pages using structured data are tested and are without errors. Structured data helps crawlers understand the content in the current page.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://developers.google.com/search/docs/guides/intro-structured-data" target="_blank" rel="noopener">Introduction to Structured Data — Search — Google Developers</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 Test your page with the <a href="https://developers.google.com/structured-data/testing-tool/" target="_blank" rel="noopener">Structured Data Testing Tool</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 Complete list of vocabularies that can be used as structured data. <a href="http://schema.org/docs/full.html" target="_blank" rel="noopener">Schema.org Full Heirarchy</a></p>
+</blockquote>
+<ul>
+<li>Sitemap HTML: An HTML sitemap is provided and is accessible via a link in the footer of your website.</li>
+</ul>
+<blockquote>
+<p>📖 <a href="https://support.google.com/webmasters/answer/183668?hl=en" target="_blank" rel="noopener">Sitemap guidelines — Google Support</a></p>
+</blockquote>
+<blockquote>
+<p>🛠 <a href="https://websiteseochecker.com/html-sitemap-generator/" target="_blank" rel="noopener">Sitemap generator</a></p>
+</blockquote>
+<span>Source: </span><a href="https://codeburst.io/the-front-end-checklist-8b2292fdda44" target="_blank" title="https://codeburst.io/the-front-end-checklist-8b2292fdda44" class="post-from">https://codeburst.io/the-front-end-checklist-8b2292fdda44</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/11/React-Component-Patterns.html" class="prev">NEXT</a><a href="/2017/11/Nghien-cuu-cai-thien-toc-do-web-app-voi-React-va-Preact-Treebo.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/11/The-Front-End-Checklist.html';
+var disqus_title = 'The Front-End Checklist';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/11/The-Front-End-Checklist.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Redux thật là đơn giản! (Phần 1) · Learn and Share</title><meta name="description" content="Redux thật là đơn giản! (Phần 1) - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Redux thật là đơn giản! (Phần 1)"><meta property="og:image"><meta property="og:description" content="Nguyên lý cơ bản của ReduxRedux nổi lên trong vòng 2 năm nay như 1 hiện tượng, nó thậm chí thay thế luôn kiến trúc Flux của Facebook dùng cho React, và hiện tại Facebook cũng khuyến cáo dev chuyển qua dùng Redux vì nhiều ưu điểm được cải tiến từ Flux.
+Mặc dù nó ko còn tính thời sự như hơn 1 năm trước nhưng mình vẫn quyết định viết series Redux để giúp các bạn mới học React và Redux tiếp cận dễ dàng hơn."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Redux thật là đơn giản! (Phần 1)</h1><h2 class="post-subtitle"></h2><header class="post-info">Sep 22, 2017<div class="tags"><a href="/tags/react" class="tag-link">#react</a><a href="/tags/javascript" class="tag-link">#javascript</a><a href="/tags/redux" class="tag-link">#redux</a></div><div class="fb-ir-time"><time dateTime="2017-09-22T07:02:19.000Z" class="op-modified"></time><time dateTime="2017-09-22T07:02:19.000Z" class="op-published"></time></div></header></div><div class="wrap"><div class="post-content"><h3 id="Nguyen-ly-co-ban-cua-Redux"><a href="#Nguyen-ly-co-ban-cua-Redux" class="headerlink" title="Nguyên lý cơ bản của Redux"></a>Nguyên lý cơ bản của Redux</h3><p>Redux nổi lên trong vòng 2 năm nay như 1 hiện tượng, nó thậm chí thay thế luôn kiến trúc Flux của Facebook dùng cho React, và hiện tại Facebook cũng khuyến cáo dev chuyển qua dùng Redux vì nhiều ưu điểm được cải tiến từ Flux.</p>
+<p>Mặc dù nó ko còn tính thời sự như hơn 1 năm trước nhưng mình vẫn quyết định viết series Redux để giúp các bạn mới học React và Redux tiếp cận dễ dàng hơn.<br><a id="more"></a><br><strong>Series gồm 3 phần:</strong></p>
+<blockquote>
+<p>Phần 1: <strong>Nguyên lý cơ bản của Redux</strong></p>
+</blockquote>
+<blockquote>
+<p>Phần 2: <a href="https://medium.com/innovatube/redux-v%E1%BB%9Bi-react-native-63ea25062084" target="_blank" rel="noopener"><strong>Cài đặt và sử dụng với React Native</strong></a></p>
+</blockquote>
+<blockquote>
+<p>Phần 3: <strong>Redux-middleware (Thunk, Saga, Observable) nên dùng cái nào?</strong></p>
+</blockquote>
+<p><strong><em>Mời các bạn đón đọc!</em></strong></p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*XHMeHrC4tdwTSHWRalm_lQ.png" alt=""></p>
+<p><strong>Lịch sử Redux (Câu chuyện vui)</strong></p>
+<blockquote>
+<p>Năm Quý Tị (2013), Facebook gia tộc bố cáo thiên hạ rằng Ăn Gô La đại pháp (Angular) của Google gia tộc chậm chạp, nặng nề, cho xuất thế một bộ chiêu thức gọi là Rối An Tâm Pháp (React).</p>
+</blockquote>
+<blockquote>
+<p>Thế nhưng Rối An Tâm Pháp lại chỉ là một bộ tâm pháp cường thân kiện thể, không thể dùng để rèn luyện nội công (chỉ là một library để render view). Do đó, không lâu sau Facebook gia tộc tiếp tục cho ra đời một bộ tâm pháp cơ bản (kiến trúc thiết kế) và một công pháp cùng tên là Phờ Lắc thần công (Flux). Nghe đồn Rối An Tâm Pháp và Phờ Lắc Thần Công kết hợp lại sẽ thành tuyệt học dời non lấp bể, không gì không làm đc. Nhân sĩ giang hồ (coder) vốn nhẹ dạ cả tin lại rủ nhau tu luyện.</p>
+</blockquote>
+<blockquote>
+<p>Phờ Lắc thần công rối rắm khó học, nhân sĩ 10 phần học thì 4–5 phần tẩu hỏa nhập ma, phần còn lại cũng trầy da tróc vẩy mà công lực cũng chẳng được như lời Facebook gia tộc quảng cáo.</p>
+</blockquote>
+<blockquote>
+<p>Bấy giờ có một nhân sĩ giang hồ tự là Đan (Dan Abramov), đang tu luyện đồng thời Phờ lắc thần công và Ê La thần công (Elm) mới nhận ra rằng hai môn võ công có nhiều điểm chung, chỉ khác chiêu thức, Đan bèn nảy ra ý định hợp nhất hai môn này lại. Không lâu sau (5/2015), Đan cho xuất thế một bộ công pháp mang tên Rì Đắt thần công (Redux), mang ưu điểm của cả hai môn võ công đồng thời loại bỏ những phức tạp dư thừa của Phờ Lắc thần công.</p>
+</blockquote>
+<blockquote>
+<p>Nhân sĩ giang hồ nghe vậy mừng lắm, thế là lại kéo nhau đi học Rì Đắt, còn Đan thì được Facebook<br>gia tộc mời về làm tộc nhân.</p>
+</blockquote>
+<blockquote>
+<p>Trích <a href="https://toidicodedao.com/2016/08/18/js-truyen-ki-chuong-2-vo-lam-day-song/" target="_blank" rel="noopener">“JavaScript Lược Sử Giang Hồ”</a></p>
+</blockquote>
+<p>Đọc qua đoạn đậm màu sắc kiếm hiệp ở trên chắc các bạn phần nào cũng hình dung được Redux sinh ra để làm gì đúng ko?</p>
+<h4 id="1-Redux-sinh-ra-de-lam-gi"><a href="#1-Redux-sinh-ra-de-lam-gi" class="headerlink" title="1. Redux sinh ra để làm gì?"></a><strong>1. Redux sinh ra để làm gì?</strong></h4><p>Do yêu cầu cho các ứng dụng single-page sử dụng Javascript ngày càng trở lên phức tạp thì code của chúng ta phải quản lý nhiều state hơn. State có thể bao gồm là data trả về từ phía Server và được cached lại hay như dữ liệu được tạo ra và thao tác ở phía client mà chưa được đẩy lên phía server. UI state cũng trở lên phức tạp vì chúng ta cần quản lý việc active Routes, selected tabs, spinners, điều khiển phân trang …vv.</p>
+<p>Việc quản lý từng thay đổi của <strong>state</strong> là rất khó: Vì nếu như khi ta thay đổi 1 <strong>Model -&gt;</strong> Model khác cũng thay đổi theo <strong>và</strong> nếu 1 <strong>View</strong> thay đổi -&gt; Model thay đổi -&gt; Model khác nữa cũng thay đổi theo. Về phía Front-end development, thì được kỳ vọng xử lý các vấn đề như “<strong>optimistic updates</strong>” (<em>Hiểu như thể một thay đổi trên giao diện được thực hiện thành công trước khi được xác nhận từ phía server)</em>, <strong>render phía server</strong>, <strong>featching data</strong> trước khi thực hiện chuyển trang …vv. Nếu như ko có một luồng xử lý khoa học và rõ ràng thì việc quản lý dữ liệu với các dự án lớn là vô cùng phức tạp.</p>
+<p>Vấn đề phức tạp như đề cập ở trên sẽ còn càng khó xử lý hơn nữa vì chúng ta đang trộn lẫn 2 khái niệm mà nó ko tự nhiên với tư duy thông thường của con người đó là: <strong>Biến đổi dữ liệu (Mutation)</strong> và <strong>tính bất đồng bộ (Asynchronicity)</strong>, mặc dù chúng sẽ là tuyệt vời nếu dùng tách rời nhau, nhưng hoạt động cùng nhau sẽ gây ra sự hỗn độn.</p>
+<p>React JS đã cố gắng giải quyết điều này ở trong tầng View bằng việc loại bỏ <strong>Bất đồng bộ</strong> và <strong>Không thao tác trực tiếp trên DOM</strong>, tuy nhiên việc quản lý state là tùy thuộc vào cách của bạn do vậy đây chính là lí do Redux xuất hiện để giúp bạn quản lý state một cách khoa học và hiệu quả hơn.</p>
+<h4 id="2-Tai-sao-nguoi-ta-hay-dung-React-voi-Redux"><a href="#2-Tai-sao-nguoi-ta-hay-dung-React-voi-Redux" class="headerlink" title="2. Tại sao người ta hay dùng React với Redux?"></a>2. Tại sao người ta hay dùng React với Redux?</h4><p>Redux ra đời lấy cảm hứng từ tư tưởng của ngôn ngữ <strong>Elm</strong> và kiến trúc <strong>Flux</strong> của Facebook . Do vậy Redux thường dùng kết hợp với React. Tuy nhiên hoàn toàn có thể sử dụng với các framework khác như <strong>Angular, Angular2, Backbone, Falcor, Deku, Swift.</strong></p>
+<p>Vậy bạn có cần biết Flux trước khi đến với Redux ko? câu trả lời là <strong>KHÔNG</strong> vì thật sự nếu bạn đã dùng flux thì cũng tốt, còn không thì bạn lại dễ tiếp cận hơn (tránh lối mòn :D).</p>
+<h4 id="3-Quan-ly-state-bang-Redux-nhu-the-nao"><a href="#3-Quan-ly-state-bang-Redux-nhu-the-nao" class="headerlink" title="3. Quản lý state bằng Redux như thế nào?"></a><strong>3. Quản lý state bằng Redux như thế nào?</strong></h4><p>Giả xử chúng ta có 1 ứng dụng mà các node như trong hình là tượng trưng cho một single page application được mô hình tree-node.</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*8Lq3goIUVsxUJHUxCoV_BA.png" alt=""></p>
+<p>Hình dung app của chúng ta vận hành bằng việc chuyển đổi qua lại data gữa các node, mỗi node (trang con) chứa một state và các node con nhận data được truyền từ node cha vào node con.</p>
+<p>Giả sử nếu có 1 action ở <strong>node d3</strong> được kích hoạt và ta muốn thay đổi state <strong>d4</strong> và <strong>c3</strong> thì luồng dữ liệu sẽ được truyền từ <strong>node d3</strong> trở về node gốc là <strong>a</strong>, xong sau đó từ <strong>node a</strong> lại phát đi data đến các node con:</p>
+<blockquote>
+<p>Cập nhật state cho node d4: <strong>d3-c2-b1-a-b2-c4-d4</strong></p>
+</blockquote>
+<blockquote>
+<p>Cập nhật state cho node c3: <strong>d3-c2-b1-a-b2-c3</strong></p>
+</blockquote>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*6Z045wEavIIcRgIkHYlhJA.png" alt=""></p>
+<p>Với những bài toán nhỏ (chỉ cần dùng React JS ko cần Redux) thì update state qua lại giữa các page có thể dễ dàng nhưng bạn thử hình dung ứng dụng lớn hơn có rất nhiều nhánh và node con thì việc thao tác update state qua lại giữa các page trở nên phức tạp hơn khiến cho flow của code cũng khó đọc và khó debug hơn.</p>
+<p>Và giải pháp Redux đưa ra là như sau:</p>
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*rIqP1BGb4jY2UK4qwDUBKQ.png" alt=""></p>
+<p>Quay lại bài toán ở trên thì ta chỉ cần map Action từ node d3 về store của redux rồi ở node c3 và d4 chỉ cần connect với store và cập nhật data thay đổi -&gt; hết sức đơn giản phải ko?</p>
+<h4 id="4-Nguyen-tac-hoat-dong-cua-Redux"><a href="#4-Nguyen-tac-hoat-dong-cua-Redux" class="headerlink" title="4. Nguyên tắc hoạt động của Redux"></a>4. <strong>Nguyên tắc hoạt động của Redux</strong></h4><p>Vừa xong phần lý thuyết để phần nào các bạn mường tượng ra triết lý của Redux tiếp theo sau đây mình sẽ đi sâu vào giải thích cụ thể hơn các thành phần của Redux</p>
+<p><strong>a. Khái niệm cốt lõi:</strong></p>
+<p>Hãy tưởng tượng state của app của bạn được mô tả như 1 object thuần dưới đây:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  todos: [&#123;</span><br><span class="line">    text: <span class="string">'Eat food'</span>,</span><br><span class="line">    completed: <span class="literal">true</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    text: <span class="string">'Exercise'</span>,</span><br><span class="line">    completed: <span class="literal">false</span></span><br><span class="line">  &#125;],</span><br><span class="line">  visibilityFilter: <span class="string">'SHOW_COMPLETED'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Thật sự thì nó trông giống như 1 <strong>model</strong> ko có phương thức <strong>setters</strong> ( nghĩa là chỉ có thể lấy ra data mà ko cho phép thay đổi data đó), điều này để tránh các thay đổi tùy tiện trong khi code gây ra việc khó debug.</p>
+<p>Để thay đổi state, chỉ có 1 cách duy nhất là dispatch 1 action (Mình sẽ nói ở phần sau).</p>
+<h4 id="b-3-nguyen-tac-cua-Redux"><a href="#b-3-nguyen-tac-cua-Redux" class="headerlink" title="b. 3 nguyên tắc của Redux"></a>b. 3 nguyên tắc của Redux</h4><blockquote>
+<ul>
+<li><strong>Single source of truth:</strong> State của toàn bộ ứng dụng được lưu trong trong 1 store duy nhất là 1 Object mô hình tree.</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><strong>- State is read-only:</strong> Chỉ có 1 cách duy nhất để thay đổi state đó là tạo ra một action (là 1 object mô tả những gì xảy ra)</p>
+</blockquote>
+<blockquote>
+<ul>
+<li><strong>Changes are made with pure functions:</strong> Để chỉ rõ state tree được thay đổi bởi 1 action bạn phải viết pure <strong>reducers</strong></li>
+</ul>
+</blockquote>
+<h4 id="c-Nguyen-ly-van-hanh"><a href="#c-Nguyen-ly-van-hanh" class="headerlink" title="c. Nguyên lý vận hành"></a><strong>c. Nguyên lý vận hành</strong></h4><p><img src="https://cdn-images-1.medium.com/max/1600/1*QERgzuzphdQz4e0fNs1CFQ.gif" alt=""></p>
+<h3 id="Actions"><a href="#Actions" class="headerlink" title="Actions"></a>Actions</h3><p>Trong Redux action là 1 pure object định nghĩa 2 thuộc tính là : <strong>type</strong>: kiểu mô tả action, và <strong>payload</strong>: giá trị tham số truyền lên</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  type: <span class="string">"KIEU_ACTION"</span>,</span><br><span class="line">  payload: <span class="comment">//tham số</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Reducers"><a href="#Reducers" class="headerlink" title="Reducers"></a>Reducers</h3><p>Action có nhiệm vụ mô tả những gì xảy ra nhưng lại không chỉ rõ phần state nào của response thay đổi -&gt; Việc này sẽ là của Reducer đảm nhiệm:</p>
+<p>Reducer nhận 2 tham số vào: 1 state cũ và action được gửi lên sau đó trả ra một state mới, ko làm thay đổi state cũ.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(previousState, action) =&gt; newState</span><br></pre></td></tr></table></figure>
+<h3 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h3><p>Store là 1 object lưu trữ state của toàn bộ ứng dụng có 3 phương thức sau:</p>
+<ul>
+<li><strong>getState()</strong>: Giúp lấy ra state hiện tại</li>
+<li><strong>dispatch(action)</strong>: Thực hiện gọi 1 action</li>
+<li><strong>subscrible(listener)</strong>:Nó có vai trò cực quan trọng, luôn luôn lắng nghe xem có thay đổi gì ko rồi ngay lập tức cập nhật ra View</li>
+</ul>
+<p>Để cho dễ hiểu hơn mình sẽ minh họa bằng ví dụ sau:</p>
+<p>Ta có 1 reducer, khở tạo store thông qua hàm <strong>createStore(reducer),</strong> trong Redux.</p>
+<script src="//gist.github.com/0ca86f0c8baaaf3331a23b0da255d7cb.js"></script>
+<p>Phân tích vị dụ trên ta có:</p>
+<ul>
+<li><strong>Step 1</strong>: Khởi tạo store cho project mà nó nhận tham số đầu vào là reducer <strong>counter</strong> ở trên:</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> store = createStore(counter);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Step 2</strong>: Sau đó giả sử ta muốn tăng giá trị lên 1 thì call action với type là “INCREMENT” dùng hàm dispatch() của store:</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.addEventListener(<span class="string">'click'</span>, () =&gt; &#123;</span><br><span class="line">   store.dispatch(&#123;<span class="attr">type</span>:<span class="string">"INCREMENT"</span>&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>Step 3</strong>: lúc này là nhệm vụ của reducer, sẽ xem kiểu action gọi lên là gì “INCREMENT” hay “DECREMENT” để nó return ra 1 new state cụ thể ở đây là state + 1.</li>
+<li><strong>Step 4:</strong> thằngsubcrible() trong store sẽ làm nhiệm vụ cập nhật tình hình thay đổi ra View:</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">store.subcrible(<span class="function"><span class="params">()</span> =&gt;</span> &#123;   </span><br><span class="line">    <span class="built_in">document</span>.body.innerText = store.getState(); </span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>Đến đây thì cơ bản bạn đã nắm được nguyên lý hoạt động cơ bản nhất của Redux mà tôi tạm rút gọn lại flow là:</p>
+<blockquote>
+<p>action -&gt; reducer -&gt; store -&gt; View</p>
+</blockquote>
+<h4 id="5-Tom-lai"><a href="#5-Tom-lai" class="headerlink" title="5. Tóm lại"></a>5. Tóm lại</h4><p>Ở phạm vi bài này mình đã trình bày nguyên lý cơ bản và cách thức hoạt động của Redux để các bạn có thể nắm được cũng như hình dung nó sinh ra để làm việc gì, bài viết mới thể hiện được các tình huống đơn giản nhất thông qua ví dụ đơn giản, còn trong khi làm dự án thực tế công việc chủ yếu là tương tác với server (fetch data) và xử lý data sau đó, thì đó là về bất đồng bộ <strong>asynchronous</strong> và xử lý <strong>side-effect</strong> sau mỗi action được gọi.</p>
+<p>Việc này sẽ được Redux xử lý với <strong>Redux-middleware</strong></p>
+<blockquote>
+<p>Hẹn gặp lại các bạn ở phần 2 về Redux: “<strong>Redux-middleware</strong>”</p>
+</blockquote>
+<p><strong>6. Nguồn tham khảo:</strong></p>
+<ul>
+<li><a href="http://redux.js.org/" target="_blank" rel="noopener">http://redux.js.org/</a></li>
+<li><a href="https://toidicodedao.com/2016/08/18/js-truyen-ki-chuong-2-vo-lam-day-song/" target="_blank" rel="noopener">https://toidicodedao.com/2016/08/18/js-truyen-ki-chuong-2-vo-lam-day-song/</a></li>
+<li><a href="https://egghead.io/lessons/javascript-redux-store-methods-getstate-dispatch-and-subscribe" target="_blank" rel="noopener">https://egghead.io/lessons/javascript-redux-store-methods-getstate-dispatch-and-subscribe</a></li>
+</ul>
+<span>Source: </span><a href="https://medium.com/innovatube/redux-th%E1%BA%ADt-l%C3%A0-%C4%91%C6%A1n-gi%E1%BA%A3n-ph%E1%BA%A7n-1-76a3fa2c31ab" target="_blank" title="https://medium.com/innovatube/redux-th%E1%BA%ADt-l%C3%A0-%C4%91%C6%A1n-gi%E1%BA%A3n-ph%E1%BA%A7n-1-76a3fa2c31ab" class="post-from">https://medium.com/innovatube/redux-th%E1%BA%ADt-l%C3%A0-%C4%91%C6%A1n-gi%E1%BA%A3n-ph%E1%BA%A7n-1-76a3fa2c31ab</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2017/09/Redux-that-la-don-gian-Phan-2.html" class="prev">NEXT</a><a href="/2017/09/Nhung-khai-niem-Javascript-ban-can-biet-khi-phong-van.html" class="next">PREV</a></div><div id="disqus_thread"></div><script>var disqus_shortname = 'nthung2112';
+var disqus_identifier = '2017/09/Redux-that-la-don-gian-Phan-1.html';
+var disqus_title = 'Redux thật là đơn giản! (Phần 1)';
+var disqus_url = 'http://nth-blogs.herokuapp.com/2017/09/Redux-that-la-don-gian-Phan-1.html';
+(function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//nthung2112.disqus.com/count.js" async></script><div class="copyright"><p>© 2017 - 2018 <a href="http://nth-blogs.herokuapp.com">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>
