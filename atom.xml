@@ -5,9 +5,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://nth-blogs.herokuapp.com/"/>
+  <link href="http://nthung2112.github.io/"/>
   <updated>2018-05-18T00:43:05.756Z</updated>
-  <id>http://nth-blogs.herokuapp.com/</id>
+  <id>http://nthung2112.github.io/</id>
   
   <author>
     <name>Hung Tan Nguyen</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Giới thiệu Progressive Web App</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/05/Gioi-thieu-Progressive-Web-App.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/05/Gioi-thieu-Progressive-Web-App.html</id>
+    <link href="http://nthung2112.github.io/2018/05/Gioi-thieu-Progressive-Web-App.html"/>
+    <id>http://nthung2112.github.io/2018/05/Gioi-thieu-Progressive-Web-App.html</id>
     <published>2018-05-18T00:30:00.000Z</published>
     <updated>2018-05-18T00:43:05.756Z</updated>
     
@@ -32,16 +32,16 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
-      <category term="pwa" scheme="http://nth-blogs.herokuapp.com/tags/pwa/"/>
+      <category term="pwa" scheme="http://nthung2112.github.io/tags/pwa/"/>
     
   </entry>
   
   <entry>
     <title>Giới thiệu về redux saga</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Gioi-thieu-ve-redux-saga.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Gioi-thieu-ve-redux-saga.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Gioi-thieu-ve-redux-saga.html"/>
+    <id>http://nthung2112.github.io/2018/04/Gioi-thieu-ve-redux-saga.html</id>
     <published>2018-04-30T11:37:00.000Z</published>
     <updated>2018-04-30T11:52:22.931Z</updated>
     
@@ -54,18 +54,18 @@
     </summary>
     
     
-      <category term="react" scheme="http://nth-blogs.herokuapp.com/tags/react/"/>
+      <category term="react" scheme="http://nthung2112.github.io/tags/react/"/>
     
-      <category term="redux" scheme="http://nth-blogs.herokuapp.com/tags/redux/"/>
+      <category term="redux" scheme="http://nthung2112.github.io/tags/redux/"/>
     
-      <category term="saga" scheme="http://nth-blogs.herokuapp.com/tags/saga/"/>
+      <category term="saga" scheme="http://nthung2112.github.io/tags/saga/"/>
     
   </entry>
   
   <entry>
     <title>Thinking in React</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Thinking-in-React.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Thinking-in-React.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Thinking-in-React.html"/>
+    <id>http://nthung2112.github.io/2018/04/Thinking-in-React.html</id>
     <published>2018-04-30T09:47:00.000Z</published>
     <updated>2018-04-30T10:03:55.328Z</updated>
     
@@ -81,16 +81,16 @@
     </summary>
     
     
-      <category term="react" scheme="http://nth-blogs.herokuapp.com/tags/react/"/>
+      <category term="react" scheme="http://nthung2112.github.io/tags/react/"/>
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
   </entry>
   
   <entry>
     <title>Tổng hợp các cheat sheets tốt nhất của front-end</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html"/>
+    <id>http://nthung2112.github.io/2018/04/Tong-hop-cac-cheat-sheets-tot-nhat-cua-front-end.html</id>
     <published>2018-04-30T08:36:00.000Z</published>
     <updated>2018-04-30T11:52:12.794Z</updated>
     
@@ -103,14 +103,14 @@
     </summary>
     
     
-      <category term="cheat sheets" scheme="http://nth-blogs.herokuapp.com/tags/cheat-sheets/"/>
+      <category term="cheat sheets" scheme="http://nthung2112.github.io/tags/cheat-sheets/"/>
     
   </entry>
   
   <entry>
     <title>Tất cả những gì bạn cần biết về CSS-in-JS</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html"/>
+    <id>http://nthung2112.github.io/2018/04/Tat-ca-nhung-gi-ban-can-biet-ve-CSS-in-JS.html</id>
     <published>2018-04-30T08:19:00.000Z</published>
     <updated>2018-04-30T08:31:39.212Z</updated>
     
@@ -123,16 +123,16 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
-      <category term="css" scheme="http://nth-blogs.herokuapp.com/tags/css/"/>
+      <category term="css" scheme="http://nthung2112.github.io/tags/css/"/>
     
   </entry>
   
   <entry>
     <title>Hiểu sâu về React Higher Order Components</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html"/>
+    <id>http://nthung2112.github.io/2018/04/Hieu-sau-ve-React-Higher-Order-Components.html</id>
     <published>2018-04-30T08:08:00.000Z</published>
     <updated>2018-04-30T08:31:59.004Z</updated>
     
@@ -146,18 +146,18 @@
     </summary>
     
     
-      <category term="react" scheme="http://nth-blogs.herokuapp.com/tags/react/"/>
+      <category term="react" scheme="http://nthung2112.github.io/tags/react/"/>
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
-      <category term="hoc" scheme="http://nth-blogs.herokuapp.com/tags/hoc/"/>
+      <category term="hoc" scheme="http://nthung2112.github.io/tags/hoc/"/>
     
   </entry>
   
   <entry>
     <title>Cách phân nhánh và chia việc trong nhóm với Git</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html"/>
+    <id>http://nthung2112.github.io/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html</id>
     <published>2018-04-26T14:50:00.000Z</published>
     <updated>2018-04-30T08:06:42.792Z</updated>
     
@@ -171,14 +171,14 @@
     </summary>
     
     
-      <category term="git" scheme="http://nth-blogs.herokuapp.com/tags/git/"/>
+      <category term="git" scheme="http://nthung2112.github.io/tags/git/"/>
     
   </entry>
   
   <entry>
     <title>Tìm hiểu về một số khái niệm trong Git</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-ve-mot-so-khai-niem-trong-Git.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-ve-mot-so-khai-niem-trong-Git.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Tim-hieu-ve-mot-so-khai-niem-trong-Git.html"/>
+    <id>http://nthung2112.github.io/2018/04/Tim-hieu-ve-mot-so-khai-niem-trong-Git.html</id>
     <published>2018-04-26T07:39:00.000Z</published>
     <updated>2018-04-30T08:06:42.823Z</updated>
     
@@ -191,14 +191,14 @@
     </summary>
     
     
-      <category term="git" scheme="http://nth-blogs.herokuapp.com/tags/git/"/>
+      <category term="git" scheme="http://nthung2112.github.io/tags/git/"/>
     
   </entry>
   
   <entry>
     <title>Progressive Web App tương lai của nền tảng web</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Progressive-Web-App-tuong-lai-cua-nen-tang-web.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Progressive-Web-App-tuong-lai-cua-nen-tang-web.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Progressive-Web-App-tuong-lai-cua-nen-tang-web.html"/>
+    <id>http://nthung2112.github.io/2018/04/Progressive-Web-App-tuong-lai-cua-nen-tang-web.html</id>
     <published>2018-04-25T11:15:00.000Z</published>
     <updated>2018-04-30T08:06:42.807Z</updated>
     
@@ -214,16 +214,16 @@
     </summary>
     
     
-      <category term="pwa" scheme="http://nth-blogs.herokuapp.com/tags/pwa/"/>
+      <category term="pwa" scheme="http://nthung2112.github.io/tags/pwa/"/>
     
-      <category term="web" scheme="http://nth-blogs.herokuapp.com/tags/web/"/>
+      <category term="web" scheme="http://nthung2112.github.io/tags/web/"/>
     
   </entry>
   
   <entry>
     <title>Biên niên sử về bố cục trong trang web</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html"/>
+    <id>http://nthung2112.github.io/2018/04/Bien-nien-su-ve-bo-cuc-trong-trang-web.html</id>
     <published>2018-04-25T10:57:00.000Z</published>
     <updated>2018-04-25T11:06:06.716Z</updated>
     
@@ -236,14 +236,14 @@
     </summary>
     
     
-      <category term="css" scheme="http://nth-blogs.herokuapp.com/tags/css/"/>
+      <category term="css" scheme="http://nthung2112.github.io/tags/css/"/>
     
   </entry>
   
   <entry>
     <title>[Regex] Học rồi mà như chưa học</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html"/>
+    <id>http://nthung2112.github.io/2018/04/Regex-Hoc-roi-ma-nhu-chua-hoc.html</id>
     <published>2018-04-25T10:23:00.000Z</published>
     <updated>2018-04-25T10:44:38.060Z</updated>
     
@@ -256,14 +256,14 @@
     </summary>
     
     
-      <category term="regex" scheme="http://nth-blogs.herokuapp.com/tags/regex/"/>
+      <category term="regex" scheme="http://nthung2112.github.io/tags/regex/"/>
     
   </entry>
   
   <entry>
     <title>Học Regular Expression và cuộc đời bạn sẽ bớt khổ</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html"/>
+    <id>http://nthung2112.github.io/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html</id>
     <published>2018-04-25T08:27:00.000Z</published>
     <updated>2018-04-30T08:06:42.792Z</updated>
     
@@ -276,14 +276,14 @@
     </summary>
     
     
-      <category term="regex" scheme="http://nth-blogs.herokuapp.com/tags/regex/"/>
+      <category term="regex" scheme="http://nthung2112.github.io/tags/regex/"/>
     
   </entry>
   
   <entry>
     <title>Tìm hiểu Higher-Order Function (HOF) và Currying qua một số ví dụ</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-Higher-Order-Function-HOF-va-Currying-qua-mot-so-vi-du-3.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/04/Tim-hieu-Higher-Order-Function-HOF-va-Currying-qua-mot-so-vi-du-3.html</id>
+    <link href="http://nthung2112.github.io/2018/04/Tim-hieu-Higher-Order-Function-HOF-va-Currying-qua-mot-so-vi-du-3.html"/>
+    <id>http://nthung2112.github.io/2018/04/Tim-hieu-Higher-Order-Function-HOF-va-Currying-qua-mot-so-vi-du-3.html</id>
     <published>2018-04-03T04:20:00.000Z</published>
     <updated>2018-05-18T01:02:21.693Z</updated>
     
@@ -298,19 +298,19 @@
     
     </summary>
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/categories/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/categories/javascript/"/>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
-      <category term="hof" scheme="http://nth-blogs.herokuapp.com/tags/hof/"/>
+      <category term="hof" scheme="http://nthung2112.github.io/tags/hof/"/>
     
   </entry>
   
   <entry>
     <title>CSS Grid vs Flexbox sử dụng như thế nào</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html</id>
+    <link href="http://nthung2112.github.io/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html"/>
+    <id>http://nthung2112.github.io/2018/03/CSS-Grid-vs-Flexbox-su-dung-nhu-the-nao.html</id>
     <published>2018-03-25T13:52:00.000Z</published>
     <updated>2018-03-25T07:39:52.137Z</updated>
     
@@ -325,18 +325,18 @@
     </summary>
     
     
-      <category term="css" scheme="http://nth-blogs.herokuapp.com/tags/css/"/>
+      <category term="css" scheme="http://nthung2112.github.io/tags/css/"/>
     
-      <category term="flexbox" scheme="http://nth-blogs.herokuapp.com/tags/flexbox/"/>
+      <category term="flexbox" scheme="http://nthung2112.github.io/tags/flexbox/"/>
     
-      <category term="grid" scheme="http://nth-blogs.herokuapp.com/tags/grid/"/>
+      <category term="grid" scheme="http://nthung2112.github.io/tags/grid/"/>
     
   </entry>
   
   <entry>
     <title>Một số thủ thuật Chrome DevTools có thể bạn đã biết</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html</id>
+    <link href="http://nthung2112.github.io/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html"/>
+    <id>http://nthung2112.github.io/2018/03/Mot-so-thu-thuat-Chrome-DevTools-co-the-ban-da-biet.html</id>
     <published>2018-03-25T07:54:00.000Z</published>
     <updated>2018-03-25T15:14:28.961Z</updated>
     
@@ -349,19 +349,19 @@
     
     </summary>
     
-      <category term="Tips" scheme="http://nth-blogs.herokuapp.com/categories/Tips/"/>
+      <category term="Tips" scheme="http://nthung2112.github.io/categories/Tips/"/>
     
     
-      <category term="tips" scheme="http://nth-blogs.herokuapp.com/tags/tips/"/>
+      <category term="tips" scheme="http://nthung2112.github.io/tags/tips/"/>
     
-      <category term="chorme" scheme="http://nth-blogs.herokuapp.com/tags/chorme/"/>
+      <category term="chorme" scheme="http://nthung2112.github.io/tags/chorme/"/>
     
   </entry>
   
   <entry>
     <title>Kiến thức cho phỏng vấn Javascript developer</title>
-    <link href="http://nth-blogs.herokuapp.com/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html"/>
-    <id>http://nth-blogs.herokuapp.com/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html</id>
+    <link href="http://nthung2112.github.io/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html"/>
+    <id>http://nthung2112.github.io/2018/01/Kien-thuc-cho-phong-van-Javascript-developer.html</id>
     <published>2018-01-02T15:12:14.000Z</published>
     <updated>2018-03-25T04:12:04.733Z</updated>
     
@@ -375,14 +375,14 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
   </entry>
   
   <entry>
     <title>Cải thiện tốc độ Web App với Tinder</title>
-    <link href="http://nth-blogs.herokuapp.com/2017/12/Cai-thien-toc-do-Web-App-voi-Tinder.html"/>
-    <id>http://nth-blogs.herokuapp.com/2017/12/Cai-thien-toc-do-Web-App-voi-Tinder.html</id>
+    <link href="http://nthung2112.github.io/2017/12/Cai-thien-toc-do-Web-App-voi-Tinder.html"/>
+    <id>http://nthung2112.github.io/2017/12/Cai-thien-toc-do-Web-App-voi-Tinder.html</id>
     <published>2017-12-25T11:29:59.000Z</published>
     <updated>2018-03-24T03:25:31.654Z</updated>
     
@@ -396,14 +396,14 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
   </entry>
   
   <entry>
     <title>The Cost Of JavaScript</title>
-    <link href="http://nth-blogs.herokuapp.com/2017/12/The-Cost-Of-JavaScript.html"/>
-    <id>http://nth-blogs.herokuapp.com/2017/12/The-Cost-Of-JavaScript.html</id>
+    <link href="http://nthung2112.github.io/2017/12/The-Cost-Of-JavaScript.html"/>
+    <id>http://nthung2112.github.io/2017/12/The-Cost-Of-JavaScript.html</id>
     <published>2017-12-16T08:01:29.000Z</published>
     <updated>2017-12-25T03:39:22.196Z</updated>
     
@@ -417,14 +417,14 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
   </entry>
   
   <entry>
     <title>JavaScript Start-up Performance</title>
-    <link href="http://nth-blogs.herokuapp.com/2017/12/JavaScript-Start-up-Performance.html"/>
-    <id>http://nth-blogs.herokuapp.com/2017/12/JavaScript-Start-up-Performance.html</id>
+    <link href="http://nthung2112.github.io/2017/12/JavaScript-Start-up-Performance.html"/>
+    <id>http://nthung2112.github.io/2017/12/JavaScript-Start-up-Performance.html</id>
     <published>2017-12-16T07:46:39.000Z</published>
     <updated>2017-12-16T07:59:58.668Z</updated>
     
@@ -440,14 +440,14 @@
     </summary>
     
     
-      <category term="javascript" scheme="http://nth-blogs.herokuapp.com/tags/javascript/"/>
+      <category term="javascript" scheme="http://nthung2112.github.io/tags/javascript/"/>
     
   </entry>
   
   <entry>
     <title>Hiểu rõ về Regular Expressions: RegEx không khó như tưởng tượng</title>
-    <link href="http://nth-blogs.herokuapp.com/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html"/>
-    <id>http://nth-blogs.herokuapp.com/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html</id>
+    <link href="http://nthung2112.github.io/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html"/>
+    <id>http://nthung2112.github.io/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html</id>
     <published>2017-12-15T15:23:22.000Z</published>
     <updated>2017-12-15T15:29:08.323Z</updated>
     
@@ -465,7 +465,7 @@
     </summary>
     
     
-      <category term="Regex" scheme="http://nth-blogs.herokuapp.com/tags/Regex/"/>
+      <category term="Regex" scheme="http://nthung2112.github.io/tags/Regex/"/>
     
   </entry>
   
