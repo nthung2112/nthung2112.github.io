@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><title> Một số nguyên tắc, định luật trong lập trình · Learn and Share</title><meta name="description" content="Một số nguyên tắc, định luật trong lập trình - Hung Tan Nguyen"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FB4D42"><meta name="google-site-verification" content="rk-Nc1c8xi1CdZ0ZQIVV-ifsndGrHanIuSHI-yTHZYE"><link rel="short icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="stylesheet" href="/css/zoom.css"><meta property="og:title" content="Một số nguyên tắc, định luật trong lập trình"><meta property="og:image" content="https://cdn-images-1.medium.com/max/800/1*y2ULNDQK6jlUJkOfGa5obw.jpeg"><meta property="og:description" content="Nguyên tắc DemeterCòn có tên gọi khác là nguyên tắc “càng biết ít càng tốt”.
+Demeter là tên gọi của Nữ thần nông nghiệp, cũng là nữ thần phân phát trong thần thoại Hi Lạp. Tên bà được dùng để đánh dấu sự ra đời của nguyên tắc này, đây có thể xem là một triết lý nền tảng của việc lập trình được sinh ra từ một aspect-oriented programming (AOP) project cùng tên."></head><body><div class="wrap"><div class="header"><a href="/" class="logo-link"><img src="/favicon.png"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/nthung2112" target="_blank" class="nav-list-link">GITHUB</a></li><li class="nav-list-item"><a href="/about" target="_self" class="nav-list-link">ABOUT</a></li><li class="nav-list-item"><a href="/atom.xml" target="_self" class="nav-list-link">RSS</a></li><li class="nav-list-item search-form-input"><div class="search-icon"><div class="search-icon__circle"></div><div class="search-icon__rectangle"></div></div></li></ul><div class="ins-search"><div class="ins-search-mask"></div><div class="ins-search-container"><div class="ins-input-wrapper"><input type="text" placeholder="Type something..." class="ins-search-input"><span class="ins-close ins-selectable"><div class="close-icon"><div class="close-icon__x"></div><div class="close-icon__y"></div></div></span></div><div class="ins-section-wrapper"><div class="ins-section-container"></div></div></div></div><script>var rootUrl = "/";
+var contentUrl = '/content.json';
+(function (window) {
+  var INSIGHT_CONFIG = {
+  TRANSLATION: {
+      POSTS:'Posts',
+      PAGES: 'Pages',
+      CATEGORIES: 'Categories',
+      TAGS: 'Tags',
+      UNTITLED: '(Untitled)'
+    },
+    ROOT_URL: rootUrl,
+    CONTENT_URL: contentUrl,
+  };
+  window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);</script></div></div><section class="container"><div class="post"><article class="post-block"><div class="wrap"><h1 class="post-title">Một số nguyên tắc, định luật trong lập trình</h1><h2 class="post-subtitle"></h2><header class="post-info">Nov 6, 2018<div class="tags"></div><div class="fb-ir-time"><time dateTime="2018-11-06T00:29:00.000Z" class="op-modified"></time><time dateTime="2018-11-06T00:29:00.000Z" class="op-published"></time></div></header></div><div class="post-banner"><img src="https://cdn-images-1.medium.com/max/800/1*y2ULNDQK6jlUJkOfGa5obw.jpeg"></div><div class="wrap"><div class="post-content"><h2 id="Nguyen-tac-Demeter"><a href="#Nguyen-tac-Demeter" class="headerlink" title="Nguyên tắc Demeter"></a>Nguyên tắc Demeter</h2><p>Còn có tên gọi khác là nguyên tắc “càng biết ít càng tốt”.</p>
+<p>Demeter là tên gọi của Nữ thần nông nghiệp, cũng là nữ thần phân phát trong thần thoại Hi Lạp. Tên bà được dùng để đánh dấu sự ra đời của nguyên tắc này, đây có thể xem là một triết lý nền tảng của việc lập trình được sinh ra từ một aspect-oriented programming (AOP) project cùng tên.<br><a id="more"></a><br>Quan điểm cơ bản của nguyên tắc này chính là : tối giản sự hiểu biết của 1 object về cấu trúc, thuộc tính của các object khác ngoài nó (bao gồm các thành phần con).</p>
+<p><a href="http://en.wikipedia.org/wiki/Law_of_Demeter" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Law_of_Demeter</a></p>
+<p>Nói một cách đơn giản là không được tiếp xúc với thuộc tính, method của các object khác một cách trực tiếp.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#Vi phạm nguyên tắc Demeter</span><br><span class="line"><span class="built_in">console</span>.log(aStudent.class.grade)</span><br><span class="line"></span><br><span class="line">#Không vi phạm nguyên tắc Demeter</span><br><span class="line"><span class="built_in">console</span>.log(aStudent.getGrade())</span><br></pre></td></tr></table></figure>
+<h2 id="Dinh-luat-Wirth"><a href="#Dinh-luat-Wirth" class="headerlink" title="Định luật Wirth"></a>Định luật Wirth</h2><p>“Software gets slower faster than hardware gets faster” – “Tốc độ tiến hóa của phần cứng không bằng tốc độ thoái hóa của phần mềm.”</p>
+<p><a href="http://en.wikipedia.org/wiki/Wirth%E2%80%99s_law" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Wirth’s_law</a></p>
+<p>Có lẽ ý chính của nó là : lập trình ngày càng dùng nhiều tài nguyên phong phú nên framework phải luôn tiến hóa để phục vụ cho việc đó. Suy ra, tốc độ phần cứng dù có tang lên đi nữa thì tốc độ phần mềm cũng chẳng hề thay đổi gì.</p>
+<h2 id="Dinh-luat-Brook"><a href="#Dinh-luat-Brook" class="headerlink" title="Định luật Brook"></a>Định luật Brook</h2><p>Đây là một định luật dựa trên kinh nghiệm thực tế : “Đưa thêm người vào 1 project đang chậm, sẽ chỉ khiến nó càng chậm hơn.”</p>
+<p>Hay có thể nói theo một cách khác nữa là “Tập hợp 9 bà bầu lại cũng không thể khiến đứa trẻ ra đời sau 1 tháng.”</p>
+<p>Luận thuyết cơ bản của định luật này là</p>
+<ul>
+<li>Cần thời gian để quen với project </li>
+<li>Công sức dành cho việc communication sẽ tăng </li>
+</ul>
+<p><a href="http://en.wikipedia.org/wiki/Brooks%27s_law" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Brooks’s_law</a></p>
+<h2 id="Dinh-luat-Conway"><a href="#Dinh-luat-Conway" class="headerlink" title="Định luật Conway"></a>Định luật Conway</h2><p>“Organizations which design systems … are constrained to produce designs which are copies of the communication structures of these organizations.”</p>
+<p>“Một công ty thiết kế hệ thống thế nào cũng sẽ làm ra những thiết kế giống y hệt với thiết kế hệ thống của chính công ty họ.”</p>
+<p><a href="http://en.wikipedia.org/wiki/Conway%27s_law" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Conway’s_law</a></p>
+<p>Nghiên cứu gần đây chỉ ra rằng hệ thống của công ty là nhân tố ảnh hưởng lớn nhất đến vấn đề phát sinh ra bug của sản phẩm.</p>
+<p><a href="http://research.microsoft.com/apps/pubs/default.aspx?id=70535" target="_blank" rel="noopener">http://research.microsoft.com/apps/pubs/default.aspx?id=70535</a></p>
+<h2 id="Nguyen-tac-bat-ngo-nho-nhat-least-astonishment"><a href="#Nguyen-tac-bat-ngo-nho-nhat-least-astonishment" class="headerlink" title="Nguyên tắc bất ngờ nhỏ nhất (least astonishment)"></a>Nguyên tắc bất ngờ nhỏ nhất (least astonishment)</h2><p>Trong trường hợp trên cùng 1 interface có 2 yếu tố hành xử mâu thuẫn với nhau, hoặc cách hành xử không rõ ràng thì cần phải chọn cách hành xử nào gây bất ngờ ít nhất cho người sử dụng.</p>
+<p><a href="http://en.wikipedia.org/wiki/Principle_of_least_astonishment" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Principle_of_least_astonishment</a></p>
+<p>Đây là 1 nguyên tắc về giao diện người dùng.</p>
+<p>Một ví dụ đơn giản :</p>
+<p>Trên 1 interface có 2 chức năng :</p>
+<ul>
+<li>Ấn ctrl+Q để thoát chương trình. </li>
+<li>Nhập macro (lưu 1 tổ hợp phím mang 1 chức năng nào đó để tiện cho việc sử dụng về sau). </li>
+</ul>
+<p>Sẽ có trường hợp user muốn dùng Ctrl+Q cho macro của mình, nên hành xử đúng với nguyên tắc bất ngờ nhỏ nhất chính là : trong khi nhập macro thì ctrl+Q được coi như là tổ hợp phím bình thường, không phải là lệnh tắt chương trình. Đây chính là điều gây bất ngờ ít nhất cho người dùng.</p>
+<h2 id="Nguyen-tac-Boy-Scout"><a href="#Nguyen-tac-Boy-Scout" class="headerlink" title="Nguyên tắc Boy Scout"></a>Nguyên tắc Boy Scout</h2><p>Nguyên tắc của các tổ chức Boy scout chính là : lúc đi phải sạch đẹp hơn lúc đến.</p>
+<p>Trong lĩnh vực lập trình thì nguyên tắc đó sẽ được hiểu là “Khi bạn checkin 1 module thì lúc đó nó phải đẹp hơn lúc bạn checkout.”</p>
+<h2 id="Nguyen-tac-YAGNI"><a href="#Nguyen-tac-YAGNI" class="headerlink" title="Nguyên tắc YAGNI"></a>Nguyên tắc YAGNI</h2><p>Viết tắt của “You ain’t gonna need it” – Cái (chức năng, phần) ấy rồi sẽ không cần thiết.</p>
+<p>Đó là một câu khẩu ngữ nhắc nhở người lập trình rằng trong quy trình Extreme Programming (lập trình cực hạn) thì : “Chưa phải lúc cần thiết thì chưa được phép làm.”</p>
+<h2 id="Nguyen-tac-DRY"><a href="#Nguyen-tac-DRY" class="headerlink" title="Nguyên tắc DRY"></a>Nguyên tắc DRY</h2><p>Viết tắt của “Don’t repeat yourself” – với ý nghĩa là “Đừng lặp lại những gì giống nhau”.</p>
+<p><a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/Don’t_repeat_yourself</a></p>
+<p>Khi nguyên tắc này được áp dụng tốt, dù ta có thay đổi 1 phần thì những phần không liên quan cũng sẽ không bị thay đổi theo. Hơn nữa, những phần có liên quan sẽ được thay đổi cùng 1 lượt, giúp ích rất nhiều cho cả khâu estimate và khâu thực hiện.</p>
+<h2 id="Nguyen-tac-KISS"><a href="#Nguyen-tac-KISS" class="headerlink" title="Nguyên tắc KISS"></a>Nguyên tắc KISS</h2><p>Viết tắt của “Keep it simple, stupid” – “Cứ đơn giản thôi, đồ ngu!”. Đây là 1 triết lí của Hải quân Mỹ.</p>
+<p><a href="http://en.wikipedia.org/wiki/KISS_principle" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/KISS_principle</a></p>
+<p>Những triết lý tương tự có thể kể đến là :</p>
+<p><strong>Phương châm dao cạo Okham (Okham’s razor)</strong> – “Không đưa ra nhiều giả thiết nếu không cần thiết. Cái gì cần ít giả thiết để chứng minh sẽ không thể chứng minh được bằng nhiều giả thiết.”</p>
+<p><strong>Albert Einstein</strong> – “Làm cái gì cũng nên đơn giản nhất có thể, nhưng đơn giản quá thì không được”.</p>
+<p><strong>Leonardo da Vinci</strong> – “Đơn giản nhất chính là điêu luyện nhất”.</p>
+<p><strong>Antoine de Saint- Exupéry</strong> – “Hoàn hảo, không phải là không thêm vào được nữa, mà là không thể bớt đi được nữa”.</p>
+<h2 id="Nguyen-tac-SOLID"><a href="#Nguyen-tac-SOLID" class="headerlink" title="Nguyên tắc SOLID"></a>Nguyên tắc SOLID</h2><p>Tập hợp những nguyên tắc trong lập trình hướng đối tượng. Các chữ cái đầu hợp lại thành SOLID.</p>
+<p><a href="http://en.wikipedia.org/wiki/SOLID_(object-oriented_design" target="_blank" rel="noopener">http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)</a>)</p>
+<p><strong>SRP (Single Responsibility Principle)</strong> – “Một class chỉ được có 1 nhiệm vụ” hay nói cách khác, “nếu muốn chỉnh sửa class thì chỉ được phép có 1 và chỉ 1 lý do”.</p>
+<p><strong>OCP (Open/closed principle)</strong> – “Mở class khi cần mở rộng nó, đóng class khi cần chỉnh sửa nó”.</p>
+<p><strong>LSP (Liskov substitution principle)</strong> – “Subtype phải luôn có thể được thay thế bằng supertype”.</p>
+<p><strong>ISP (Interface segregation principle)</strong> – “Việc dùng nhiều interface cho các client khác nhau, tốt hơn là việc chỉ dùng 1 interface cho cùng lúc nhiều mục đích” hay nói cách khác “Không được phép hạn chế access vào những method mà client không sử dụng”.</p>
+<p><strong>DIP (Dependency inversion principle)</strong> – “Module tầng trên không được phụ thuộc vào module tầng dưới. Bất cứ module nào cũng phải phụ thuộc vào cái trừu tượng, không phải vào cái cụ thể”.</p>
+<span>Source: </span><a href="https://qiita.com/hirokidaichi/items/d6c473d8011bd9330e63" target="_blank" title="https://qiita.com/hirokidaichi/items/d6c473d8011bd9330e63" class="post-from">https://qiita.com/hirokidaichi/items/d6c473d8011bd9330e63</a></div></div></article></div></section><div class="wrap"><footer><div class="paginator"><a href="/2018/11/Cach-Javascript-hoat-dong-P1-Khai-quat-ve-engine-runtime-va-callstack.html" class="prev">NEXT</a><a href="/2018/10/Khi-nao-nen-su-dung-PureComponent-hoac-Component.html" class="next">PREV</a></div><div class="copyright"><p>© 2017 - 2018 <a href="http://nthung2112.github.io">Hung Tan Nguyen</a>, unless otherwise noted.</p></div></footer></div><script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-41935289-1",'auto');ga('send','pageview');</script><script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script><script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script><script src="/js/zoom.js"></script><script src="/js/insight.js"></script></body></html>

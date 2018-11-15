@@ -2,6 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nthung2112.github.io/2018/11/Cach-Javascript-hoat-dong-P4-Event-loop-lap-trinh-bat-dong-bo-5-meo-cai-thien-Async-Await.html</loc>
+    
+    <lastmod>2018-11-13T16:39:26.827Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/11/Cach-Javascript-hoat-dong-P3-Quan-ly-bo-nho-4-truong-hop-memory-leaks-pho-bien.html</loc>
+    
+    <lastmod>2018-11-13T16:05:48.137Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/11/Cach-Javascript-hoat-dong-P2-Ben-trong-engine-V8-5-meo-de-toi-uu-hoa-code.html</loc>
+    
+    <lastmod>2018-11-13T15:58:38.369Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/11/Cach-Javascript-hoat-dong-P1-Khai-quat-ve-engine-runtime-va-callstack.html</loc>
+    
+    <lastmod>2018-11-13T15:51:06.078Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/10/Khi-nao-nen-su-dung-PureComponent-hoac-Component.html</loc>
+    
+    <lastmod>2018-11-07T01:00:18.161Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/11/Mot-so-nguyen-tac-dinh-luat-trong-lap-trinh.html</loc>
+    
+    <lastmod>2018-11-06T00:41:54.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/09/Redux-hay-MobX-Ly-giai-su-nham-lan.html</loc>
+    
+    <lastmod>2018-11-06T00:20:35.856Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/08/Cach-toi-uu-trang-web-cua-ban-voi-nen-Gzip.html</loc>
+    
+    <lastmod>2018-09-07T13:53:33.634Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/07/Object-Function-Method-Constructor-in-JavaScript.html</loc>
+    
+    <lastmod>2018-09-07T13:27:14.724Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/07/Memory-Leaks-trong-Javascript.html</loc>
+    
+    <lastmod>2018-09-07T13:27:14.713Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html</loc>
+    
+    <lastmod>2018-09-07T13:27:14.704Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nthung2112.github.io/2018/07/Functional-trong-Javascript-voi-ES6-Recursive-Patterns.html</loc>
+    
+    <lastmod>2018-09-07T13:27:14.693Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nthung2112.github.io/2018/07/Lam-the-nao-de-thanh-thao-CSS-Grid-trong-nhay-mat.html</loc>
     
     <lastmod>2018-07-10T02:08:58.475Z</lastmod>
@@ -212,14 +296,14 @@
   </url>
   
   <url>
-    <loc>http://nthung2112.github.io/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html</loc>
+    <loc>http://nthung2112.github.io/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html</loc>
     
     <lastmod>2018-04-30T08:06:42.792Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://nthung2112.github.io/2018/04/Cach-phan-nhanh-va-chia-viec-trong-nhom-voi-Git.html</loc>
+    <loc>http://nthung2112.github.io/2018/04/Hoc-Regular-Expression-va-cuoc-doi-ban-se-bot-kho.html</loc>
     
     <lastmod>2018-04-30T08:06:42.792Z</lastmod>
     
@@ -271,13 +355,6 @@
     <loc>http://nthung2112.github.io/2017/12/JavaScript-Start-up-Performance.html</loc>
     
     <lastmod>2017-12-16T07:59:58.668Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nthung2112.github.io/2017/12/Hieu-ro-ve-Regular-Expressions-RegEx-khong-kho-nhu-tuong-tuong.html</loc>
-    
-    <lastmod>2017-12-15T15:29:08.323Z</lastmod>
     
   </url>
   
@@ -653,14 +730,14 @@
   </url>
   
   <url>
-    <loc>http://nthung2112.github.io/categories/index.html</loc>
+    <loc>http://nthung2112.github.io/tags/index.html</loc>
     
     <lastmod>2017-03-09T14:16:54.197Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://nthung2112.github.io/tags/index.html</loc>
+    <loc>http://nthung2112.github.io/categories/index.html</loc>
     
     <lastmod>2017-03-09T14:16:54.197Z</lastmod>
     
