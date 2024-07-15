@@ -68,6 +68,7 @@ export const DATA = {
       title: 'Senior Frontend Engineer',
       logoUrl: '/nab.png',
       start: 'February, 2021',
+      end: '',
       description:
         'Implemented the Bitcoin discreet log contract (DLC) protocol specifications as an open source Typescript SDK. Dockerized all microservices and setup production kubernetes cluster. Architected a data lake using AWS S3 and Athena for historical backtesting of bitcoin trading strategies. Built a mobile app using react native and typescript.',
     },
