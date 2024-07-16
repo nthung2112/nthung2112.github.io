@@ -19,7 +19,7 @@ export const DATA = {
     { href: '#', icon: PencilLine, label: 'Notes' },
   ],
   contact: {
-    email: 'hello@example.com',
+    email: 'nthung2112@gmail.com',
     tel: '+123456789',
     social: {
       GitHub: {
@@ -34,7 +34,7 @@ export const DATA = {
         url: 'https://www.linkedin.com/in/nthung2112',
         icon: Icons.linkedin,
 
-        navbar: true,
+        navbar: false,
       },
       X: {
         name: 'X',
@@ -47,7 +47,7 @@ export const DATA = {
         name: 'Youtube',
         url: 'https://www.youtube.com/@nthung2112',
         icon: Icons.youtube,
-        navbar: true,
+        navbar: false,
       },
       email: {
         name: 'Send Email',
