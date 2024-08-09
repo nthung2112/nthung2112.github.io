@@ -11,7 +11,7 @@ export const DATA = {
   summary:
     'I specialize in crafting high-performance apps while prioritizing user experience. My written work covers modern JavaScript, TypeScript, React, and Node.js.',
   avatarUrl: '/me.png',
-  skills: ['React', 'Next.js', 'Remix', 'Typescript', 'Node.js', 'Python', 'Postgres', 'Docker'],
+  skills: ['React', 'React Native', 'Next.js', 'Remix', 'Typescript', 'Node.js', 'GraphQL', 'Firebase', 'Postgres', 'Docker'],
   navbar: [
     { href: '/', icon: HomeIcon, label: 'Home' },
     { href: '/blog', icon: NotebookIcon, label: 'Blog' },
@@ -20,7 +20,7 @@ export const DATA = {
   ],
   contact: {
     email: 'nthung2112@gmail.com',
-    tel: '+123456789',
+    tel: '+8423456789',
     social: {
       GitHub: {
         name: 'GitHub',
@@ -67,8 +67,8 @@ export const DATA = {
       location: 'HCM, Vietnam',
       title: 'Senior Frontend Engineer',
       logoUrl: '/nab.png',
-      start: 'February, 2021',
-      end: '',
+      start: 'Feb, 2021',
+      end: 'Current',
       description:
         'Implemented the Bitcoin discreet log contract (DLC) protocol specifications as an open source Typescript SDK. Dockerized all microservices and setup production kubernetes cluster. Architected a data lake using AWS S3 and Athena for historical backtesting of bitcoin trading strategies. Built a mobile app using react native and typescript.',
     },
@@ -79,8 +79,8 @@ export const DATA = {
       location: 'HCM, Vietnam',
       title: 'Senior Frontend Engineer',
       logoUrl: '/home.png',
-      start: 'August, 2018',
-      end: 'January, 2021',
+      start: 'Aug, 2018',
+      end: 'Jan, 2021',
       description:
         'Implemented a custom Kubernetes controller in Go to automate the deployment of MySQL and ProxySQL custom resources in order to enable 2,000+ internal developers to instantly deploy their app databases to production. Wrote several scripts in Go to automate MySQL database failovers while maintaining master-slave replication topologies and keeping Zookeeper nodes consistent with changes.',
     },
@@ -91,8 +91,8 @@ export const DATA = {
       location: 'HCM, Vietnam',
       title: 'Senior Software Engineer',
       logoUrl: '/kms.png',
-      start: 'February, 2016',
-      end: 'July, 2018',
+      start: 'Feb, 2016',
+      end: 'Jul, 2018',
       description:
         'Architected and wrote the entire MVP of the GeForce Now Cloud Gaming internal admin and A/B testing dashboard using React, Redux, TypeScript, and Python.',
     },
@@ -103,28 +103,20 @@ export const DATA = {
       location: 'HCM, Vietnam',
       title: 'Software Engineer',
       logoUrl: '/kms.png',
-      start: 'October, 2014',
-      end: 'February, 2016',
+      start: 'Oct, 2014',
+      end: 'Feb, 2016',
       description:
         'Architected and wrote the entire MVP of the GeForce Now Cloud Gaming internal admin and A/B testing dashboard using React, Redux, TypeScript, and Python.',
     },
   ],
   education: [
     {
-      school: 'Buildspace',
-      href: 'https://buildspace.so',
-      degree: 's3, s4, sf1, s5',
-      logoUrl: '/buildspace.jpg',
-      start: '2023',
-      end: '2024',
-    },
-    {
-      school: 'University of Waterloo',
-      href: 'https://uwaterloo.ca',
-      degree: "Bachelor's Degree of Computer Science (BCS)",
-      logoUrl: '/waterloo.png',
-      start: '2016',
-      end: '2021',
+      school: 'University of Science - VNUHCM',
+      href: 'https://hcmus.edu.vn/',
+      degree: 'Bachelor of Science',
+      logoUrl: '/khtn.png',
+      start: '2010',
+      end: '2014',
     },
   ],
   projects: [
