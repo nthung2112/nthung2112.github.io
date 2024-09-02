@@ -62,7 +62,7 @@ export const DATA = {
   work: [
     {
       company: 'NAB VN',
-      href: 'https://atomic.finance',
+      href: 'https://nab.com.au',
       badges: [],
       location: 'HCM, Vietnam',
       title: 'Senior Frontend Engineer',

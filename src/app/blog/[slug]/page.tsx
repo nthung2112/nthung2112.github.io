@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/utils';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { CustomMDX } from '@/components/mdx';
 
 export async function generateMetadata({
   params,
@@ -95,10 +96,9 @@ export default async function Blog({
           </p>
         </Suspense>
       </div>
-      <article
-        className="prose dark:prose-invert"
-        dangerouslySetInnerHTML={{ __html: post.source }}
-      ></article>
+      <article className="prose prose-neutral prose-quoteless mt-8 max-w-none dark:prose-invert">
+        <CustomMDX source={post.source} />
+      </article>
     </section>
   );
 }
