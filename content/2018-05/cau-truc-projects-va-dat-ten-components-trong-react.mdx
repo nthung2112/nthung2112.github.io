@@ -1,0 +1,219 @@
+---
+title: Cấu trúc projects và đặt tên components trong React
+author: Hung Tan Nguyen
+tags:
+  - react
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*RnfoUx35p_wHEv-cVGcV3Q.png'
+sourceUrl: >-
+  https://hackernoon.com/structuring-projects-and-naming-components-in-react-1261b6e18d76
+date: 2018-05-26 23:02:00
+slug: /cau-truc-projects-va-dat-ten-components-trong-react
+---
+
+Như bạn đã biết, React chỉ là một thư viện nên nó không chỉ rõ cho người dùng cách tổ chức, phân chia cấu trúc thư mục cho dự án của mình. Xét trên một khía cạnh, có thể điều này là tốt vì dev có thể thoải mái thử rất nhiều cách khác nhau để chọn ra phương pháp phù hợp với dự án của mình. Tuy nhiên, nó lại khiến cho những dev mới bắt đầu sử dụng React cảm thấy khó hiểu. Bài viết này sẽ đưa ra một vài phương pháp phân chia folders, files giúp cho ứng dụng React của bạn có thể mở rộng một cách thuận tiện, nhất là đối với những người mới bước chân vào React và không biết phải làm như thế nào cho hợp lý.
+
+# Cấu trúc files và folders
+
+Một trong những câu hỏi dev thường gặp phải khi bắt đầu code là "Làm thế nào dể phân chia files và folders". Để thuận tiện thì chúng ta sẽ bắt đầu từ cấu trúc đơn giản nhất mà package **create-react-app** đã tạo ra. Cụ thể là folder **src**. Đây là folder chính chứa source code, vì vậy chúng ta sẽ tập trung vào phần này. Toàn bộ những files, folder khác nằm ngoài vẫn sẽ được giữ nguyên:
+
+![](https://cdn-images-1.medium.com/max/800/1*eXN1LlNnuZmosJ7n7EsJ-Q.png)
+
+## Tách riêng thành folder Containers và Components
+
+Có thể bạn đã thấy trong một vài dự án, dev thường sử dụng hai folders có tên _Components_ và _Containers_
+
+```javascript
+src
+├─ components
+└─ containers
+```
+
+Thoạt nhìn thì có vẻ ổn, nhưng cách phân chia như trên còn tồn tại những nhược điểm như sau:
+
+- **Định nghĩa chức năng một cách không rõ ràng** - Sử dụng cấu trúc như trên có thể gây nhầm lẫn, hiểu lần về chức năng của mỗi folder _Container_ và _Component_ , có nhiều người sẽ hiểu chức năng của mỗi folder theo ý khác nhau. Có người thì hiểu _Containers_ là các components thực hiện việc xử lý logic (như handle click, button) và lấy dữ liệu từ server, còn components có nghĩa _Presentational Component_, thực hiện nhiệm vụ hiển thị view cho người dùng. Có người lại sử dụng _Containers_ để chứa những route components (mỗi component là một link route, nếu như bạn sử dụng react-router), còn _Components_ thì chứa những base component để tạo nên các route components kia. Vì thế khi làm việc trong team sẽ gây ra không đồng nhất và các member khó thống nhất trong việc sử dụng hai folder này.
+- **Components không còn linh động, reusable** - Ngay cả khi bạn đã code ra một components với chức năng đặc thù, sau này bạn vẫn phải sửa lại components đó do những lí do như đổi requirements, thêm chức năng,... khiến cho file chuyển qua chuyển lại giữa 2 folders **components** và **containers**.
+- **Components trùng tên** - Khi sử dụng react, tên của một component nên có ý nghĩa như chức năng của nó, và quan trọng là không nên có nhiều components trùng tên nhau trong project để tránh gây nhầm lẫn. Cách tổ chức folders như trên sẽ tạo ra 2 components có tên giống nhau, một sử dụng cho **container**, một sử dụng cho **components** (_presentational_ - hiển thị)
+- **Giảm hiệu suất code** - Bạn sẽ phải thường xuyên navigate giữa 2 folder trên khi viết cho một tính năng, do một tính năng thường sẽ gồm cả 2 loại components Một cách phân chia khác cũng có cấu trúc 2 folder như trên, nhưng phân biệt dựa trên module . Giả sử ứng dụng của bạn có một module User. Trong đó sẽ tách ra thành 2 folder components và containers:
+
+```javascript
+src
+└─ User
+    ├─ components
+    └─ containers
+```
+
+Theo hướng tiếp cận trên, dev sẽ không phải gặp khó khăn trong việc navigate giữa các folder khi code. Bạn sẽ không phải kéo lên, kéo xuống để tìm xem components của User ở đâu, khi đang hoàn thiện file trong containers để đối chiếu. Tuy nhiên, cách này sẽ sinh ra một đống folder containers và components nếu như hệ thống của bạn lớn và cót rất nhiều modules.
+
+Như vậy, việc tách biệt 2 folder **components** và **containers** không hẳn là hợp lý. Thay vì tách riêng ra như vậy, các components sẽ được đặt hết trong folder **components** ngoại trừ những components sử dụng làm _screens_
+
+## Tái cấu trúc folders dựa trên module
+
+Trong folder **components**, chúng ta sẽ nhóm các files lại theo module hoặc feature/tính năng.
+
+Với tính năng CRUD user, chúng ta chỉ cần module User, nên folder tree sẽ có dạng như sau:
+
+```javascript
+src
+└─ components
+  └─ User
+    ├─ Form.jsx
+    └─ List.jsx
+```
+
+Khi component được cấu thành bời nhiều hơn một file (chẳng hạn như phải import nhiều components khác, hay file chỉnh sửa css cho component đó), chúng ta sẽ đưa component này cùng các files liên quan vào một folder có cùng tên. Ví dụ như **Form.jsx** cần thêm **Form.css** để chỉnh style, bạn sẽ có một folder như sau:
+
+```javascript
+src
+└─ components
+  └─ User
+    ├─ Form
+    │ ├─ Form.jsx
+    │ └─ Form.css
+    └─ List.jsx
+```
+
+### UI components
+
+Ngoài các folder dành cho module hay tính năng trong ứng dụng của bạn, có thể thêm một folder _UI_ (hoặc _base_/_atomic_) dùng cho các component dạng UI - là những phần tử nhỏ sử dụng cho UI trong ứng dụng của bạn. Đây là những component giống các thư viện open source, thường được dùng đi dùng lại nhiều lần trong ứng dụng của bạn, không nhất thiết phải là một module lớn và không thực hiện các business logic. Những ví dụ về components dạng này như Button, Checkbox, SelectBox, Modal, DatePicker, BreadCrumb,...
+
+# Đặt tên cho components
+
+Ở phần trên chúng ta đã thấy được cách hệ thống files và folder trong ứng dụng, còn bây giờ sẽ tìm hiểu xem đặt tên components ra sao cho phù hợp.
+
+Như đã đề cập ở trên, tên của components nên rõ ràng và không bị trùng lặp để có thể dễ tìm lại và tránh nhầm lẫn cho những thành viên khác trong team. Ngoài ra, tên components rõ ràng cũng giúp cho việc debug bằng những extension tools trở nên dễ dàng hơn trên trình duyệt (chẳng hạn như React Dev Tools) - vì khi app của bạn gặp lỗi khi đang chạy thì lỗi sẽ hiển thị ở đúng components xảy ra lỗi.
+
+Để đặt tên components, chúng ta sẽ đặt theo hướng _path-based-component-naming_, nghĩa là cấu thành bởi đường dẫn từ folder src/components đến file chúng ta tạo component đó. Chẳng hạn, bạn có một file với đường dẫn **src/components/User/List.jsx** thì tên component được sử dụng trong **List.jsx** sẽ được đặt là **UserList**:
+
+```javascript
+class UserList extends React.Component
+```
+
+Nếu một file trong folder trùng tên với tên folder, chúng ta sẽ không cần phải lặp lại cả tên folder lẫn tên file. Chẳng hạn, có một file **src/components/User/Form/Form.jsx** thì thay vì sử dụng **UserFormForm**, chúng ta sẽ đặt là UserForm.
+
+Việc đặt tên components theo đường dẫn như trên có những ích lợi như sau:
+
+- **Việc search file trong text editor/IDE trở nên thuận tiện hơn** - Chỉ cần gõ vào ô search của IDE hay text editor mà bạn sử dụng là có thể tìm đến file một cách nhanh chóng. Hoặc navigate đến file cũng rất thuận tiện:
+
+![](https://cdn-images-1.medium.com/max/800/1*DLndSrnMgIklk7tAhzgMWg.png)
+
+- **Tránh lặp đi lặp lại tên khi import** Theo cách đặt tên như vậy, bạn sẽ luôn đặt tên file giống với chức năng, nhiệm vụ của nó. Đối với component **form** ở trên, chính xác thì phải là **user form**, nhưng do file đã nằm trong folder **User** nên chúng ta không cần lặp lại từ đó trong tên file của component, mà chỉ cần sử dung **Form.jsx**
+
+  Có nhiều trường hợp, dev viết app React và đặt tên file/folder cũng như tên component một cách đầy đủ, bao gồm cả tên module lớn và nhỏ, và dần dần sau này khi app scale lên thì việc đặt tên này sẽ trở nên phức tạp hơn rất nhiều. Thử so sánh hai trường hợp sau đây:
+
+```javascript
+import ScreensUserForm from './screens/User/UserForm';
+// vs
+import ScreensUserForm from './screens/User/Form';
+```
+
+Đối với module nhỏ với ít thành phần như trên thì cách đặt tên thứ hai có vẻ như không tạo nhiều khác biệt lắm, ta có thể thấy cách viết thứ nhất vẫn ổn. Tuy nhiên, nếu như app của bạn scale lên với nhiều thành phần, module, chức năng phức tạp thì việc đặt tên như vậy sẽ trở nenen vô cùng kinh khủng:
+
+```javascript
+import MediaPlanViewChannel from '/MediaPlan/MediaPlanView/MediaPlanViewChannel.jsx';
+// vs
+import MediaPlanViewChannel from './MediaPlan/View/Channel';
+```
+
+Chưa kể những dòng như thế này còn lặp lại nhiều lần vì phải import nhiều thành phần cùng lúc.... Ví lí do đó, chúng ta nên đặt tên file và folder đúng với chức năng/nhiệm vụ trực tiếp của nó, thay vì thêm vào tên của những module cha. Còn tên component thì nên đặt theo đường dẫn tương đối so với folder src/components.
+
+# Screens components - Dùng cho một view page
+
+Ở trên, bài viết có nhắc đến những compoents không được đặt trong folder components, được gọi là _screens_. Giống như tên gọi của nó, đây là những components tượng trưng cho một _màn hình_ hiển thị trong ứng dụng của bạn Lấy ví dụ đối với tính năng CRUD users, chúng ta sẽ có những màn hình cơ bản nhất bao gồm:
+
+- List users (/users
+- Create user (/user)
+- Edit user (/users/:id)
+
+Như vậy, chúng ta có 3 screens khác nhau. Mỗi screen là một component cấu thành lên một page trong ứng dụng react của bạn. Screen component nên là một presentational component và không nên thực hiện xử lý business logic.
+
+Các screens sẽ nằm trong một folder screens song song với components trong đường dẫn src, vì mỗi component ở trong sẽ đại diện cho route của ứng dụng, thay vì một module nào đó:
+
+```javascript
+src
+    ├─ components
+    └─ screens
+      └─ User
+        ├─ Form.jsx
+        └─ List.jsx
+```
+
+Nếu ứng dụng của bạn sử dụng react-router, chúng ta sẽ giữ một file Root.jsx trong folder screens và đưa toàn bộ các view route vào trong file này:
+
+```javascript
+import React, { Component } from 'react';
+import { Router } from 'react-router';
+import { Redirect, Route, Switch } from 'react-router-dom';
+
+import ScreensUserForm from './User/Form';
+import ScreensUserList from './User/List';
+
+const ScreensRoot = () => (
+  <Router>
+    <Switch>
+      <Route path="/user/list" component={ScreensUserList} />
+      <Route path="/user/create" component={ScreensUserForm} />
+      <Route path="/user/:id" component={ScreensUserForm} />
+    </Switch>
+  </Router>
+);
+
+export default ScreensRoot;
+```
+
+Với cách này chúng ta đã đưa toàn bộ screens vào trong một folder có cùng tên với định nghĩa route: user/ -> User/. Folder User chứa màn hình List và màn hinh Form bên trong. Từ đó bạn có thể dễ dàng tìm thấy màn hình nào render route nào bằng cách nhìn vào url.
+
+Một màn hình có thể sử dụng để render nhiều route, như chúng ta thấy màn hình Form sẽ render 2 route dành cho việc Create và Edit. Chú ý rằng, chúng ta nên thêm prefix Screen khi đặt tên cho các screen, để tránh nhầm lẫn với các component trong folder components.
+
+Như vậy tên của screen component đặt trong folder src/screens/User/List.jsx nên được đặt là ScreenUserList:
+
+```javascript
+import React from 'react';
+import UserForm from '../../components/User/Form/Form';
+
+const ScreensUserForm = ({ match: { params } }) => (
+  <div>
+    <h1>{`${!params.id ? 'Create' : 'Update'}`} User</h1>
+    <UserForm id={params.id} />
+  </div>
+);
+
+export default ScreensUserForm;
+```
+
+Như trong đoạn code trên thì screen component sẽ không xử lý gì liên quan đến state (data) mà chỉ thực hiện render ra component _UserForm_.
+
+Cuối cùng thì chúng ta sẽ có được một cấu trúc folder như sau:
+
+```javascript
+src
+├─ components
+│  ├─ User
+│  │ ├─ Form
+│  │ │ ├─ Form.jsx
+│  │ │ └─ Form.css
+│  │ └─ List.jsx
+│  └─ UI
+│
+└─ screens
+  ├─ User
+  │ ├─ Form.jsx
+  │ └─ List.jsx
+  └─ Root.jsx
+```
+
+## Tổng kết
+
+Tóm tắt lại, chúng ta cần nhớ những điểm sau đây:
+
+- **Presentational** và **Container** components được đặt trong folder src/components
+- Nhóm các components lại dựa trên module/feature
+- Đưa những component chung được sử dụng nhiều lần (UI components) vào trong src/components/UI
+- Viết component **screens** (màn hình) thật đơn giản, ít code
+- Nhóm các màn hình lại theo route của ứng dụng. Với route /user/list thì screen sẽ nằm trong src/screens/User/List.jsx.
+- Components được dặt tên theo đường dẫn tương đối của so với src/components hoặc src - Tên component trong file src/components/User/List.jx sẽ có tên là UserList, tên component trong file src/screens/User/List.jsx sẽ có tên là ScreensUserList.
+- Component trong file có cùng tên với folder chứa nó sẽ không lặp lại tên của folder. Ví dụ file src/components/User/List/List.jsx sẽ có component được đặt tên là UserList, chứ **KHÔNG PHẢI** là UserListList
+
+# Kết luận
+
+Bài viết đã đưa ra một trong những cách để tổ chức, phân chia cũng như đặt tên cho file, folder và component khi thiết kế ứng dụng bằng React. Đương nhiên, đây chỉ là ý kiến chủ quan, bạn hoàn toàn có thể tự mình thiết lập và đưa ra những pattern mà bạn cảm thấy hợp lý, thuận tiện khi làm việc với React, miễn sao cho trải nghiệm của bản thân là tốt nhất. Xin cảm ơn!

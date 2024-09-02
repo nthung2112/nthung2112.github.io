@@ -1,0 +1,202 @@
+---
+title: Cơ chế sử dụng Virtual DOM trong React
+author: Hung Tan Nguyen
+tags:
+  - react
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/800/1*iJKfCo2XlFtz-9ST0_HCtA.png'
+sourceUrl: >-
+  https://medium.com/@gethylgeorge/how-virtual-dom-and-diffing-works-in-react-6fc805f9f84e
+date: 2018-05-25 22:22:00
+slug: /co-che-su-dung-virtual-dom-trong-react
+---
+
+Khi tìm hiểu về ReactJS, chắc hẳn bạn đã nghe tới khái niệm DOM ảo (Virtual DOM). Nó giúp cho hiệu suất làm việc của React cao hơn hẳn so với các thư viện và framework Javascript khác. Nhưng bạn đã bao giờ tìm hiểu DOM ảo là gì và nó hoạt động như thế nào trong React? Hôm nay, chúng ta cùng tìm hiểu về chủ đề này nhé.
+
+## **Virtual DOM là gì?**
+
+Điều đầu tiên tôi muốn nói ở đây là: Virtual DOM không được phát minh ra bởi React, mà React sử dụng nó. DOM ảo là một bản sao chép trừu tượng của DOM thật (HTML DOM). Bạn có thể tưởng tượng nó giống như một bản thiết kế, chứa các chi tiết cần thiết để cấu hình lên một DOM. Ví dụ, thay vì tạo một thẻ `<div>` thật chứa các thẻ `<ul>` bên trong, nó sẽ tạo một div object chứa `ul` object bên trong. Cụ thể ở trong React sẽ là các `React.div` và `React.ul`. Khi tương tác, ta có thể tương tác với các object đó rất nhanh mà không phải động tới DOM thật hoặc thông qua DOM API. Tiếp theo chúng ta sẽ tìm hiểu cụ thể React tương tác với DOM ảo như thế nào nhé
+
+## **Virtual DOM trong React**
+
+Trước tiên, đã bao giờ bạn tự hỏi tại sao lại phải tương tác thông qua DOM ảo, sao không render trực tiếp ở DOM thật? Vậy bạn đã thực sự hiểu rõ DOM được tạo và re-render như thế nào mỗi khi các thành phần trong DOM thay đổi?
+
+![](https://cdn-images-1.medium.com/max/800/1*ZrzXoRljG5Co5KvEsWJNjA.png)
+
+Mỗi khi có sự thay đổi, vì cấu trúc của DOM là **tree structure** , khi muốn thay đổi các element và các thẻ con của nó, nó phải thông qua các **Reflow/Layout**, sau đó các thay đổi đó sẽ được Re-painted, rất mất thời gian. Vì thế, càng nhiều các item phải **reflow/repaint**, web của bạn sẽ càng load chậm. Vậy React đã sử dụng DOM ảo như thế nào? Để một trang lớn như Facebook mà chúng ta dùng hàng ngày có hiệu suất làm việc cao như vậy? Để dễ hình dung, chúng ta sẽ tìm hiểu thông qua một ví dụ nho nhỏ dưới đây nhé.
+
+![](https://cdn-images-1.medium.com/max/800/1*QX2kUf7GoCkTNkTWBUfX-g.png)
+
+Đó là giao diện của một app cộng hoặc trừ 2 số. Người dùng sẽ nhập vào 2 số vào 2 ô input, sau đó chọn phép toán và in ra kết quả ở phần Output.
+
+```javascript
+import React, { Component } from 'react';
+
+export default class Calculator extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { output: '' };
+  }
+
+  render() {
+    let IntegerA, IntegerB, IntegerC;
+
+    return (
+      <div className="container">
+        <h2>using React</h2>
+        <div>
+          Input 1:
+          <input type="text" placeholder="Input 1" ref="input1" />
+        </div>
+        <div>
+          Input 2 :
+          <input type="text" placeholder="Input 2" ref="input2" />
+        </div>
+        <div>
+          <button
+            id="add"
+            onClick={() => {
+              IntegerA = parseInt(this.refs.input1.value);
+              IntegerB = parseInt(this.refs.input2.value);
+              IntegerC = IntegerA + IntegerB;
+              this.setState({ output: IntegerC });
+            }}
+          >
+            Add
+          </button>
+
+          <button
+            id="subtract"
+            onClick={() => {
+              IntegerA = parseInt(this.refs.input1.value);
+              IntegerB = parseInt(this.refs.input2.value);
+              IntegerC = IntegerA - IntegerB;
+              this.setState({ output: IntegerC });
+            }}
+          >
+            Subtract
+          </button>
+        </div>
+        <div>
+          <hr />
+          <h2>Output: {this.state.output}</h2>
+        </div>
+      </div>
+    );
+  }
+}
+
+
+import React, { Component } from 'react';
+import Calculator from './Calculator';
+
+export default class Layout extends Component {
+  render() {
+    return (
+      <div>
+        <h1>Basic Calculator</h1>
+        <Calculator />
+      </div>
+    );
+  }
+}
+
+```
+
+Và đây là DOM thật sau lần load đầu tiên
+
+![How DOM looks after initial rendering](https://cdn-images-1.medium.com/max/800/1*UeJO46kqBIm0Z8j9B8G6kw.png)
+
+Còn đây là DOM ảo mà React tạo ra tương ứng với DOM thật bên trên. Trong React, nó cũng được gọi là một Component với **tree structure** gồm các Component con bên trong
+
+![Component Tree structure build by React](https://cdn-images-1.medium.com/max/800/1*WMkI8W__gUagZEVCUN37Pg.png)
+
+Sau đây, chúng ta sẽ cùng thử nhập vào 2 số và click vào button Add và xem React xử lí như thế nào nhé.
+
+```
+Input 1: 100
+Input 2: 50
+
+Output mong đợi sẽ là 150.
+```
+
+Điều gì xảy ra khi ta click vào button Add? Ở ví dụ này, chúng ta set **output** là một **state**, vì thế khi một **output** mới được hiện ra nghĩa là ta đã set cho **State** đó một giá trị mới đó là 150.
+
+### Đánh dấu Component dirty
+
+![Calculator component marked Dirty](https://cdn-images-1.medium.com/max/600/1*SBXiC6G3cjT5deW1tR0C4w.png)
+
+Trong React, khi một Component có một **state** mới được set, React đánh dấu nó như là một **dirty Component**, nghĩa là mỗi khi chúng ta gọi tới function _setState()_ thì Component đó sẽ được đánh dấu là **dirty**. Cụ thể ở đây, khi ta click Add, React sẽ đánh dấu Component **Calculator** như thế nào:
+
+1.  Tất cả các event khi ta thao tác với DOM, nó được gói trọn trong **React event listener**. Vì thế khi nút Add được click, event đó được gửi tới **React event listener** và sau đó nó sẽ chạy một _anonymous function_()
+2.  Trong _anonymous function()_, chúng ta gọi tới function _this.setState_ với một **state** value mới.
+3.  Function _this.setState_() được chạy, Component **Calculator** được đánh dấu là **dirty**.
+
+```javascript
+//ReactUpdates.js  - enqueueUpdate(component) function
+dirtyComponents.push(component);
+```
+
+4.  Và hiện tại, Calculator của chúng ta đã được đánh dấu là **dirty**. Cùng xem những gì sẽ diễn ra tiếp theo
+
+### Chạy qua Component lifecycle
+
+[Component lifecycle](https://reactjs.org/docs/react-component.html) trong React là một loạt các hàm mặc định sẽ được chạy ngay trước, trong và ngay sau quá trình update một Component. Ở ví dụ này, chúng ta không overwrite các hàm đó thì nó sẽ chạy ở các giá trị mặc định.
+
+![](https://cdn-images-1.medium.com/max/800/1*HmOs3RG_uYsneZFHnrmYEA.png)
+
+Quá trình update Component được diễn ra như sau:
+
+1.  React sẽ kiểm tra Component đó có được mark **dirty** hay không, sau đó bắt đầu quá trình update.
+
+```javascript
+//ReactUpdates.js
+var flushBatchedUpdates = function () {
+  while (dirtyComponents.length || asapEnqueued) {
+    if (dirtyComponents.length) {
+      var transaction = ReactUpdatesFlushTransaction.getPooled();
+      transaction.perform(runBatchedUpdates, null, transaction);
+```
+
+2.  Sau đó, React sẽ kiểm tra xem có **pending state** nào phải được update hay không hoặc có **forceUpdate** nào không
+
+```javascript
+if (this._pendingStateQueue !== null || this._pendingForceUpdate) {
+      this.updateComponent(transaction, this._currentElement,
+      this._currentElement, this._context, this._context);
+```
+
+![](https://cdn-images-1.medium.com/max/600/1*UVixYuczWFlNJ7tbM4TAsg.png)
+
+Trong ví dụ này của chúng ta, trong Calculator wrapper, **this.pendingStateQueue,** chứa State object với giá trị Output mới 3\. React chạy các lifecycle methods. Đầu tiên là _componentWillReceiveProps_(), tiếp đó là _shouldComponentUpdate()_ (các phương thức này có giá trị mặc định thế nào nếu chúng ta không overwrite nó thì các bạn tự tìm hiểu nhé). Trong trường hợp này, method _shouldComponentUpdate()_ sẽ trả về _true_, sau đó sẽ chạy _componentWillUpdate(), render()_ và _componentDidUpdate()_. Thứ quan trọng nhất trong quá trình update ở đấy chính là _render()_, đó chính là chỗ mà DOM ảo được tạo lại và update DOM ảo để tìm ra sự khác biệt để sau đó cập nhật ở DOM thật, hay nói các khác là tìm ra cụ thể những element thay đổi để update chỉ những element đó trong DOM thật.
+
+### Xây dựng lại Component, Update DOM ảo, tìm sự thay đổi, update DOM thật
+
+![](https://cdn-images-1.medium.com/max/800/1*9paXIsNMjkuN4iBdpJ-MXg.png)
+
+React sẽ kiểm tra các element trước và sau khi được render lại ở lần vừa rồi có giống nhau hay không, sau đó bắt đầu quá trình đồng bộ.
+
+```javascript
+var prevRenderedElement = this._renderedComponent._currentElement;
+var nextRenderedElement = this._instance.render(); //Calculator.render() method is called and the element is build.
+```
+
+Quá trình đồng bộ và update DOM thật như sau:
+
+![](https://cdn-images-1.medium.com/max/800/1*chzMjpfd821rcHntjWb8rQ.png)
+
+Những điểm màu đỏ nghĩa là quá trình đồng bộ sẽ được lặp lại đối với những thành phần con của nó. Và đây là DOM mà chúng ta nhận được sau quá trình đó :
+
+![](https://cdn-images-1.medium.com/max/600/1*l2w9vcsBN7wd2UqZ7qZTHA.png)
+
+Trong ví dụ này, chỉ có phần Output bị thay đổi, bạn có thể nhìn thấy phần được đánh dấu flash ở hình dưới, chỉ có phần đó được DOM thật re-painted
+
+![](https://cdn-images-1.medium.com/max/800/1*-N2b8UJgqIUtgUfPLWtQQw.png)
+
+Và cây component được cập nhật tại DOM thực tế.
+
+![](https://cdn-images-1.medium.com/max/800/1*xvjOyXVne-7Y0ch0dRTIdw.png)
+
+## **Kết luận**
+
+Qua ví dụ trên mong là bạn có thể hình dung phần nào đó cách thực hoạt động của DOM ảo trong React và tính hữu dụng của nó. Nhờ có DOM ảo, React có thể tìm ra các node bị thay đổi và update ở DOM thật chỉ ở những cái node đó, thật thuận tiện và nhanh gọn phải không nào.

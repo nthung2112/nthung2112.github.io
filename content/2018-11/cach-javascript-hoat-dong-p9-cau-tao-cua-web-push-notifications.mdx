@@ -1,0 +1,282 @@
+---
+title: 'Cách Javascript hoạt động P9: Cấu tạo của Web Push Notifications'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-the-mechanics-of-web-push-notifications-290176c5c55d
+date: 2018-11-24 22:51:00
+slug: /cach-javascript-hoat-dong-p9-cau-tao-cua-web-push-notifications
+---
+
+Chào các bạn đến với bài thứ 9 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Hôm nay chúng ta sẽ chuyển hướng sự chú ý qua **web push notifications** (tạm dịch: thông báo đẩy trên trang web): chúng ta sẽ tìm hiểu về thành phần của nó, khám phá các quy trình gửi/nhận thông báo phía sau và cuối bài sẽ cùng tìm hiểu làm sao SessionStack sử dụng chúng để xây dựng chức năng của sản phẩm.
+
+Push Notifications rất phổ biến trong thế giới của điện thoại. Vì lý do này hay lý do khác, chúng bước chân vào thế giới web lại khá muộn mặc dù nó là tính năng rất được các developer ưa chuộng và đề xuất.
+
+# Khái quát
+
+Web Push Notifications cho phép user tham gia vào các cập nhật theo thời gian từ webapp nhằm mục đích thu hút người dùng dựa trên nội dung thú vị, quan trọng và đúng lúc đối với họ.
+
+Push dựa trên Service Workers - chính là chủ đề mà chúng ta đã [thảo luận ở bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-8---Service-Workers--vong-doi-va-cac-truong-hop-su-dung).
+
+Lý do lựa chọn dùng Service Workers trong trường hợp này là vì chúng hoạt động trong background. Rất phù hợp cho Push Notifications vì như vậy nghĩa là code chỉ được thực thi khi user tương tác với chính notification đó.
+
+# Push & notification
+
+Push và notification là 2 API khác nhau.
+
+- [Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API): được gọi khi server cung cấp thông tin cho Server Worker
+- [Notification](https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API): hành động của Service Worker hoặc một đoạn script trên webapp nhằm hiển thị thông tin đến user.
+
+# Push
+
+Có 3 bước cơ bản để triển khai 1 push:
+
+- **Giao diện (UI)**: thêm vào những logic cần thiết ở phía client để đăng ký user với push. Đây là phần logic Javascript mà UI của webapp cần để cho phép user đăng ký vào push message.
+- **Gửi push message**: triển khai lời gọi API trên server để trigger một push message tới thiết bị của user.
+- **Nhận push message**: xử lý push message một khi nó về tới trình duyệt.
+
+Giờ thì chúng ta sẽ tìm hiểu toàn bộ quá trình một cách chi tiết hơn.
+
+# Xác nhận hỗ trợ từ trình duyệt
+
+Đầu tiên là cần phải kiểm tra xem trình duyệt bạn đang dùng có hỗ trợ cho push message hay không. Chúng ta có 2 bài check đơn giản:
+
+- Kiểm tra serviceWorker trong object navigator
+- Kiểm tra PushManager trong object window
+
+Code kiểm tra:
+
+```javascript
+if (!('serviceWorker' in navigator)) {
+  // Service Worker không được hỗ trợ, vô hiệu hóa hoặc ẩn UI đi.
+  return;
+}
+
+if (!('PushManager' in window)) {
+  // Push không được hỗ trợ, vô hiệu hóa hoặc ẩn UI đi.
+  return;
+}
+```
+
+# Đăng ký một Service Worker
+
+Tại thời điểm này, ta đã biết các chức năng đều được hỗ trợ. Bước tiếp theo sẽ là đăng ký Service Worker.
+
+Đăng ký một Service Worker như thế nào thì bạn cũng đã quen với những diễn giải từ [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-8---Service-Workers--vong-doi-va-cac-truong-hop-su-dung) rồi.
+
+# Yêu cầu được cấp quyền
+
+Xong phần với Service Worker thì ta có thể đi tiếp đến phần đăng ký user. Bạn cần phải có quyền của user thì mới gửi push message đến họ được.
+
+API dùng để lấy quyền (permission) cũng tương đổi đơn giản, tuy nhiên điểm bất lợi là API đã thay đổi từ việc dùng callback sang trả về Promise. Nó sinh ra vấn đề khác: chúng ta không thể biết version của API đã được triển khai trên trình duyệt hiện tại, vì thế chúng ta phải xử lý cả 2 trường hợp.
+
+Nó trông như thế này đây:
+
+```javascript
+function requestPermission() {
+  return new Promise(function (resolve, reject) {
+    const permissionResult = Notification.requestPermission(function (result) {
+      // Xử lý phiên bản cũ với callback.
+      resolve(result);
+    });
+
+    if (permissionResult) {
+      permissionResult.then(resolve, reject);
+    }
+  }).then(function (permissionResult) {
+    if (permissionResult !== 'granted') {
+      throw new Error('Permission not granted.');
+    }
+  });
+}
+```
+
+Lời gọi đến Notification.requestPermission() sẽ hiển thị 1 bảng thông báo nhỏ:
+
+![](https://cdn-images-1.medium.com/max/1000/1*xhB8ceUNM6vb8s0ZQKMHNg.png)
+
+Một khi quyền đã được cấp, được đóng hoặc block thì chúng ta cũng nhận được những kết quả tương tự dưới dạng string: granted, default, denied.
+
+Nhớ rằng nếu user click chuột vào nút Block thì webapp của bạn sẽ không thể hỏi user về chuyện cấp quyền một lần nữa, cho tới khi user tự "unblock" app của bạn bằng cách thay đổi trạng thái của quyền. Tùy chọn này được giấu trong bảng cài đặt.
+
+# Đăng ký một user với PushManager
+
+Khi Service Worker đã được đăng ký và chúng ta được user cấp quyền, ta có thể subscribe 1 user bằng cách gọi registration.pushManager.subscribe() khi đăng ký Service Worker của bạn.
+
+Toàn bộ đoạn code như sau (bao gồm cả phần đăng ký Service Worker):
+
+```javascript
+function subscribeUserToPush() {
+  return navigator.serviceWorker
+    .register('service-worker.js')
+    .then(function (registration) {
+      var subscribeOptions = {
+        userVisibleOnly: true,
+        applicationServerKey: btoa(
+          'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
+        ),
+      };
+
+      return registration.pushManager.subscribe(subscribeOptions);
+    })
+    .then(function (pushSubscription) {
+      console.log('PushSubscription: ', JSON.stringify(pushSubscription));
+      return pushSubscription;
+    });
+}
+```
+
+registration.pushManager.subscribe(options) nhận một object options gồm 1 param bắt buộc và 1 param tùy chọn:
+
+- **userVisibleOnly**: một boolean chỉ định push subscription trả về sẽ chỉ được dùng cho message mà hiệu ứng của message đó user có thể nhìn thấy được. Nó phải được gán bằng true nếu không thì sẽ lỗi (Có cả 1 quá khứ lịch sử về nó).
+- **applicationServerKey**: một DOMString hoặc ArrayBufffer chứa public key được mã hóa thành Base64 mà server push sẽ dùng để xác thực server của app.
+
+Server của bạn cần sinh ra một cặp server key cho app, chúng còn được biết đến là key VAPID duy nhất cho server. Đây là 1 cặp public-private key. Private key thì được giữ một cách bí mật ở phía bạn trong khi public key được trao đổi với client. Những key này cho phép push service biết app server nào đã đăng ký user và đảm bảo đó chính là server trigger các push message đến người dùng cụ thể.
+
+Bạn chỉ cần tạo ra cặp private/public key 1 lần duy nhất cho ứng dụng. Có 1 cách làm nhanh đó là dùng trang này [https://web-push-codelab.glitch.me/](https://web-push-codelab.glitch.me/)
+
+Trình duyệt truyền applicationServerKey (public key) lên một push server khi đăng ký user, nghĩa là push server có thể liên kết public key của app bạn với PushSubscription của user.
+
+Đây là những gì diễn ra:
+
+- Webapp của bạn được load xong và bạn gọi subscribe(), truyền server key vào.
+- Trình duyệt tạo 1 request lên mạng đến một push service để sinh ra một endpoint, sau đó liên kết endpoint này với key và trả về cho trình duyệt.
+- Trình duyệt sẽ thêm endpoint này vào trong object PushSubscription, chính là object được trả về từ subscribe() promise.
+
+Về sau, cứ mỗi khi bạn muốn gửi 1 push message, bạn chỉ cần tạo một **Authorization header** có chưa thông tin đã ký (signed) với private key từ server ứng dụng của bạn. Khi push service nhận request để gửi một push message, nó sẽ xác minh header bằng cách tìm public key đã liên kết với endpoint cụ thể đó (ở bước thứ 2)
+
+# Object PushSubscription
+
+Một PushSubscription chứa những thông tin cần thiết để gửi push message đến thiết bị của user:
+
+```javascript
+{
+  "endpoint": "https://domain.pushservice.com/some-id",
+  "keys": {
+    "p256dh":
+"BIPUL12DLfytvTajnryr3PJdAgXS3HGMlLqndGcJGabyhHheJYlNGCeXl1dn18gSJ1WArAPIxr4gK0_dQds4yiI=",
+    "auth":"FPssMOQPmLmXWmdSTdbKVw=="
+  }
+}
+```
+
+endpoint ở đây là URL của push service. Để trigger một push mesage ta cần tạo request POST đến URL này.
+Object keys chứa giá trị dùng để mã hóa dữ liệu thông tin được gửi đi với push message.
+Một khi user đã được đăng ký và bạn có PushSubscription thì bạn cần gửi nó về cho server. Tại đây (trên server) bạn sẽ lưu thông tin tham gia của user vào database và kể từ bây giờ sẽ dùng nó để gửi push message về cho user đó.
+
+![](https://cdn-images-1.medium.com/max/1000/1*hTMGxzZrOmxxIfaQU7nKig.png)
+
+# Gửi push message
+
+Khi bạn cần gửi một push message cho nhiều user, điều đầu tiên bạn cần là push service. Bạn đang chỉ bảo cho push service (thông qua API) dữ liệu để gửi, gửi đến ai và các tình huống về việc làm thế nào để gửi message. Thông thường, lời gọi API này sẽ được thực hiện trên server.
+
+# Push Services
+
+Push service là thứ dùng để nhận các request, xác nhận chúng và chuyển giao push message cho trình duyệt phù hợp.
+
+Lưu ý rằng bạn không quản lý push service, nó là 1 dịch vụ của bên thứ 3\. Server của bạn giao tiếp với push service thông qua API. Một ví dụ về push service chính là [Google's FCM](https://firebase.google.com/docs/cloud-messaging/)
+
+Push service xử lý tất cả những việc nặng nhọc. Ví dụ: Nếu như trình duyệt đang offline, push service sẽ xếp message vào hàng đợi và chờ cho đến khi trình duyệt online lại trước khi gửi message đi 1 cách tuần tự.
+
+Mỗi tình duyệt có thể dùng bất kỳ push service nào và điều này vượt ngoài khả năng kiểm soát của developer.
+
+Tuy nhiên tất cả các push service có chung API nên việc này không làm cho quá trình triển khai trở nên khó khăn.
+
+Để lấy được URL xử lý các request cho push message, bạn cần phải kiểm tra giá trị của endpoint trong object PushSubscription.
+
+# Push Service API
+
+Push Service API cung cấp 1 cách để gửi message đến cho user. API là 1 [Web Push Protocol](https://tools.ietf.org/html/draft-ietf-webpush-protocol-12) theo tiêu chuẩn IETF định nghĩa cách ta gọi API đến một push service
+
+Dữ liệu bạn gửi với push message phải được mã hóa. Bằng cách này, bạn ngăn chặn push service đọc dữ liệu gửi đi. Điều này rất quan trọng vì trình duyệt chính là người quyết định nên dùng push service nào (có thể đó là push service không đáng tin cậy và bảo mật kém)
+
+Với mỗi push message, bạn có thể đưa ra hướng dẫn như sau:
+
+- **TTL**: định nghĩa một message nên chờ bao lâu trong hàng đợi trước khi nó bị gỡ ra và không được chuyển đi.
+- **Mức độ ưu tiên (priority)**: định nghĩa mức độ ưu tiên của mỗi message, cách này giúp cho push service chỉ gửi những thông tin có mức độ ưu tiên cao, ví dụ trong trường hợp pin thiết bị của người dùng sắp cạn.
+- **Chủ đề (topic)**: cung cấp cho push message một tên chủ đề sẽ thay thế message đang chờ xử lý (pending) có cùng chủ đề để khi thiết bị đang hoạt động, user sẽ không nhận thông tin cũ, lỗi thời.
+
+![](https://cdn-images-1.medium.com/max/1000/1*PgclyCPqxWc1rENfAOesag.png)
+
+# Sự kiện Push trên trình duyệt
+
+Một khi bạn gửi message đến push service như giải thích ở trên, message sẽ chuyển sang trạng thái chờ (pending) cho đến khi 1 trong số những điều sau đây xảy ra:
+
+- Thiết bị online
+- Message hết hạn trên hàng đợi do TTL.
+
+Khi push service truyền một message, trình duyệt sẽ nhận nó, giải mã và điều phối một sự kiện push trong Service Worker của bạn.
+
+Điều tuyệt vời là trình duyệt thực thi code Service Worker của bạn thậm chí cả khi web page chưa mở lên:
+
+- Push message được gửi tới trình duyệt và được giải mã.
+- Trình duyệt đánh thức Service Worker
+- Một sự kiện push được phân phối đến Service Worker
+
+Code để cài đặt một listener cho push even cũng khá tương đồng với các loại event listener khác trong Javascript:
+
+```javascript
+self.addEventListener('push', function (event) {
+  if (event.data) {
+    console.log('This push event has data: ', event.data.text());
+  } else {
+    console.log('This push event has no data.');
+  }
+});
+```
+
+Một điều cần phải hiểu về Service Worker là bạn có ít quyền kiểm soát về thời gian chạy của code Service Worker. Trình duyệt quyết định khi nào thì đánh thức nó dậy và khi nào thì hủy nó.
+
+Trong Service Worker, event.waitUntil(promise) cho trình duyệt biết công việc vẫn đang thực hiện cho tới khi promise được giải quyết xong và trình duyệt sẽ không hủy service worker nếu nó cần quá trình đó hoàn thành.
+
+Dưới đây là 1 ví dụ về xử lý sự kiện push:
+
+```javascript
+self.addEventListener('push', function (event) {
+  var promise = self.registration.showNotification('Push notification!');
+
+  event.waitUntil(promise);
+});
+```
+
+Gọi self.registration.showNotification() hiển thị một thông báo đến user và nó trả về promise, promise này được resolve khi thông báo đã được hiển thị lên.
+
+Phương thức showNotification(title, options) có thể được chỉnh sửa để phù hợp với nhu cầu. Param title là 1 string, còn options là object như dưới đây:
+
+```javascript
+{
+  "//": "Visual Options",
+  "body": "<String>",
+  "icon": "<URL String>",
+  "image": "<URL String>",
+  "badge": "<URL String>",
+  "vibrate": "<Array of Integers>",
+  "sound": "<URL String>",
+  "dir": "<String of 'auto' | 'ltr' | 'rtl'>",
+
+  "//": "Behavioural Options",
+  "tag": "<String>",
+  "data": "<Anything>",
+  "requireInteraction": "<boolean>",
+  "renotify": "<Boolean>",
+  "silent": "<Boolean>",
+
+  "//": "Both Visual & Behavioural Options",
+  "actions": "<Array of Strings>",
+
+  "//": "Information Option. No visual affect.",
+  "timestamp": "<Long>"
+}
+```
+
+Bạn có thể tìm hiểu chi tiết về mỗi options ở đây: [https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification)
+
+Push Notification là một cách tuyệt vời để thu thập sự chú ý của user những khi có thông tin gấp, quan trọng hoặc cần thời điểm nhạy cảm mà bạn muốn chia sẻ với họ.
+
+Team SessionStack thực hiện push notifications để báo cho user biết khi có crash, vấn đề hoặc điều gì đó bất thường trong sản phẩm của họ. Việc này giúp cho user biết ngay lập tức nếu có gì không đúng đang xảy ra. Sau đó họ có thể replay lại issue đó dưới dạng video và xem mọi thứ diễn ra với người dùng cuối của họ bằng cách tận dụng dữ liệu được thu thập với thư viện của SessionStack, chẳng hạn như thay đổi trên DOM, tương tác người dùng, request mạng, biệt lệ không được xử lý và các thông báo lỗi.
+
+Tính năng này không chỉ sẽ giúp user sử dụng SessionStack hiểu và tái hiện lại bất kỳ vấn đề nào mà nó còn cho phép họ nhận được thông báo ngay khi nó xuất hiện.

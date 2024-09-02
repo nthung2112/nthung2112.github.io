@@ -1,0 +1,204 @@
+---
+title: Trở thành Functional Programmer - Phần 3
+author: Hung Tan Nguyen
+date: 2017-08-23 23:25:03
+sourceUrl: https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-3-1b0fd14eb1a7#.8rfx2iaro
+coverImage: https://viblo.asia/uploads/e85b8079-5076-40ca-af63-f1a136d06516.png
+tags:
+slug: /tro-thanh-functional-programmer-phan-3
+---
+
+Những bước đầu tiên của việc hiểu rõ các concepts trong lập trình hàm (Functional Programming - FP) là những bước quan trọng nhất, và đôi khi là những bước khó khăn nhất. Nhưng với cách tiếp cận đúng đắn, mọi thứ sẽ trở nên dễ hiểu hơn rất nhiều. Và đây là series được tạo ra nhằm mục đích giúp các bạn dễ thở hơn trong quá trình tiếp cận với FP.
+
+## Concept 5: Function Composition - Hàm hợp
+
+![](https://viblo.asia/uploads/a43d04e0-b38a-414e-994f-483c2e68770d.png)
+
+Lười là một trong những đặc trưng của lập trình viên chúng ta. Điển hình cho cái tính lười này là sự ngán ngẩm khi phải thực hiện đi thực hiện lại công việc chỉnh sửa, test, deploy code mà mình đã từng viết trước đó.
+
+Vì thế, chúng ta luôn luôn tìm ra những cách để chỉ làm một lần và đem ra tái sử dụng một lúc nào đó.
+
+Tái sử dụng code (code reuse) là một thứ thật tuyệt vời nhưng rất khó để đạt được. Nếu các đoạn code quá cụ thể thì ta không thể nào tái sử dụng được. Nhưng nếu các đoạn code đó lại quá chung chung thì lại rất khó khi áp dụng vào từng trường hợp cụ thể.
+
+Do đó chúng ta cần một sự cân bằng giữa hai tính chất trên, cần một cách để tạo ra các khối code nhỏ, có thể dễ dàng tái sử dụng - giống như các viên gạch vậy - để tạo nên các chức năng phức tạp.
+
+Trong FP, hàm được coi như các khối vật liệu xây dựng nên chương trình. Chúng ta sẽ viết các hàm cho những công việc cụ thể, nhưng sau đó chúng ta có thể ghép chúng lại như ghép Lego vậy.
+
+Và concept mô tả cho việc này có tên là **Function Composition - Hàm hợp**
+
+Vậy nó hoạt động như thế nào? Để hiểu rõ hơn, hãy cùng bắt đầu với 2 hàm Javascript sau :
+
+```
+var add10 = function(value) {
+    return value + 10;
+};
+var mult5 = function(value) {
+    return value * 5;
+};
+
+```
+
+Nhìn 2 hàm này khá là rối rắm, nên chúng ta có thể viết lại bằng cách sử dụng [Arrow function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions) như sau:
+
+```
+var add10 = value => value + 10;
+var mult5 = value => value * 5;
+
+```
+
+Gọn hơn rồi nhỉ. Lúc này hãy thử tưởng tượng rằng chúng ta có một hàm nhận một giá trị số rồi cộng với 10, sau đó nhân kết quả nhận được với 5\. Chúng ta _có thể_ viết như sau :
+
+```
+var mult5AfterAdd10 = value => 5 * (value + 10)
+
+```
+
+Mặc dù đây chỉ là một ví dụ đơn giản, nhưng chúng ta sẽ có cảm giác rằng mình không hề muốn viết hàm này từ con số 0 một chút nào. Lý do đầu tiên, vì chúng ta có thể phạm phải một số sai lầm như là quên mất dấu đóng/mở ngoặc.
+
+Lý do thứ hai, chúng ta đã có 2 hàm trước đó, `add10` dùng để cộng thêm 10 vào 1 giá trị, `mult5` dùng để nhân 5 lần giá trị nhận được, nên việc viết lại hàm `mul5AfterAdd10` thực chất chỉ là viết lại những gì đã viết.
+
+Và vì thế, chúng ta sẽ dùng 2 hàm `add10` và `mult5` làm thành phần cho việc _xây dựng_ nên hàm mới:
+
+```
+var mult5AfterAdd10 = value => mult5(add10(value));
+
+```
+
+Ta đã vừa sử dụng các hàm đã có để tạo nên hàm `mult5AfterAdd10`, nhưng vẫn còn cách cải thiện đoạn code trên.
+
+Chúng ta sẽ nhắc lại một chút về toán học. `f ∘ g` là phép hợp hàm và được diễn giải là `hàm f kết hợp với hàm g`, hoặc theo ngôn ngữ phổ thong, `hàm f sau hàm g`. Vì thế `(f ∘ g)(x)` tương đương với việc gọi hàm `f` sau khi gọi hàm `g` với tham số là `x`, hay viết gọn lại là `f(g(x))`.
+
+Ví dụ ở trên sẽ tương đương với `mult5 ∘ add10` hoặc là `hàm mult5 theo sau hàm add10`, và vì thế tên hàm sẽ là `mult5AfterAdd10`.
+
+Và đó chính xác là những gì mà chúng ta đã làm. Ta gọi hàm `mult5` sau khi gọi hàm `add10` với tham số là `value`, hay viết gọn là `mult5(add10(value))`.
+
+Vì Javascript không hỗ trợ FP một cách hoàn toàn nên code có vẻ khá phức tạp, chúng ta hãy nhìn sang phiên bản của Elm:
+
+```
+add10 value =
+    value + 10
+mult5 value =
+    value * 5
+mult5AfterAdd10 value =
+    (mult5 << add10) value
+
+```
+
+Toán tử `<<` được dùng để _kết hợp hàm_ ở trong Elm. Và việc sử dụng toán tử này sẽ cho chúng ta một hình dung khá rõ ràng về luồng xử lý dữ liệu. Đầu tiên, biến `value` được truyền cho hàm `add10`, sau đó sẽ được truyền sang hàm `mult5`.
+
+Đồng thời hãy lưu ý dấu mở và đóng ngoặc ở hàm `mult5AfterAdd10`, cụ thể là ở đoạn `(mult5 << add10)`. Việc sử dụng đóng mở ngoặc ở đây nhằm đảm bảo rằng 2 hàm sẽ được kết hợp _trước khi_ xử lý tham số `value`.
+
+Ta cũng có thể kết hợp nhiều hàm nếu thích :
+
+```
+f x =
+   (g << h << s << r << t)  x
+
+```
+
+Ở đây biến `x` sẽ được truyền vào hàm `t`, kết quả được truyền sang hàm `r`, sau đó kết quả ở hàm `r`lại sang hàng `s` và tiếp tục cho đến hết hàm `g`. Phiên bản hàm hợp tương đương ở Javascript sẽ là `g(h(s(r(t(x)))))` - trông như một đống ngổn ngang toàn dấu đóng mở ngoặc.
+
+## Concept 6 : Point-Free Notation
+
+(Lời người dịch : Từ này mình không tìm thấy từ tiếng Việt tương ứng, theo ý hiểu của mình có nghĩa là ký hiệu hàm mà không phải chỉ định rõ tham số nên được gọi là Point - Free)
+
+![](https://viblo.asia/uploads/0c8cf48b-7b8a-4da8-b178-101aefb74ca3.png)
+
+Có một phong cách viết code mà không phải chỉ định rõ tham số với tên gọi là **Point-Free Notation**. Ban đầu phong cách này nhìn có thể kỳ cục nhưng theo thời gian, chúng ta sẽ cảm nhận được tác dụng của sự vắn tắt này.
+
+Quay trở lại ví dụ về hàm `mult5AfterAdd10`, ta nhận thấy rằng biến `value` được ghi ra hai lần. Một lần trong danh sách tham số và một lần được sử dụng trong thân hàm
+
+```
+-- This is a function that expects 1 parameter
+mult5AfterAdd10 value =
+    (mult5 << add10) value
+
+```
+
+Nhưng thực tế thì tham số này là không cần thiết vì hàm `add10` - hàm ở ngoài cùng bên phải của hàm hợp, cũng dùng chính xác tham số đó. Dưới đây sẽ là phiên bản `point-free` tương đương với hàm trên:
+
+```
+-- This is also a function that expects 1 parameter
+mult5AfterAdd10 =
+    (mult5 << add10)
+
+```
+
+Khi viết theo cách này, thực tế sẽ đem lại cho ta rất nhiều lợi ích.
+
+Đầu tiên, chúng ta không phải chỉ rõ các tham số được rút gọn, do đó chúng ta không phải mất thời gian để nghĩ tên cho tất cả các tham số đó.
+
+Thứ hai, viết theo kiểu này sẽ dễ đọc và suy luận hơn vì nó sẽ bớt rối rắm. Ví dụ phía trên rất đơn giản, nhưng hãy tưởng tượng nếu một hàm nhận _nhiều hơn một tham số_.
+
+## Rắc rối chốn thiên đường
+
+![](https://viblo.asia/uploads/b7929b21-7615-4740-9aa9-40b4dafd8aef.png)
+
+Từ đầu bài viết đến giờ, chúng ta đã tìm hiểu cách _Hàm hợp_ hoạt động và lý do cũng như cách chúng ta nên viết hàm dưới dạng _Point-Free Notation_ cho sự mạch lạc, rõ ràng và linh động.
+
+Giờ, hãy thử áp dụng các ý tưởng trên vào một bối cảnh khác và xem chúng hoạt động ra sao nhé. Tưởng tượng chúng ta thay hàm `add10` bằng hàm `add` như sau :
+
+```
+add x y =
+    x + y
+mult5 value =
+    value * 5
+
+```
+
+Câu hỏi giờ là : Làm thế nào để tạo ra hàm `mult5After10` chỉ với 2 hàm trên.
+
+Trước khi đi tiếp, tôi khuyên bạn hãy dừng lại và nghĩ một chút. Không có gì nghiêm trọng cả, chỉ đơn giản là dừng lại và thử ngẫm nghĩ một chút thôi.
+
+Ok, nếu bạn đã bỏ thời gian suy nghĩ, thì _có thể_ bạn đã nghĩ đến giải pháp như dưới đây:
+
+```
+-- This is wrong !!!!
+mult5AfterAdd10 =
+    (mult5 << add) 10
+
+```
+
+Nhưng thực tế nó sẽ không hoạt động. Vì sao? Vì hàm `add` cần hai - hai chứ không phải một tham số.
+
+Nếu trong Elm nhìn có vẻ không hiển nhiên, chúng ta sẽ quay lại với phiên bản Javascript:
+
+```
+var mult5AfterAdd10 = mult5(add(10)); // cái này không hoạt động
+
+```
+
+Đoạn code này không đúng, nhưng lý do là vì sao?
+
+Nguyên nhân là vì hàm `add` chỉ lấy 1 trong 2 tham số để tính toán, tạo ra kết quả sai, mà _kết quả sai_ đó sẽ được truyền sang hàm `mult5`, dẫn đến kết quả cuối cùng không đúng.
+
+Trong thực tế, với Elm, bộ biên dịch - compiler sẽ không bao giờ bỏ qua những dòng code sai định dạng như trên (và đó là một trong những điểm tuyệt vời của Elm).
+
+Chúng ta có thể viết lại như sau :
+
+```
+var mult5AfterAdd10 = y => mult5(add(10, y)); // not point-free
+
+```
+
+Đây không phải là cách viết hàm theo phong cách _point-free_, nhưng ít ra thì nó sẽ đảm bảo được kết quả đúng. Nhưng giờ thì ta không thể dùng toán tử kết hợp các hàm lại thành hàm hợp nữa (là phần `<<`). Thay vì thế ta đang tạo ra một hàm mới. Sau này nếu kịch bản trở nên phức tạp hơn, ví dụ như muốn kết hợp hàm `mult5AfterAdd10` với một cái gì đó khác, lúc này mọi thứ sẽ trở nên thực sự rắc rối.
+
+Vì thế khi chúng ta không thể kết hợp hai hàm ở trên, có một điều ta nhận thấy rõ ràng là **Hàm hợp** có sự hạn chế nhất định. Điều đó thật tệ vì **Hàm hợp** là một concept khá mạnh mẽ.
+
+Vậy làm thế nào để chúng ta giải quyết vấn đề trên? Chúng ta cần thứ gì để có thể thổi bay sự rắc rối này?
+
+Giả sử chúng ta có thể làm cách nào đó để chỉ truyền cho hàm `add` một giá trị tham số _trước tiên_ (khi tạo hàm hợp) , và tham số thứ 2 sẽ được truyền vào _sau đó_ khi thực hiện hàm hợp - ở đây là lúc hàm `mult5AfterAdd10` được gọi, chẳng phải vấn đề ở trên sẽ dễ dàng được giải quyết sao.
+
+Và thực tế là cách đó có tồn tại, với tên gọi là **Currying**.
+
+## Đầu của tôi!!!!
+
+![](https://viblo.asia/uploads/3cb3a723-1140-4d4c-abc8-9da098acc7d6.png)
+
+Hôm nay đến đây thôi là đủ.
+
+Trong các phần sau của bài viết này, tôi sẽ nói về các vấn đề như là _Currying, các functional functions cơ bản (như là map, filter, fold,... ), Referential Transparency và một vài thứ nữa_
+
+Nếu bạn muốn tham gia vào cộng đồng các nhà phát triển web muốn học và giúp đỡ lẫn nhau về FP trong Elm, mời các bạn tham gia Group Facebook sau: [Learn Elm Programming](https://www.facebook.com/groups/learnelm/)
+
+Và đây là Twitter của tác giả : [@cscalfani](https://twitter.com/cscalfani)

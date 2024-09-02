@@ -1,0 +1,209 @@
+---
+title: Reducing CSS bundle size with webpack
+author: Hung Tan Nguyen
+date: 2017-08-20 15:41:31
+sourceUrl: https://medium.freecodecamp.org/reducing-css-bundle-size-70-by-cutting-the-class-names-and-using-scope-isolation-625440de600b
+tags: [webpack, css]
+slug: /reducing-css-bundle-size-with-webpack
+---
+
+Đầu năm nay tôi đã build 1 ứng dụng tên là [GO2CINEMA](https://go2cinema.com/), 1 ứng dụng nhỏ gọn, nhanh nhẹ, bảo mật, giúp người dùng book vé xem phim ở Anh. Trong thời gian build ứng dụng này, tôi đã bị ám ảnh với việc tối ưu hóa tốc độ render.
+
+Tôi đã giải quyết việc pre-render HTML bằng [usus](https://github.com/gajus/usus). usus sẽ render HTML SPA (Single Page Application) và sử dụng [inline CSS](https://medium.com/@gajus/pre-rendering-spa-for-seo-and-improved-perceived-page-loading-speed-47075aa16d24). Tuy nhiên tôi không thích việc nhét đến 70kB dung lượng vào mỗi tài liệu HTML, nhất là khi phần lớn dung lượng đó là để chứa tên class CSS.
+
+## Google xử lý như thế nào?
+
+Đã bao giờ bạn tò mò về source code của [Google](https://www.google.com/) chưa? Nếu rồi, hẳn bạn sẽ nhận ra tên class CSS chỉ đơn giản là vài ký tự. Bạn có thắc mắc tại sao lại thế không?
+
+![https://cdn-images-1.medium.com/max/800/1*mGuDYFM56iyLi1MgZPC8bw.png](https://cdn-images-1.medium.com/max/800/1*mGuDYFM56iyLi1MgZPC8bw.png)
+
+## Sự thiếu sót của CSS minifier
+
+Có 1 thứ duy nhất minifier không thể làm được: đó là thay đổi tên của selector. Lý do là vì minifier CSS không điều khiển được các HTML output. Trong lúc đó, các CSS name có thể rất dài.
+
+Nếu bạn sử dụng CSS module, CSS module sẽ có xu hướng thêm các tên cho stylesheet, local identifier và các hash ngẫu nhiên. Dạng của tên class sẽ được định nghĩa bởi css-loader [localIdentName](https://github.com/webpack-contrib/css-loader), config như sau: `[name]___[local]___[hash:base64:5`. Do đó, tên class sẽ được sinh ra có dạng giống thế: `.MovieView___movie-title___yvKVV`; trong trường hợp bạn muốn mô tả kĩ hơn, tên class có thể còn dài nữa: `.MovieView___movie-description-with-summary-paragraph___yvKVV`
+
+## Thay đổi tên class CSS ngay thời điểm biên dịch
+
+Nếu bạn sử dụng [webpack](https://webpack.js.org/) và [babel-plugin-react-css-module](https://github.com/gajus/babel-plugin-react-css-modules) thì bạn không cần lo lắng thêm về vấn đề này nữa. Bạn có thể thay đổi tên class ngay thời điểm biên dịch bằng cách sử dụng css-loader [getLocalIdent](https://github.com/webpack-contrib/css-loader) và babel-plugin-react-css-modules [generateScopedName](https://github.com/gajus/babel-plugin-react-css-modules#configuration).
+
+```javascript
+const generateScopedName = (localName: string, resourcePath: string) => {
+  const componentName = resourcePath.split("/").slice(-2, -1);
+  return componentName + "_" + localName;
+};
+```
+
+Có 1 điều khá tuyệt về `generateScopedName` đó là instance của function này có thể được sử dụng trong quá trình build của babel và webpack.
+
+```javascript
+/**
+ * @file Webpack configuration.
+ */
+const path = require('path');
+
+const generateScopedName = (localName, resourcePath) => {
+  const componentName = resourcePath.split('/').slice(-2, -1);
+
+  return componentName + '_' + localName;
+};
+
+module.exports = {
+  module: {
+    rules: [
+      {
+        include: path.resolve(__dirname, '../app'),
+        loader: 'babel-loader',
+        options: {
+          babelrc: false,
+          extends: path.resolve(__dirname, '../app/webpack.production.babelrc'),
+          plugins: [
+            [
+              'react-css-modules',
+              {
+                context: common.context,
+                filetypes: {
+                  '.scss': {
+                    syntax: 'postcss-scss',
+                  },
+                },
+                generateScopedName,
+                webpackHotModuleReloading: false,
+              },
+            ],
+          ],
+        },
+        test: /\.js$/,
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: 'css-loader',
+            options: {
+              camelCase: true,
+              getLocalIdent: (context, localIdentName, localName) => {
+                return generateScopedName(localName, context.resourcePath);
+              },
+              importLoaders: 1,
+              minimize: true,
+              modules: true,
+            },
+          },
+          'resolve-url-loader',
+        ],
+      },
+    ],
+  },
+  output: {
+    filename: '[name].[chunkhash].js',
+    path: path.join(__dirname, './.dist'),
+    publicPath: '/static/',
+  },
+  stats: 'minimal',
+};
+```
+
+## Đặt tên ngắn
+
+May mắn rằng `babel-plugin-react-css-modules` và `css-loader` sử dụng cùng 1 logic để sinh ra tên class CSS. Nhờ đó ta có thể thay đổi tên class bất cứ khi nào cần thiết, thậm chí các hash ngẫu nhiên. Cá nhân tôi thì lại muốn tên class ngắn nhất có thể.
+
+Để làm được điều này, tôi sẽ tạo 1 class name index và sử dụng module [incstr](https://github.com/grabantot/incstr) để sinh ra các ID tăng dần cho mỗi bản ghi.
+
+```javascript
+const incstr = require('incstr');
+
+const createUniqueIdGenerator = () => {
+  const index = {};
+
+  const generateNextId = incstr.idGenerator({
+    // Removed "d" letter to avoid accidental "ad" construct.
+    // @see https://medium.com/@mbrevda/just-make-sure-ad-isnt-being-used-as-a-class-name-prefix-or-you-might-suffer-the-wrath-of-the-558d65502793
+    alphabet: 'abcefghijklmnopqrstuvwxyz0123456789',
+  });
+
+  return (name) => {
+    if (index[name]) {
+      return index[name];
+    }
+
+    let nextId;
+
+    do {
+      // Class name cannot start with a number.
+      nextId = generateNextId();
+    } while (/^[0-9]/.test(nextId));
+
+    index[name] = generateNextId();
+
+    return index[name];
+  };
+};
+
+const uniqueIdGenerator = createUniqueIdGenerator();
+
+const generateScopedName = (localName, resourcePath) => {
+  const componentName = resourcePath.split('/').slice(-2, -1);
+
+  return uniqueIdGenerator(componentName) + '_' + uniqueIdGenerator(localName);
+};
+```
+
+Việc này sẽ đảm bảo được tên class sẽ đủ ngắn và duy nhất trong cả ứng dụng. Bây giờ thay vì là những cái tên dài ngoằng như `.MovieView___movie-title___yvKVV` và `.MovieView___movie-description-with-summary-paragraph___yvKVV`, tên class đã trở thành `.a_a`, `.b_a`.
+
+**_Nhờ đó mà kích thước file bundle css của [GO2CINEMA](https://go2cinema.com/) đã giảm từ 140kB xuống còn 53kB_**.
+
+## Sử dụng Scope Isolation để giảm kích thước file bundle
+
+Có 1 lý do cho việc tôi sử dụng `_` trong tên class, chia tách tên các component với tên các local identifier, điều này rất hữu ích cho quá trình minify.
+
+[csso](https://github.com/css/csso) (CSS minifier) có những thiết lập về [scope](https://github.com/css/csso#scopes). Scope sẽ định nghĩa các danh sách tên class CSS để sử dụng với 1 số markup, ví dụ các selector từ các scope khác nhau sẽ không nối với các element giống nhau. Việc này sẽ giúp cho việc optimize chủ động hơn.
+
+Dưới đây là code sử dụng [csso-webpack-plugin](https://github.com/zoobestik/csso-webpack-plugin) để tiền xử lý file bundle CSS:
+
+```javascript
+const getScopes = (ast) => {
+  const scopes = {};
+
+  const getModuleID = (className) => {
+    const tokens = className.split('_')[0];
+
+    if (tokens.length !== 2) {
+      return 'default';
+    }
+
+    return tokens[0];
+  };
+
+  csso.syntax.walk(ast, (node) => {
+    if (node.type === 'ClassSelector') {
+      const moduleId = getModuleID(node.name);
+
+      if (moduleId) {
+        if (!scopes[moduleId]) {
+          scopes[moduleId] = [];
+        }
+
+        if (!scopes[moduleId].includes(node.name)) {
+          scopes[moduleId].push(node.name);
+        }
+      }
+    }
+  });
+
+  return Object.values(scopes);
+};
+```
+
+**_Quá trình này tiếp tục giảm kích thước file bundle CSS của [GO2CINEMA](https://go2cinema.com/) từ 53kB còn 47kB._**
+
+## Kết luận
+
+Hẳn sẽ có những ý kiến trái chiều nói rằng việc minify này hoàn toàn có thể dùng thuật toán nén. Với GO2CINEMA, fle bundle CSS sau khi được nén bằng thuật toán [Brotli](https://en.wikipedia.org/wiki/Brotli) thì kích thước của nó chỉ ít hơn 1kB so với cách minify file bundle bỏ-tên-class tôi đã trình bày trên.
+
+Mặt khác, cài đặt quá trình minify có thể xem như là 1 khoản đầu tư dài hạn. Ngoài việc giảm kích thước file cần parse, nó còn có những lợi ích khác nữa, ví dụ như ngăn chặn việc tên class CSS không bị nối với các selector của [blocklist](https://gist.github.com/spyesx/42fe84c0ef757d1c38a4) ad-blocker chẳng hạn.
+
+Bạn có thể xem demo của minification này được sử dụng với các phim trên GO2CINEMA:
+
+- [https://go2cinema.com/movies/wonder-woman-2017-1305237](https://go2cinema.com/movies/wonder-woman-2017-1305237)
+- [https://go2cinema.com/venues/odeon-oxford-magdalen-st-1001053](https://go2cinema.com/venues/odeon-oxford-magdalen-st-1001053)

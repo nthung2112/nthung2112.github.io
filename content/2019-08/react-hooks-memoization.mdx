@@ -1,0 +1,194 @@
+---
+title: 'React Hooks: Memoization'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - hooks
+categories: []
+sourceUrl: 'https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853'
+coverImage: 'https://miro.medium.com/max/3840/0*kq8EQA8DURCeZImm'
+date: 2019-08-05 12:50:00
+slug: /react-hooks-memoization
+---
+
+React Hooks make our life so much better in **almost** every way**.** But the minute performance becomes an issue, things get slightly tricky. You can write blazing fast applications using Hooks, but before you do that, there are a thing or two that you should be aware of.
+
+# Should you memoize?
+
+React is plenty fast for most use cases. If your application is fast enough and you don’t have any performance problems, this article is not for you. Solving imaginary performance problems is a real thing, so before you start optimizing, make sure you are familiar with [React Profiler](https://reactjs.org/blog/2018/09/10/introducing-the-react-profiler.html).
+
+![](https://miro.medium.com/max/1680/0*i3m1ovbb7kLrDh_2.png)
+
+If you’ve identified scenarios where rendering is slow, memoization is probably the best bet.
+
+[React.memo](https://reactjs.org/docs/react-api.html#reactmemo) is a performance optimization tool, a [higher order component](https://reactjs.org/docs/higher-order-components.html). It’s similar to [React.PureComponent](https://reactjs.org/docs/react-api.html#reactpurecomponent) but for function components instead of classes. If your function component renders the same result given the same props, React will memoize, skip rendering the component, and reuse the last rendered result.
+
+> By default it will only shallowly compare complex objects in the props object. If you want control over the comparison, you can also provide a custom comparison function as the second argument.
+
+# No memoization
+
+Let’s consider an example where we don’t use memoization and why that might cause performance problems.
+
+```js
+function List({ items }) {
+  log('renderList');
+  return items.map((item, key) => <div key={key}>item: {item.text}</div>);
+}
+
+export default function App() {
+  log('renderApp');
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState(getInitialItems(10));
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>inc</button>
+      <List items={items} />
+    </div>
+  );
+}
+```
+
+Example 1: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-1)
+
+Every time inc is clicked, both renderApp and renderList are logged, even though nothing has changed for List. If the tree is big enough, it can easily become performance bottleneck. We need to reduce number of renders.
+
+# Simple memoization
+
+```js
+const List = React.memo(({ items }) => {
+  log('renderList');
+  return items.map((item, key) => <div key={key}>item: {item.text}</div>);
+});
+
+export default function App() {
+  log('renderApp');
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState(getInitialItems(10));
+  return (
+    <div>
+      <h1>{count}</h1>
+      <button onClick={() => setCount(count + 1)}>inc</button>
+      <List items={items} />
+    </div>
+  );
+}
+```
+
+Example 2: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-2)
+
+In this example **memoization works** properly and reduces number of renders. During mount renderApp and renderList are logged, but when inc is clicked, only renderApp is logged.
+
+# Memoization & callback
+
+Let’s make a small modification and add inc button to all List items. Beware, passing callback to memoized component can cause subtle bugs.
+
+```js
+function App() {
+  log('renderApp');
+
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState(getInitialItems(10));
+
+  return (
+    <div>
+      <div style={{ display: 'flex' }}>
+        <h1>{count}</h1>
+        <button onClick={() => setCount(count + 1)}>inc</button>
+      </div>
+      <List items={items} inc={() => setCount(count + 1)} />
+    </div>
+  );
+}
+```
+
+Example 3: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-3)
+
+In this example, our **memoization fails**. Since we are using inline lambda, new reference is created for each render, making React.memo useless. We need a way to memoize the function itself, before we can memoize the component.
+
+# 4\. useCallback
+
+Luckily, React has two built-in hooks for that purpose: [useMemo](https://reactjs.org/docs/hooks-reference.html#usememo) and [useCallback](https://reactjs.org/docs/hooks-reference.html#usecallback). useMemo is useful for expensive calculations, useCallback is useful for passing callbacks needed for optimized child components.
+
+```js
+function App() {
+  log('renderApp');
+
+  const [count, setCount] = useState(0);
+  const [items, setItems] = useState(getInitialItems(10));
+
+  const inc = useCallback(() => setCount(count + 1));
+
+  return (
+    <div>
+      <div style={{ display: 'flex' }}>
+        <h1>{count}</h1>
+        <button onClick={inc}>inc</button>
+      </div>
+      <List items={items} inc={inc} />
+    </div>
+  );
+}
+```
+
+Example 4: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-4)
+
+In this example, our **memoization fails** again.renderList is called every time inc is pressed. Default behavior of useCallback is to compute new value whenever new function instance is passed. Since inline lambdas create new instance during every render, useCallback with default config is useless here.
+
+# 5\. useCallback with input
+
+```js
+const inc = useCallback(() => setCount(count + 1), [count]);
+```
+
+Example 5: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-5)
+
+useCallback takes second argument, an array of inputs and only if those inputs change will useCallback return new value. In this example, useCallback will return new reference every time count changes. Since count changes during each render, useCallback will return new value during each render. This code **does not memoize** as well.
+
+# useCallback with input of empty array
+
+```js
+const inc = useCallback(() => setCount(count + 1), []);
+```
+
+Example 6: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-6)
+
+useCallback can take an empty array as input, which will call inner lambda only once and memoize the reference for future calls. This code **does memoize**, one renderApp will be called when clicking any button, main inc button will work correctly, but inner inc buttons will **stop working** correctly**.**
+
+Counter will increment from 0 to 1 and it will stop after that. Lambda is created once, but called multiple times. Since count is 0 when lambda is created, it behaves exactly as the code below:
+
+```js
+const inc = useCallback(() => setCount(1), []);
+```
+
+The root cause of our problem is that we are trying to read and write from and to the state at the same time. We need API designed for that purpose. Fortunately for us, React provides two ways for solving the problem:
+
+# useState with functional updates
+
+```js
+const inc = useCallback(() => setCount((c) => c + 1), []);
+```
+
+Example 7: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-7)
+
+Setters returned by [useState](https://reactjs.org/docs/hooks-reference.html#usestate) can take function as an argument, where you can read previous value of a given state. In this example, **memoization works** correctly, without any bugs.
+
+# useReducer
+
+```js
+const [count, dispatch] = useReducer((c) => c + 1, 0);
+```
+
+Example 8: [Live Demo](https://stackblitz.com/edit/react-hooks-memoization-8)
+
+[useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer) **memoization works** exactly as [useState](https://reactjs.org/docs/hooks-reference.html#usestate) in this case. Since dispatch is guaranteed to have same reference across renders, useCallback is not needed, which makes code less error-prone to memoization related bugs.
+
+# useReducer vs useState
+
+useReducer is more suited for managing state objects that contain multiple sub-values or when the next state depends on the previous one. [Common pattern](https://reactjs.org/docs/hooks-faq.html#how-to-avoid-passing-callbacks-down) of using useReducer is with useContext to avoid explicitly passing callbacks in a large component tree.
+
+The rule of thumb I recommend is to mostly use useState for data that does not leave the componet, but if non-trivial two-way data exchange is needed between parent and descendants, useReducer is a better choice.
+
+---
+
+To sum things up, [React.memo](https://reactjs.org/docs/react-api.html#reactmemo) and [useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer) are best friends, [React.memo](https://reactjs.org/docs/react-api.html#reactmemo) and [useState](https://reactjs.org/docs/hooks-reference.html#usestate) are siblings that sometimes fight and cause problems, [useCallback](https://reactjs.org/docs/hooks-reference.html#usecallback) is the next-door neighbor you should always be cautious about.

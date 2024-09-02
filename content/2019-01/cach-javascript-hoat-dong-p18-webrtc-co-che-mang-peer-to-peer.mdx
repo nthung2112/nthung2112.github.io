@@ -1,0 +1,294 @@
+---
+title: 'Cách Javascript hoạt động P18: WebRTC & cơ chế mạng peer-to-peer'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/800/0*iWlF5x7BVj1vh5Lu'
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-webrtc-and-the-mechanics-of-peer-to-peer-connectivity-87cc56c1d0ab
+date: 2019-01-06 00:00:00
+slug: /cach-javascript-hoat-dong-p18-webrtc-co-che-mang-peer-to-peer
+---
+
+**_Thêm một bài nữa mang nặng kiến thức về mạng mà mình lại không chuyên về mảng này, nếu mình dịch chỗ nào không phù hợp thì nhờ mọi người giúp đỡ nhé @_@\_**
+
+- **Peer-To-Peer hay P2P**: Mạng ngang hàng
+- **Real-time**: thời gian thực
+
+Chào các bạn đến với bài thứ 18 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+# Khái quát
+
+Đầu tiên thì WebRTC là cái gì vậy? Nó là viết tắt của chữ **R**eal **T**ime **C**ommunication (Giao tiếp thời gian thực), nghe qua chắc bạn cũng đã có cái gì sơ sơ về công nghệ này rồi nhỉ.
+
+WebRTC lấp đầy 1 khoảng trống lớn trong nền tảng web. Trước đây, các công nghệ P2P chẳng hạn như những app chat trên desktop có thể làm những việc mà web không làm được. Nhưng WebRTC đã thay đổi điều đó.
+
+Về cơ bản WebRTC cho phép webapp có thể thiết lập giao tiếp Peer-To-Peer, chính là nội dung trong bài viết này. Ta sẽ thảo luận về các chủ đề sau đây để có thể mang đến cho bạn 1 cái nhìn toàn cảnh về "ruột gan phèo phổi" của WebRTC:
+
+- Giao tiếp Peer-To-Peer
+- Tường lửa và NAT Traversal
+- Tín hiệu (Signaling), Phiên (Session), Giao thức (Protocol)
+- Các API của WebRTC
+
+# Giao tiếp Peer-To-Peer
+
+Để có thể giao tiếp lẫn nhau thông qua trình duyệt web, mỗi trình duyệt của user phải thực hiện những bước sau đây:
+
+- Đồng ý để bắt đầu giao tiếp
+- Biết cách xác định vị trí của đối tượng
+- Vượt qua an ninh và tưởng lửa bảo vệ
+- Chuyển giao tất cả các giao tiếp đa phương tiện theo real-time
+
+1 trong số những thách thức lớn nhất liên quan đến các giao tiếp P2P dựa trên trình duyệt là làm sao để biết vị trí & thiết lập 1 kết nối socket mạng (network socket connection) với 1 trình duyệt khác để vận chuyển dữ liệu 2 chiều. Ta sẽ xem xét những khó khăn liên quan đến việc thiết lập kết nối này.
+
+Khi webapp của bạn cần dữ liệu hoặc tài nguyên, nó sẽ lấy về từ các server. Tuy nhiên, nếu bạn muốn tạo ra 1 ứng dụng video chat chẳng hạn, bằng cách kết nối trực tiếp đến trình duyệt của người khác - thì đây là vấn đề, vì bạn không biết địa chỉ bởi vì trình duyệt của người kia không phải là 1 web server. Vì vậy để có thể thiết lập 1 kết nối P2P ta cần rất nhiều thứ.
+
+# Tường lửa và NAT Traversal
+
+Thường thì máy tính của bạn không không có địa chỉ IP public tĩnh. Lý do là máy tính của bạn phải núp đằng sau tường lửa và thiết bị NAT (Network access translation - Bộ phiên dịch truy cập mạng).
+
+Thiết bị NAT sẽ dịch địa chỉ IP cá nhân từ bên trong tường lửa thành địa chỉ IP công khai (public-facing IP). Ta cần các thiết bị NAT để bảo mật và giải quyết sự giới hạn của IPv4 đối với những địa chỉ IP công khai sẵn có. Đó là lý do tại sao webapp không nên giả định rằng thiết bị hiện tại có 1 địa chỉ IP public tĩnh.
+
+Cùng tìm hiểu 1 chút về cách hoạt động của các thiết bị NAT. Nếu như bạn đang ở trong môi trường công cộng và kết nối vào mạng WiFi, máy tính của bạn sẽ được gán 1 địa chỉ IP mà nó chỉ tồn tại đằng sau NAT. Giả sử IP là 172.0.23.4, tuy nhiên, với thế giới bên ngoài, địa chỉ IP của bạn có thể mang giá trị khác, ví dụ 164.53.27.98. Vì vậy, thế giới bên ngoài sẽ thấy các request của bạn đến từ địa chỉ 164.53.27.98 nhưng thiết bị NAT sẽ đảm bảo các response cho những request (được gửi từ máy của bạn) sẽ trả về đúng chỗ là 172.0.23.4. Ơn trời các bảng ánh xạ (mapping table). Lưu ý rằng ngoài địa chỉ IP thì cổng (port) cũng là điều kiện cần thiết cho các giao tiếp mạng.
+
+Do có sự tham gia của các thiết bị NAT, trình duyệt của bạn cần tìm được địa chỉ IP của máy tính có trình duyệt mà bạn muốn giao tiếp.
+
+Đến đây thì ta lại phải nhờ đến các server **STUN** (**S**ession **T**raversal **U**tilities for **N**AT - Tiện ích truyền tải theo phiên cho NAT) và **TURN** (**T**raversal **U**sing **R**elays around **N**AT - Truyền tải sử dụng điểm chuyển tiếp vòng quanh NAT). Để các công nghệ WebRTC hoạt động được, đầu tiên thì 1 request hỏi địa chỉ IP public của bạn sẽ được gửi đến server STUN. Bạn cứ nghĩ theo hướng kiểu như máy tính đang tạo truy vấn đến 1 server từ xa để hỏi về địa chỉ IP mà server đó nhận câu truy vấn là bao nhiêu. Server từ xa sẽ trả về địa chỉ IP mà nó thấy. Nói ngắn gọn là máy tính của bạn "hỏi" 1 server từ xa địa chỉ IP của chính máy bạn là bao nhiêu.
+
+Giả sử tiến trình này hoạt động bình thường và bạn nhận được địa chỉ IP public của mình cũng như số port, bạn sẽ có thể nói với những peer ngang hàng khác làm thế nào để kết nối trực tiếp đến bạn. Những peer này cũng có thể làm cùng 1 việc là sử dụng STUN & server TURN và nói cho bạn biết nên liên lạc đến địa chỉ nào.
+
+# Signaling, Sessions, Protocols
+
+**_Tín hiệu, phiên, giao thức_**
+
+Quá trình khám phá thông tin mạng được mô tả ở trên chỉ là 1 phần của chủ đề về Signaling to bự hơn nhiều, trong trường hợp của WebRTC thì phần signaling này dựa trên 1 chuẩn JSEP (**J**avascript **S**ession **E**stablishment **P**rotocol - Giao thức thiết lập phiên của Javascript). Signaling bao gồm cả khám phá mạng (network discovery) và NAT Traversal, tạo và quản lý phiên, bảo mật giao tiếp, siêu dữ liệu (metadata) và phối hợp khả năng của media, xử lý lỗi.
+
+Để kết nối có thể hoạt động, peer thu được những điều kiện về local media cho metadata (ví dụ: những khả năng về kích thước và kiểu codec) và gom góp các địa chỉ mạng có thể có cho host của ứng dụng. Cơ chế signaling dùng để truyền tới/lui những thông tin quan trọng này không được định nghĩa trong API của WebRTC.
+
+Signaling không được quy định bởi chuẩn WebRTC và nó không được triển khai bằng API của nó để cho phép sử dụng một cách linh động các công nghệ và giao thức cần thiết. Các WebRTC developer sẽ đối phó với signaling và server xử lý signaling.
+
+Giả sử app WebRTC dựa trên trình duyệt của bạn có thể xác định được địa chỉ IP public của nó bằng cách sử dụng STUN như đã nói ở trên, bước tiếp theo thực sự là 1 màn đàm phán & thiết lập phiên kết nối đến với peer.
+
+Phần đàm phán và thiết lập khởi tạo phiên xảy ra khi dùng 1 giao thức signaling/giao tiếp được đặc tả trong các giao tiếp đa phương tiện. Giao thức này cũng chịu trách nhiệm cho việc điều hành các quy định trong đó phiên được quản lý và hủy bỏ.
+
+Một trong số các giao thức như vậy có tên là **S**ession **I**nitiation **P**rotocol (SIP - Giao thức khởi tạo phiên). Lưu ý rằng do sự linh động của WebRTC signaling, SIP không phải là giao thức signaling duy nhất có thể dùng. Giao thức signaling được chọn phải hoạt động với 1 giao thức ở tầng ứng dụng gọi là **S**ession **D**escription **P**rotocol (SDP - Giao thức mô tả phiên), giao thức này được sử dụng trong trường hợp của WebRTC. Tất cả các metadata đa phương tiện cụ thể được truyền đi bằng giao thức SDP này.
+
+Bất kỳ peer nào (ví dụ: app tận dụng WebRTC) thử giao tiếp với 1 peer khác đều sinh ra 1 tập các ứng viên giao thức Interactive Connectivity Establishment (ICE - Thiết lập kết nối tương tác). Những ứng viên này biểu diễn 1 bộ kết hợp của địa chỉ IP, port, giao thức giao vận được dùng. Lưu ý rằng 1 máy tính có thể có nhiều giao diện mạng (không dây, có dây, vân vân), vì thế có thể được gán nhiều địa chỉ IP cho mỗi giao diện.
+
+Dưới đây là sơ đồ lấy từ MDN mô tả lại sự trao đổi:
+![](https://cdn-images-1.medium.com/max/1000/0*SXRTlnVxy2-hE9ZX)
+
+# Thiết lập kết nối
+
+Mỗi peer đầu tiên phải thiết lập địa chỉ IP public như đã nói ở trên. "Kênh" (channel) dữ liệu signaling sau đó được tự động tạo ra để xác định các peer và hỗ trợ đàm phán peer-to-peer và thiết lập phiên.
+
+Thế giới bên ngoài hoàn toàn không biết hoặc không thể truy xuất đến những "kênh" này và nó cũng yêu cầu 1 định danh duy nhất nếu muốn truy cập.
+
+Lưu ý rằng, do sự linh động của WebRTC và cũng bởi tiến trình signaling không được cụ thể hóa trong các tiêu chuẩn, ý tưởng và cách thực hiện của "kênh" có thể sẽ có ít nhiều khác biệt tuy vào công nghệ sử dụng. Rõ ràng, 1 vài giao thức không cần đến cơ chế "kênh" mà vãn giao tiếp được.
+
+Chúng ta sẽ giả sử rằng "kênh" được dùng trong việc triển khai cho các mục đích được nhắc tới ở bài viết này.
+
+Một khi 2 hoặc nhiều peer đã cùng kết nối vào 1 "kênh" thì những peer đã có thể giao tiếp và trao đổi thông tin phiên. Tiến trình này về mặt nào đó thì tương tự như [mô hình publish/subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern). Về cơ bản, peer khởi tạo ban đầu sẽ gửi 1 "lời đề nghị" sử dụng 1 giao thức signaling chẳng hạn như Session Initiation Protocol (SIP - Giao thức khởi tạo phiên) và SDP. Người khởi tạo sẽ chờ để nhận được "câu trả lời" từ bất kỳ người nhận nào đã kết nối với "kênh".
+
+Khi đã nhận được câu trả lời, 1 tiến trình diễn ra để xác định và trao đổi giao thức ứng viên ICE tốt nhất (Interactive Connectivity Establishment - Thiết lập kết nối tương tác) mà mỗi peer thu thập được. Một khi chọn được ứng viên ICE tối ưu thì về cơ bản sẽ có nhiều thứ theo sau đó được chấp nhận, bao gồm: những metadata cần thiết, các định tuyến mạng (địa chỉ IP và port) và các thông tin media thường dùng để giao tiếp với mỗi peer. Phiên mạng socket mạng giữa những peer sau đó được thiết lập hoàn chỉnh và kích hoạt. Tiếp đó, các luồng dữ liệu local và các endpoint kênh dữ liệu được tạo ra bởi mỗi peer, dữ liệu đa phương tiện cuối cùng được chuyển đi theo cả 2 đường sử dụng bất kỳ công nghệ giao tiếp 2 chiều nào.
+
+Nếu như tiến trình đồng ý chấp nhận ứng viên ICE tốt nhất bị thất bại, thỉnh thoảng nguyên nhân là do tường lửa hoặc kỹ thuật NAT đang dùng, thì giải pháp dự phòng sau đó là sử dụng 1 server TURN dưới dạng 1 điểm chuyển tiếp thay thế. Tiến trình này về cơ bản sẽ dùng 1 server hoạt động như người trung gian và nó chuyển tiếp bất kỳ dữ liệu nào truyền qua lại giữa các peer. Lưu ý rằng đây không phải là giao tiếp peer-to-peer thực thụ trong đó các peer truyền dữ liệu 2 chiều trực tiếp đến với nhau.
+
+Khi sử dụng giải pháp dự phòng TURN để giao tiếp, mỗi peer sẽ không cần phải biết làm thế nào để liên lạc và truyền dữ liệu đến bên kia. Thay vào đó, nó cần biết server TURN public nào để gửi và nhận dữ liệu đa phương tiện theo thời gian thực xuyên suốt phiên giao tiếp.
+
+Điều quan trọng cần phải hiểu rằng đây chắc chẳn là 1 dạng "kế hoạch dự phòng" và chỉ dùng khi không còn cách nào khác. Các server TURN phải khá vững chắc, có băng thông rộng, khả năng xử lý và có thể xử lý 1 lượng lớn dữ liệu tiềm tàng. Cách sử dụng server TURN vì thế rõ ràng là sẽ phát sinh thêm chi phí và sự phức tạp.
+
+# Các API của WebRTC
+
+Có 3 mục phân loại API chính trong WebRTC:
+
+- **Media Capture and Streams** (luồng media và chụp media) - cho phép bạn truy xuất vào các thiết bị đầu vào, chẳng hạn như microphone hay web camera. API cho phép bạn lấy 1 luồng media từ các thiết bị đó.
+- **RTCPeerConnection** - dùng những API này, bạn có thể gửi theo thời gian thực 1 luồng âm thanh & hình ảnh đã bắt được thông qua internet đến 1 endpoint WebRTC khác. Bạn có thể tạo ra kết nối giữa máy local và peer từ xa. Nó cũng cung cấp các phương thức để kết nối đến 1 peer từ xa, duy trì và kiểm soát kết nối & đóng kết nối 1 khi ta không cần đến nó nữa.
+- **RTCDataChannel** - API này cho phép bạn truyền dữ liệu tùy ý. Mỗi kênh dữ liệu được liên kết với 1 RTCPeerConnection.
+
+Chúng ta sẽ đi sâu vào thảo luận mỗi loại trên.
+
+## Media Capture & Streams
+
+API **Media Capture & Streams**, thường được gọi là _Media Stream API_ hoặc _Stream API_, là 1 API hỗ trợ những luồng (stream) dữ liệu âm thanh hay hình ảnh, các phương thức để làm việc với chúng, những hạn chế liên kết với từng loại dữ liệu, callback thành công/thất bại khi sử dụng dữ liệu bất đồng bộ và những sự kiện được bắn ra suốt quá trình.
+
+Phương thức getUserMedia() của [MediaDevices](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices) nhắc nhở người dùng cấp quyền để sử dụng đầu vào media, nó tạo ra 1 [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream) kèm với các track chứa kiểu request của media. Luồng đó có thể chứa 1 track video (được tạo ra bởi phần cứng hay nguồn video ảo chẳng hạn như camera, thiết bị ghi video, dịch vụ chia sẻ màn hình, vân vân), 1 track audio (tương tự, được tạo ra bởi nguồn ghi vật lý hoặc nguồn ghi ảo như microphone, bộ chuyển A/D...) và có thể có cả những loại track khác.
+
+Nó sẽ trả về 1 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) và resolve thành object [MediaStream](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream). Nếu người dùng từ chối cấp quyền hoặc là media phù hợp không tồn tại thì promise đó sẽ bị reject với PermissionDeniedError hoặc NotFoundError.
+
+Mô hình singleton MediaDevice có thể được truy xuất thông qua object navigator như sau:
+
+```javascript
+navigator.mediaDevices
+  .getUserMedia(constraints)
+  .then(function (stream) {
+    /* use the stream */
+  })
+  .catch(function (err) {
+    /* handle the error */
+  });
+```
+
+Lưu ý là bạn cần truyền object constraints để nói cho API loại stream nào để trả về. Bạn có thể cấu hình tất cả những thứ linh tinh liên quan, bao gồm cả camera mà bạn dùng (camera trước/sau), tần suất khung hình, độ phân giải, vân vân.
+
+Kể từ phiên bản 25, các trình duyệt dựa trên nhân Chromium cho phép dữ liệu âm thanh từ getUserMedia() có thể được truyền đến element audio hoặc video (nhưng lưu ý rằng mặc định thì các media element bị tắt tiếng (mute))
+
+getUserMedia còn có thể được dùng như 1 [node đầu vào cho Web Audio API](http://updates.html5rocks.com/2012/09/Live-Web-Audio-Input-Enabled)
+
+```javascript
+function gotStream(stream) {
+  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+  var audioContext = new AudioContext();
+  // Tạo AudioNode từ stream
+  var mediaStreamSource = audioContext.createMediaStreamSource(stream);
+  // Kết nối nó đến điểm đích để nghe bạn
+  // hoặc bất kỳ node nào khác đang xử lý
+  mediaStreamSource.connect(audioContext.destination);
+}
+
+navigator.getUserMedia({ audio: true }, gotStream);
+```
+
+### Giới hạn về sự riêng tư
+
+Là 1 API có thể chứa nhiều điều lo ngại đáng kể về quyền riêng tư, getUserMedia() được tổ chức bởi các đặc điểm kỹ thuật với những yêu cầu rất cụ thể về thông báo người dùng và quản lý quyền truy cập. getUserMedia() phải luôn luôn xin quyền từ người dùng trước khi mở bất kỳ thiết bị thu thập thông tin media nào chẳng hạn như webcam hay microphone. Trình duyệt có thể có tính năng cấp quyền trên mỗi domain (once-per-domain), nhưng nó phải hỏi bạn ít nhất là lần đầu tiên hoạt động và người dùng phải đặc biệt cấp quyền tiếp theo nếu họ muốn.
+
+Một điều quan trọng tương đương là các quy định xung quanh thông báo (notification). Trình duyệt được yêu cầu phải hiển thị 1 thông số thể hiện camera hoặc microphone đang hoạt động, hơn hết thảy bất kỳ thông số thể hiện phần cứng nào khác. Họ cũng phải hiện 1 chỉ số cho thấy rằng quyền được được cấp để sử dụng thiết bị đầu vào, kể cả nếu như thiết bị đó chưa được kích hoạt để ghi chép tại thời điểm đó.
+
+# RTCPeerConnection
+
+Giao diện **RTCPeerConnection** thể hiện 1 kết nối WebRTC giữa máy tính local và peer từ xa. Nó cung cấp các phương thức để kết nối đến peer từ xa, duy trì, kiểm soát kết nối và ngắt kết nối một khi nó không cần dùng tới nữa.
+
+Dưới đây là 1 mô hình kiến trúc của WebRTC thể hiện vai trò của RTCPeerConnection:
+![](https://cdn-images-1.medium.com/max/1000/0*Nm9r_NLcAhJernmo)
+
+Từ góc độ của Javascript, điều cần hiểu trong mô hình trên là **RTCPeerConnection** trao cho các web developer một cái nhìn tinh tế từ những sự phức tạp xuất phát từ đống "nội tạng" rối rắm bên dưới. Các mã codec và giao thức được dùng bởi WebRTC thực hiện 1 lượng lớn công việc dể làm cho giao tiếp real-time hoạt động được, kể cả với các mạng không đáng tin cậy:
+
+- Che dấu mất gói tin (Package loss concealment - PLC, là 1 kỹ thuật dùng để che đậy ảnh hưởng của tình trạng mất gói tin trong giao tiếp VoIP)
+- Hủy bỏ phản hồi (Echo cancellation - trong mạng máy tính thì "echo" được hiểu là quá trình gửi trả về gói tin đã gửi đi)
+- Khả năng thích ứng băng thông
+- Bộ đệm jitter động (jitter buffer - Trong kỹ thuật VoIP thì jitter buffer là vùng dữ liệu chia sẻ nơi mà các gói tin âm thanh có thể được thu thập, lưu trữ và gửi đi đến bộ xử lý âm thanh)
+- Tự động chiếm quyền kiểm soát
+- Giảm nhiễu và xóa nhiễu
+- "Dọn dẹp" hình ảnh
+
+# RTCDataChannel
+
+Cũng như hình ảnh và âm thanh, WebRTC cũng hỗ trợ giao tiếp real-time cho các loại dữ liệu khác.
+
+API RTCDataChannel cho phép peer-to-peer trao đổi các dữ liệu tùy ý.
+
+Có rất nhiều trường hợp sử dụng API này, ví dụ:
+
+- Dùng trong các game
+- Ứng dụng chat real-time
+- Truyền file
+- Các mạng phi tập trung
+
+API cũng có nhiều tính năng để tận dụng tối đa RTCPeerConnection và kích hoạt sức mạnh cũng như sự linh động của giao tiếp peer-to-peer:
+
+- Tận dụng cài đặt phiên của RTCPeerConnection
+- Đa kênh đồng thời với khả năng phân chia mức độ ưu tiên
+- Ngữ cảnh vận chuyển đáng tin cậy và không đáng tin cậy.
+- Tích hợp sẵn bảo mật (DTLS) và kiểm soát tắc nghẽn.
+
+Cú pháp tương tự như WebSocket mà ta đã biết, với phương thức send() và sự kiện message:
+
+```javascript
+var peerConnection = new webkitRTCPeerConnection(servers, {
+  optional: [{ RtpDataChannels: true }],
+});
+
+peerConnection.ondatachannel = function (event) {
+  receiveChannel = event.channel;
+  receiveChannel.onmessage = function (event) {
+    document.querySelector('#receiver').innerHTML = event.data;
+  };
+};
+
+sendChannel = peerConnection.createDataChannel('sendDataChannel', {
+  reliable: false,
+});
+
+document.querySelector('button#send').onclick = function () {
+  var data = document.querySelector('textarea#send').value;
+  sendChannel.send(data);
+};
+```
+
+Sự giao tiếp diễn ra trực tiếp giữa các trình duyệt, vì thế RTCDataChannel có thể nhanh hơn nhiều so với WebSocket kể cả khi cần đến 1 server chuyển tiếp (TURN).
+
+# WebRTC trong thế giới thực
+
+Trong thế giới thực thì WebRTC cần có server, tuy nhiên thực tế lại đơn giản hơn:
+
+- Các user tự khám phá ra đối tác của họ và trao đổi các chi tiết chẳng hạn như tên.
+- Các ứng dụng WebRTC phía client (các peer) trao đổi thông tin mạng.
+- Các peer trao đổi dữ liệu về media chẳng hạn như định dạng hình ảnh và độ phân giải.
+- Các ứng dụng WebRTC phía client di chuyển xuyên qua các [cổng NAT](http://en.wikipedia.org/wiki/NAT_traversal) và tường lửa.
+
+Nói cách khác, WebRTC cần phải có 4 tính năng ở phía server:
+
+- User khám phá ra và giao tiếp.
+- Signaling
+- Di chuyển NAT/tường lửa
+- Các server chuyển tiếp trong trường hợp giao tiếp peer-to-peer thất bại.
+
+Giao thức [STUN](http://en.wikipedia.org/wiki/STUN) và bản mở rộng [TURN](http://en.wikipedia.org/wiki/Traversal_Using_Relay_NAT) của nó được dùng bởi [ICE](http://en.wikipedia.org/wiki/Interactive_Connectivity_Establishment) để kích hoạt RTCPeerConnection nhằm đối phó với di chuyển NAT và các thay đổi mạng mơ hồ khác.
+
+Như đã nhắc đến trước đó, ICE là 1 giao thức để kết nối các peer, chẳng hạn như 2 ứng dụng video chat client. Khi khởi tạo, ICE sẽ thử kết nối trực tiếp đến các peer với độ trễ thấp nhất có thể thông qua UDP. Trong tiến trình này, các server STUN có 1 tác vụ duy nhất: kích hoạt 1 peer phía sau NAT để tìm địa chỉ public & số port. Bạn có thể kiểm tra các server STUN đang tồn tại ở danh sách này (Google cũng có 1 số server)
+
+| | # source : http://code.google.com/p/natvpn/source/browse/trunk/stun_server_list |
+| | # A list of available STUN server. |
+| | |
+| | stun.l.google.com:19302 |
+| | stun1.l.google.com:19302 |
+| | stun2.l.google.com:19302 |
+| | stun3.l.google.com:19302 |
+| | stun4.l.google.com:19302 |
+| | stun01.sipphone.com |
+| | stun.ekiga.net |
+| | stun.fwdnet.net |
+| | stun.ideasip.com |
+| | stun.iptel.org |
+| | stun.rixtelecom.se |
+| | stun.schlund.de |
+| | stunserver.org |
+| | stun.softjoys.com |
+| | stun.voiparound.com |
+| | stun.voipbuster.com |
+| | stun.voipstunt.com |
+| | stun.voxgratia.org |
+| | stun.xten.com |
+
+[view raw](https://gist.github.com/zziuni/3741933/raw/212e4b6316110dc5c128d08f65ff8f174d7ae383/stuns) [stuns](https://gist.github.com/zziuni/3741933#file-stuns) hosted with ❤ by [GitHub](https://github.com).
+![](https://cdn-images-1.medium.com/max/1000/1*ONNxJHqmMTXB1Nuq3qTNXQ.png)
+
+## Tìm những ứng viên kết nối
+
+Nếu như UDP thất bại, ICE sẽ thử TCP: đầu tiên là HTTP, sau đó là HTTPS. Nếu kết nối trực tiếp thất bại - cụ thể là bởi vì dịch chuyển NAT & tường lửa mức độ doanh nghiệp - ICE sẽ dùng 1 server TURN trung gian (điểm chuyển tiếp). Nói cách khác, ICE đầu tiên sẽ dùng STUN với UDP để kết nối trực tiếp các peer với nhau, nếu thất bại, nó sẽ đổi kế hoạch sang dùng server chuyển tiếp TURN. Cụm từ "tìm kiếm ứng viên" nhắc đến quá trình tìm kiếm các giao diện mạng & port.
+![](https://cdn-images-1.medium.com/max/1000/1*0REL14sYPR34hY7yua6-PA.png)
+
+# Bảo mật
+
+Có rất nhiều cách mà 1 ứng dụng hoặc plugin giao tiếp real-time có thể bị ảnh hưởng về bảo mật. Ví dụ:
+
+- Dữ liệu hoặc media không được mã hóa có thể bị chặn trên đường đi giữa các trình duyệt hay giữa trình duyệt và server
+- Một ứng dụng có thể ghi chép và phân phối âm thanh, hình ảnh mà user hoàn toàn không biết
+- Malware hoặc virus máy tính có thể được cài đặt cùng với 1 ứng dụng hoặc plugin vớ vẩn.
+
+WebRTC có nhiều tính năng để tránh các vấn đề trên:
+
+- WebRTC triển khai sử dụng các giao thức bảo mật chẳng hạn như [DTLS](http://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security) và [SRTP](http://en.wikipedia.org/wiki/Secure_Real-time_Transport_Protocol)
+- Mã hóa là điều cần thiết đối với tất cả các component của WebRTC, bao gồm cả cơ chế signaling.
+- WebRTC không phải là 1 plugin: các component của nó chạy trong sandbox của trình duyệt và không chạy ở luồng riêng, các component không yêu cầu cài đặt riêng lẻ và được cập nhật mỗi khi trình duyệt được cập nhật.
+- Truy xuất camera và microphone phải được cấp quyền rõ ràng và khi camera hoặc microphone đang hoạt động thì phải được thể hiện ra ở phía giao diện người dùng.
+
+WebRTC là 1 công nghệ cực kỳ thú vị & mạnh mẽ dành cho các sản phẩm cần làm việc với mô hình truyền tải real-time giữa các trình duyệt.
+
+Ví dụ, ở SessionStack, họ cho phép user tích hợp thư viện Javascript của họ vào bên trong webapp của user. Nhiệm vụ của nó là bắt đầu thu thập các dữ liệu như sự kiện người dùng, thay đổi trên DOM, dữ liệu mạng, biệt lệ, thông báo debug, vân vân, và gửi chúng về cho server.
+
+Trong khi đó, user của bạn có thể vào trong webapp của họ, mở 1 phiên làm việc bình thường và xem nó hoạt động theo thời gian thực. Sử dụng các dữ liệu thu thập được, SessionStack có thể tái tạo mọi thứ đã từng xảy ra trên trình duyệt của user, kết hợp các thông tin về hình ảnh thuần túy với 1 bộ giả lập console của trình duyệt và mọi thứ bên trong nó. Bạn cứ nghĩ nó giống như desktop từ xa nhưng không bắt người dùng cuối phải tải về bất cứ chương trình nào. Và trên hết tất cả các thông tin hình ảnh, bạn có thể thực sự thấy được các thông tin kỹ thuật lấy từ phiên.
+
+Họ đã làm được tất cả điều đó thuần túy với các server, tuy nhiên sử dụng WebRTC họ có thể thật sự không cần phụ thuộc vào server nữa mà giao tiếp trực tiếp giữa các trình duyệt với nhau, giảm độ trễ và sức mạnh tính toán cần thiết.

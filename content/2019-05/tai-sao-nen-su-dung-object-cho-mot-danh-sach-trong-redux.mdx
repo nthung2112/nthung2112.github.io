@@ -1,0 +1,162 @@
+---
+title: 'Tại sao nên sử dụng object cho một danh sách trong Redux'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - redux
+categories: []
+sourceUrl: 'https://medium.com/javascript-in-plain-english/https-medium-com-javascript-in-plain-english-why-you-should-use-an-object-not-an-array-for-lists-bee4a1fbc8bd'
+coverImage: 'https://cdn-images-1.medium.com/max/2600/1*QcAh45dlS_pwW6wvoS7JOQ.jpeg'
+date: 2019-05-27 19:45:00
+slug: /tai-sao-nen-su-dung-object-cho-mot-danh-sach-trong-redux
+---
+
+If you are working on an application, chances are that you are using a list of items: users, comments, posts, todos, movies etc.
+
+The most common data structure to choose for lists in Javascript is an array.
+
+I would like to explain why that might not be the best choice when storing those lists in a state management tool like Redux or React Context.
+
+### C[RUD] operations on a single item
+
+If you want to make one of the RUD (read, update or delete) operations to a single item, you always need to iterate.
+
+Except for the create, where you just need to add the item to the list.
+
+#### Read
+
+If you use an array, you need to find that item by filtering. When you have an object, you only need the identifier you used as key.
+
+#### Update
+
+When using an array the fastest way is to map and change the one you want to change. With an object, just set the property pointing to the updated item.
+
+#### Delete
+
+Filter for an array. Just delete that key for an object.
+
+### Fetching from an API
+
+This is where using an object shines over using an array.
+
+When your items come from the backend, you need to fetch them. What happens when you fetch the same item twice? Or the same list twice? Or a list with some duplicated and some new items?
+
+If you use an array you need to make sure to not duplicate the items. You need to handle that scenario. It means adding more complexity.
+
+How about adding to an object the same item twice?
+
+Nothing to do. The items are stored by key. In an object you can’t have the same key twice. You will only substitute the fetched item by the one already in the state.
+
+### When NOT to use an object
+
+If you don’t have a unique identifier for each item. Or you want to keep an order without using an extra property.
+
+### Code Examples
+
+Let’s take a look at some code examples. The following code examples represent only the operations described above. They are NOT redux reducers or other kind of state creator. They are just some snippets to better understand the point I am making above.
+
+We have a list of comments.
+
+```javascript
+// array
+const comments = [
+  { id: '1', text: 'add code examples' },
+  { id: '2', text: 'examples would be great for this article' },
+  { id: '3', text: 'hi there' },
+];
+// object
+const comments = {
+  1: { id: '1', text: 'please add code examples' },
+  2: { id: '2', text: 'examples would be great for this article' },
+  3: { id: '3', text: 'hi there' },
+};
+```
+
+#### Read comment id 2
+
+```javascript
+const commentId = '2';
+// array
+comments.find((comment) => comment.id === commentId);
+// object
+comments[commentId];
+```
+
+#### Update comment id 1
+
+```javascript
+const updatedComment = { id: '1', text: 'add code examples, please' };
+// array
+comments.map((comment) => {
+  if (comment.id === updatedComment.id) {
+    return updatedComment;
+  }
+  return comment;
+});
+// object
+comments[updatedComment.id] = updatedComment;
+```
+
+#### Delete comment id 3
+
+```javascript
+const commentId = '3';
+// array
+comments.filter((comment) => comment.id !== commentId);
+// object
+delete comments[commentId];
+```
+
+#### Adding a new comment
+
+We have to assume that we don’t know whether it already exists or not
+
+```javascript
+const newComment = { id: '4', text: 'thanks for the code examples!' };
+// array
+if (comments.find((comment) => comment.id === newComment.id) {
+  comments = comments.map((comment) => {
+    if (comment.id === newComment.id) {
+      return newComment;
+    }
+    return comment;
+  });
+} else {
+  comments = comments.concat([newComment]);
+}
+// object
+comments[newComment.id] = newComment;
+```
+
+### What if you need an array somewhere in your code?
+
+Sometimes, you might find that it’s easier to use an array for your list of items. For example, when you are rendering a list. It’s easier to have an array, use a map and create the element in each iteration.
+
+This has an easy solution. Instead of accessing directly the state, use a function. What is also known as a **selector**.
+
+A selector is a function that takes some state and returns the data you need. Usually in the schema or structure you want.
+
+```javascript
+// object
+const comments = {
+  1: { id: '1', text: 'please add code examples' },
+  2: { id: '2', text: 'examples would be great for this article' },
+  3: { id: '3', text: 'hi there' },
+};
+// transform to array
+const commentsSelector = (commentsObj) => {
+  return Object.keys(commentsObj).map((commentKey) => commentsObj[commentKey]);
+};
+// usage of the selector
+const commentsArray = commentsSelector(comments);
+```
+
+### Conclusion
+
+Using an object will save your future self some time and bugs. Do her/him a favor and use an object to store a list of items.
+
+Even as a beginner, I recommend you to to use objects instead of arrays to store lists of items. The struggle pays off at the end. As most struggles do :)
+
+More on best practices in state shapes in [Redux Docs on Normalization](https://redux.js.org/recipes/structuring-reducers/normalizing-state-shape).
+
+Thank you for reading. I would love to hear your thought in the comments.

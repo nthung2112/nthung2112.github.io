@@ -1,0 +1,53 @@
+---
+title: Running express.js server over HTTPS
+author: Hung Tan Nguyen
+tags: [expressjs]
+categories: []
+coverImage: 'https://hackernoon.com/hn-images/1*49glYe-285UPvYW9xp7JFw.jpeg'
+sourceUrl: 'https://timonweb.com/posts/running-expressjs-server-over-https/'
+date: '2020-02-27T06:59:28.459Z'
+slug: '/running-expressjs-server-over-https'
+---
+
+HTTPS is everywhere and more often than not we need to spin an https server or two. Here's how you can do it for your local express.js dev server:
+
+## 1\. Generate a self-signed certificate
+
+```bash
+openssl req -nodes -new -x509 -keyout server.key -out server.cert
+```
+
+## 2\. Enable HTTPS in Express
+
+Add something like this to your index.js
+
+```javascript
+var fs = require('fs');
+var https = require('https');
+var app = express();
+
+app.get('/', function (req, res) {
+  res.send('hello world');
+});
+
+https
+  .createServer(
+    {
+      key: fs.readFileSync('server.key'),
+      cert: fs.readFileSync('server.cert'),
+    },
+    app
+  )
+  .listen(3000, function () {
+    console.log(
+      'Example app listening on port 3000! Go to https://localhost:3000/'
+    );
+  });
+```
+
+Now run a command _node index.js_ and your server should be available at address _https://localhost:3000_.
+
+- Note:
+  In Chrome, put in chrome://flags/#allow-insecure-localhost in the address bar.
+  Enable the option that says "Allow invalid certificates for resources loaded from localhost".
+  Restart Chrome, and it should allow the site.

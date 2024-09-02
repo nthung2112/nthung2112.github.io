@@ -1,0 +1,90 @@
+---
+title: Load Javascript với async và defer
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: 'http://www.growingwiththeweb.com/2014/02/async-vs-defer-attributes.html'
+coverImage: 'https://cdn-images-1.medium.com/max/800/1*xPX0KhPP_WSkMyGA82H79w.jpeg'
+date: 2018-06-23 18:29:00
+slug: /load-javascript-voi-async-va-defer
+---
+
+# Vấn đề
+
+**Javascript** là 1 trong những tài nguyên chặn trang, có nghĩa là việc hiển thị HTML có thể bị chặn hay làm chậm bởi Javascript. Khi parser đọc đến `<script>` tag, bất kể là inline hay là external file, quá trình parse sẽ tạm dừng để fetch script đó về và execute. Việc này có thể là vấn đề nếu chúng ta load nhiều file Javascript trên trang, làm tăng thời gian load trang mặc dù có thể việc hiển thị html ở trang không thực sự phụ thuộc vào những file javascript đó. Và may mắn thay, thẻ `<script>` có 2 thuộc tính, đó là **async và defer**, cho phép chúng ta kiểm soát và load những file này theo ý muốn, tránh chặn quá trình load trang.
+
+# Mô tả cách thực thi
+
+![](legend.png)
+
+## `<script>`
+
+```html
+<html>
+  <head>
+    ...
+  </head>
+  <body>
+    ...
+    <script src="script.js" />
+    ....
+  </body>
+</html>
+```
+
+Với thẻ script không có thuộc tính gì khác thì HTML file sẽ được parse cho đến khi gặp phải thẻ script, đến lúc này thì quá trình parse sẽ tạm dùng và để fetch script file về (nếu là external file), sau đó execute những code script này, sau đó mới tiếp tục lại quá trình parse html
+
+![](script.png)
+
+## `<script async>`
+
+```javascript
+<script async src="script.js" />
+```
+
+Với thẻ script có thuộc tính async, khi quá trình parse html gặp phải script này, nó sẽ vẫn tiếp tục parse html cho đến khi script này được download xong, thì quá trình parse html mới tạm dừng để execute những code script này, sau đó lại tiếp tiếp quá trình parse html
+
+![](script-async.png)
+
+## `<script defer>`
+
+```javascript
+<script defer src="script.js" />
+```
+
+Với thẻ script có thuộc tính defer, quá trình parse html sẽ không bị dừng lại mà parse cho đến khi hoàn thành, quá trình download các script file được tiến hành song song, và cuối cùng thì sẽ execute những script code này khi html đã parse xong.
+
+![](script-defer.png)
+
+# Vậy nên dùng khi nào?
+
+Nó phụ thuộc vào từng tình huống cụ thể.
+
+## Quy tắc như sau:
+
+- Nếu script là 1 module tách biệt, không phụ thuộc vào script nào khác thì nên sử dụng async cho load và execute với trang luôn
+- Nếu script phụ thuộc vào script khác, hoặc bị script khác phụ thuộc, thì nên dùng defer, để load và execute theo thứ tự
+- Nếu script nhỏ và các script khác phụ thuộc vào nó, thì cho load inline và không cần async hay defer
+
+## Ngoài ra nên cân nhắc 1 số câu hỏi trước khi thêm các thuộc tính này
+
+### 1\. Thẻ script đang nằm ở đâu trong trang
+
+Async và defer có thể rất cần thiết nếu thẻ script không nằm ở cuối trang. HMTL document được parse theo thứ tự, từ thẻ mở `<html>` cho đến thẻ đóng `</html>`. Nếu script năm ngay gần cuối thẻ đóng `</body>` thì việc sử dụng async hay defer thì cũng không có ý nghĩa lắm bởi vì việc parse html đã gần xong xuôi, và javascript không còn block gì html nữa.
+
+### 2\. Script đó có độc lập không?
+
+Với những file script không phụ thuộc vào những file khác, thì thuộc tính async dùng cho script đó là việc nên làm, vì nó load và execute script song song, giảm thời gian tải trang, kết quả cuối cùng nhanh hơn.
+
+### 3\. Script có yêu cầu việc load DOM xong mới thực hiện?
+
+Trong nhiều trường hợp, các script chứa đựng code tương tác với DOM, hoặc phụ thuộc vào các thành phần trên trang, yêu cầu trang phải parse xong thì mới execute script. Thông thường thì những file như thế sẽ được đặt ở cuối trang để chắc chắn mọi thử đã được parse. Tuy nhiên chúng ta có thể dùng thuộc tính defer thay thế, đảm bảo script sẽ được execute khi trang đã tải xong.
+
+### 4.Script nhỏ và các file khác phụ thuộc vào nó?
+
+Nếu script dung lượng nhỏ, và các file khác phụ thuộc vào nó, thì nên để script đó inline. Mặc dù nó block quá trình parse HTML, nhưng nó không đáng kể vì dung lượng nhỏ.
+
+# Lợi ích
+
+Với việc biết cách sử dụng các thuộc tính async, defer hợp lí thì tốc độ load trang sẽ được cải thiện hơn, mang lại cảm giác thích thú cho người dùng. Vì vậy nó giúp tối ưu SEO, giúp tăng điểm Google Page Speed ([https://developers.google.com/speed/pagespeed/insights](https://developers.google.com/speed/pagespeed/insights))

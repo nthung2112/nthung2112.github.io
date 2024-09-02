@@ -1,0 +1,146 @@
+---
+title: >-
+  Cách Javascript hoạt động P6: So sánh với WebAssembly + Một số trường hợp tốt
+  hơn nên sử dụng
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-a-comparison-with-webassembly-why-in-certain-cases-its-better-to-use-it-d80945172d79
+date: 2018-11-16 07:19:00
+slug: /cach-javascript-hoat-dong-p6-so-sanh-voi-webassembly-mot-so-truong-hop-tot-hon-nen-su-dung
+---
+
+Chào các bạn đến với bài thứ 6 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Lần này chúng ta sẽ khám phá về WebAssembly và phân tích cách hoạt động của nó, quan trọng hơn là những điểm vượt trội hơn so với Javascript về mặt hiệu năng: thời gian tải, tốc độ thực thi, dọn rác (GC), sử dụng bộ nhớ, truy cập API, debugging, đa luồng và tính di động (portability).
+
+Cách chúng ta xây dựng web app trên bờ vực cách mạng - vẫn đang trong những ngày đầu nhưng cách chúng ta suy nghĩ về web app đang dần thay đổi.
+
+# Cùng xem WebAssembly có thể làm gì
+
+WebAssembly (gọi tắt **wasm**) là một loại bytecode cấp độ thấp và hiệu quả cho web.
+
+WASM cho phép bạn sử dụng ngôn ngữ khác Javascript (như C, C++, Rust...), viết chương trình với những ngôn ngữ đó, và biên dịch trước (ahead of time) sang WebAssembly.
+
+Kết quả là webapp sẽ load và thực thi rất nhanh.
+
+# Thời gian tải (loading time)
+
+Để load Javascript, trình duyệt phải load tất cả file .js đúng nguyên văn bản.
+
+WebAssembly load nhanh hơn trong trình duyệt bởi vì chỉ có những file wasm **đã được biên dịch** là được truyền tải qua internet. Và bởi vì wasm là ngôn ngữ bậc thấp gần giống assembly có format nhị phân rất nhỏ gọn.
+
+# Thực thi (execution)
+
+Wasm chạy chậm hơn 20% **so với native code**. Dù gì đi nữa thì đây là một kết quả đáng kinh ngạc. Nó là một định dạng được biên dịch sang môi trường sandbox và chạy cùng rất nhiều ràng buộc để đảm bảo nó không có những điểm yếu bảo mật hoặc rất khó để chống lại. Tốc độ chậm là không đáng kể khi so với native code. Hơn nữa, nó sẽ được cải thiện chạy nhanh hơn trong tương lai.
+
+Ngoài ra, khả năng tương thích rất tốt với trình duyệt là điểm mạnh, tất cả những engine lớn đều có hỗ trợ WebAssembly và đều đưa ra thời gian thực thi tương đương nhau.
+
+Để hiểu WebAssembly thực thi nhanh như thế nào so với Javascript, bạn nên [đọc bài trước trong series Đục khoét Javascript](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-2---Ben-trong-engine-V8---5-meo-de-toi-uu-hoa-code)
+
+Cùng xem điều gì xảy ra trong V8:
+![](https://cdn-images-1.medium.com/max/1000/0*bN9YVBLw_tT1Xvte.)
+
+Cách tiếp cận của V8: biên dịch chậm
+
+Ở bên trái, chúng ta có Javascript source, bao gồm các hàm. Đầu tiên thì nó cần phải được parse (phân tích cú pháp) để chuyển tất cả string sang token và sinh ra [Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST - Cây cú pháp trừu tượng, chúng ta sẽ có một bài viết về nó sau). Cây AST là đại diện biểu thị logic của chương trình JS trong bộ nhớ. Một khi nó được sinh ra, V8 sẽ đi thẳng đến mã máy. Về cơ bản thì bạn sẽ duyệt qua cây đó, tạo ra mã máy và hàm của bạn đã được biên dịch. Không có tiến trình nào cố gắng tăng tốc nó.
+
+Giờ thì lướt qua xem V8 pipeline làm gì tiếp theo:
+
+![](https://cdn-images-1.medium.com/max/1000/0*wzuQ9LYv7CAUICOC.)
+
+Chúng ta có [TurboFan](https://github.com/v8/v8/wiki/TurboFan), 1 trong những trình biên dịch tối ưu hóa của V8\. Trong khi app Javascript đang chạy thì còn có rất nhiều code khác chạy trong V8\. TurboFan thực hiện điều hành, nếu có gì chạy chậm bất kể là đang nghẽn cổ chai (bottleneck) hay những điểm nóng (hot spots), thì sẽ được tối ưu hóa. Nó đẩy phần code đang ngốn tài nguyên CPU đó qua một bộ [JIT](https://en.wikipedia.org/wiki/Just-in-time_compilation) tối ưu để tạo ra code nhanh hơn nhiều.
+
+Nó giải quyết vấn đề, nhưng bên cạnh đó quá trình phân tích code và quyết định nên tối ưu như thế nào cũng làm tốn tài nguyên CPU. Điều này, làm hao tổn thời lượng pin nhiều hơn, đặc biệt là trên các thiết bị di động.
+
+Chà, wasm thì không cần. Nó đi thẳng vào quá trình làm việc như dưới đây:
+
+![](https://cdn-images-1.medium.com/max/1000/0*GDU4GguTzk8cSAYk.)
+
+Wasm đã duyệt qua quá trình tối ưu hóa ngay trong giai đoạn biên dịch. Trên hết thì parsing đã không còn cần thiết nữa. Bạn có mã nhị phân tối ưu có thể gắn trực tiếp vào bộ phận backend để sinh ra mã máy. Tất cả các sự tối ưu hóa đã được hoàn thành bởi trình biên dịch ở frontend.
+
+Điều này làm cho quá trình thực thi wasm trở nên hiệu quả hơn rất nhiều bởi vì ta có thể bỏ qua 1 số bước trong khi xử lý.
+
+# Mô hình bộ nhớ
+
+![](https://cdn-images-1.medium.com/max/1000/0*QphcOVaiVC2YL7Jd.)
+
+Bộ nhớ của 1 chương trình C++ là chuỗi liền kề các block nhớ không có "lỗ". Một trong số các tính năng của wasm giúp đẩy mạnh sự bảo mật là ý tưởng về stack thực thi đặt riêng biệt với bộ nhớ thẳng hàng (linear). Trong C++ ta có heap, cấp phát từ đáy của heap và phát triển stack ở đỉnh heap. Ta có thể lấy con trỏ và tìm kiếm trong bộ nhớ stack để chơi đùa với những biến mà chúng ta còn không đụng tới.
+
+Đây là một điểm cạm bẫy mà rất nhiều malware khai thác.
+
+WebAssembly sử dụng một mô hình hoàn toàn khác. Stack thực thi tách biệt với chương trình chính WebAssembly nên không có cách nào bạn có thể chỉnh sửa và thay đổi những biến bên trong nó. Thêm nữa là các hàm có offset là số nguyên chứ ko dùng contror. Hàm trỏ vào một bảng chức năng vô hướng. Sau đó, các con số được tính toán trực tiếp này được đưa vào bên trong module. Nó được xây dựng theo cách này để có thể load nhiều wasm cùng lần, đánh offset tất cả các index và nó sẽ chạy tốt.
+
+Để tìm hiểu sâu hơn về mô hình bộ nhớ và các cách quản lý trong Javascript, bạn có thể [xem lại bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-3---Quan-ly-bo-nho---4-truong-hop-ro-ri-pho-bien).
+
+# Dọn rác (GC)
+
+Chúng ta đã biết quản lý bộ nhớ của Javascript có bao gồm cả xử lý dọn rác Garbage Collector.
+
+Đối với WebAssembly thì hơi khác một chút. Nó hỗ trợ những ngôn ngữ quản lý bộ nhớ thủ công. Bạn có thể sử dụng GC của chính bạn với các wasm module, nhưng công việc đó hơi phức tạp.
+
+Hiện tại, WebAssembly được thiết kế xoay quanh các trường hợp sử dụng của C++ và RUST. Bởi vì wasm là ngôn ngữ thấp nên sẽ dễ hiểu hơn nếu sử dụng những ngôn ngữ lập trình gần gũi & dễ biên dịch ra ngôn ngữ assembly. C có thể sử dụng malloc thường, C++ có thể dùng con trỏ thông minh. Rust dùng một mô hình khác hoàn toàn (nhưng là 1 chủ đề khác nhé). Những ngôn ngữ này không dùng GC, do đó chúng không cần các tác vụ runtime để theo dõi bộ nhớ. WebAssembly phù hợp với chúng.
+
+Thêm nữa, những ngôn ngữ này không phải được thiết kế 100% cho việc truy vấn những thứ phức tạp thuộc về Javascript, ví dụ như thay đổi DOM. Nó khá vô nghĩa khi phải viết toàn bộ app HTML trên nền C++ bởi vì C++ không được thiết kế với mục đích làm webapp. Đa số các trường hợp các kỹ sư dùng C++ hoặc Rust, họ hướng tới WebGL hoặc những thư viện có tính tối ưu hóa cao. (Ví dụ: phép tính toán học khó và phức tạp)
+
+Tuy nhiên, trong tương lai WebAssembly sẽ hỗ trợ những ngôn ngữ có sẵn GC.
+
+# Truy xuất Platform API
+
+Tùy thuộc vào môi trường runtime thực thi Javascript, quyền truy xuất vào những API đang tồn tại đặc trưng cho platform có thể được truy cập trực tiếp thông qua app JS của bạn. Ví dụ: bạn chạy JS code trên trình duyệt, bạn có 1 cục các Web API mà webapp có thể gọi và điều khiển trình duyệt hoặc chức năng thiết bị và có quyền truy xuất vào DOM, CSSOM, WebGL, IndexedDB, Web Audio API, vân vân.
+
+WebAssembly module không có quyền truy cập vào platform API. Mọi thứ đều trung gian qua Javascript. Nếu bạn muốn truy xuất vào một số API đặc trưng cho platform bên trong module WebAssembly thì bạn phải gọi nó thông qua Javascript.
+
+Ví dụ, nếu muốn dùng console.log, bạn gọi nó thông qua JS thay vì C++. Và dĩ nhiên là sẽ có những hạn chế về JS mà ta phải chấp nhận.
+
+Nhưng trường hợp này sẽ sớm được khắc phục khi mà đặc điểm kỹ thuật sẽ cung cấp các platform API cho wasm trong tương lai, bạn sẽ có thể sớm phát triển app mà không cần Javascript.
+
+# Ánh xạ mã nguồn (Source map)
+
+Khi bạn làm tối giản code JS, bạn cần đảm bảo có thể debug nó. Đó là khi mà ta cần đến [Source Map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/).
+
+Về cơ bản, Source Map là 1 cách để map một file tối giản về với trạng thái ban đầu của nó. Khi bạn build sản phẩm cho môi trường production, cùng với file JS đã kết hợp & tối gian, bạn sẽ sinh ra 1 file source map chứa thông tin về file JS gốc. Khi bạn query một dòng cụ thể với số cột nào đó file JS, bạn có thể tra cứu trong source map để tìm ra vị trí gốc ban đầu của nó.
+
+WebAssembly không hỗ trợ source map vì nó chưa có mô tả kỹ thuật cho phần này nhưng hi vọng là tương lai gần sẽ hỗ trợ.
+
+Khi bạn đặt breakpoint trong code C++, bạn sẽ thấy code C++ thay vì WebAssembly, ít nhất là vẫn còn có ích.
+
+# Đa luồng (Multithreading)
+
+Ai cũng biết Javascript là đơn luồng. Có nhiều cách để cải thiện Event Loop và nâng cấp phần lập trình bất đồng bộ mà chúng tôi đã [giới thiệu trong bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-4---Event-loop--lap-trinh-bat-dong-bo---5-meo-cai-thien-Async-Await).
+
+Javascript có thể dùng Web Workers nhưng nó rất hạn chế trường hợp. Về cơ bản, bất kỳ tính toán nào ảnh hưởng nặng đến CPU và block luồng xử UI đều có thể được đẩy ra load riêng với WebWorker. Tuy nhiên, WebWorker lại không truy xuất được vào DOM.
+
+WebAssembly hiện tại không hỗ trợ đa luồng. Tuy nhiên, điều này chắc chắn sẽ được thay đổi. Wasm đang tiến gần tới những tiến trình native (ví dụ: luồng kiểu C++). Có những luồng "thực" sẽ tạo ra rất nhiều cơ hội mới trên trình duyệt. Và lẽ dĩ nhiên, nó cũng sẽ bị lạm dụng nhiều hơn.
+
+# Tính di động (Portability)
+
+Ngày nay Javascript có thể chạy ở bất kỳ đâu, từ trình duyệt đến server, kể cả trong các hệ thống nhúng.
+
+WebAssembly được thiết kế để an toàn và linh động. Như Javascript, nó chạy trên nhiều môi trường hỗ trợ wasm (ví dụ: mọi trình duyệt)
+
+WebAssembly có cùng mục tiêu di động như cách mà Java đang cố thực hiện trong những ngày đầu với Applets.
+
+# Khi nào thì dùng WebAssembly tốt hơn JavaScript?
+
+Trong các phiên bản đầu của WebAssembly, chức năng chính chỉ tập trung vào các phép tính nặng tải trên CPU (các bài toán phức tạp chẳng hạn). Ứng dụng chủ yếu nhất khi nghĩ đến là games - có cả hàng tấn pixel cần thao tác xử lý trên màn hình. Bạn có thể viết app bằng ngôn ngữ mà bạn quen thuộc như C++/Rust bằng OpenGL sao đó biên dịch sang wasm và nó sẽ chạy trên trình duyệt.
+
+Bạn có thể xem ví dụ sau (tốt nhất là dùng Firefox): [http://s3.amazonaws.com/mozilla-games/tmp/2017-02-21-SunTemple/SunTemple.html](http://s3.amazonaws.com/mozilla-games/tmp/2017-02-21-SunTemple/SunTemple.html). Nó chạy trên nền [Unreal engine](https://www.unrealengine.com/en-US/what-is-unreal-engine-4).
+
+Một trường hợp khác tiêu biểu cho viêc sử dụng WebAssembly (về mặt hiệu năng) là triển khai một số thư viện chạy các tác vụ nặng với CPU, ví dụ như xử lý ảnh.
+
+Như đã nói ở trước, wasm có thể giảm khá nhiều lượng tiêu thụ pin trên các thiết bị di động (phụ thuộc vào engine), bởi vì đa số các bước xử lý đều đã được hoàn thành trước trong khi biên dịch.
+
+Trong tương lai, bạn sẽ có thể sử dụng code WASM nhị phân kể cả khi bạn không thực sự viết code có thể biên dịch ra nó. Bạn có thể tìm vài projects trên NPM đang bắt đầu triển khai theo hướng này.
+
+Với trường hợp thay đổi DOM và sử dụng nhiều platform API thì tốt nhất vẫn là dùng Javascript, bởi vì rõ ràng nó hỗ trợ tốt với các API đó.
+
+Ở [SessionStack](https://www.sessionstack.com/?utm_source=medium&utm_medium=blog&utm_content=Post-6-webassembly-outro), tác giả liên tục mở rộng biên giới hiệu năng của Javascript nhằm viết được nhiều code tối ưu và hiệu quả cao. Giải pháp của họ cần cung cấp hiệu năng nhanh chóng mặt vì không thể gây ảnh hưởng lên hiệu năng của app của khách hàng.
+
+Một khi bạn đã tích hợp SessionStack vào web app của bạn, nó sẽ ghi lại mọi thứ diễn ra trên app/website: những thay đổi trên DOM, tương tác của người dùng, JS exception, stack trace, những request bị fail và cả thông báo debug, cho phép bạn chạy lại (replay) những issue đã xảy ra dưới dạng video và xem chúng diễn ra như thế nào với người dùng. Tất cả đều hoạt động theo thời gian thực (real-time) và không ảnh hưởng đến hiệu năng của webapp. SessionStack phải tối ưu hóa code một cách tối đa và làm cho quá trình này bất đồng bộ nhất có thể.
+
+Không chỉ là một thư viện! Khi bạn chạy lại một session của người dùng trong SessionStack thì nó phải render lại toàn bộ những gì mà trình duyệt của user thực hiện tại thời điểm vấn đề xảy ra và team tác giả phải xây dựng lại toàn bộ trạng thái, cho phép bạn có thể nhảy tới nhảy lui trong timeline session. Để đạt được điều đó, team tác giả đã tận dụng tối đa khả năng bất đồng bộ mà Javascript cung cấp trong khi thiếu sót những giải pháp tốt hơn.
+
+Với WebAssembly, team tác giả có thể đẩy những tiến trình xử lý và render nặng nhất vào một ngôn ngữ phù hợp hơn với công việc này và để phần thu thập dữ liệu, thay đổi DOM cho Javascript làm.

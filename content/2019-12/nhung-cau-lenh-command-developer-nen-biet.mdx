@@ -1,0 +1,281 @@
+---
+title: Những câu lệnh command Developer nên biết
+author: Hung Tan Nguyen
+tags:
+  - command
+categories: []
+coverImage: 'https://miro.medium.com/max/9216/0*ya4dNTm8Mvfui1fD'
+sourceUrl: >-
+  https://medium.com/better-programming/here-are-11-console-commands-every-developer-should-know-54e348ef22fa
+date: '2019-12-26T08:00:00.000Z'
+slug: /nhung-cau-lenh-command-developer-nen-biet
+---
+
+The command line makes our life so much easier since we can automate several mundane tasks and make things run smoother. Instead of clicking around in the Graphical User Interface _(GUI),_ we can fire off a couple of commands and call it job done.
+
+A Unix shell is a command-line interpreter or shell that provides a command-line user interface for Unix-like operating systems. The shell is both an interactive command language and a scripting language and is used by the operating system to control the execution of the system using shell scripts.
+
+Every Linux or Mac-based operating system has a command-line installed by default, usually under the name “Terminal.” The command line _(CLI)_ lets us easily move and rename files, sort through data, and navigate around the computer.
+
+Without further ado, here are 11 command line tricks that will make your life easier.
+
+---
+
+# 1\. grep
+
+```
+$ grep "some string" file
+```
+
+The grep command searches for patterns in each file. It also looks for patterns separated by newline characters, and grep prints each line that matches a pattern.
+
+![](https://miro.medium.com/max/1780/1*ovG5it9EJTZ0JG3tdOgclA.png)
+
+The _-i_ option enables us to search for a string case-insensitively in the given file. It matches words like “REACT,” “REact,” and “react.”
+
+```
+$ grep -i "REact" file
+```
+
+We can find the number of lines that matches the given string/pattern with the _-c_ _(count)_ flag.
+
+```
+$ grep -c "react" index.js
+```
+
+![](https://miro.medium.com/max/1564/1*-KL9UvoB8RR4NKkUfHNBoQ.png)
+
+Here’s a fun and an educational comic about the _grep_ command I found on the internet.
+
+![](https://miro.medium.com/max/2400/1*ZkpszLnLQFRFp_cVO_Ldmw.jpeg)
+
+In addition, the variant programs _egrep_ and _fgrep_ are the same as  
+_grep -E_ and _grep -F_, respectively. These variants are deprecated,  
+but are provided for backward compatibility.
+
+You can do a lot with _grep_— read the documentation for an in-depth dive [here](http://man7.org/linux/man-pages/man1/grep.1.html).
+
+---
+
+# 2\. ls
+
+```
+$ ls
+```
+
+_ls_ lists files and directories in the current active path. If the _pathname_ is a file, _ls_ displays information on the file according to the requested options. If the _pathname_ is a directory, ls displays information on the files and subdirectories therein.
+
+![](https://miro.medium.com/max/2248/1*JthCA8XeIN22yScYBJlRIw.png)
+
+You might have noticed the files are being shown as a grey color, while the folders are blueish. This is to help us make a distinction between folders and files.
+
+---
+
+# 3\. pwd
+
+```
+$ pwd
+```
+
+![](https://miro.medium.com/max/1748/1*E1zXuIQ6X0aaTtVC0wZ_nw.png)
+
+The _pwd_ command is a command-line utility for printing the current working directory. The output will print the full system path of the current working directory to standard output. By default, the _pwd_ command ignores symlinks, although the full physical path of a current directory can be shown with an option.
+
+---
+
+# 4\. cat
+
+```
+$ cat somefile.js
+```
+
+![](https://miro.medium.com/max/2144/1*SL7g1NHsb7dKgwmoYBySkQ.png)
+
+The _cat_ command has three related functions with regard to a text file:
+
+- Displaying them
+- Combining copies
+- Creating new ones
+
+The most common use of cat is to read the contents of files, and _cat_ is often the most convenient program for this purpose.
+
+In the following example, the standard output of cat is redirected using the output redirection operator (which is represented by a rightward pointing angular bracket) to file2:
+
+```
+$ cat somefile > somefile2
+```
+
+![](https://miro.medium.com/max/2296/1*NxLOMigqozU5EvxVdr1f7Q.png)
+
+---
+
+# 5\. echo
+
+```
+$ echo "some text"
+```
+
+The _echo_ command in Linux is used to display a line of text/string that’s passed as an argument. The _echo_ is a built-in command that’s mostly used in shell scripts and batch files to output status text to the screen or a file.
+
+![](https://miro.medium.com/max/2088/1*1bMjVqwhueQP5hvyMMdDKA.png)
+
+---
+
+# 6\. touch
+
+```
+$ touch somefile
+```
+
+The _touch_ command is used to create a file without any content. The _touch_ command can be used when the user doesn’t have data to store at the time of file creation.
+
+![](https://miro.medium.com/max/1528/1*RIrUCSW4TT_cJrnGy9ighQ.png)
+
+Notice how we’re using _touch_ to create the file and _cat_ to look inside the file. Since the newly created _index2.js_ file is empty, the cat returns nothing.
+
+Here are the main differences between _cat_ and*touch*:
+
+- _cat_— Used to create the file with the content.
+- _touch_— Creates a file without any content or empty files. Remember, the file created using _touch_ command is empty. This command is useful when the user doesn’t have data to store at the time of file creation.
+
+---
+
+# 7\. mkdir
+
+```
+$ mkdir some-directory
+```
+
+As you guessed it, mkdir creates a new empty directory in the current active path. Instead of clicking around in your text editor or GUI, use this command to create new folders.
+
+![](https://miro.medium.com/max/2184/1*FsxDBW5HDWJn9kHsw0My7A.png)
+
+_Note:_ Notice how we can peek inside the directory with the previous _ls_ command.
+
+## 7.1 rm
+
+```
+$ rm someFile
+```
+
+Rm stands for remove, which does exactly what it says it does. Removes, or in other words, deletes a file.
+
+![](https://miro.medium.com/max/2148/1*damLEKdyWY7aBPILFELVNg.png)
+
+By default, the _rm_ command doesn’t remove directories. You need to pass the _-rf_ flag to remove directories.
+
+```
+$ rm -rf some-directory
+```
+
+![](https://miro.medium.com/max/2272/1*gXTLAllsEVTdWHCcDw83WQ.png)
+
+_Note:_ This removes the directory unconditionally, whether the directory has content inside or not.
+
+## 7.2 rmdir
+
+```
+$ rmdir some-directory
+```
+
+The _rmdir_ command removes the directory if there’s no content inside the directory.
+
+![](https://miro.medium.com/max/1880/1*aUJ0VbrVb_cTUf0okMxmWA.png)
+
+---
+
+# 8\. tail
+
+```
+$ tail somefile
+```
+
+The _tail_ command reads a file and outputs the last part of it (the “tail”).
+
+![](https://miro.medium.com/max/2804/1*Xvo2zdyDZqj4QhTHF0TLTg.png)
+
+The _tail_ command is useful when going through crash reports or previous history logs. Here’s an example of its usefulness when working with file logs.
+
+```
+# tail /var/log/messages
+Mar 20 12:42:22 hameda1d1c dhclient\[4334\]: DHCPREQUEST on eth0 to 255.255.255.255 port 67 (xid=0x280436dd)
+Mar 20 12:42:24 hameda1d1c avahi-daemon\[2027\]: Registering new address record for fe80::4639:c4ff:fe53:4908 on eth0.\*.
+Mar 20 12:42:28 hameda1d1c dhclient\[4334\]: DHCPREQUEST on eth0 to 255.255.255.255 port 67 (xid=0x280436dd)
+Mar 20 12:42:28 hameda1d1c dhclient\[4334\]: DHCPACK from 10.76.198.1 (xid=0x280436dd)
+Mar 20 12:42:30 hameda1d1c avahi-daemon\[2027\]: Joining mDNS multicast group on interface eth0.IPv4 with address 10.76.199.87.
+Mar 20 12:42:30 hameda1d1c avahi-daemon\[2027\]: New relevant interface eth0.IPv4 for mDNS.
+Mar 20 12:42:30 hameda1d1c avahi-daemon\[2027\]: Registering new address record for 10.76.199.87 on eth0.IPv4.
+Mar 20 12:42:30 hameda1d1c NET\[4385\]: /sbin/dhclient-script : updated /etc/resolv.conf
+Mar 20 12:42:30 hameda1d1c dhclient\[4334\]: bound to 10.76.199.87 -- renewal in 74685 seconds.
+Mar 20 12:45:39 hameda1d1c kernel: usb 3-7: USB disconnect, device number 2
+```
+
+---
+
+# 9\. wget
+
+```
+$ wget someurl
+```
+
+GNU Wget is a [free software](https://www.gnu.org/philosophy/free-sw) package for retrieving files using HTTP, HTTPS, FTP, and FTPS — the most widely-used internet protocols. It’s a non-interactive command-line tool, so it may easily be called from scripts, CRON jobs, terminals without X-Windows support, etc.
+
+![](https://miro.medium.com/max/2880/1*nbzEhCeVUxT2-Px0oQbszQ.png)
+
+GNU Wget has many features to make retrieving large files or mirroring entire web or FTP sites easy, including:
+
+- Can resume aborted downloads using REST and RANGE
+- Can use filename wild cards and recursively mirror directories
+- NLS-based message files for many different languages
+- Optionally converts absolute links in downloaded documents to relative so that downloaded documents may link to each other locally
+- Runs on most UNIX-like operating systems as well as Microsoft Windows
+- Supports HTTP proxies
+- Supports HTTP cookies
+- Supports persistent HTTP connections
+- Unattended / background operation
+- Uses local file timestamps to determine whether documents need to be re-downloaded when mirroring
+- GNU Wget is distributed under the [GNU General Public License](https://www.gnu.org/licenses/gpl.html).
+
+Read the [official GNU documentation](https://www.gnu.org/software/wget/) for more information.
+
+---
+
+# 10\. find
+
+```
+$ find path -name filename
+```
+
+The _find_ command lets you quickly lookup a file or directory. It’s useful when you’re working on a big project with hundreds of files and multiple directories.
+
+![](https://miro.medium.com/max/1696/1*j291SZcYXSaPtdvqipX6sg.png)
+
+## Search for files of a particular type
+
+The _find_ command also lets you search for the same type of files in a directory (and its subdirectories). For example, the following command will search for all _.js_ files in your current working directory.
+
+```
+$ find . -name "*.js"
+```
+
+![](https://miro.medium.com/max/1992/1*_i8_TEIElXAAyXy-F1JQmA.png)
+
+---
+
+# 11\. mv
+
+```
+$ mv somefile /to/some/other/path
+```
+
+The _mv_ command moves files or directories from one place to another. The _mv_ command supports moving single files, multiple files, and directories.
+
+![](https://miro.medium.com/max/2360/1*TdqoyPUFrdBvI2Ws7cfyfQ.png)
+
+---
+
+# Conclusion
+
+Thanks for reading, I hope you learned something new. If you know a handy command-line trick, please let’s grow together and post it in the responses.
+
+If you want to learn more about shell commands, I suggest grabbing the _“_[_Linux for beginners_](https://amzn.to/2QazBku)_”_ book. Stay curious and hungry!

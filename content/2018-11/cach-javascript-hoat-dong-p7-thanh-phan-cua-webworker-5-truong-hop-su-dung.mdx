@@ -1,0 +1,334 @@
+---
+title: 'Cách Javascript hoạt động P7: Thành phần của WebWorker + 5 trường hợp sử dụng'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-the-building-blocks-of-web-workers-5-cases-when-you-should-use-them-a547c0757f6a
+coverImage: 'https://cdn-images-1.medium.com/max/1000/0*b5WMJNTRt9QqN-Zy.jpg'
+date: 2018-11-16 07:27:00
+slug: /cach-javascript-hoat-dong-p7-thanh-phan-cua-webworker-5-truong-hop-su-dung
+---
+
+Chào các bạn đến với bài thứ 7 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Trong bài này chúng ta sẽ tìm hiểu về Web Workers: một cái nhìn tổng quan, thảo luận về các loại worker khách nhau, các thành phần của nó hoạt động với nhau như thế nào và những điểm mạnh cũng như điểm yếu của nó trong các ngữ cảnh khác nhau. Cuối cùng, team tác giả sẽ cung cấp 5 trường hợp mà trong đó Web Worker là sự lựa chọn đúng đắn.
+
+Bạn đã quen với sự thật rằng Javascript chạy đơn luồng như chúng ta đã [thảo luận chi tiết ở bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-1---Khai-quat-ve-engine--runtime-va-callstack). JS cũng giúp các developer viết code bất đồng bộ.
+
+# Những hạn chế của lập trình bất đồng bộ
+
+Chúng ta đã thảo luận ở [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-4---Event-loop--lap-trinh-bat-dong-bo---5-meo-cai-thien-Async-Await) về lập trình bất đồng bộ và khi nào thì nên dùng.
+
+Lập trình bất đồng bộ cho phép UI của app trở nên mượt mà, bằng cách "lên lịch" cho từng phần của code được thực thi ở thời gian phù hợp trong event loop, do đó nó cho phép render UI được thực hiện trước.
+
+Một trường hợp tốt để dùng lập trình bất đồng bộ là khi ta gọi Ajax request. Bởi vì request có thể tốn nhiều thời gian nên có thể để cho nó chạy bất đồng bộ và trong khi client chờ kết quả trả về, những code khác vẫn được thực thi.
+
+```javascript
+// Giả sử bạn dùng jQuery
+jQuery.ajax({
+  url: 'https://api.example.com/endpoint',
+  success: function (response) {
+    // code được thực thi khi response trả về
+  },
+});
+```
+
+Nhưng điều này lại gây ra vấn đề khác: request được xử lý bởi Web API của trình duyệt, nhưng làm thế nào mà code khác có thể chạy bất đồng bộ? Ví dụ nếu như code bên trong một success callback lại chạy ngốn rất nhiều CPU:
+
+```javascript
+var result = performCPUIntensiveCalculation();
+```
+
+Nếu như performCPUIntensiveCalculation không phải là một request HTTP nhưng lại block code xử lý (ví dụ: 1 vòng lặp rất lớn), không có cách nào để giải phóng event loop và unblock cho UI trình duyệt, nó sẽ đóng băng và không phản hồi lại với user.
+
+Nghĩa là trong Javascript, những hàm bất đồng bộ chỉ giải quyết vấn đề nhỏ của hạn chế ở đơn luồng.
+
+Trong những trường hợp đó, bạn có thể làm cho unblock UI khỏi quá trình tính toán quá lâu bằng cách sử dụng setTimeout. Ví dụ, tách một chuỗi xử lý tính toán phức tạp vào trong nhiều lời gọi setTimeout, bằng cách đó bạn có thể đặt chúng vào những "vị trí" khác nhau trong event loop và cách này có thể giúp cho render UI được tốt hơn.
+
+Cùng xem một ví dụ đơn giản về tính toán số trung bình của 1 mảng số nguyên:
+
+```javascript
+function average(numbers) {
+  var len = numbers.length,
+    sum = 0,
+    i;
+
+  if (len === 0) {
+    return 0;
+  }
+
+  for (i = 0; i < len; i++) {
+    sum += numbers[i];
+  }
+
+  return sum / len;
+}
+```
+
+Dưới đây là cách ta viết lại code trên và "giả lập" trường hợp bất đồng bộ:
+
+```javascript
+function averageAsync(numbers, callback) {
+  var len = numbers.length,
+    sum = 0;
+
+  if (len === 0) {
+    return 0;
+  }
+
+  function calculateSumAsync(i) {
+    if (i < len) {
+      // Đưa hàm tiếp theo vào event loop
+      setTimeout(function () {
+        sum += numbers[i];
+        calculateSumAsync(i + 1);
+      }, 0);
+    } else {
+      // hết mảng, gọi callback
+      callback(sum / len);
+    }
+  }
+
+  calculateSumAsync(0);
+}
+```
+
+Cách này sẽ dùng setTimeout để thêm mỗi bước thực hiện tính toán vào trong event loop. Giữa mỗi lần tính toán sẽ có đủ thời gian cho các tính toán được thêm vào và giải phóng trình duyệt khỏi bị đóng băng.
+
+# Web Workers đến giải cứu
+
+HTML5 mang đến cho chúng ta rất nhiều thứ tuyệt vời:
+
+- SSE (đã thảo luận và so sánh với WebSocket ở [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-5---Dao-sau-WebSocket---HTTP-2-voi-SSE---Hay-chon-gia-dung))
+- Geolocation
+- Application cache
+- Local Storage
+- Drag and Drop
+- **Web Workers**
+
+Web Workers là tiến trình trong trình duyệt nhưng có thể được dùng để thực thi Javascript code mà không cản trở event loop
+
+Điều này thực sự kỳ diệu. Toàn bộ mô hình của Javascript dựa trên ý tưởng về môi trường đơn luồng nhưng giờ đây là có Web Workers và nó gỡ bỏ (1 phần nào) sự hạn chế đó.
+
+Web Workers cho phép developer đặt những công việc có thời gian chạy dài và những công việc nặng về xử lý tính toán trong background mà không gây trở ngại đến UI, làm app của bạn mượt mà hơn. Ngoài ra, không cần phải xài trick với setTimeout để đánh lừa event loop nữa.
+
+[Ở đây](http://afshinm.github.io/50k/) có một demo mẫu thể hiện sự khác nhau khi thực hiện sắp xếp mảng dùng và không dùng Web Workers.
+
+# Khái quát về Web Workers
+
+Web Workers cho phép bạn làm những việc như thực thi các đoạn code xử lý tốn thời gian để tính toán các phép tính hao tổn nheiefu CPU nhưng không làm cản trở UI. Thực ra, nó sẽ chạy song song. Web Workers là đa luồng.
+
+Bạn sẽ thắc mắc: "Chứ không phải Javascript là ngôn ngữ đơn luồng à?"
+
+Đây là lúc mà bạn sẽ thốt lên _aha_ ngạc nhiên khi nhận ra Javascript là một ngôn ngữ không định nghĩa mô hình tiến trình. **Web Workers không phải là một phần của Javascript, nó là tính năng của trình duyệt mà có thể truy xuất thông qua Javascript**. Đa số các trình duyệt có lịch sử về đơn tiến trình (giờ thì thay đổi rồi), và đa số các triển khai của Javascript đều diễn ra trên trình duyệt. Web Workers không được triển khai trên Node.js, nó có khái niệm hơi khác một chút về cluster hay child_process.
+
+Có 3 loại Web Workers được đề cập đến trong [thông số kỹ thuật](http://www.whatwg.org/specs/web-workers/current-work/):
+
+- [Dedicated Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers)
+- [Shared Workers](https://developer.mozilla.org/en-US/docs/Web/API/SharedWorker)
+- [Service workers](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker_API)
+
+# Dedicated Workers (Worker chuyên dụng)
+
+Dedicated Web Workers được khởi tạo bởi tiến trình chính và chỉ có thể giao tiếp với tiến trình đó.
+
+![](https://cdn-images-1.medium.com/max/1000/1*ya4zMDfbNUflXhzKz9EBIw.png)
+
+# Shared Workers (Worker chia sẻ)
+
+Shared Workers có thể được truy cập bởi tất cả các tiến trình chạy trên cùng origin (khác tab trình duyệt, iframe hoặc là các shared worker khác)
+
+![](https://cdn-images-1.medium.com/max/1000/1*lzOIevUBVy5eWyf2kHf--w.png)
+
+Nếu bạn muốn dùng thử SessionStack để hiểu và khám phá lại những vấn đề kỹ thuật cũng như UX trên webapp của bạn, team SessionStack đang có bản dùng thử miễn phí, [ở đây nhé](https://www.sessionstack.com/?utm_source=medium&utm_medium=blog&utm_content=Post-5-websockets-getStarted).
+
+# Service Workers (Worker dịch vụ)
+
+Một Service Worker là worker hướng sự kiện (event-driven) được đăng ký với origin và path. Nó có thể điều khiển web page/site mà nó liên kết, can thiệp và chỉnh sửa sự điều hướng và các yêu cầu tài nguyên, lưu đệm tài nguyên với phong cách rất chi tiết để cho phép bạn có toàn quyền điều khiển về việc app của bạn xử lý như thế nào trong từng trường hợp cụ thể (ví dụ như khi rớt mạng)
+
+![](https://cdn-images-1.medium.com/max/1000/1*6o2TRDmrJlS97vh1wEjLYw.png)
+
+Trong bài này chúng ta sẽ tập trung vào **Dedicated Worker** và chỉ gọi nó dưới cái tên **Web Workers** hoặc **Worker**
+
+# Web Workers hoạt động như thế nào?
+
+Web Workers được triển khai dưới dạng đuôi .js và được đính kèm theo request HTTP bất đồng bộ trong web của bạn. Những request này được ẩn hoàn toàn bởi [Web Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API)
+
+Workers sử dụng message kiểu tiến trình để thực hiện quá trình hoạt động song song. Chúng có thể giữ cho UI được cập nhật mới nhất, có thể tương tác và mượt mà với người dùng một cách hoàn hảo.
+
+Web Workers chạy trong một tiến trình cô lập trong trình duyệt. **Do đó là code chúng thực thi cần phải đặt trong 1 file riêng biệt**. Điều này rất quan trọng nhé.
+
+Cách tạo worker cơ bản
+
+```javascript
+var worker = new Worker('task.js');
+```
+
+Nếu task.js tồn tại và có thể truy cập được, trình duyệt sẽ thiết lập một tiến trình mới để tải file bất đồng bộ. Sau khi quá trình tải file hoàn tất, nó sẽ thực thi code trong đó và worker bắt đầu làm việc.
+
+Trong trường hợp file lỗi không load được thì trả về 404 và worker sẽ dừng lại một cách yên lặng như chưa có gì xảy ra.
+
+Để bắt đầu tạo worker, bạn cần gọi phương thức postMessage:
+
+```javascript
+worker.postMessage();
+```
+
+# Giao tiếp của Web Worker
+
+Để giao tiếp giữa một Web Worker và trang của bạn thì bạn cần phải sử dụng phương thức postMessage hoặc [kênh phát sóng](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) (Broadcast channel).
+
+# Phương thức postMessage
+
+Các trình duyệt mới hỗ trợ object JSON như là param đầu tiên của phương thức trong khi các trình duyệt cũ hơn thì chọn string
+
+Dưới đây là ví dụ về một page có worker có thể giao tiếp qua lại với nó như thế nào bằng cách truyền một object JSON. Truyền string cũng tương tự:
+
+```javascript
+<button onclick="startComputation()">Start computation</button>
+
+<script>
+  function startComputation() {
+    worker.postMessage({'cmd': 'average', 'data': [1, 2, 3, 4]});
+  }
+  var worker = new Worker('doWork.js');
+  worker.addEventListener('message', function(e) {
+    console.log(e.data);
+  }, false);
+
+</script>
+```
+
+Và đoạn code của worker:
+
+```javascript
+self.addEventListener(
+  'message',
+  function (e) {
+    var data = e.data;
+    switch (data.cmd) {
+      case 'average':
+        var result = calculateAverage(data); // Tính trung bình cộng từ một array
+        self.postMessage(result);
+        break;
+      default:
+        self.postMessage('Unknown command');
+    }
+  },
+  false
+);
+```
+
+Khi click vào button, trang chính sẽ gọi tới postMessage. Dòng worker.postMessage truyền một object JSON vào worker, object chứa thông tin là cmd và data. Worker sẽ xử lý message thông qua một message handler đã được định nghĩa.
+
+Khi message đến, các thao tác tính toán thực sự sẽ được thực hiện trong worker mà không cản trở event loop. Worker kiểm tra event e được truyền vào và thực thi giống như một hàm Javascript bình thường. Khi xong việc kết quả sẽ được trả ngược lại cho trang chính.
+
+Trong ngữ cảnh của worker, cả self và this đều đang tham chiếu đến global scope.
+
+> Có 2 cách để dừng worker: gọi hàm worker.terminate() từ ngoài trang chính hoặc gọi self.close() bên trong worker.
+
+# Kênh phát sóng (Broadcast Channel)
+
+[Broadcast Channel](https://developer.mozilla.org/en-US/docs/Web/API/BroadcastChannel) giống như một API giao tiếp tổng quát. Nó cho phép chúng ta broadcast message tới tất cả các ngữ cảnh cùng chia sẻ chung origin. Tất cả các tab trình duyệt, iframe hoặc worker phục vụ chung origin có thể phát và nhận message.
+
+```javascript
+// Kết nối đến một broadcast channel
+var bc = new BroadcastChannel('test_channel');
+
+// Ví dụ gửi một message đơn giản
+bc.postMessage('This is a test message.');
+
+// Ví dụ về một event handler có chức
+// năng in message ra console
+bc.onmessage = function (e) {
+  console.log(e.data);
+};
+
+// Ngắt kết nối
+bc.close();
+```
+
+Xem hình minh họa thì bạn sẽ hiểu cách hoạt động của Broadcast Channel rõ ràng hơn:
+
+![](https://cdn-images-1.medium.com/max/1000/1*NVT6WbNrH_mQL64--b-l1Q.png)
+
+Broadcast Channel bị hạn chế hỗ trợ từ các trình duyệt:
+
+![](https://cdn-images-1.medium.com/max/1000/1*81mCsOzyJj-HfQ1lP_033w.png)
+
+# Kích thước message
+
+Có 2 cách để gửi message trong Web Workers:
+
+- **Sao chép message**: message được serialized, sao chép, gửi đi và được de-serialized ở đầu kia. Trang web và worker không dùng chung instance, vì thế cuối cùng là kết quả sẽ bị trùng lặp ở cả 2 phía. Đa số các trình duyệt triển khai tính năng này bằng cách encoding/decoding giá trị ở cả 2 phía thành JSON một cách tự động. Đúng như dự đoán thì các hoạt động dữ liệu như thế này bổ sung thêm chi phí đáng kể vào việc truyền tải message. Message càng lớn thì thời gian gửi càng lâu.
+
+- **Truyền tải message**: điều này nghĩa là bên gửi sẽ không thể sử dụng nó một khi đã gửi đi. Truyền tải dữ liệu gần như tức thời. Hạn chế là chỉ duy nhất [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer) là có thể gửi được.
+
+# Tính năng có sẵn của Web Workers
+
+Web Workder chỉ có truy xuất tới một tập hợp nhỏ các tính năng của Javascript bởi vì bản chất đa luồng của nó, dưới đây là danh sách các tính năng:
+
+- Object navigator
+- Object location (chỉ đọc - read only)
+- XMLHttpRequest
+- setTimeout()/clearTimeout() và setInterval()/clearInterval()
+- Bộ đệm ứng dụng ([Application Cache](https://www.html5rocks.com/tutorials/appcache/beginner/))
+- Import script bên ngoài thông qua importScripts()
+- [Tạo các web worker khác](https://www.html5rocks.com/en/tutorials/workers/basics/#toc-enviornment-subworkers)
+
+# Hạn chế của Web Workers
+
+Hơi buồn là Web Worker không có quyền truy cập đến một số tính năng quan trọng của Javascript:
+
+- DOM (not thread-safe)
+- Object window
+- Object document
+- Object parent
+
+Điều này nghĩa là Web Worker không thể thay đổi DOM (và UI). Nó có thể hơi khó khăn, nhưng nếu bạn đã quen với viêc sử dụng Web Worker đúng cách thì bạn sẽ bắt đầu sử dụng khả năng "tính toán độc lập" của nó trong khi các code thay đổi UI đang được xử lý và hoạt động. Worker sẽ chăm sóc tất cả những phần nặng nhọc cho bạn và khi đã xong viêc thì bạn chỉ cần gửi kết quả ra màn hình để cập nhật UI cho phù hợp.
+
+# Xử lý lỗi
+
+Giống như code Javascript khác, bạn sẽ cần xử lý lỗi khi Web Worker bắn ra. Nếu có lỗi xảy ra trong quá trình worker thực thi, ErrorEvent sẽ được bắn. Interface này sẽ bao gồm 3 thuộc tính hữu ích cho việc tìm ra bạn đang sai chỗ nào:
+
+- **filename**: tên của worker script gây ra lỗi
+- **lineno**: số của dòng gây ra lỗi
+- **message**: mô tả lỗi
+
+Ví dụ:
+
+```javascript
+function onError(e) {
+  console.log('Line: ' + e.lineno);
+  console.log('In: ' + e.filename);
+  console.log('Message: ' + e.message);
+}
+
+var worker = new Worker('workerWithError.js');
+worker.addEventListener('error', onError, false);
+worker.postMessage(); // Khởi tạo worker mà không truyền messageself.addEventListener('message', function(e) {
+  postMessage(x * 2); // Intentional error. 'x' is not defined.
+};
+```
+
+Ở đây bạn thấy rằng chúng ta tạo worker và bắt đầu listen sự kiện error.
+
+Bên trong worker (file workerWithError.js) chúng ta cố tình tạo một exception bằng cách nhân x với 2 trong khi x không hề tồn tại trong scope đó. Exception được bắn ra khi khởi tạo script và hàm onError được gọi với thông tin về lỗi.
+
+# Trường hợp nên sử dụng Web Workers
+
+Cho đến bây giờ thì chúng ta đã nghiên cứu về điểm mạnh và hạn chế của Web Workers. Cùng xem những trường hơp nào thì dùng chúng là tốt nhất:
+
+- **Dò tia (Ray tracing)**: ray tracing là một kỹ thuật [render](https://en.wikipedia.org/wiki/Rendering_%28computer_graphics%29) để sinh ra những hình ảnh bằng cách dò theo vết đường đi của ánh sáng theo dạng pixel. Ray traycing sử dụng rất nhiều phép tính toán học có ảnh hướng lớn đến CPU để giả lập đường đi của ánh sáng. Ý tưởng về giả lập những hiệu ứng như phản chiếu (reflection), khúc xạ (refraction), vật liệu, vân vân. Tất cả các logic tính toán như vậy đều có thể đưa vào Web Worker để tránh gây trở ngại với UI thread. Thậm chí có thể tốt hơn nếu bạn có thể chia nhỏ quá trình render hình ảnh ra nhiều worker (và chia ra nhiều CPU). Đây là 1 minh họa đơn giản của ray tracing sử dụng Web Workers:  [https://nerget.com/rayjs-mt/rayjs.html](https://nerget.com/rayjs-mt/rayjs.html)
+- **Mã hóa (Encryption)**: Mã hóa end-to-end (E2EE) càng ngày càng phổ biến do sự gia tăng khắt khe về các quy định của dữ liệu nhạy cảm & cá nhân. Mã hóa có thể khá tốn thời gian, đặc biệt nếu có rất nhiều dữ liệu cần được mã hóa thường xuyên (trước khi gửi về server chẳng hạn). Đây là một trường hợp trong đó Web Worker là lựa chọn rất tốt vì nó không yêu cầu truy xuất đến DOM hay các thứ khác, chỉ thuần túy là thuật toán mã hóa. Một khi đã được đẩy vào worker xử lý, nó sẽ hoạt động rất trơn tru và không ảnh hưởng đến trải nghiệm của người dùng.
+- **Tải trước dữ liệu**: Để tối ưu website hoặc webapp và cải thiện thời gian loading, bạn có thể nhờ vả Web Workers để load và lưu dữ liệu trước và sử dụng chúng về sau khi cần đến. Web Workers rất tốt trong trường hợp này vì nó không ảnh hướng đến UI, không giống như khi ta dùng mà không có workers.
+- **Progressive Web Apps**: Chúng cần được load thật nhanh kể cả khi kết nối mạng không ổn định. Nghĩa là dữ liệu cần phải được lưu trên trình duyệt. IndexDB hoặc những API tương tự hỗ trợ tốt khoản này. Về cơ bản thì lưu trữ ở phía client là cần thiết. Để có thể sử dụng mà không gây cản trở đến UI, công việc cần phải được hoàn thành trong Web Workers. Trong trường hợp của IndexDB, có một API bất đồng bộ cho phép bạn làm việc này mà không dùng workers, tuy nhiên cũng có một API đồng bộ trước đây (có thể sẽ được giới thiệu lại) chỉ được phép chạy bên trong workers.
+- **Kiểm tra chính tả (Spell checking)**: một bộ spell checker cơ bản hoạt động như sau: chương trình sẽ đọc một file từ điển với danh sách các từ đúng chính tả. Từ điển sẽ được parse thành cây tìm kiếm (search tree) để có thể tìm kiếm văn bản hiệu quả. Khi một từ được đưa vào checker, chương trình sẽ kiểm tra nếu nó tồn tại trong cây tìm kiếm. Nếu từ đó không tồn tại, chương trình sẽ cung cấp từ thay thế bằng cách thay đổi ký tự thay thế và kiểm tra nếu đó là 1 từ hợp lệ nếu nó là từ mà user muốn viết ra. Tất cả quá trình này có thể dễ dàng giảm tải cho hệ thống bằng Web Workers và user có thể gõ chữ, viết câu mà không gây cản trở với UI trong khi worker thực thi tất cả các phần tìm kiếm và đưa ra đề xuất.
+
+Hiệu năng và độ tin cậy là rất quan trọng đối với team SessionStack. Lý do là vì một khi đã tích hợp SessionStack vào web app của bạn, chương trình sẽ bắt đầu ghi lại mọi thứ từ thay đổi trên DOM và tương tác người dùng đến các request mạng, exception không được xử lý và các thông báo lỗi. Tất cả dữ liệu được truyền về cho server của chương trình trong **thời gian thực** để có thể cho phép bạn chạy lại những issue từ webapp dưới dạng video và xem thử điều gì đang diễn ra với user. Tất cả điều này được thực hiện với độ trễ tối thiểu và không có ảnh hưởng đến hiệu năng của app của bạn.
+
+Đây là lý do mà team tác giả đã đưa toàn bộ logic (phần nào có thể) từ cả thư viện điều hành & phần player vào Web Worker để xử lý các công viêc nặng tải với CPU như băm để xác nhận tính toàn vẹn dữ liệu, render, vân vân.
+
+Công nghệ web liên tục thay đổi và phát triển vì thế team tác giả đã đi thêm 1 chặng đường dài để đảm bảo SessionStack thật nhẹ và không gây ảnh hưởng đến hiệu năng của người dùng.

@@ -1,0 +1,153 @@
+---
+title: Tất cả những gì bạn cần biết về CSS-in-JS
+author: Hung Tan Nguyen
+tags:
+  - css
+  - javascript
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*OH0dDfJAGv6aEGFk2zLAxw.jpeg'
+sourceUrl: 'https://hackernoon.com/all-you-need-to-know-about-css-in-js-984a72d48ebc'
+date: 2018-04-30 15:19:00
+slug: /tat-ca-nhung-gi-ban-can-biet-ve-css-in-js
+---
+
+TL;DR:**Thinking in components — **No longer do you have to maintain bunch of style-sheets. CSS-in-JS abstracts the CSS model to the component level, rather than the document level (modularity).
+
+#### Styled React Component Example
+
+![](https://cdn-images-1.medium.com/max/1600/1*DFwkvCRyz9K0Mbl59r2hMg.png)
+
+---
+
+You probably heard terms like [**CSS-in-JS**](http://cssinjs.org/?v=v9.1.0), [**Styled Components**](https://www.styled-components.com), [**_Radium_**](https://github.com/FormidableLabs/radium), [**Aphrodite**](https://github.com/Khan/aphrodite) and you’re left there hanging **“why is this a thing? — **I’m perfectly happy with **CSS-in-CSS** (**_CSS_ in *.css***).**”**
+
+I’m here to shine some light on why this is a thing and hopefully we will least understand the concept and understand why it’s a thing. With that said — please feel free to use CSS-in-CSS — on no terms are you obligated to use CSS-in-JS. **Whatever works best for you and makes you happy is hands down the best solution, always-always!**
+
+CSS-in-JS is a delicate and controversial topic — I’m advocating having an open mind and weighing if this makes sense to you — ask yourself **“will it improve my workflow?” —\*\***in the end — that’s the only thing that matters — use tools that make you happier and more productive!\*\*
+
+I’ve always felt awkward having to maintain a huge folder of stylesheets. I would like to try different approaches. I’ve seen many people asking if there are new styling ideas. CSS-in-JS is so far the best concept.
+
+Let’s give CSS-in-JS a shot.
+
+![Small-To-Medium size project CSS](https://cdn-images-1.medium.com/max/1600/1*bsbmmLcGl2kSJSuKW-JFqw.png)
+
+---
+
+### What is CSS-in-JS?
+
+> [JSS is a more powerful abstraction](https://medium.com/@oleg008/jss-is-css-d7d41400b635) over CSS. It uses JavaScript as a language to describe styles in a declarative and maintainable way. It is a [high performance](http://cssinjs.org/performance) JS to CSS compiler which works at runtime and server-side. This core library is low level and framework agnostic. It is about 6KB (minified and gzipped) and is extensible via [plugins](http://cssinjs.org/plugins) API. —[ source](http://cssinjs.org/)
+
+Keep in mind [**Inline styles**](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style) **and CSS-in-JS are not the same!** They’re different — Quick demonstration time!
+
+### [How Inline Styles Works](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style)
+
+<Gist id="5812bd9006c91b9eb0fe08e3678d88c8" />
+
+In the browser this will get attached to the DOM node like so:
+
+<Gist id="02b07c1daa4816eb2a51eb8d1b494f3e" />
+
+### How CSS-in-JS works
+
+<Gist id="769908d4e065b363258d9ae733febac2" />
+
+In the browser this will gets attached to the DOM like so:
+
+<Gist id="e76c2883a81a11ee16f4b12906572e2a" />
+
+### Difference
+
+See the slight difference? CSS-in-JS attached a `<style>` tag on top of the DOM while inline styles just attached the properties to the DOM node.
+
+**_Why does this matter?_**
+
+**Not all CSS features can be aliased with JavaScript event handlers **, many pseudo selectors (like :disabled, :before, :nth-child) aren’t possible, styling the html and body tags isn’t supported etc.
+
+**With CSS-in-JS**, you have all the power of CSS at your fingertips. Since actual CSS is generated, you can use every media query and pseudo selector you can think of. Some libraries (like jss, styled-components) even add support for neat, non-CSS-native features like nesting!
+
+[**Brilliant article going in depth on how they’re different.**](https://mxstbr.blog/2016/11/inline-styles-vs-css-in-js/)
+
+“Just write the darn CSS in CSS and be done with it.”
+
+Yes — while that’s the case for how it’s been done for a long-long time — **the challenge is modern web is written in components not pages.**
+
+**CSS was never actually made for component based approaches**. CSS-in-JS solves exactly this problem. Shout-out to [Vue](https://vuejs.org/) for solving this problem beautifully even tho Vues styles have no access to components state.
+
+![Here’s Bob Ross painting rocks to cool down the tension 😄](https://cdn-images-1.medium.com/max/1600/1*jk3SeXoIgOfymKO-8JO23A.gif)
+
+### What are the benefits of using CSS-in-JS?
+
+- **Thinking in components — **No longer do you have to maintain bunch of style-sheets. CSS-in-JS abstracts the CSS model to the component level, rather than the document level (modularity).
+- CSS-in-JS **leverages the full power of the JavaScript ecosystem** to _enhance_ CSS.
+- “**True rules isolation**” — Scoped selectors are not enough. CSS has properties which are inherited automatically from the parent element, if not explicitly defined. Thanks to [jss-isolate](http://cssinjs.org/jss-isolate) plugin, JSS rules will not inherit properties.
+- **Scoped selectors **— CSS has just one global namespace. It is impossible to avoid selector collisions in non-trivial applications. Naming conventions like BEM might help within one project, but will not when integrating third-party code. JSS generates unique class names by default when it compiles JSON representation to CSS.
+- **Vendor Prefixing** —The CSS rules are automatically vendor prefixed, so you don’t have to think about it.
+- **Code sharing **— Easily share constants and functions between JS and CSS.
+- **Only the styles which are currently** in use on your screen are also in the DOM ([react-jss](https://github.com/cssinjs/react-jss)).
+- [**Dead code elimination**](https://en.wikipedia.org/wiki/Dead_code_elimination)
+- **Unit tests** for CSS!
+
+### What are the drawbacks of using CSS-in-JS?
+
+- **Learning curve**.
+- **New dependencies.**
+- **Harder for newer teammates to adapt to the code-base**. People who are new to front-end have to learn “more” things.
+- **Challenging** the status quo. (not necessarily a con)
+
+The pros out-weight the cons heavily — let’s give CSS-in-JS a shot! **Nothing to lose!**
+
+---
+
+### Most popular CSS-in-JS libaries
+
+_Will provide a quick hello world example for all the popular CSS-in-JS libraries— help yourself to choose which one you like the most based on the syntax._
+
+![NPM trends](https://cdn-images-1.medium.com/max/2000/1*xXIXJeI3l6_k-rXg6cqNjw.png)
+
+#### [Styled Components](https://www.styled-components.com/)
+
+![](https://cdn-images-1.medium.com/max/1600/1*QvSrt0RgwuOKYlLHLjkDQw.png)
+
+<Gist id="5888c4756651dfef1e1015b822d09b27" />
+
+### [JSS-React](https://github.com/cssinjs/react-jss)
+
+![](https://cdn-images-1.medium.com/max/1600/1*z7kPKLW6meQuC5sznIYnkQ.png)
+
+<Gist id="c90a6455e9dd7dce7b579b06d2e61413" />
+
+### [glamorous](https://glamorous.rocks/)
+
+![](https://cdn-images-1.medium.com/max/1600/1*tWuxJKAhaod4WNsm3MkMgQ.png)
+
+<Gist id="47c1dc52980ed0197db2ceb5ebbb9ac0" />
+
+#### [Radium](http://formidable.com/open-source/radium/) (caveat: uses inline styles)
+
+![](https://cdn-images-1.medium.com/max/1600/1*UsS6OxCfH6r7JLWx-wNeIQ.png)
+
+<Gist id="14b38638841f6c0539127ad52358d099" />
+
+Note: Radium uses [decorators](https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841)!
+
+#### [Aphrodite](https://github.com/Khan/aphrodite)
+
+<Gist id="f7d862549b680f766e68751e0f3f77d1" />
+
+#### [Stylotron](https://github.com/rtsao/styletron)
+
+![](https://cdn-images-1.medium.com/max/1600/1*a0c0iulx7pZFScn0fsAn0w.png)
+
+<Gist id="9919c99b28ca4a063a3245efc1e4dddd" />
+
+These are really simple examples which demonstrate the core functionality. All of the libraries have much more functionality included — for example, **theming**, **dynamic props**, **server side rendering** and much more!
+
+[Excellent post](https://medium.com/object-partners/css-in-js-benefits-drawback-and-tooling-80286b03f9aa) going in depth about all of the features CSS-in-JS enables.
+
+[**Here’s the full list — go and give all the libraries a quick try!**](https://github.com/tuchk4/awesome-css-in-js)
+
+Hate it or love it — **CSS-in-JS deserves a chance!**
+
+#### [Convinced CSS-in-JS is not for me? There’s another option — CSS Modules!](https://glenmaddern.com/articles/css-modules)
+
+Thanks for reading!

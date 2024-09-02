@@ -1,0 +1,289 @@
+---
+title: Trở thành Functional Programmer - Phần 5
+author: Hung Tan Nguyen
+date: 2017-08-23 23:28:13
+sourceUrl: https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-5-c70adc9cf56a#.aaslflbmu
+coverImage: https://viblo.asia/uploads/e85b8079-5076-40ca-af63-f1a136d06516.png
+tags:
+slug: /tro-thanh-functional-programmer-phan-5
+---
+
+Những bước đầu tiên của việc hiểu rõ các concepts trong lập trình hàm (Functional Programming - FP) là những bước quan trọng nhất, và đôi khi là những bước khó khăn nhất. Nhưng với cách tiếp cận đúng đắn, mọi thứ sẽ trở nên dễ hiểu hơn rất nhiều. Và đây là series được tạo ra nhằm mục đích giúp các bạn dễ thở hơn trong quá trình tiếp cận với FP.
+
+## Concept 8 : Referential Transparency - Tham chiếu minh bạch
+
+![](https://viblo.asia/uploads/d95f1311-8901-4647-b860-a531066cf329.png)
+
+**Referential Transparency - Tham chiếu minh bạch** là một cụm từ khá là màu mè được dùng để mô tả khả năng của **pure function** (nếu chưa rõ pure function là gì, mời xem lại [Phần 1](https://viblo.asia/ta.duy.anh/posts/PqOzvNbWzAB)) khi các vị trí sử dụng **pure function** đều _có thể được thay thế bằng phần định nghĩa của chính nó_ (nói đơn giản là chỗ nào gọi hàm thì đều có thể thay thế bằng phần thân - các biểu thức định nghĩa hàm). Ví dụ dưới đây sẽ giúp chúng ta hiểu rõ hơn.
+
+Giả sử ta có một **biểu thức toán học** khá quen thuộc như sau :
+
+`y = x + 10`
+
+Và khi gán giá trị cụ thể cho `x`:
+
+`x = 3`
+
+Thì chúng ta có thể thay thế `3` ở vị trí của `x` vào biểu thức, khiến biểu thức trở thành :
+
+`y = 3 + 10`
+
+Có thể thấy là `y = 3 + 10` vẫn là một biểu thức hoàn toàn hợp lệ. Và với _pure function_, việc thay thế tương tự như trên là hoàn toàn có thể.
+
+Dưới đây là một hàm trong Elm được dùng để thêm dấu nháy đơn vào trước và sau một String :
+
+```
+quote str =
+       "'"  ++ str ++ "'"
+
+```
+
+Và đây là một ngữ cảnh dùng hàm ở trên:
+
+```
+findError key =
+     "Unable to find " ++ (quote key)
+
+```
+
+Ở đấy hàm `findError` sẽ xuất ra một message thông báo lỗi khi việc tìm kiếm `key` không thành công.
+
+Vì hàm `quote` là một `pure function`, chúng ta có thể thay thế việc gọi hàm đó trong thân hàm `findError` bằng chính _phần thân hàm của hàm quote_ như sau :
+
+```
+findError key =
+     "Unable to find " ++ ("'"  ++ str ++ "'" )
+
+```
+
+Việc thay thế này tôi gọi là **Tái cấu trúc ngược - Reverse Refactoring** (vì nó nghe hợp tai thôi), và được định nghĩa là quá trình có thể được sử dụng bởi lập trình viên hoặc chương trình phần mềm (ví dụ như bộ biên dịch - compiler hay là phần mềm test) để hiểu về ý nghĩa và luồng hoạt động của code, đặc biệt khi tìm hiểu các hàm đệ quy.
+
+## Execution Order - Thứ tự thực hiện
+
+![](https://viblo.asia/uploads/4522e8c2-c5eb-4315-9408-b70264c3bf5f.png)
+
+Hầu hết các phần mềm hiện nay đều là đơn luồng (single-thread), có nghĩa là trong một thời điểm, có một và chỉ một đoạn code được thực hiện. Ngay cả khi bạn làm ra một phần mềm theo hướng đa luồng, hầu hết các luồng sẽ bị chặn và phải chờ cho các tác vụ xử lý I/O hoàn thành (tác vụ I/O là các tác vụ liên quan đến xử lý input và output của hệ thống như `file, network,...`
+
+Dưới đây là một cách lý giải cho việc chúng ta thường sẽ nghĩ theo các bước tuần tự khi viết code. Trước hết hãy xem ví dụ sau :
+
+```
+1. Lấy bánh mỳ
+2. Đặt 2 lát bánh mỳ vào máy nướng
+3. Chọn mức nướng
+4. Bấm nút bắt đầu nướng
+5. Chờ cho đến khi bánh mỳ nướng xong
+6. Cất máy nướng
+7. Lấy bơ
+8. Lấy dao cắt bơ
+9. Phết bơ vào bánh mỳ nướng
+
+```
+
+Nhìn vào các bước thực hiện cho việc tạo ra bánh mỳ nướng bơ ở trên, chúng ta có thể thấy có 2 luồng hoạt động độc lập : Lấy bơ và nướng bánh. Và 2 luồng hoạt động này chỉ tương tác với nhau ở bước cuối cùng - bước thứ 9.
+
+Vì thế chúng ta có thể thực hiện 2 công việc sau song song với nhau : 1 việc bao gồm các bước từ 1 đến 6, và 1 việc bao gồm 2 bước 7 và 8\. Và ta sẽ đưa 2 công việc này thành 2 luồng.
+
+Nhưng khi chúng ta làm như vậy, mọi thứ sẽ trở nên phức tạp hơn :
+
+> ## Luồng thứ 1
+>
+> 1.  Lấy bánh mỳ
+> 2.  Đặt 2 lát bánh mỳ vào máy nướng
+> 3.  Chọn mức nướng
+> 4.  Bấm nút bắt đầu nướng
+> 5.  Chờ cho đến khi bánh mỳ nướng xong
+> 6.  Cất máy nướng
+>
+> ## Luồng thứ 2
+>
+> 1.  Lấy bơ
+> 2.  Lấy dao cắt bơ
+> 3.  **Chờ luồng thứ nhất thực hiện xong**
+> 4.  Phết bơ vào bánh mỳ nướng
+
+Ở đây luồng thứ 2 có thêm một công việc là chờ luồng thứ 1 thực hiện xong. Vậy điều gì sẽ xảy ra với luồng thứ 2 nếu luồng thứ 1 thất bại? Nguyên tắc và cách thức để 2 luồng có thể giao tiếp và hợp tác với nhau là gì? Ai sẽ sở hữu bánh mỳ nướng: Luồng 1, luồng 2, hay cả hai?
+
+Tất cả các câu hỏi trên sẽ xảy ra khi chúng ta muốn làm đa luồng, và nếu cứ để nguyên ở dạng đơn luồng, chúng ta có thể bỏ qua không cần phải suy nghĩ gì đến các vấn đề phức tạp ở trên. Vậy là bạn đã hiểu lý do vì sao con người luôn tự nhiên suy nghĩ và thực hiện công việc theo một luồng có thứ tự duy nhất rồi chứ.
+
+Nhưng chúng ta cần nâng cao tối đa hiệu năng của phần mềm bằng mọi cách có thể, nên việc áp dụng đa luồng sẽ trở thành một điều ta cần nỗ lực để có thể đạt được những kết quả đáng ghi nhận.
+
+Tuy nhiên, sẽ có 2 vấn đề khi làm việc với đa luồng. Đầu tiên, các phần mềm đa luồng sẽ rất khó để viết, đọc, lý giải, test và debug (đương nhiên rồi).
+
+Thứ hai, một số ngôn ngữ như Javascript thì _không hỗ trợ đa luồng_, hoặc các ngôn ngữ có hỗ trợ thì _hỗ trợ một cách nghèo nàn_.
+
+Nhưng sẽ ra sao nếu thứ tự thực hiện bỗng chốc trở nên không còn quan trọng nữa, mọi thứ có thể thực hiện song song?
+
+Điều này nghe có vẻ điên rồ, nhưng tôi sẽ cho bạn thấy rằng nó _có thể_. Hãy xem một đoạn code Elm mô tả cho lý luận trên:
+
+```
+buildMessage message value =
+    let
+        upperMessage =
+            String.toUpper message
+        quotedValue =
+            "'" ++ value "'"
+    in
+        upperMessage ++ ": " ++ value
+
+```
+
+Ở đây hàm `buildMessage` nhận 2 tham số là `message` và `value`, sau đó sẽ trả về `message` phiên bản chữ hoa, kèm với một dấu hai chấm và `value` nằm trong dấu nháy đơn.
+
+Trong hàm này 2 biến `upperMessage` và `quotedValue` là độc lập với nhau. Ta sẽ cùng tìm hiểu lý do vì sao có thể kết luận được như vậy?
+
+Để xét về tính độc lập, sẽ có 2 nội dung cần được xác nhận là đúng. Thứ nhất, các đối tượng được xét đến đều phải là `pure function`. Điều này là cực kỳ quan trọng bởi vì các đối tượng này **phải** biệt lập với các xử lý khác bên ngoài. Nếu các đối tượng này không `pure`, chúng ta sẽ không bao giờ biết được chúng có độc lập hay không. Và trong trường hợp đó, ta sẽ phải dựa vào thứ tự được gọi của các hàm này được viết trong code để xác định thứ tự thực hiện của chúng. Và đó là cách mà các ngôn ngữ Imperative hoạt động.
+
+Thứ hai, để xác định tính độc lập, thì output của một hàm _không được các hàm còn lại lấy làm input_. Nếu điều này bị vi phạm, thì chúng ta sẽ phải chờ một hàm được thực hiện xong thì mới thực hiện tiếp hàm còn lại, và điều này thì khiến chúng không còn độc lập nữa.
+
+Trong ví dụ tôi vừa nêu, cả `upperMessage` và `quotedValue` đều là kết quả của 2 hàm `pure` và chúng đều không yêu cầu output của lẫn nhau.
+
+Do đó, 2 hàm này có thể thực hiện theo _BẤT KỲ THỨ TỰ NÀO_.
+
+Bộ biên dịch (compiler) - vì thế có thể tự quyết định thứ tự thực hiện của 2 hàm trên mà không cần sự chỉ đạo cụ thể của người lập trình. Việc này chỉ có thể khả thi với các ngôn ngữ được xác định là **Pure Functional Language** (là các ngôn ngữ FP mà các biểu thức - expression đều là pure - hay nói cách khác, không tạo ra side-effect), bởi vì nếu không sẽ rất khó, thậm chí là không thể xử lý các side-effect khi chúng xảy ra.
+
+> Thứ tự thực hiện trong các ngôn ngữ Pure Functional Language có thể được quyết định bởi trình biên dịch (compiler).
+
+Đây thực sự là một lợi ích hiển nhiên khi trong thời đại ngày nay, các bộ vi xử lý thay vì được nâng cao tốc độ thì chúng sẽ được trang bị ngày càng nhiều nhân hơn. Việc thứ tự thực hiện có thể được quyết định bởi trình biên dịch sẽ khiến cho code có thể được chạy song song trên nhiều nhân một lúc, và vì thế, hiệu năng sẽ được nâng cao.
+
+Đáng tiếc là với các ngôn ngữ Imperative, chúng ta không thể tận dụng tối đa việc CPU có nhiều nhân, trừ khi có sự thay đổi ở phần thấp, thậm chí là lõi của ngôn ngữ, mà khi đó thì sẽ kéo theo rất nhiều thay đổi trong kiến trúc của các phần mềm viết ra dựa trên các ngôn ngữ đó.
+
+Với các ngôn ngữ **Pure Functional Language**, chúng ta sẽ có tiềm năng vận dụng các nhân của CPU một cách hiệu quả nhất mà không cần phải thay đổi bất cứ dòng code nào.
+
+## Type Annotation - Xác định kiểu dữ liệu
+
+![](https://viblo.asia/uploads/093aba53-f216-4df1-9017-4928ba25d45f.png)
+
+Trong các ngôn ngữ có kiểu dữ liệu tĩnh (Statically Typed Language), kiểu được định nghĩa trong cùng 1 dòng. Dưới đây là một đoạn code Java để tham khảo :
+
+```
+public static String quote(String str) {
+    return "'" + str + "'";
+}
+
+```
+
+Bạn hãy để ý phần xác định kiểu trả về của hàm và của tham số đều được viết trong cùng dòng với phần định nghĩa hàm. Và khi ta dùng _generics_, thì nhìn còn tệ hơn nữa :
+
+```
+private final Map<Integer, String> getPerson(Map<String, String> people, Integer personId) {
+   // ...
+}
+
+```
+
+Ở đây các phần dùng để xác định kiểu dữ liệu sẽ là `Map<Integer, String>, Map<String, String>, Integer`, và bởi vì chúng nằm lẫn với phần định nghĩa hàm, chứa cả tên hàm và các biến, nên chúng ta sẽ mất thời gian và cần nhiều sự tập trung để có thế tìm ra tên các tham số.
+
+Ngược lại, với các ngôn ngữ có kiểu dữ liệu động (Dynamically Typed Language), chúng ta không gặp phải vấn đề ở trên. Ví dụ như với Javascript, hàm ở trên sẽ chỉ cần viết như sau là đủ :
+
+```
+var getPerson = function(people, personId) {
+    //...
+};
+
+```
+
+Có thể thấy rằng phiên bản bằng JS ở trên _dễ đọc hơn rất nhiều_ vì ko có những khai báo kiểu dữ liệu loằng ngoằng như với phiên bản của Java. Vấn đề duy nhất ở đây là mặc dù dễ đọc hơn, nhưng chúng ta đã phải bỏ qua sự an toàn khi định nghĩa rõ kiểu dữ liệu. Ta có thể dễ dàng truyền vào các biến có kiểu không phù hợp, như là một số cho biến `people` hoặc một Object cho biến `personID`. Và việc truyền nhầm kiểu dữ liệu này chỉ có thể phát hiện đến khi các đoạn code được thực hiện, nên _có thể sẽ xảy ra lỗi sau khi chúng ta đã đưa code lên môi trường thật hàng tháng trời_. Nhưng với Java thì sẽ không gặp lỗi này, và sẽ được phát hiện khi code được biên dịch (compile).
+
+Đó là những điểm lợi và bất lợi giữa kiểu dữ liệu động và tĩnh, và nếu chúng ta có thể kết họp ưu điểm của cả hai, bao gồm syntax đơn giản dễ hiểu bên phía Javascript và sự an toàn khi định rõ kiểu dữ liệu bên Java, thì chẳng phải sẽ rất tuyệt hay sao?
+
+Và thực tế là chúng ta _có thể làm được_. Đây là một ví dụ về một hàm trong Elm với việc định rõ kiểu dữ liệu:
+
+```
+add : Int -> Int -> Int
+add x y =
+    x + y
+
+```
+
+Hãy để ý rằng thông tin về kiểu dữ liệu của tham số và giá trị trả về của hàm được viết bằng _một dòng riêng biệt_. Và sự tách riêng như này đem đến rất rất nhiều điều khác biệt.
+
+Nếu lần đầu nhìn vào đoạn code trên, bạn có thể nghĩ rằng phần khai báo thông tin kiểu dữ liệu (dòng đầu tiên) có lỗi đánh máy. Tôi cũng đã từng cảm thấy như vậy. Lúc đó tôi đã nghĩ dấu `->` đầu tiên nên là dấu phẩy. Nhưng thực tế thì câu lệnh đó hoàn toàn chính xác.
+
+Nếu đặt thêm vài dấu đóng mở ngoặc, bạn sẽ bắt đầu thấy nó có vẻ hợp lý hơn :
+
+```
+add : Int -> ( Int -> Int)
+
+```
+
+Biểu thức ở trên chỉ ra rằng hàm `add` là một hàm có **một** tham số có kiểu `Int` và trả về một hàm cũng có **một** tham số kiểu `Int`với kết quả trả về là một giá trị `Int`.
+
+Dưới đây là một khai báo hàm phức tạp hơn một chút:
+
+```
+doSomething : String -> (Int -> (String -> String))
+doSomething prefix value suffix =
+    prefix ++ (toString value) ++ suffix
+
+```
+
+Đoạn code trên được dùng để khai báo một hàm có tên là `doSomething` sẽ nhận _một tham số_ có kiểu String, và trả về 1 hàm (tạm gọi là hàm A). Hàm A là hàm nhận _một tham số_ có kiểu `Int`, và trả về 1 hàm (hàm B). Hàm B là hàm nhận _một tham số_ có kiểu `String`, và trả về kết quả là giá trị kiểu `String`.
+
+Có thể thấy rằng tất cả các hàm đều chỉ **có một tham số**. Đó là bởi tất cả các hàm trong Elm đều hỗ trợ **Currying**.
+
+Và bởi vì dấu ngoặc đơn luôn được đặt vào từ phía ngoài cùng bên phải, lần lượt theo từng dấu mũi tên nên chúng ta có thể bỏ qua không cần chỉ định rõ, và kết quả sẽ là:
+
+```
+doSomething : String -> Int -> String -> String
+
+```
+
+Dấu ngoặc đơn chỉ thực sự cần thiết khi chúng ta muốn truyền hàm trong tham số. Nếu không sử dụng chúng thì việc xác định kiểu dữ liệu sẽ trở nên mù mờ. Ví dụ:
+
+```
+takes2Params : Int -> Int -> String
+takes2Params num1 num2 =
+    -- do something
+
+```
+
+sẽ khác hoàn toàn so với :
+
+```
+takes1Param : (Int -> Int) -> String
+takes1Param f =
+    -- do something
+
+```
+
+`take2Params` là một hàm yêu cầu 2 tham số `Int`, để có thể trả về giá trị kiểu `String`. Nhưng `take1Param` là hàm _yêu cầu 1 tham số là một hàm f, mà hàm f đó có 1 tham số là Int và trả về kết quả là Int_.
+
+Và đây là phần định kiểu dữ liệu cho hàm `map` chúng ta đã dùng ở phần trước
+
+```
+map : (a -> b) -> List a -> List b
+map f list =
+    // ...
+
+```
+
+Ở đây dấu ngoặc đơn là cần thiết bởi vì hàm `f` dùng trong hàm `map` sẽ có kiểu là `(a -> b)`, với ý nghĩa là một hàm nhận vào giá trị kiểu `a` và trả về giá trị kiểu `b`.
+
+Chữ `a` ở đây được hiểu với nghĩa là _bất kỳ kiểu nào_. Nếu một kiểu có ký tự hoa, thì nó sẽ là một kiểu cụ thể, ví dụ như `String`. Còn nếu một kiểu chỉ có ký tự thường, nó có thể là bất cứ kiểu dữ liệu nào. Vì thế kiểu `a` có thể là `String` hay `Int` đều được.
+
+Nếu bạn nhìn thấy kiểu định nghĩa hàm là `(a -> a)` thì nó sẽ có ý nghĩa là kiểu dữ liệu của tham số và giá trị trả về **PHẢI** giống nhau, mặc dù có thể là bất kỳ kiểu dữ liệu nào (tức là nếu hàm nhận input kiểu `Int` thì phải trả về kiểu `Int`, nhận input kiểu `String` thì phải trả về kiểu `String`).
+
+Nhưng trong trường hợp của hàm `map` được viết là `(a -> b)`. Điều đó có nghĩa là hàm `f` _Có thể_ trả về kiểu dữ liệu khác với tham số nhưng _CŨNG có thể_ trả về kiểu dữ liệu giống với kiểu của tham số.
+
+Nhưng khi kiểu của `a` đã được xác định, thì `a` sẽ mang kiểu đó trong suốt phần định nghĩa kiểu dữ liệu của hàm. Ví dụ nếu `a` là kiểu `Int` và `b` là `String` thì định nghĩa kiểu dữ liệu phía trên của hàm `map` sẽ tương đương với :
+
+```
+(Int -> String) -> List Int -> List String
+
+```
+
+Bạn sẽ thấy rằng tất cả các chỗ dùng `a` trong định nghĩa kiểu dữ liệu đã được thay thế bằng `Int` (ở phần định nghĩa hàm `f` có `(a -> b)`, cũng như phần tham số thứ 2 là `List a`), và tất cả các chỗ dùng `b` đều được thay thế bằng `String`.
+
+Kiểu dữ liệu `List Int` có nghĩa là một danh sách chứa các phần tử có kiểu `Int`, và `List String` tương đương với một danh sách chứa các phần tử có kiểu `String`. Nếu bạn đã từng sử dụng `generics` trong Java hoặc các ngôn gnữu khác, thì hẳn bạn sẽ thấy quen thuộc với concept này (ví dụ trong Java là `List<T>`).
+
+## Đầu của tôi!!!!
+
+![](https://viblo.asia/uploads/3cb3a723-1140-4d4c-abc8-9da098acc7d6.png)
+
+Hôm nay đến đây thôi là đủ.
+
+Trong phần tiếp theo, cũng là phần cuối cùng của series này, tôi sẽ đề cập đến việc sử dụng tất cả những concept mà tôi đã giới thiệu vào công việc hàng ngày như thế nào, cụ thể sẽ là trong việc lập trình Javascript nhưng theo hướng functional, và lập trình với Elm.
+
+Nếu bạn muốn tham gia vào cộng đồng các nhà phát triển web muốn học và giúp đỡ lẫn nhau về FP trong Elm, mời các bạn tham gia Group Facebook sau: [Learn Elm Programming](https://www.facebook.com/groups/learnelm/)
+
+Và đây là Twitter của tác giả : [@cscalfani](https://twitter.com/cscalfani)

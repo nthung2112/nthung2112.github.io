@@ -1,0 +1,229 @@
+---
+title: 'Cách Javascript hoạt động P11: Render engine & mẹo tối ưu hóa hiệu năng render'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-the-rendering-engine-and-tips-to-optimize-its-performance-7b95553baeda
+date: 2018-11-25 15:29:00
+slug: /cach-javascript-hoat-dong-p11-render-engine-meo-toi-uu-hoa-hieu-nang-render
+---
+
+Chào các bạn đến với bài thứ 11 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Trong những bài trước của series "Đục khoét Javascript", chúng ta đã tập trung vào tìm hiểu **ngôn ngữ** Javascript, các tính năng của nó, cách chúng được thực thi trên trình duyệt, làm thế nào để tối ưu hóa, vân vân.
+
+Tuy nhiên, khi bạn xây dựng webapp, bạn không chỉ viết code Javascript. Code của bạn còn tương tác với môi trường. Thấu hiểu môi trường, cách nó hoạt động cũng như các thành phần của nó sẽ cho phép bạn xây dựng app tốt hơn và có nền tảng chuẩn bị tốt để đề phòng những nguy cơ tiềm tàng có thể xảy đến bất cứ lúc nào khi lên production.
+
+![](https://cdn-images-1.medium.com/max/1000/1*lMBu87MtEsVFqqbfMum-kA.png)
+
+Các thành phần chính của trình duyệt:
+
+- **Giao diện (User interface)**: phần này bao gồm thanh địa chỉ (address bar), nút back & forward, menu bookmark, vân vân. Về bản chất, đây là những phần thuộc về trình duyệt hiển thị lên cho bạn thấy, ngoại trừ khung hiển thị trang web.
+- **Engine trình duyệt (Browser engine)**: nó xử lý các giao tiếp giữa user interface và rendering engine
+- **Engine dựng hình (Rendering engine)**: chịu trách nhiệm hiển thị trang web. Rendering engine sẽ phân giải HTML & CSS và hiển thị nội dung đó lên màn hình.
+- **Mạng (Networking)**: đây là những lời gọi mạng chẳng hạn như XHR request, chúng được tạo ra bằng cách sử dụng nhiều triển khai khác nhau cho nhiều nền tảng khác nhau nằm phía sau một interface độc lập nền tảng (platform-independent interface). Chúng ta sẽ thảo luận về lớp network chi tiết hơn ở bài tiếp theo (số 12) trong series này nhé.
+- **Giao diện ở backend (UI Backend)**: dùng để vẽ nên các thành phần cốt lõi, ví dụ như checkbox hay cửa sổ. Phần này thể hiện một interface chung không phụ thuộc hay đặc trưng cho nền tảng. Nó sử dụng các phương thức về UI của hệ điều hành.
+- **Javascript engine**: Chúng ta đã tìm hiểu về phần này trong [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-2---Ben-trong-engine-V8---5-meo-de-toi-uu-hoa-code). Về cơ bản, đây là nơi code Javascript được thực thi.
+- **Cố định dữ liệu (Data persistence)**: app của bạn có thể cần lưu trữ dữ liệu ở phía local. Các loại kiến trúc lưu trữ được hỗ trợ ở đây gồm có [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [indexDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API), [WebSQL](https://en.wikipedia.org/wiki/Web_SQL_Database) và [FileSystem](https://developer.mozilla.org/en-US/docs/Web/API/FileSystem)
+
+Trong bài này, chúng ta sẽ tập trung vào rendering engine (engine dựng hình), bởi vì nó xử lý quá trình phân giải và hình ảnh hóa (visualization) code HTML & CSS, là phần mà đa số app Javascript cần tương tác liên tục.
+
+# Khái quát về rendering engine
+
+Công việc chính của rendering engine là hiển thị trang được yêu cầu lên màn hình của trình duyệt.
+
+Rendering engine có thể hiển thị HTML, văn bản XML và ảnh. Nếu bạn sử dụng thêm plugin ở ngoài thì engine có thể hiển thị các loại văn bản khác, chẳng hạn như PDF.
+
+# Rendering engines
+
+Tương tự như Javascript engine, trình duyệt khác nhau cũng sử dụng các rendering engine khác nhau. Một vài bộ engine nổi tiếng:
+
+- **Gecko** — Firefox
+- **WebKit** — Safari
+- **Blink** — Chrome, Opera (từ phiên bản 15 trở đi)
+
+# Quá trình render
+
+Rendering engine nhận nội dung của văn bản được yêu cầu từ lớp networking.
+
+![](https://cdn-images-1.medium.com/max/1000/1*9b1uEMcZLWuGPuYcIn7ZXQ.png)
+
+# Xây dựng DOM tree
+
+Bước đầu tiên của công cuộc rendering là phân giải văn bản HTML và chuyển những phần tử đã phân giải thành những DOM node thực sự trong DOM tree.
+
+Giả sử bạn có đoạn input như sau:
+
+```html
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" type="text/css" href="theme.css" />
+  </head>
+  <body>
+    <p>Hello, <span> friend! </span></p>
+    <div>
+      <img src="smiley.gif" alt="Smiley face" height="42" width="42" />
+    </div>
+  </body>
+</html>
+```
+
+DOM tree của đoạn HTML trên sẽ giống như sau:
+![](https://cdn-images-1.medium.com/max/1000/1*ezFoXqgf91umls9FqO0HsQ.png)
+
+Về cơ bản thì mỗi phần tử được thể hiện như là một node cha của tất cả các element khác nằm trực tiếp ngay bên dưới (bên trong) nó. Nguyên tắc này được áp dụng một cách đệ quy.
+
+# Xây dựng CSSOM tree
+
+CSSOM viết tắt của **CSS Object Model**. Trong khi trình duyệt đang xây dựng DOM, nó bắt gặp một thẻ link trong phần head và dẫn tới một file CSS tên là theme.css ở bên ngoài. Dự đoán rằng nó có thể cần đến tài nguyên này để render trang, ngay lập tức nó điều phối 1 request đến. Giả sử file theme.css có nội dung như sau:
+
+```css
+body {
+  font-size: 16px;
+}
+
+p {
+  font-weight: bold;
+}
+
+span {
+  color: red;
+}
+
+p span {
+  display: none;
+}
+
+img {
+  float: right;
+}
+```
+
+Tương tự HTML, engine cần chuyển tất cả CSS sang một thứ gì đó mà trình duyệt có thể xử lý, chính là CSSOM. Dưới đây là mô phỏng của CSSOM tree:
+
+![](https://cdn-images-1.medium.com/max/1000/1*5YU1su2mdzHEQ5iDisKUyw.png)
+
+Bạn có tự hỏi tại sao CSSOM lại có cấu trúc dạng cây (tree)? Khi tính toán bộ style cuối cùng cho mỗi object tren trang, trình duyệt sẽ bắt đầu với rule áp dụng toàn cục nhất cho node đó (ví dụ: nếu nó là con của phần tử body thì áp dụng tất cả style của body) và tinh chỉnh một cách đệ quy những style đã được tính toán bằng cách áp dụng các rule cụ thể hơn.
+
+Với ví dụ ở trên, bất kỳ text nào nằm bên trong thẻ span mà span nằm trong phần tử body thì đều có font-size 16 và màu đỏ. Những style này được kế thừa từ phần tử body. Nếu như span là con của phần tử p thì nội dung của nó sẽ bị ẩn bởi vì có style khác cụ thể hơn đã được áp dụng cho nó (ở đây là display: none).
+
+Thêm nữa, lưu ý rằng tree ở trên chưa phải là CSSOM tree hoàn chỉnh và chỉ thể hiện những style mà ta đã ghi đè trong style sheet. Mỗi trình duyệt cung cấp 1 bộ style mặc định, còn được biết tới là **user agent styles** - đây chính những gì ta thấy nếu như không cung cấp style cụ thể. Style của chúng ta thêm vào chỉ đơn giản là ghi đè lại những phần mặc định này.
+
+# Xây dựng render tree
+
+Cùng với phần thể hiện trực quan trong HTML kết hợp với dữ liệu style từ CSSOM tree là chúng ta đã có đủ nguyên liệu để tạo ra render tree.
+
+Bạn sẽ thắc mắc "render tree" là gì? Nó là 1 cây (tree) của các phần tử trực quan được xây dựng theo thứ tự trong đó chúng được hiển thị trên màn hình. Đó là sự thể hiện 1 cách trực quan của HTML cùng với CSS tương ứng. Mục đích của cây này là cho phép tô màu nội dung theo đúng thứ tự.
+
+Mỗi node trong render tree được gọi là 1 renderer hoặc render object trong Webkit.
+
+Dưới đây là cách mà render tree của DOM & CSSOM ở trên thể hiện:
+
+![](https://cdn-images-1.medium.com/max/1000/1*WHR_08AD8APDITQ-4CFDgg.png)
+
+Để xây dựng render tree, trình duyệt về cơ bản sẽ làm những bước sau đây:
+
+- Bắt đầu từ root của DOM tree, nó sẽ đi qua mỗi **node thấy được**. Vài node có thể bị ẩn đi (ví dụ như tag script, meta, vân vân) hoặc bỏ qua bởi vì chúng không phản chiếu trong kết quả render đầu ra. Vài node bị ẩn bởi CSS và cũng bị bỏ qua khỏi render tree. Ví dụ như node span trong ví dụ trên thì nó sẽ không có mặt trong render tree vì đã được set style display: none rồi.
+- Với mỗi node thấy được, trình duyệt sẽ tìm các rule CSSOM phù hợp và khớp với nó rồi áp dụng vào.
+- Trình duyệt sẽ xuất ra các node thấy được với nội dung và style tương ứng.
+
+Bạn có thể xem qua source code của RenderObject (WebKit) ở đây: [https://github.com/WebKit/webkit/blob/fde57e46b1f8d7dde4b2006aaf7ebe5a09a6984b/Source/WebCore/rendering/RenderObject.h](https://github.com/WebKit/webkit/blob/fde57e46b1f8d7dde4b2006aaf7ebe5a09a6984b/Source/WebCore/rendering/RenderObject.h)
+
+Cùng nghía qua một vài dòng cốt lõi trong class này nhé:
+
+```javascript
+class RenderObject : public CachedImageClient {
+  // Tô màu lại toàn bộ object. Nó sẽ được gọi khi border color thay đổi hoặc
+  // border style thay đổi.
+
+  Node* node() const { ... }
+
+  RenderStyle* style;  // the computed style
+  const RenderStyle& style() const;
+
+  ...
+}
+```
+
+Mỗi renderer thể hiện một khu vực hình chữ nhật tương ứng với CSS box của một node. Nó bao gồm cả thông tin hình học như độ rộng (width), chiều cao (height) hay vị trí (position).
+
+# Cách bố trí của render tree
+
+Khi renderer được tạo ra và thêm vào tree, nó không có thông tin vị trí hay kích thước, phần tính toán các giá trị này được gọi là layout.
+
+HTML sử dụng mô hình layout theo dòng (flow-based layout), nghĩa là hầu như toàn bộ thời gian nó có thể tính toán thông số hình học chỉ trong 1 lần duyệt. Hệ thống tọa độ có liên quan đến root renderer. Thông số tọa độ top và left được sử dụng.
+
+Layout là 1 quá trình đệ quy, nó bắt đầu ở root renderer, chính là thứ tương ứng với phần tử `<html>` trong văn bản HTML. Layout tiếp tục duyệt đệ quy qua một hoặc toàn bộ cây cấp bậc(hierarchy) renderer, tính toán các thông tin hình học cần thiết cho mỗi renderer.
+
+Vị trí của root renderer là 0,0 và kích thước của nó bằng phần nhìn thấy được của cửa sổ hiển thị trên trình duyệt (còn gọi là viewport).
+
+Bắt đầu quá trình tạo layout chính là truyền đạt lại cho mỗi node tọa độ chính xác mà nó cần phải xuất hiện trên màn hình là ở đâu.
+
+# Tô màu cho render tree
+
+Trong giai đoạn này, renderer tree đã được duyệt qua và phương thức paint() của renderer được gọi để hiển thị nội dung lên màn hình.
+
+Tô màu có thể theo cách global hoặc incremantal tương tự như layout):
+
+- **Global (toàn cục)**: toàn bộ tree được lên màu.
+- **Incremental (gia tăng)**: chỉ có một vài renderer thay đổi theo cách không ảnh hưởng đến toàn bộ tree. Renderer vô hiệu hóa khung chữ nhật của chính nó trên màn hình. Điều này làm cho OS (hệ điều thành) hiểu rằng vùng đó cần phải được tô màu lại và sinh ra một paint event. OS thực hiện điều đó một cách thông minh bằng cách gộp nhiều vùng thành một.
+
+Về tổng quát thì quan trọng là cần phải hiểu rằng tô màu là quá trình diễn ra từ từ. Để có UX tốt hơn, render engine sẽ cố hiển thị nội dung trên màn hình ngay khi có thể. Nó sẽ không ngồi yên đợi cho tới khi toàn bộ HTML được parse để bắt đầu xây dựng và bố trí render tree. Từng phần của nội dung sẽ được parse và hiển thị lên trong khi tiến trình tiếp tục với những item nội dung tiếp theo đang được truyền về trên mạng.
+
+# Thứ tự xử lý script và style
+
+Các script được parse và thực thi ngay lập tức khi parser vừa gặp thẻ `<script>`. Quá trình parse của toàn bộ văn bản sẽ tạm dừng cho đến khi script thực thi xong. Nghĩa là tiến trình này diễn ra đồng bộ.
+
+Nếu như script là file ở ngoài thì việc đầu tiên nó cần phải được lấy về từ mạng (bất đồng bộ). Tất cả công việc parse sẽ dừng lại cho đến khi lấy xong file.
+
+HTML5 có thêm 1 tùy chọn để đánh dấu script là bất đồng bộ, do đó nó có thể được parse và thực thi trong 1 tiến trình khác.
+
+# Tối ưu hóa hiệu suất render
+
+Nếu bạn muốn tối ưu hóa app thì có 5 điểm chính mà bạn cần tập trung vào dưới đây:
+
+1.  **Javascript** - trong các bài trước chúng ta đã nghiên cứu về chủ đề viết code tối ưu và có hiệu quả bộ nhớ cao mà không làm ảnh hưởng đến UI. Với trường hợp của render, chúng ta cần phải suy nghĩ về cách mà code Javascript sẽ tương tác với các phần tử DOM trên trang. Javascript có thể tạo ra rất nhiều thay đổi với UI, đặc biệt là các app SPA.
+2.  **Tính toán Style** - đây là tiến trình xác định CSS rule nào sẽ áp dụng vào phần tử nào dựa trên các selector. Một khi các rule đã được định nghĩa, chúng sẽ được áp dụng và tính toán style cuối cùng cho mỗi phần tử.
+3.  **Layout** - khi trình duyệt biết rule nào áp dụng cho phần tử nào, nó có thể bắt đầu tính toán bao nhiêu không gian một phần tử sẽ chiếm dụng và vị trí của nó sẽ nằm ở đâu trên màn hình của trình duyệt. Mô hình layout của trang web xác định một phần tử có thể gây ảnh hưởng đến phần tử khác. Ví dụ, độ rộng của `<body>` có thể ảnh hưởng độ rộng của phần tử con của nó. Điều này nghĩa là quá trình layout sẽ là quá trình nặng về tính toán số học. Phần "vẽ" được thực hiện trong nhiều layer khác nhau.
+4.  **Tô màu** - đây là lúc mà các pixel thực sự được lên màu. Tiến trình bao gồm cả phần vẽ các câu chữ, màu sắc, hình ảnh, viền, đổ bóng, vấn vân, từng phần nhìn thấy được của từng phần tử.
+5.  **Kết hợp (Compositing)** - Bởi vì các phần nhỏ của webpage được vẽ vào trong nhiều lớp khác nhau, chúng cần được kết hợp vào một màn hình theo đúng thứ tự để page có thể render một cách chính xác. Điều này rất quan trọng, đặc biệt là với các phần tử chồng nhau.
+
+# Tối ưu hóa JavaScript
+
+Javascript thường trigger những thay đổi nhìn thấy được trên trình duyệt. Và những tác vụ đó nhân lên nhiều lần khi xây dựng ứng dụng SPA.
+
+Dưới đây là 1 số mẹo nhỏ để bạn biết nên tối ưu phần nào của code Javascript nhằm cải thiện render:
+
+- Tránh sử dụng setTimeout và setInterval đối với những cập nhật nhìn thấy được. Hai hàm này sẽ gọi callback tại 1 thời điểm nào đó trong frame, có thể là cuối frame. Thứ chúng ta cần là trigger thay đổi ngay khi bắt đầu frame để tránh bị sót.
+- Đưa những tính toán Javascript phức tạp và tốn thời gian vào trong Web Workers như chúng ta đã thảo luận ở [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-7---Thanh-phan-cua-WebWorker---5-truong-hop-su-dung).
+- Sử dụng các tác vụ siêu nhỏ (micro-tasks) để thông báo sự thay đổi của DOM với nhiều frame. Dùng trong trường hợp các tác vụ cần truy xuất vào DOM, điều này Web Workers không làm được. Về cơ bản thì nó nghĩa là bạn cần chia nhỏ 1 tác vụ lớn thành nhiều phần nhỏ hơn và chạy chúng bên trong các hàm requestAnimationFrame, setTimeout, setInterval tùy thuộc vào đặc tính của mỗi tác vụ.
+
+# Tối ưu hóa CSS
+
+Chỉnh sửa DOM bằng cách thêm bớt các phần tử, thay đổi các thuộc tính... sẽ làm cho trình duyệt phải tính toán lại style của phần tử và trong nhiều trường hợp, là phải tính lại layout của toàn bộ trang hoặc 1 phần của trang.
+
+Để tối ưu quá trình render, bạn cần cân nhắc những điều sau:
+
+- Giảm thiểu sự phức tạp trong các selector. Sự phức tạp của selector có thể chiếm đến hơn 50% thời gian cần thiết để tính toán style cho 1 phần tử (phần còn lại là thời gian để xây dựng style).
+- Giảm số lượng phần tử cần được tính toán style. Về bản chất thì thay đổi style trực tiếp cho 1 vài phần tử thì tốt hơn là vô hiệu toàn bộ page.
+
+# Tối ưu hóa layout
+
+Tính toán lại layout có thể ngốn nhiều tài nguyên của trình duyệt nên bạn cần cân nhắc những điều sau:
+
+- Giảm số lượng layout bất cứ khi nào có thể. Khi bạn thay đổi style thì trình duyệt kiểm tra để xem thử có thay đổi nào cần layout phải được tính toán lại không. Các thay đổi về property như width, height, left, top và trên hết là những property nào liên quan đến hình học, cần có layout. Vì thế tránh thay đổi chúng hết mức có thể.
+- Dùng flexbox bất cứ khi nào có thể dùng. Nó chạy nhanh hơn và có thể cải thiện hiệu năng một cách đáng kể.
+- Tránh ép buộc layout đồng bộ. Nhớ rằng khi Javascript chạy, tất cả giá trị của layout cũ từ frame trước đó được xác định và sẵn sàng cho bạn truy vấn. Không vấn đề gì nếu như bạn muốn truy xuất box.offsetHeight. Tuy nhiên, nếu bạn thay đổi style của box trước khi nó được truy xuất (ví dụ: cố tình thêm CSS class vào 1 phần tử), trình duyệt đầu tiên sẽ áp dụng thay đổi của style rồi sau đó mới chạy đến phần layout. Điều có có thể gây tốn thời gian và làm ảnh hưởng nặng đến tài nguyên máy tính, vì thế nên tránh càng xa nó càng tốt.
+
+# Tối ưu hóa tô màu
+
+Đây thường là tác vụ chạy lâu nhất trong số các tác vụ nên quan trọng là tránh mặt nó càng xa càng tốt. Những gì bạn có thể làm:
+
+- Thay đổi bất kỳ property nào khác ngoài transform hay opacity sẽ trigger tác vụ tô màu. Nhớ sử dụng tiết kiệm nhé.
+- Nếu bạn trigger một layout, bạn cũng sẽ trigger luôn tác vụ tô màu bởi vì thay đổi về kích thước hình học cũng sẽ thay đổi phần nhìn thấy được của phần tử.
+- Giảm diện tích tô màu thông qua thăng cấp layer và dàn dựng các animation.
+
+Render là một khía cạnh quan trọng trong cách thức hoạt động của [SessionStack](https://www.sessionstack.com/?utm_source=medium&utm_medium=blog&utm_content=js-series-rendering-engine-outro). SessionStack phải tái tạo lại một video về mọi thứ đã diễn ra với user tại thời điểm họ trải nghiệm qua một vấn đề khi đang lướt webapp của bạn. Để làm được điều này, SessionStack chỉ xử lý duy nhất những dữ liệu mà thư viện của nó thu thập được: các sự kiện từ user, thay đổi trên DOM, request lên mạng, biệt lệ, thông báo debug, vân vân. Trình phát video được tối ưu hóa tối đa để có thể render một cách chính xác và sử dụng toàn bộ những dữ liệu thu thập được để có thể đưa ra một bản giả lập trình duyệt của user hoàn-hảo-đến-từng-pixel cũng như những gì đã xảy ra trên đó, cả về mặt kỹ thuật lẫn quan sát.

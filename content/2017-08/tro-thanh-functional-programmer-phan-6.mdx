@@ -1,0 +1,208 @@
+---
+title: Trở thành Functional Programmer - Phần 6
+author: Hung Tan Nguyen
+date: 2017-08-23 23:30:13
+sourceUrl: https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-6-db502830403#.ixhzsy2zb
+coverImage: https://viblo.asia/uploads/e85b8079-5076-40ca-af63-f1a136d06516.png
+tags:
+slug: /tro-thanh-functional-programmer-phan-6
+---
+
+Những bước đầu tiên của việc hiểu rõ các concepts trong lập trình hàm (Functional Programming - FP) là những bước quan trọng nhất, và đôi khi là những bước khó khăn nhất. Nhưng với cách tiếp cận đúng đắn, mọi thứ sẽ trở nên dễ hiểu hơn rất nhiều. Và đây là series được tạo ra nhằm mục đích giúp các bạn dễ thở hơn trong quá trình tiếp cận với FP.
+
+## Bước tiếp theo
+
+![](https://viblo.asia/uploads/6b50d1f5-1c5c-4d80-ab29-3ed59965a08d.png)
+
+Thông qua 5 phần trước, tôi đã giới thiệu đến các bạn tất cả các concepts tuyệt vời mà FP mang lại, nhưng đồng thời cũng dấy lên trong các bạn câu hỏi : "Giờ thì sao? Liệu những kiến thức đó có thể có ích gì cho tôi trong công việc hàng ngày chứ?"
+
+Câu trả lời sẽ là tùy theo từng người. Nếu bạn có thể/đang làm việc với các ngôn ngữ _Pure Functional Language_ như là Elm hay Haskell, thì bạn có thể tận dụng toàn bộ những kiến thức đã đề cập đến, đồng thời các ngôn ngữ đó sẽ hỗ trợ bạn trong việc vận dụng chúng một cách thuận tiện nhất.
+
+Còn nếu bạn vẫn đang tiếp tục sử dụng các ngôn ngữ Imperative như Javascript - giống như hầu hết các lập trình viên hiện nay, thì bạn vẫn có thể vận dụng những concepts đã học được, nhưng sẽ cần một vài tùy chỉnh và nguyên tắc cần tuân thủ.
+
+## Functional Javascript - Code JS theo hướng Functional
+
+![](https://viblo.asia/uploads/3c9b615c-9302-4e69-a56e-c1bab6177ee2.png)
+
+Javascript có thể thực hiện rất nhiều concepts của FP. Mặc dù nó không `thuần khiết` (pure) cho lắm, nhưng JS vẫn có lựa chọn để sử dụng khả năng immutability (tính bất biến) hoặc nếu sử dụng các thư viện đã có, thì việc hỗ trợ FP concepts còn mạnh mẽ hơn.
+
+Mặc dù áp dụng FP vào JS không hoàn toàn lý tưởng, nhưng nếu bạn có thể tận dụng một vài lợi ích từ FP thì tại sao không thử nhỉ?
+
+### Immutability - Tính bất biến
+
+Điều đầu tiên mà ta có thể xem xét áp dụng là tính bất biến. Trong phiên bản ES2015 - hay còn gọi là ES6, có một từ khóa mới đã được giới thiệu có tên là **const**. Và đúng như tên gọi của từ khóa này, nó được dùng để khai báo một biến mà giá trị không thể gán lại được :
+
+```
+const a = 1;
+a = 2; //  sẽ có exception có tên là TypeError trong Chrome, Firefox hoặc Node
+       // nhưng không có nếu dùng Safari (bản 10/2016)
+
+```
+
+Ở đây biến `a` được khai báo là một `hằng số` (const) nên nó sẽ không thể được set lại giá trị nữa. Vì thế mà đoạn code `a = 2` sẽ sinh ra Exception (ngoại trừ Safari).
+
+Tuy nhiên, có một vấn đề với `const`, đó là nó vẫn chưa hoàn toàn implement tính bất biến _một cách đầy đủ_. Đoạn code dưới đây sẽ thể hiện hạn chế này:
+
+```
+const a = {
+    x: 1,
+    y: 2
+};
+a.x = 2; // KHÔNG CÓ EXCEPTION!
+a = {}; // có exception TypeError
+
+```
+
+Bạn sẽ thấy rằng khi set `a.x = 2` thì sẽ **không** gây ra lỗi. Thứ duy nhất mà từ khóa `const` áp dụng để kiểm tra tính bất biến chỉ là biến `a`. Còn tất cả những thành phần mà a có thể liên kết đến thì vẫn có thể thay đổi được (Ở đây sẽ hiểu là keyword `const` chỉ check `a` có là object vẫn tạo ra từ đầu hay không, mà _không_ check được các thuộc tính của a bị thay đổi).
+
+Tôi thấy khá là thất vọng khi nhận ra điều này, vì nếu được implement một cách hoàn hảo, JS đã có thể trở nên tốt hơn rất nhiều.
+
+Vậy liệu có cách nào để chúng ta có thể áp dụng tính bất biến vào JS một cách toàn diện nhất không?
+
+Câu trả lời là _Có thể_, nhưng chúng ta phải sử dụng một thư viện có tên là [Immutable](https://facebook.github.io/immutable-js/). Thư viện này sẽ hỗ trợ tính bất biến tốt hơn so với `const` nhưng lại khiến code của chúng ta giống Java hơn là Javascript.
+
+### Currying và Composition
+
+Ở các series trước đó, chúng ta đã học được cách viết hàm hỗ trợ khả năng **Currying**. Dưới đây là một ví dụ phức tạp hơn:
+
+```
+const f = a => b => c => d => a + b + c + d
+
+```
+
+Để ý rằng phiền toái đầu tiên là chúng ta phải chỉ rõ phần currying (`a => b => c => d`)
+
+Và nếu phải gọi hàm `f`, thì mọi thứ sẽ còn phức tạp hơn
+
+```
+console.log(f(1)(2)(3)(4)); // prints 10
+
+```
+
+Quá nhiều dấu ngoặc đơn như trên là đủ để khiến lập trình Lisp phải khóc ròng rồi (Lisp dùng nhiều dấu ngoặc đơn, nên nếu lập trình viên Lisp còn phải khóc trước số lượng dấu ngoặc đơn như này thì đủ thấy sự kinh khủng của dòng code trên là như nào :D)
+
+Và vì thế có rất nhiều thư viện để giải quyết vấn đề này. Và thư viện mà tôi thích nhất có tên là [Ramda](http://ramdajs.com/)
+
+Khi dùng Ramda thì chúng ta có thể viết lại đoạn code trên như sau:
+
+```
+const f = R.curry((a, b, c, d) => a + b + c + d);
+console.log(f(1, 2, 3, 4)); // prints 10
+console.log(f(1, 2)(3, 4)); // also prints 10
+console.log(f(1)(2)(3, 4)); // also prints 10
+
+```
+
+Phần định nghĩa hàm không được cải thiện nhưng lắm, nhưng chúng ta đã loại bỏ được việc yêu cầu phải viết dấu ngoặc đơn ở phần gọi hàm phía sau. Đồng thời mỗi lần gọi hàm 'f', chúng ta có thể áp dụng đúng hoặc ít hơn số lượng tham số nếu muốn.
+
+Dưới đây sẽ là code viết lại hàm `mult5AfterAdd10` (ở [Phần 4](https://viblo.asia/ta.duy.anh/posts/AoDKYNWQzvg)) sử dụng Ramda:
+
+```
+const add = R.curry((x, y) => x + y);
+const mult5 = value => value * 5;
+const mult5AfterAdd10 = R.compose(mult5, add(10));
+
+```
+
+Ngoài khả năng trên, Ramda còn có một số hàm đã được viết sẵn để hỗ trợ việc viết các hàm theo phong cách **Currying**, ví dụ như là `R.add` hoặc `R.multiply`, giúp chúng ta đỡ phải viết nhiều code hơn:
+
+```
+const mult5AfterAdd10 = R.compose(R.multiply(5), R.add(10));
+
+```
+
+### Các hàm Map, Reduce, Filter trong JS
+
+Một khả năng nữa của thư viện Ramda là việc cung cấp sẵn các hàm `map, filter, reduce`. Mặc dù các hàm này đã có trong `Array.prototype` của JS core, nhưng các hàm này của Ramda cao cấp hơn ở chỗ chúng là các **curried function**.
+
+```
+const isOdd = R.flip(R.modulo)(2);
+const onlyOdd = R.filter(isOdd);
+const isEven = R.complement(isOdd);
+const onlyEven = R.filter(isEven);
+
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8];
+console.log(onlyEven(numbers)); // prints [2, 4, 6, 8]
+console.log(onlyOdd(numbers)); // prints [1, 3, 5, 7]
+
+```
+
+Hàm `R.modulo` yêu cầu 2 tham số, đầu tiên là `dividend` (số bị chia), tiếp theo là `divisor` (số chia).
+
+Biến `isOdd` sẽ là hàm được dùng để lấy ra phần dư của việc lấy số bị chia chia cho 2\. Nếu phần dư là 0 sẽ tương đương với giá trị `false`, thể hiện số bị chia không phải là số lẻ, còn nếu phần dư là 1 thì sẽ tương đương với giá trị `true`, thể hiện số bị chia là số lẻ. Hàm `R.flip` được dùng để đổi vị trí giữa 2 tham số của hàm `R.modulo`, khiến giá trị tham số truyền vào lúc đầu sẽ là số chia (ở đây là 2).
+(kết quả cuối cùng khi gọi `isOdd` với 1 tham số sẽ trả về kết quả là tham số đó có phải là số chẵn hay không. VD `isOdd(4) = false` hay `isOdd(5) = true`).
+
+Và hàm `isEven` sẽ là `phần bù` của hàm `isOdd` (tức là giá trị trả về của `isEven` sẽ ngược với `isOdd` nên ta có thể sử dụng hàm `R.complement`)
+
+Tiếp theo, hàm `onlyOdd` là kết quả của hàm `filter` với hàm dùng để lọc dữ liệu là `isOdd`, và hàm này sẽ cần tham số là một mảng các số nguyên để thực hiện. Tương tự với hàm `onlyEven`, chỉ khác là hàm này dùng `isEven` là hàm để lọc dữ liệu.
+
+Khi chúng ta truyền một mảng vào tham số `numbers` tới hàm `onlyOdd` hoặc `onlyEven`, hàm `isOdd` và `isEven` sẽ nhận tham số là từng phần tử trong mảng và thực hiện trả về kết quả 0 hoặc 1, tương ứng với true và false, và từ đó hàm `onlyOdd` hoặc `onlyEven` sẽ giữ lại các giá trị mong muốn (chỉ số lẻ hoặc số chẵn).
+
+### Những thiếu sót của Javascript
+
+![](https://viblo.asia/uploads/61005b31-42b4-4169-9658-962efb65efbb.png)
+
+Với tất cả những thư viện và những tính năng được chính JS hỗ trợ, chúng ta có thể có những bước tiến nhất định trong việc áp dụng FP vào JS. Tuy nhiên, có một sự thật không thể chối cãi rằng JS vẫn chỉ là một Imperative Language đang cố để thỏa mãn tất cả mọi người.
+
+Rất nhiều lập trình viên frontend đang mắc kẹt với JS bởi lẽ đến thời điểm hiện tại, đó hầu như là lựa chọn duy nhất và không thể tránh khỏi. Nhưng xu hướng hiện nay thì rất nhiều lập trình viên JS đang viết code JS _một cách không trực tiếp_.
+
+Thay vào đó, họ viết **một ngôn ngữ khác** và biên dịch, hay nói chính xác hơn, biến đổi chúng thành Javascript.
+
+Một trong số các ngôn ngữ cho việc trên là **CoffeScript**. Và với AngularJS 2, **TypeScript** đã được giới thiệu với tính năng tương tự. Ngoài ra thì **Babel** cũng được coi như một công cụ để biến đổi JS.
+
+Xu thế hiện nay cho thày càng ngày càng có nhiều người sử dụng cách tiếp cận này trong sản phẩm của mình.
+
+Nhưng hạn chế rõ ràng nhất là các ngôn ngữ này đều xuất phát từ JS và chỉ có thể làm nó tốt hơn _một chút_ mà thôi. Vậy thì sao chúng ta không triệt để hẳn, biến đổi từ một ngôn ngữ _Pure Functional Language_ sang JS nhỉ? Và đó chính là cách mà Elm được phát triển.
+
+## Elm
+
+![](https://viblo.asia/uploads/4e572de0-6b64-4b16-9b57-b0771c9ce188.png)
+
+Trong suốt series này, chúng ta đã từng sử dụng `Elm` để hỗ trợ trong việc hiểu về FP.
+
+### Vậy Elm là gì? Và chúng ta có thể dùng Elm như thế nào?
+
+Elm là một ngôn ngữ hoàn toàn là **Pure Functional Language**, mà source code được viết bởi Elm sau đó sẽ được biến đổi thành code Javascript. Và vì thế, ta có thể sử dụng Elm để tạo ra các Web Application theo [Kiến Trúc Elm](https://guide.elm-lang.org/architecture/), hay còn gọi là TEA (kiến trúc này thực tế đã gây cảm hứng cho các kỹ sư tạo ra Redux).
+
+Ngôn ngữ Elm sẽ không có bất kỳ lỗi `Runtime Error` nào (lỗi khi thực hiện code).
+
+Elm đã được sử dụng trong môi trường production (môi trường sản phẩm thật) bởi các công ty như là [NoRedink](https://www.noredink.com/), mà công ty đó hiện đang có Evan Czapliki - người tạo ra Elm - làm việc (trước đây ông đã làm cho [Prezi](https://prezi.com/)).
+
+Để biết thêm chi tiết, mời các bạn tham khảo bài nói chuyện [6 tháng làm Elm với production](https://www.youtube.com/watch?v=R2FtMbb-nLs), được tạo ra bởi Richard Feldman và những tín đồ Elm.
+
+### Liệu tôi có phải thay đổi tất cả code JS của mình bằng Elm không?
+
+Không. Bạn có thể thay thế từng phần một. Bài viết sau đây sẽ mô tả chi tiết khả năng này : [Làm thế nào để sử dụng Elm trong công việc](http://elm-lang.org/blog/how-to-use-elm-at-work)
+
+### Vì sao học Elm?
+
+1.  Làm việc với một ngôn ngữ _Pure Functional Language_ vừa có sự hạn chế và sự tự do. Sự hạn chế đến từ việc bạn không thể làm những thứ đã làm được trước đó (mà những thứ này hầu hết lại giới hạn output mà bạn có thể tạo ra), nhưng đồng thời, sự tự do sẽ được thể hiện ở những phần mềm không có lỗi, có thiết kế tốt, bởi lẽ các phần mềm được viết bởi Elm sẽ tuân theo TEA (Kiến trúc Elm), một mô hình phù hợp với FP.
+2.  FP sẽ giúp bạn trở thành một lập trình viên chất lượng hơn. Tất cả các ý tưởng trong series bài viết này chỉ là những phần trên của tảng băng trôi. Chỉ khi áp dụng chúng vào trong thực tế, bạn mới biết được sự lợi hại và hữu ích của FP trong việc phát triển các phần mềm phù hợp với nhiều yêu cầu, đồng thời tăng trưởng một cách ổn định.
+3.  Javascript là một ngôn ngữ được viết trong 10 ngày, sau đó được chỉnh sửa trong 2 thập kỉ gần đây để cố gắng trở thành một ngôn ngữ vừa functional, vừa hướng đối tượng, trong khi bản chất vẫn là một imperative language. Trong khi đó, Elm được thiết kế dựa trên 30 năm kinh nghiệm làm việc với Haskell, và hàng thập kỷ nghiên cứu trong toán học cũng như khoa học máy tính. Đồng thời kiến trúc Elm(TEA) đã được thiết kế và tinh chỉnh hàng năm trời, và là kết quả từ luận văn của Evan về vấn đề hỗ trợ functional của các ngôn ngữ lập trình. Bạn có thể tham khảo bài nói [Watch Controlling Time and Space](https://www.youtube.com/watch?v=Agu6jipKfYw) để biết rõ hơn Evan đã hiện thực hóa ý tưởng của mình như thế nào khi thiết kế ra TEA
+4.  Elm được thiết kế cho lập trình viên frontend. Mục tiêu của nó là khiến cuộc đời lập trình viên dễ thở hơn. Mời tham khảo bài nói [Let's be Mainstream](https://www.youtube.com/watch?v=oYk8CKH7OhE) để hiểu rõ hơn mục tiêu này.
+
+## Tương lai
+
+![](https://viblo.asia/uploads/9c50b295-7b38-4ed4-9b8c-27ebe0e5984e.png)
+
+Việc biết trước tương lai sẽ diễn biến như thế nào là bất khả thi, nhưng chúng ta có thể có một vài dự đoán có cơ sở. Dưới đây là các dự đoán của tôi về tương lai:
+
+> Sẽ có thêm nhiều ngôn ngữ được viết để biến đổi ra JS.
+> Các ý tưởng của FP đã tồn tại trên 40 năm sẽ được tái nhìn nhận và sử dụng để giải quyết những vấn đề phức tạp của phần mềm hiện nay
+> Hiện trạng của các thiết bị phần cứng hiện nay, như hàng Gigabytes bộ nhớ giá rẻ và chip xử lý nhanh sẽ biến các kỹ thuật FP thành khả thi
+> CPUs sẽ tăng trưởng theo hướng có nhiều nhân hơn là tăng tốc độ xử lý
+> Phần mềm có trạng thái biến đổi khi thực hiện sẽ được coi là một trong những vấn đề lớn nhất trong các hệ thống phần mềm phức tạp.
+
+Lý do khiến tôi viết series này là bởi vì tôi tin rằng FP sẽ là tương lai của ngành phần mềm, và bởi vì tôi cũng đã tốn vài năm để học nó (hiện tại tôi _vẫn đang tiếp tục học FP_)
+
+Nên mục tiêu của tôi với bài viết này là để giúp mọi người có thể hiểu được những concepts của FP một cách dễ dàng và nhanh chóng hơn so với tôi, đồng thời nếu có thể - giúp các bạn trở thành những lập trình viên tốt hơn, và có sự nghiệp sáng giá trong tương lai.
+
+Kể cả việc dự đoán rằng Elm sẽ là một ngôn ngữ phát triển trong tương lai của tôi có thể sai, thì tôi vẫn có thể tự tin khẳng định rằng FP và Elm sẽ nằm trên quỹ đạo chuyển động của tương lai - cho dù đó là tương lai nào đi nữa.
+
+Hy vọng rằng sau series này, mọi người sẽ tự tin hơn vào khả năng của mình, cũng như củng cố, nắm vững được những concepst mà tôi đã giới thiệu.
+
+Lời cuối cùng, chúc mọi người may mắn trong những nỗ lực phía trước.
+
+Nếu bạn muốn tham gia vào cộng đồng các nhà phát triển web muốn học và giúp đỡ lẫn nhau về FP trong Elm, mời các bạn tham gia Group Facebook sau: [Learn Elm Programming](https://www.facebook.com/groups/learnelm/)
+
+Và đây là Twitter của tác giả : [@cscalfani](https://twitter.com/cscalfani)

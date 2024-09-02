@@ -1,0 +1,56 @@
+---
+title: Truy cập và thay đổi các biến CSS với Javascript
+author: Hung Tan Nguyen
+date: 2017-09-08 20:46:11
+sourceUrl: https://hackernoon.com/accessing-and-modifying-css-variables-with-javascript-2ccb735bbff0
+coverImage: css-variables.png
+tags: [css]
+slug: /truy-cap-va-thay-doi-cac-bien-css-voi-javascript
+---
+
+### Tại sao nó tốt hơn sử dụng biến SASS
+
+**B**iến trong [SASS](http://sass-lang.com/guide) đã được sử dụng trong một thời gian. Chúng cho phép bạn định nghĩa một biến một lần lúc runtime và sử dụng biến đó ở nhiều nơi.
+↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
+
+#### Tương tác với các biến CSS với JS post-runtime.
+
+Trong bản demo này chúng ta sẽ xây dựng một form đơn giản và sẽ sử dụng JS để tự động cập nhật các biến CSS (trong trường hợp này là thay đổi color và margin của một dấu chấm)
+
+![](https://cdn-images-1.medium.com/max/1600/1*2MZOxx1HO5xGtgIB0iU9vQ.png)<figcaption class="image-caption">jsfiddle result</figcaption>
+
+[JSFiddle Demo](https://jsfiddle.net/btg5679/9e22zasm/5/)
+
+Chúng ta hãy nhìn vào những phần dưới đây:
+
+### CSS
+
+![](https://cdn-images-1.medium.com/max/2000/1*7Nq8ZrdI5ctUelDJgumWuA.png)<figcaption class="image-caption">css with root vars</figcaption>
+
+[Đây](https://developer.mozilla.org/en-US/docs/Web/CSS/:root) là một vài thông tin về CSS `:root`, [ở đây](https://www.w3schools.com/cssref/sel_root.asp) cũng vậy. Từ MDN:
+
+> The `:root` CSS [pseudo-class](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes) matches the root element of a tree representing the document. In HTML, `:root` represents the [html](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html) element and is identical to the selector `html`, except that its [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) is higher.
+
+Các biến CSS được định nghĩa trong `:root` và được sử dụng ở dòng 13–14\. `--` là định nghĩa chuẩn của CSS cho các biến.
+
+### HTML
+
+![](https://cdn-images-1.medium.com/max/2000/1*Zjm71PitjK5BQeM33Gt_jQ.png)<figcaption class="image-caption">form markup</figcaption>
+
+Dễ dàng ở đây, lưu ý các thuộc tính input trên `type="range"`. Chúng giữ giá trị _min_ và _max_ cũng như giá trị khởi tạo _value_. Tương tự cho loại input `type="color"`. Giá trị màu khởi tạo là `#2cba92`.
+
+### JAVASCRIPT
+
+![](https://cdn-images-1.medium.com/max/2000/1*dlF3gNzQBRrFhU_3SnY9lg.png)<figcaption class="image-caption">js accessing css vars</figcaption>
+
+Thông tin từng dòng:
+
+- 4 — lấy phần tử footer
+- 5 — lấy tất cả input trên trang [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList)
+- 7 — input **CHANGE** **EventListener**
+- 8 — input **MOUSEMOVE** **EventListener**(updates dynamic margin on slide)
+- 10 — hàm đặt lại giá trị mong muốn CSS var(chú ý chúng ta thêm `px` vào biến cho margin ở dòng line 14)
+
+---
+
+Và đó tất cả cho **Truy cập và thay đổi các biến CSS với Javascript**.

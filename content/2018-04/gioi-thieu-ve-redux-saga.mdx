@@ -1,0 +1,120 @@
+---
+title: Giới thiệu về redux saga
+author: Hung Tan Nguyen
+tags:
+  - redux
+  - saga
+  - react
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/1000/1*p3s4qTPe1Czua0akklszWw.jpeg'
+sourceUrl: 'https://viblo.asia/p/gioi-thieu-ve-redux-saga-maGK7zjD5j2'
+date: 2018-04-30 18:37:00
+slug: /gioi-thieu-ve-redux-saga
+---
+
+# Redux-Saga là gì?
+
+Redux-Saga là một thư viện redux middleware, giúp quản lý những side effect trong ứng dụng redux trở nên đơn giản hơn. Bằng việc sử dụng tối đa tính năng [Generators](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Statements/function*) `(function*)` của ES6, nó cho phép ta viết async code nhìn giống như là synchronos.
+
+Saga không chỉ tồn tại trong thế giới javascript, nó còn được coi là 1 pattern. Bạn có thể xem qua về saga pattern bằng clip này: [https://youtu.be/xDuwrtwYHu8](https://youtu.be/xDuwrtwYHu8)
+
+Một cách nhìn nhanh chóng thì Saga pattern là cách để quản lý những long transaction với những side effect hoặc các nguy cơ tiềm ẩn. Với mỗi transaction thành công, chúng ta đều cần có counter-transaction để revert transaction đó về trạng thái ban đầu nếu gặp trục trặc. Tham khảo thêm về saga pattern với bài viết của Roman Liutikov : [Confusion about Saga pattern](https://medium.com/@roman01la/confusion-about-saga-pattern-bbaac56e622)
+
+# Side effect là gì??
+
+Ta đã biết tất cả những xử lý ở REDUCER đều phải là synchronous và pure tức chỉ là xử lý đồng bộ. Nhưng trong ứng dụng thực tế thì cần nhiều hơn vậy ví dụ như asynchronous (thực hiện một số việc như gọi một hàm AJAX để fetch dữ liệu về nhưng cần đợi kết quả chứ kết quả không trả về ngay được) hoặc là impure (thực hiện lưu, đọc dữ liệu ra bên ngoài như lưu dữ liệu ra ổ cứng hay đọc cookie từ trình duyệt… đều cần đợi kết quả). Những việc như thế trong lập trình hàm gọi nó là side effects.
+
+# Generator function là gì??
+
+Khác với function bình thường là thực thi và trả về kết quả, thì Generator function có thể thực thi, tạm dừng trả về kết quả và thực thi bằng tiếp. Từ khóa để làm được việc đấy là “YIELD”. Generator được đưa ra cách đây mấy chục năm nhưng đến ES2015 mới được bổ sung, các ngôn ngữ khác đã được bổ sung tính năng này như C#, PHP, Ruby, C++, R…
+
+# Redux-Saga hoạt động như thế nào??
+
+Đối với logic của saga, ta cung cấp một hàm cho saga, chính hàm này là hàm đứng ra xem xét các action trước khi vào store, nếu là action quan tâm thì nó sẽ thực thi hàm sẽ được thực thi, nếu bạn biết khái niệm hook thì hàm cung cấp cho saga chính là hàm hook. Điều đặc biệt của hàm hook này nó là một generator function, trong generator function này có yield và mỗi khi yield ta sẽ trả về một plain object. Object trả về đó được gọi Effect object. effect object này đơn giản chỉ là một object bình thường nhưng chứa thông tin đặc biệt dùng để chỉ dẫn middleware của Redux thực thi các hoạt động khác ví dụ như gọi một hàm async khác hay put một action tới store. Để tạo ra effect object đề cập ở trên thì ta gọi hàm từ thư viện của saga là redux-saga/effects.
+
+![](https://i.stack.imgur.com/iCi6Y.png)
+
+# Tại sao tôi phải sử dụng Saga??
+
+Khi bắt đầu tìm tòi về redux, bạn hay tìm thấy các bài hướng dẫn sử dụng [redux-thunk](https://github.com/gaearon/redux-thunk) hoặc [redux-saga](https://github.com/redux-saga/redux-saga) để quản lý các async action. Vậy tại sao bạn lại được khuyên sử dụng redux-saga ?
+
+Trích dẫn trong document của redux-saga:
+
+> Contrary to redux thunk, you don’t end up in callback hell, you can test your asynchronous flows easily and your actions stay pure. \_Tạm dịch: trái với redux thunk, bạn không cần phải phát dồ lên với các callback trong mỗi action, đến với saga đi, bạn có thể test các async action với một quy trình dễ dàng mà không làm hư các action đó !
+
+#### So sánh saga và thunk:
+
+1.  redux-thunk
+
+    ```javascript
+    import {
+      API_BUTTON_CLICK,
+      API_BUTTON_CLICK_SUCCESS,
+      API_BUTTON_CLICK_ERROR,
+    } from './actions/consts';
+    import { getDataFromAPI } from './api';
+
+    const getDataStarted = () => ({ type: API_BUTTON_CLICK });
+    const getDataSuccess = data => ({ type: API_BUTTON_CLICK_SUCCESS, payload: data })
+    const getDataError = message => ({ type: API_BUTTON_CLICK_ERROR. payload: message });
+
+    const getDataFromAPI = () => {
+      return dispatch => {
+        dispatch(getDataStarted());
+
+        getDataFromAPI()
+          .then(data => {
+            dispatch(getUserSuccess(data));
+          }).fail(err => {
+            dispatch(getDataError(err.message));
+          })
+      };
+    };
+    ```
+
+    Ở đây ta có một action creator getDataFromAPI() bắt đầu async progress như sau:
+
+    - Đầu tiên bắn ra action cho phép store biết rằng chuẩn bị 1 API request ( dispatch(getDataStarted())
+    - Tiếp theo thực hiện API request trả về một Promise
+    - Cuối cùng bắn ra success action nếu request thành công hoặc error action nếu có lỗi
+
+2.  redux-saga
+
+    ```javascript
+    import { call, put, takeEvery } from 'redux-saga/effects';
+
+    import {
+      API_BUTTON_CLICK,
+      API_BUTTON_CLICK_SUCCESS,
+      API_BUTTON_CLICK_ERROR,
+    } from './actions/consts';
+    import { getDataFromAPI } from './api';
+
+    export function* apiSideEffect(action) {
+      try {
+        const data = yield call(getDataFromAPI);
+        yield put({ type: API_BUTTON_CLICK_SUCCESS, payload: data });
+      } catch (e) {
+        yield put({ type: API_BUTTON_CLICK_ERROR, payload: e.message });
+      }
+    }
+
+    // the 'watcher' - on every 'API_BUTTON_CLICK' action, run our side effect
+    export function* apiSaga() {
+      yield takeEvery(API_BUTTON_CLICK, apiSideEffect);
+    }
+    ```
+
+    Cùng một process, nhưng cách implement khác nhau hoàn toàn.
+
+    - put thay cho dispatch
+    - function cuối (apiSaga()) giúp theo dõi tổng thể toàn bộ các action (ở đây có API_BUTTON_CLICK)
+    - Với cách gọi của redux-saga, chúng ta có thể get data từ bất kì async function nào (promise, ...)
+
+3.  ###### Nhận xét
+
+    Cả 2 cách implement đều dễ đọc, tuy nhiên đối với redux-thunk , bạn phải đối đầu với một tá các promise, các callback nếu có, rất mất thời gian cho người maintain đọc và tìm code. Với redux-saga , đơn giản bạn chỉ cần track theo try/catch block để theo dõi dòng code, bên cạnh đó còn có hàm giúp bạn track các action một cách dễ dàng.
+
+# Kết luận
+
+Ở bài viết này mình đề cập đến 2 điểm nhấn chính của redux-saga là giữ cho action pure synchronos theo chuẩn redux và loại bỏ hoàn toàn callback theo javascript truyền thống. Bài viết tiếp theo mình sẽ đề cập nốt key point cuối cùng của saga là **easy to test**.

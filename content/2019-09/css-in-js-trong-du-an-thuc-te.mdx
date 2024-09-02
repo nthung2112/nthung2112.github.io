@@ -1,0 +1,764 @@
+---
+title: 'CSS in JS trong dự án thực tế'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - css
+categories: []
+sourceUrl: 'https://medium.com/warsawjs/css-in-js-in-real-life-e0b50bbbd740'
+coverImage: 'https://miro.medium.com/max/3840/1*Xa5-kpaOSjCYgS0uTuCS6w.jpeg'
+date: 2019-09-01 12:45:00
+slug: /css-in-js-trong-du-an-thuc-te
+---
+
+Recently I have stumbled across a lot of blog posts describing changes in [styling](/actualize-network/modern-css-explained-for-dinosaurs-5226febe3525) [approaches](https://medium.freecodecamp.org/css-in-javascript-the-future-of-component-based-styling-70b161a79a32). Clearly, we’re entering a new era of styling in JS, that simply can be called _CSS in JS_. But what all of those posts miss, in my opinion, is a deep comparison of the features provided by those solutions and how they perform in real-world project. Code examples always look fresh and reusable and sexy, but what happens when we pick such solution and use it in a live application? Are there any drawbacks that turn beautiful ideas into coding hell? Let’s find out.
+
+> Side note: Recently I’ve been a React developer and when I did the research I was focusing mainly on how I could utilize the technology in my projects, so therefore I will mostly focus on the ease of use in React. Ability to read JSX will help you to understand what the heck is going on.
+
+# CSS Modules
+
+Putting [CSS Modules](https://github.com/css-modules/css-modules) here can be a bit of a stretch, depending on how you define CSS in JS, because you write basically in CSS (with some cool additions). What’s change is the way of loading the styles into components. But they were the first, so treat it like a honorable mention on the list. Chances are that you probably seen CSS Modules somewhere. But let’s take a look at them (or, you know, you can always scroll to the next section). Let’s start with this simple example:
+
+```js
+// styles.css
+.heading {
+  color: gray;
+  font-size: 1.5em;
+}
+.paragraph {
+  font-size: 1.1em;
+}
+// component.js
+import React from 'react';
+import styles from './styles.css';
+const Article = () => {
+  return (
+    <div>
+      <h1 className={styles.heading}>
+        Heading
+      </h1>
+      <p className={styles.paragraph}>
+        Article's text
+      </p>
+    </div>
+  );
+};
+
+```
+
+Okay, so as you can see, the CSS are still the same. You simply write them like you did for years. What changes is the way of loading them into your application. Now, while bundling, the CSS files are being parsed and turn into pure JS objects, that are easy to use inside code. Styles are imported explicitly and used like any other JS object, which is very cool from the semantic perspective. But that’s not where CSS Modules shine.
+
+## Local Scope
+
+Having classnames parsed, CSS Modules is able to change the names of the output classnames into totally unique strings. This gives us local scope inside CSS. That’s huge! The generated output will look like this:
+
+```html
+// output
+<div>
+  <h1 class="6b87a4">Heading</h1>
+  <p class="7h3g1a">Article's text</p>
+</div>
+```
+
+The unique classnames are awesome! Are the solution to everything! And are totally un-debuggable. But there’s a small fix for it:
+
+```js
+// fix (in webpack.config.js)
+(...)&localIdentName=[path]_[name]_[local]_[hash:base64:5]
+// output
+<div>
+  <h1 class="src-components_component_heading_6b87a4">
+    Heading
+  </h1>
+  <p class="src-components_component_paragraph_7h3g1a">
+    Article's text
+  </p>
+</div>
+```
+
+Ah, much better! Now it’s clearly visible what styles come from what files. You can adjust the naming convention according to what’s suits you the most.
+
+Pros:
+
+- Pure CSS (no learning curve)
+- Some additional features
+- Local scoping
+- Nice semantics using JavaScript’s import statement
+- Easy debugging (with the right Webpack setting)
+
+Cons:
+
+- No more global styles, which is generally a good thing, but you need to invest some time to adjust to this approach
+- Additional Webpack (or other bundler) configuration
+
+## SASS Modules / LESS Modules
+
+CSS Modules on their own bring some additional functionalities, like _composition_ or _global pseudo class_. But if you’re missing some of the cool stuff like _mixins_ or _variables_ you can always add [SASS](https://sass-lang.com/) or [LESS](http://lesscss.org/). Just add the respective loader to your webpack config. Now, you have a very powerful duo, fully pack with features and possibilities.
+
+Pros:
+
+- All of the CSS Modules features
+- All of the SASS/LESS features (!)
+
+Cons:
+
+- Similar as CSS Modules
+
+> For a long time I thought that using SASS with CSS Modules was the ultimate solution. Then, the other solutions came along.
+
+# Styled Components
+
+Although one can argue, that CSS Modules were the first CSS in JS, [Styled Components](https://github.com/styled-components/styled-components) were the one that started the whole avalanche of such solutions recently.
+
+Styled Components utilize tagged template strings and allow to put your CSS code inside JavaScript directly. You can still split it into 2 files, to get that feeling of logic and styles being separate. But it’s optional. So, how our example would look like in Styled Components? Let’s see:
+
+```js
+// component.js
+import React from 'react';
+import styled from 'styled-components';
+const Heading = styled.h1`
+  color: gray;
+  font-size: 1.5em;
+`;
+
+const Paragraph = styled.p`
+  font-size: 1.1em;
+`;
+
+const Article = () => {
+  return (
+    <div>
+      <Heading>Heading</Heading>
+      <Paragraph>Article's text</Paragraph>
+    </div>
+  );
+};
+```
+
+It’s pretty straightforward. Just use tags provided by the library to render a component that you would like having styling added to inside the template string literal. As simple as that.
+
+## Extending styles
+
+Let’s say, we would like to extend the styling of existing component and add some more. That’s very simple:
+
+```js
+const SexyParagraph = styled(Paragraph)`
+  text-decoration: underline;
+  color: green;
+`;
+```
+
+Things get a little bit complicated, when you would like to add additional handlers to styled components. Let’s take a simple button and add a onClickhandler to it. Sadly, we can’t do it in one step. What we need to do, is basically create 2 components — one with logic, and one that brings styles:
+
+```js
+// button.js
+import React from 'react';
+import styled from 'styled-components';
+
+const Button = ({ children }) => (
+  <button onClick={() => console.log('click')}>{children}</button>
+);
+
+const StyledButton = styled(Button)`
+  border: solid 2px green;
+`;
+
+// usage:
+<StyledButton>My fancy button</StyledButton>;
+```
+
+So this makes things a bit excessive. Every time you would like to add some logic to a component, you will end up with 2 components. While it is kinda in style of [HoC](https://reactjs.org/docs/higher-order-components.html), but it just doesn’t go well with other HoC, so it can’t be used with cool HoC helpers like [recompose](https://github.com/acdlite/recompose). I must admit, that I’m a big fan of HoC and not being able to use Styled Components in that fashion just misses the mark for me.
+
+Creating a separate component every time that a styling is needed seems like a good idea, but when I used such approach I suddenly missed the ability to just write a bit more complicated markup. So, in theory this approach is very appealing, but practice shows that sometimes you need to produce much more small components. This can lead to less readable code. Because if I can do something in 20 lines of JSX, I would prefer that over creating 10 small components.
+
+## Dynamic Styles
+
+One of cool features of Styled Components, that was just not possible in CSS Modules, is the ability to read components’ props and generate the appropriate styling. Let’s assume that we have 2 props: important and width. They can be accessed inside the style in such manner:
+
+```js
+const CustomButton = styled.button`
+  color: ${props => props.important ? 'red' : 'black'};
+  width: ${props => props.width}px;
+}
+
+<CustomButton important={false} width={320}>My button</Button>
+```
+
+Dynamic styles are a pretty cool feature. Although my concern is that it can lead to more logic-heavy styles. Depending on the project, that can be a double edged sword.
+
+## Theming
+
+Another great feature is theme support. That’s right, you can simply define your theme or color palette (as a simple object) and access its properties whenever you like. But what if I could tell you, that you can change themes on the fly? Yup, it’s possible. Let’s see it in action:
+
+```js
+// button.js
+const ThemableButton = styled.button`
+  color: ${(props) => props.theme.textColor};
+  border: ${(props) => props.theme.borderColor};
+`;
+
+// themes.js
+const theme = {
+  textColor: 'red',
+  borderColor: 'gray',
+};
+
+const otherTheme = {
+  ...theme,
+  textColor: 'green',
+};
+
+// in app.js
+<ThemeProvider theme={theme}>
+  <div>
+    <SomeComponent>
+      <ThemableButton>Red button</ThemableButton>
+    </SomeComponent>
+  </div>
+  <ThemeProvider theme={otherTheme}>
+    <ThemableButton>I'm green!</ThemableButton>
+  </ThemeProvider>
+</ThemeProvider>;
+```
+
+The usage of ThemeProvider allows to add a theme (via property) to all components inside. If you’re in need of adding another theme, just place your components inside another ThemeProvider and enter a new theme property. As simple as that. The question arises, how many times you were in need of a theming that can be changed? I didn’t see much of such projects recently, but if you need it, it’s there.
+
+## Debugging
+
+Now, from debugging perspective, the generated output is fairly good. The StyledButton from the example above will not render a component inside a component, which is good. At the very beginning only the class names are unreadable (such as in case of CSS Modules). But there’s a Babel [plugin for that](https://github.com/styled-components/babel-plugin-styled-components), and you’re good to go.
+
+Pros:
+
+- Easy to use, easy to understand.
+- Local scope
+- Dynamic styling based on props
+- Theming
+- Easy debugging (with babel plugin)
+- Works with React Native (although I didn’t test that)
+
+Cons:
+
+- Excessive creation of components (2 components each time handler or lifecycle method needs to be used)
+- Possible too much of too small components
+- Syntax highlighting needs an external plugin
+
+# Glamorous
+
+[Glamorous](https://glamorous.rocks/) takes inspiration from Styled Components and aims to change a bit the way you can use it. Notably, the biggest difference is the departure from tagged template strings in favor of plain objects. You still would use it in a similar way, but replacing string with objects. Just take a look:
+
+```js
+import glamorous from 'glamorous';
+
+const Heading = glamorous.h1({
+  fontSize: '2.4em',
+  marginTop: 10,
+  color: '#CC3A4B'
+})
+
+// rendering
+render() {
+  return (<Heading>My Heading</Heading>);
+}
+```
+
+To use media queries, pseudo classes and pseudo elements, simply create nested objects with selectors as their names, like so:
+
+```js
+import glamorous from 'glamorous';
+
+const Heading = glamorous.h1({
+  fontSize: '2.4em',
+  marginTop: 10,
+  color: '#CC3A4B',
+  ':hover': {
+    color: 'yellow'
+  },
+  '@media only screen and (max-width: 500px)': {
+    marginTop: 5,
+    fontSize: '1.8em'
+  }
+});
+
+// rendering
+render() {
+  return (<Heading>My Heading</Heading>);
+}
+```
+
+## Animations
+
+Well, this is something that does not come with Styled Components. Glamorous has a build in helper for creating CSS animations. That’s something really cool. Nowadays fluid animations and transitions are important parts of good UX and everything that improves creation of those effects is more then welcome.
+
+```js
+const AnimatedDiv = glamorous.div((props) => {
+  const bounce = glamor.css.keyframes({
+    '0%': { transform: `scale(1.01)` },
+    '100%': { transform: `scale(0.99)` },
+  });
+
+  return {
+    animation: `${bounce} 0.2s infinite alternate`,
+  };
+});
+```
+
+Okay, so it’s not a game changing functionality. But it allows to create unique keyframes animations in a simple manner.
+
+## Dynamic Styling
+
+Just like in Styled Components, Glamorous has the ability to use dynamic styling. In my opinion, it does it in much clearer way. Because we work with objects, not with string literals, conditional operations are much more natural. Simply, instead of object, pass a function that receives props and returns a valid object.
+
+```js
+const CustomButton = glamorous.button((props) => ({
+  color: props.important ? 'red' : 'black',
+  width: props.width
+});
+
+<CustomButton important={false} width={320}>My button</Button>
+```
+
+Obviously, having the ability to pass a function into the component factory gives you much more flexibility, but allows to create even more logic-heavy styles. Double edged sword once again.
+
+## Theming and reusing styles
+
+Theming for Glamorous looks like it was taken directly from Styled Components, just define a theme object and pass it to your components. They will have access to it via props.theme. Simple as that.
+
+Glamorous allows also to reuse and extend existing styles. For that you can use the glamorous object as a function, pass the component and then styles to override the existing ones.
+
+```js
+const GreatButton = glamorous(CustomButton)({
+  padding: 20,
+});
+```
+
+Moreover, it allows you to copy existing styles to a different tag via withComponent method:
+
+```js
+const GreatLink = GreatButton.withComponent('a');
+```
+
+## Not HoC compliant
+
+When it comes to overall usage, Glamorous suffers from the same drawback of not really being in compliant with HoC approach. So, once again, to build a more advanced component with styling, you will need to create 2 components. Let’s revisit the example from Styled Components:
+
+```js
+// button.js
+import React from 'react';
+import glamorous from 'glamorous';
+
+const Button = ({ children }) => (
+  <button onClick={() => console.log('click')}>{children}</button>
+);
+
+const StyledButton = glamorous(Button)({
+  border: 'solid 2px green',
+});
+
+// usage:
+<StyledButton>My fancy button</StyledButton>;
+```
+
+So this comes with the same issue: too many small components.
+
+## Debugging
+
+When it comes to debugging, Glamorous on it’s own is not very readable in the DevTools. But, obviously, there’s a [plugin](https://github.com/bernard-lin/babel-plugin-glamorous-displayname) for that.
+
+Pros:
+
+- ...styledComponents.pros
+- Object notation instead template literals
+- Keyframes helper
+
+Cons:
+
+- (Potentially) excessive components creation
+
+# Styletron
+
+When it comes to [Styletron](https://github.com/rtsao/styletron), I’m probably quite biased. I have become involved in a project using it and it quickly pushed me to do research on other similar solutions to migrate away to. I felt so limited and distracted by it so I couldn’t just bare with styling anymore. I get the impression, that Styletron does a lot of things similar to Glamorous, but fails to deliver really usable in real-life solution. Let’s start with basics:
+
+```js
+import { styled } from 'styletron-react';
+
+const Heading = styled('h1', {
+  fontSize: '2.4em',
+  marginTop: 10,
+  color: '#CC3A4B'
+});
+
+// rendering
+render() {
+  return (<Heading>My Heading</Heading>);
+}
+```
+
+When it comes to simple usage, it’s almost the same as in Glamorous.
+
+## Themes, dynamic styles and extending styles
+
+Styletron provides ways to extend existing styles, or to build dynamic styles. It also supports theming in a very similar fashion, as we have seen previously. Let’s see all of those features in action together:
+
+```js
+import { styled } from 'styletron-react';
+import ThemeProvider from './ThemeProvider';
+import Button from './GenericButton';
+
+const FancyButton = styled(GenericButton, ({ theme, size }) => {
+  return {
+    color: theme.button.color,
+    background: theme.button.background,
+    height: (size === 'big') ? '30px', '20px',
+    width: (size === 'big') ? '100px', '60px'
+  };
+});
+
+const MyTheme = {
+  button: {
+    color: '#ee3ae4',
+    background: '#323c4d'
+  }
+}
+
+// rendering
+<ThemeProvider theme={MyTheme}>
+  <FancyButton size="big">Click me</FancyButton>
+</ThemeProvider>
+```
+
+Similar to previous solutions, Styletron does not allow to create more lifecycle-heavy components with styles. Instead, you need to create 2 components, one with logic, and one with styles:
+
+```js
+class MyComponent extends React.Component {
+  componendDidMount() {
+    // some awesome logic here
+  }
+  render() {
+    return <div>My Component</div>;
+  }
+}
+
+const StyledComponent = styled(MyComponent, {
+  /* styles */
+});
+```
+
+So, let’s see, what Styletron renders in HTML…
+
+## Generated output
+
+The output for the example above will be something like:
+
+```html
+<div class="_c _d _g x1 x3 xm _a">
+  <div>My Component</div>
+</div>
+```
+
+And two issues can be seen here. Firstly, that the rendered code is totally not debuggable. You can’t really deduce from which component any of the styles really come. Or even what component you’re looking at. Switching to React DevTools doesn’t help either. All you gonna see is that it’s `<styled(div)>`. That’s really helpful.
+
+Oh, and each style property gets it’s own, unique class name. Imagine having a well styled component with over 30 properties. Yeah…
+
+```html
+<div
+  class="_a _b _c _d _e _f _m1 _m2 _m3 _m4 _m17 _m20 _m22 _m33
+            _m45 _m46 _la _lg _lz _lh _l5 _hm _hn _hi x1 x12 x13
+            x15 x16 x21 x22 x23 x24 x25 x26 x30 x32 x33 x34"
+>
+  Hi
+</div>
+```
+
+And what’s even worse, there is **no debugging plugin** for it!
+
+Moreover, imagine that the example would have 10 nested components, one inside another. Could you tell the number of generated divs? Yup, 20. Because every time you need to have more advanced component, Styletron will need to add additional wrapper for styling purposes. That’s something I like to call a _Wrapper-iada_. And it’s no good.
+
+## Other issues
+
+Styletron has a bug that’s basically prevents you from using dynamic tags (so the tags used depending on the props). Let me explain:
+
+```js
+const headers = {
+  h1: 'h1',
+  h2: 'h2',
+  h3: 'h3
+}
+
+const DynamicHeader = ({ size, children }) => {
+  const Element = headers[size];
+  return (
+    <Element>{children}</Element>
+  );
+};
+```
+
+Now, if I would like to add styling to my DynamicHeader, I would go with:
+
+```js
+const StyledHeader = styled(DynamicHeader, { /\* new styles \*/ });
+```
+
+None of the new styles won’t be applied. Why? I don’t have an idea, but it’s not good.
+
+## No animations
+
+That’s right, Styletron does not support css keyframes! Obviously, you can use animation like the following:
+
+```js
+const BouncyDiv = styled('div', {
+  animation: 'bounce 1s',
+});
+```
+
+And it will work. But you can’t define the keyframes of bounce using Styletron. If you would really like to somehow define keyframes, you need to use good, ol’ CSS. That’s a terrible solution.
+
+Let’s sum up:
+
+Pros:
+
+- Looks similar to Glamorous
+- Local scope
+- Theming, dynamic styles, extending styles
+
+Cons:
+
+- Undebuggable (!)
+- Wrapper-iada
+- No dynamic elements
+- No keyframes support
+
+# Styled JSX
+
+Next CSS-in-JS solution that I researched was [Styled JSX](https://github.com/zeit/styled-jsx). At the very beginning it looks different to the solutions above, it kinda looks more inline with JSX approach and I find it a bit more appealing. The basic example looks like this:
+
+```js
+const MyComponent = () => {
+  return (
+    <div>
+      <h1>Heading</h1>
+      <p>Paragraph 1</p>
+      <p className="p2">Paragraph 2</p>
+      <style jsx>{`
+        h1 {
+          font-size: 1.6em;
+        }
+        p {
+          line-height: 1.5em;
+        }
+        .p2 {
+          color: gray;
+        }
+      `}</style>
+    </div>
+  );
+};
+```
+
+Styled JSX uses template literals inside of a `<style jsx>` tag. What’s really neat, is that you can use the plain old CSS inside. It’s readable, it’s safe due to local scope. If you like, you can move the string to a separate file because everything is in a string. If you’re running React in versions 16.2 or higher, you can replace the div with React’s fragment.
+
+## Same features and more freedom
+
+Obviously, defining the styles inside component’s render method allows us to access all of the props and hence build dynamic styles. Or you can access the theme provided by ThemeProvider although you need to use additional module for that, as Styled JSX don’t have a built in ThemeProvider.
+
+```js
+const MyComponent = ({ theme, size }) => {
+  return (
+    <div>
+      <h1>Heading</h1>
+      <style jsx>{`
+        h1 {
+          font-size: ${size}px;
+          color: ${theme.heading.color};
+        }
+      `}</style>
+    </div>
+  );
+};
+```
+
+What I like here, is that I can write styles and apply them to components with lifecycle methods. Another thing to like is that Styled JSX integrates nicely with React’s idea of rendering components. That was not possible with any of the previous libraries. But here I can decide when I should split component into smaller ones. That kind of freedom is something I really appreciate. Artificial code splitting forced by previous solutions does not always end up in a very readable code.
+
+## Drawbacks
+
+I must say I really like this approach, but the drawbacks just kill it for me. The problems start when you want to extend existing styling. Or when you would like to alter the default styling of a child component. There is no easy way of doing such things. While in Glamorous all you needed was to call glamorous(DefaultButton)(newStyles), in Styled JSX you need to come up with your own approach to reusing existing styling. So as I said before, this kills the Styled JSX for me.
+
+Pros:
+
+- More inline with JSX approach
+- Doesn’t force artificial code splitting
+- Easy to understand
+- Local scope
+- Dynamic Styles, Themes support
+
+Cons:
+
+- Reusability of styles is hard if non-existent
+
+# JSS
+
+The last but not least — [JSS](http://cssinjs.org/). At first glance, JSS looks very similar to Glamorous. You create objects literals with styles, you apply them to components. But it also successfully adds the ability to write couple styles for multiple tags inside one component.
+
+```js
+import withStyles from 'react-jss';
+
+const styles = {
+  heading: {
+    fontSize: '1.6em'
+  },
+  paragraph: {
+    lineHeight: '1.4em'
+  }
+};
+
+const MyComponent ({ classes }) => {
+  return (
+    <div>
+      <h1 className={classes.heading}>
+        Heading
+      </h1>
+      <p className={classes.paragraph}>
+         Paragraph 1
+      </p>
+    </div>
+  );
+};
+
+export default withStyles(styles)(MyComponent);
+```
+
+First what I have to admit, and what really got me excited about JSS is that finally, it’s a HoC! You pass a object with different class names to it, and the HoC will produce a wrapper that adds a classes property containing generated, unique class names. In a way, it brings the functionality of both Styled JSX and Glamorous neatly together. That’s off to a good start.
+
+## Theming and dynamic styles
+
+Just like abovementioned solutions, JSS supports both themes and dynamic styles. It comes with build in ThemeProvider which is always a neat solution.
+
+```js
+// component.js
+import withStyles from 'react-jss';
+
+const styles = (theme) => ({
+  wrapper: {
+    fontSize: '1.4em',
+    color: theme.primaryColor,
+    height: (props) => props.size,
+  },
+});
+
+const Component = ({ classes }) => {
+  return <div className={classes.wrapper}>My fancy component</div>;
+};
+
+export default withStyles(styles)(Component);
+
+// app.js
+import { ThemeProvider } from 'react-jss';
+const theme = {
+  primaryColor: '#51abff',
+};
+
+// rendering
+<ThemeProvider theme={theme}>
+  <Component size="32px" />
+</ThemeProvider>;
+```
+
+The theme object is available when instead of styles object, you create a function that returns the styles object. Component’s props are available in a slightly more annoying way, as a argument for function returning value of each property.
+
+## Reusing and overriding styles
+
+When it comes to extending styles, well, JSS does not provide any simple way of doing so. But, then again, they are all JS object, so we can export styles and extend them on our own using the spread operator.
+
+```js
+// component.js
+export const styles = {
+  wrapper: {
+    // original styles
+  },
+};
+
+const Component = () => {
+  // Component's logic
+};
+
+export default withStyles(styles)(Component);
+
+// fancy-component.js
+import { styles as defaultStyles } from './component';
+export const styles = {
+  wrapper: {
+    ...defaultStyles.wrapper,
+    color: 'red',
+  },
+};
+```
+
+A bit of work, but it’s very explicit. No under-the-hood magic. There is a [extend-plugin](http://cssinjs.org/jss-extend), however its usage is very similar to the spread operator.
+
+JSS has a neat feature that is not available in other libraries, and that’s ability to override default styles of the component. You can call the withStyles HoC again and again on component, overriding it’s default styles, like so:
+
+```js
+// componentA.js
+const styles = {
+  wrapper: {
+    color: 'red',
+    fontSize: '1.4em'
+  }
+  paragraph: {
+    fontSize: '1.2em',
+    color: 'gray'
+  }
+};
+
+const ComponentA = () => {
+  // ...
+};
+
+export default withStyles(styles)(ComponentA);
+
+// componentB.js
+const stylesA = {
+  wrapper: {
+    color: 'blue'
+  }
+};
+
+const StyledA = withStyles(stylesA)(ComponentA);
+
+const ComponentB = () => {
+  return (
+    <div>
+      <StyledA />
+    </div>
+  );
+};
+```
+
+Because withStyles performs a shallow merge of the style objects, the StyledA component will contain the original styles for paragraph, but it will have only the newest styles for wrapper. This means that it will have only the color: blue property but it will lose the fontSize: 1.4em property.
+
+You can obviously combine the two methods to override styles with extending the existing ones. However, since it is a HoC, you can write your own HoC that does just that.
+
+## Other features
+
+JSS comes with variety of [plugins](http://cssinjs.org/plugins). You can use them, for example, to write styles inside template literals, if that’s your thing, or to extend existing classes via class names or objects.
+
+## Debugging
+
+When it comes to debugging, JSS is very user-friendly. At the very beginning, it renders human-friendly class names, so you can quickly find your way around the generated HTML markup. It also does not change the generated components’ names, as it only works on the className property, which is quite nice.
+
+Pros:
+
+- Local Scope
+- Theming, dynamic styles
+- No artificial code splitting
+- Overriding default styles (!)
+- works as a HoC
+
+Cons
+
+- No native style extending solution (but you can work around this)
+
+# Conclusion
+
+It’s time to sum up. Is there a clear winner? In my opinion, yes. JSS takes the top spot. It gives me all of the features of other CSS-in-JS solutions and doesn’t forces me to create super-small components each time I need styling for a div. In addition to that, it works as a HoC, so if I don’t like the default behavior (like when overriding styles) I can always create my own HoC that wraps it and changes the behavior. It’s simple to use and flexible. And at the end of the day, it’s the solution that devs from the [Material UI](http://www.material-ui.com/#/) are [gonna use](https://material-ui-next.com/customization/css-in-js). For me, that’s a hell of a recommendation for JSS.
+
+> As I already mentioned, I thought that SASS + CSS Modules were the future. But now I can clearly see, that CSS in JS is at least as good, with JSS being my favorite. It’s really usable and works great in the real-life development. My personal pick after doing the research: JSS.

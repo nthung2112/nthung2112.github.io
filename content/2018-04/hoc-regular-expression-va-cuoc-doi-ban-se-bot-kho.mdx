@@ -1,0 +1,228 @@
+---
+title: Học Regular Expression và cuộc đời bạn sẽ bớt khổ
+author: Hung Tan Nguyen
+tags:
+  - regex
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/1000/0*qASU92GfMj2HCTMg.jpg'
+sourceUrl: >-
+  https://viblo.asia/p/hoc-regular-expression-va-cuoc-doi-ban-se-bot-kho-Az45bnoO5xY
+date: 2018-04-25 15:27:00
+slug: /hoc-regular-expression-va-cuoc-doi-ban-se-bot-kho
+---
+
+## Regular Expression (RegEx) à? Nghe quen quen.
+
+> _**Đã bao giờ bạn ở vào các tính huống sau đây?**_
+
+### Bạn cần xử lý validate (kiểm tra tính hợp lệ) các trường dữ liệu nhập vào ô Text
+
+![](https://images.viblo.asia/1e7a1bf4-eb56-428c-b731-eb53970ffba9.png)
+
+### Bạn cần copy và paste rất nhiều text từ chỗ này sang chỗ kia
+
+Ví dụ từ XML sang C#
+
+![](https://images.viblo.asia/4b3505d9-e466-427e-8ee4-e7327ec16d12.jpg)
+
+hoặc CSV, Excel sang C#
+
+![](https://images.viblo.asia/2a11aac3-36a4-43d9-b3de-b75f36b41ab8.jpg)
+
+### Tìm kiếm một chuỗi nằm ở nhiều dòng trong Visual Studio hoặc Notepad++
+
+Ví dụ tôi cần tìm và xóa bỏ (replace all) các comment như thế này ở code cũ.
+
+![](https://images.viblo.asia/b77a555f-0486-4fef-bf15-637fa70473c9.jpg)
+
+### Bạn cần bóc tách dữ liệu của một trang web.
+
+Ví dụ extract (crawling) tách lấy dữ liệu từ một trang web để lưu lại vào cơ sở dữ liệu của bạn
+
+![](https://images.viblo.asia/17aa1867-6f02-47b0-9884-6467e44a660d.jpg)
+
+### Cơn ác mộng đọc một chuỗi string từ DB và cố gắng chuyển đổi nó sang DateTime
+
+Chuỗi ngày tháng lưu vào CSDL rất đa dạng. Rất khó để dùng hàm DateTime.TryParse() để tự động chuyển đổi một chuỗi thành Datetime ngon lành cành đào.
+
+![](https://images.viblo.asia/c40a1d3d-4f01-4f24-8749-119034a8f1ab.png)
+
+### Tìm kiếm một chuỗi, lưu chuỗi đó lại và lấy chuỗi đã lưu chèn vào chỗ nào đó
+
+Hay nói cách khác, ta cần thay một chuỗi bằng một chuỗi khác, trong chuỗi mới đó lại có chứa cả chuỗi vừa bị thay thế. Như ví dụ dưới đây sẽ cho các bạn thấy. Ta cần tìm ra ClassName, nhưng không phải thay thế ClassName đó bằng Class khác mà ta sẽ nhét nó vào 2 vị trí thay vì chỉ có 1 vị trí như hiện tại.
+
+![](https://images.viblo.asia/7a2da882-3374-4327-ae69-57e43cadbc6a.jpg)
+
+![](https://images.viblo.asia/cc4d46c2-54d1-44a5-9dea-a2c6de67837e.gif)
+
+# Vậy RegEx có thể giúp gì cho chúng ta trong các trường hợp trên?
+
+Regular Expression sinh ra là để giúp cho cuộc đời của bạn bớt khổ. Hãy tưởng tượng xem bạn phải nai lưng ra copy-paste bao nhiêu code. Bạn hoàn toàn có thể download các tool về để replace giúp bạn. Nhưng bạn cần bao nhiêu tool cho đủ đây.
+
+Thay vào đó, bạn hãy thử học RegEx. Bộ cú pháp này sẽ giúp cho bạn thao tác với chuỗi như dao chém chuối. Như ta thấy các ví dụ bên trên, tất cả đều là XỬ LÝ CHUỖI ví dụ Cut Copy Paste hoặc Replace chuỗi. RegEx là ngôn ngữ giúp xử lý chuỗi rất mạnh.
+
+RegEx không phải là một ngôn ngữ lập trình. Nó chỉ là một BỘ CÚ PHÁP dùng để bắt chuỗi. Nhưng nó cực kỳ phổ biến và bất kỳ ngôn ngữ lập trình nào cũng hỗ trợ. Nó có cả trăm ngàn ứng dụng và công cụ ăn theo.
+
+Hãy lần lượt xem qua các ví dụ sau đây để học cách sử dụng Regular Expression nhé.
+
+# Bắt đầu sử dụng Regular Expression
+
+Để bắt đầu sử dụng và học cách dùng RegEx, mình hay dùng trang web [https://regex101.com/](https://regex101.com/). Giao diện như sau:
+
+![](https://images.viblo.asia/df2fd4af-d0f0-4e92-bd56-5570086484d3.gif)
+
+### Trước hết các bạn hãy đọc qua một lượt các quy tắc bắt chuỗi (matching) đơn giản nhất của RegEx
+
+- `[xyz]` Tìm và so sánh tất cả ký tự nằm trong dấu ngoặc vuông và trùng khớp với 1 ký tự trong dấu ngoặc vuông. Ví dụ: [31] sẽ trùng khớp với **3** hoặc **1**, [0123456789] sẽ trùng khớp với bất kỳ một ký tự nào trong khoảng từ **0** đến **9**.
+- `[a-z]` So sánh và trùng khớp với một ký tự nằm trong khoảng chỉ định. Ví dụ: `[a-z]` sẽ trùng khớp với một ký tự trong khoảng từ a đến z nằm trong chuỗi cần test. `[0-9]` sẽ trùng khớp với bất kỳ một ký tự nào trong khoảng từ **0** đến **9**.
+- `[^xyz]` So sánh và không trùng khớp với những ký tự nằm trong khoảng chỉ định. Dấu ^ (dấu mũ) nằm trong dấu ngoặc vuông là một dấu phủ định. Ví dụ: `[^a-z]` sẽ không trùng khớp với tất cả các ký tự nằm trong khoảng từ **a** đến **z**.
+- `^` Trùng khớp với phần đầu của chuỗi đích. Ví dụ: ^a sẽ trùng khớp với chữ **a** trong chuỗi `**abc**`, `^\w+` sẽ trùng khớp với chữ đầu tiên – chữ **"the"** của chuỗi **"The quick brown fox jumps over the lazy dog"**.
+- `$` Trùng khớp với phần cuối của chuỗi đích. Ví dụ: c$ sẽ trùng khớp với chữ c trong chuỗi abc, \w+$ sẽ trùng khớp với chữ cuối - chữ **"dog"** của chuỗi **"The quick brown fox jumps over the lazy dog"**.
+- `-` Trùng khớp với 1 hoặc nhiều lần ký tự đứng trước nó. Ví dụ \d+ sẽ chỉ trùng với chuỗi có từ 1 con số trở lên.
+- `-` Trùng khớp với 0 hoặc nhiều lần ký tự đứng trước nó. Ví dụ \d\* sẽ trùng với chuỗi có chứa 1 chữ số hoặc k có chữ số nào cũng đc.
+- `?` Trùng khớp với 0 hoặc 1 lần ký tự đứng trước nó. Tương tự như _ nhưng nó lại chỉ nhân lên 1 lần. _ thì nhân lên nhiều lần.
+- `.` Trùng khớp với 1 ký tự đơn bất kỳ ngoại trừ ký tự ngắt dòng `(line-break)` và cũng không lấy được ký tự có dấu `(unicode)`. Ví dụ: . sẽ trùng khớp với ký tự `**a` hoặc b hoặc `c**` trong chuỗi `**abc**`. Nhưng . sẽ không bắt được các chữ ă hoặc ê.
+- `x{n}` Trùng khớp đúng với n lần ký tự đứng trước nó. n là một số không âm. Ví dụ `\d{2}` sẽ bắt đc các số có 2 chữ số đứng liền nhau.
+- `x{n,}` Trùng khớp với ít nhất n lần ký tự đứng trước nó. n là một số không âm.Ví dụ `\d{2,}` sẽ bắt đc các số có từ 2 chữ số trở lên đứng liền nhau.
+- `x{n,m}` Trùng khớp với ít nhất n lần và nhiều nhất là m lần ký tự đứng trước nó. n và m là một số không âm và `n <= m`. Ví dụ: `a{1,3}` sẽ khớp với **hah, haah, `haaah**`nhưng không khớp với`**haaaah**`.
+- `x|y` Trùng khớp với x hoặc y. Ví dụ: slow|fast sẽ khớp với chữ **slow** hoặc **fast** trong chuỗi đích.
+- `\b` Trùng khớp với toàn bộ ký tự đứng trước nó. Ví dụ: hello\b sẽ trùng khớp với toàn bộ từ hello trong chuỗi **hello world** nhưng sẽ không khớp với chuỗi **helloworld**.
+- `\B` Ngược lại với `\b`, `\B` sẽ không khớp với toàn bộ mà chỉ 1 phần ký tự đứng trước nó. Ví dụ: `hello\B` sẽ trùng khớp với chữ hello trong chuỗi **helloworld** nhưng sẽ không khớp với chuỗi **hello world**.
+- `\d` Trùng khớp 1 ký tự số (digit).
+- `\D` Trùng khớp 1ký tự không phải số (non-digit).
+- `\s` Trùng khớp 1 ký tự khoảng trắng (whitespace) bao gồm khoảng trắng tạo ra bởi phím Tab.
+- `\S` Trùng khớp với 1 ký tự không phải là khoảng trắng (non-whitespace).
+- `\w` Trùng khớp với các ký tự là từ (word) bao gồm dấu \_ (underscore) và chữ số.
+- `\W` Trùng khớp với các ký tự không phải là từ (non-word). Ví dụ: \W sẽ khớp với ký tự % trong chuỗi **"100%"**.
+- `\uxxxx` Trùng khớp với 1 ký tự unicode. Ví dụ: \u00FA sẽ khớp với ký tự **"ú"**, \u00F9 sẽ khớp với ký tự **"ù"**.
+- `\pL` Trùng khớp với một ký tự Unicode bất kỳ ngoại trừ dấu cách. Đây chính là cú pháp viết hoàn hảo hơn của dấu. Ví dụ `\pL+` sẽ lấy được chuỗi truyền, thuyết trong chuỗi **"truyền thuyết"**.
+
+![](https://images.viblo.asia/bb00ea2c-cb41-4090-bce0-1b7ce1893791.gif)
+
+Đừng lo, hãy xem qua các ví dụ từ từ rồi bạn sẽ hiểu
+
+## Ví dụ đơn giản
+
+### Tìm chuỗi số
+
+![](https://images.viblo.asia/f2448336-4cd5-4ceb-a147-f617228b24ed.gif)
+
+### Tìm ngày tháng
+
+![](https://raw.githubusercontent.com/chungminhtu/regex_practices/master/Regex_CaptureDate.gif)
+
+Link demo: [https://regex101.com/r/3dNzjU/1](https://regex101.com/r/3dNzjU/1)
+
+### Tìm ngày tháng chính xác
+
+Trong ví dụ trên thì ta thấy có chuỗi **"60/60/2018"** cũng được coi là ngày tháng, như thế là không chính xác. Ta hãy viết lại cho chuẩn.
+
+![](https://raw.githubusercontent.com/chungminhtu/regex_practices/master/RegEx_CaptureDate_Advance.gif)
+
+Link demo: [https://regex101.com/r/3dNzjU/2](https://regex101.com/r/3dNzjU/2)
+
+## Cách "tóm lấy" string cần tìm đưa vào Group
+
+![](https://raw.githubusercontent.com/chungminhtu/regex_practices/master/RegEx_MatchGroup.gif)
+
+## Cách tạo ra code để dùng RegEx trong các ngôn ngữ lập trình
+
+RegEx là bộ cú pháp, tuy nhiên để áp dụng nó vào các ngôn ngữ lập trình lại phải tuân thủ theo các thư viện và quy tắc lập trình để lấy ra được các Group đã capture (thu) được. Hãy xem các tạo code ngay sau đây:
+
+![](https://raw.githubusercontent.com/chungminhtu/regex_practices/master/RegEx_GenerateCode.gif)
+
+## Cách bắt lấy chuỗi bất kỳ
+
+![](https://raw.githubusercontent.com/chungminhtu/regex_practices/master/RegEx_CaptureString.gif)
+Link demo: [https://regex101.com/r/3dNzjU/3](https://regex101.com/r/3dNzjU/3)
+
+# Sử dụng RegEx trong thực tế
+
+Trong thực tế RegEx có thể được gõ trực tiếp ở bất kỳ trình Editor nào. Ví dụ mình hay dùng Notepad++, hoặc Visual Studio
+
+![](https://github.com/chungminhtu/regex_practices/blob/master/Nodepad++KepChuoi.gif?raw=true)
+
+# Tham khảo
+
+Tham khảo thêm toàn bộ cú pháp RegEx bằng tiếng Anh tại: [https://www.cheatography.com/davechild/cheat-sheets/regular-expressions/](https://www.cheatography.com/davechild/cheat-sheets/regular-expressions/)
+
+> Một số công cụ test RegEx Online
+
+- [https://regex101.com/](https://regex101.com/)
+- [http://regexr.com/](http://regexr.com/)
+- [http://www.regexpal.com/](http://www.regexpal.com/)
+- [http://regexper.com/](http://regexper.com/)
+
+# Bài tập về nhà
+
+Bạn ngứa tay muốn thử học RegEx ngay và luôn cho nóng. Vậy hãy thử thực hành bằng một số bài tập từ dễ đến khó sau đây nhé.
+
+_**Bài tập nhập môn:**_
+
+1.  Lấy ra các chữ có chữ test trong chuỗi sau: **“that tested test is testing the tester's tests”**
+2.  Lấy ra các số điện thoại trong chuỗi sau: ** “p:444-555-1234 f:246.555.8888 m:1235554567”**
+3.  Lấy ra các mã màu RGB trong chuỗi sau: **“#FF006C ABC 99AAB7FF 0xF0F73611”**
+4.  Lấy ra các chữ có 4 ký tự trong chuỗi sau: **“drink beer, it's very nice!”**
+5.  Lấy ra tên file trong chuỗi URL sau: **“[rapidshare.com/asd/asd/File.avi.html”](http://rapidshare.com/asd/asd/File.avi.html%E2%80%9D)**
+
+> Đáp án ở phần comment nhé.
+
+_**Bài tập dành cho học sinh giỏi (lớp học thêm)**_
+
+1.  Tìm cách lấy các URL trong chuỗi HTML sau:
+
+```html
+Lorem gyum <b>Betrag</b> von
+<a href="http://www.vektor.de">Vektoren</a>
+(Länge eines Vektors)
+<a href="gcfa.com">GCFA</a>
+<a href="//cdn.com/test.js">CDN</a>
+ist das Maß einer Menge sozu…
+```
+
+2.  Tìm cách loại bỏ toàn bộ COMMENT trong đoạn code sau:
+
+```javascript
+var sample = 0;
+var my_string = "Hello World!";
+// This is a comment!
+function do_stuff(){
+// This is another comment!
+alert(‘somethings’);
+/* this is a multiline
+     comment */
+}
+```
+
+3.  Tìm cách lấy ra chuỗi tiếng Nhật trong chuỗi sau: “
+
+```
+This is a demo story 前に来た時は北側からで、当時の光景はいまでも思い出せる。And it is true.
+```
+
+4.  Lấy ra những file ảnh và độ phân giải của ảnh từ chuỗi sau:
+
+```
+.bash_profile
+workspace.doc
+img0912.jpg (1280x720)
+updated_img0912.png (1024x768)
+documentation.html
+favicon.gif
+img0912.jpg (1920x1600)
+access.htaccess
+```
+
+5.  Đọc nội dung từ trang tin rss sau: [http://rss.cnn.com/rss/edition.rss](http://rss.cnn.com/rss/edition.rss) Lấy ra các Tiêu đề, ngày giờ đăng, nội dung tin vắn
+
+> Đáp án các bạn post vào phần comment và cùng trao đổi nhé.
+
+Nếu các bài tập trên đây vẫn chưa đủ, các bạn hãy làm thêm các bài tập tại trang [https://regexone.com](https://regexone.com) nhé, rất nhiều ví dụ hay.
+
+# Kết luận
+
+Hi vọng bài viết nhỏ này đã giúp bạn học được cú pháp viết RegEx và áp dụng vào công việc thường ngày. Mình dùng Regex rất nhiều và nó là trợ thủ đắc lực trong quá trình code.
+
+Các bạn thì sao? bạn đã dùng Regex vào những việc gì? Hãy kể tên bên dưới comment để mình cùng học hỏi với nhé.
+
+Thanks các bạn đã đọc!

@@ -1,0 +1,879 @@
+---
+title: Làm thế nào để thành thạo CSS Grid trong nháy mắt
+author: Hung Tan Nguyen
+tags:
+  - css
+  - grid
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*ewoge0tZmHZ1nWd-UDBMbg.png'
+sourceUrl: >-
+  https://medium.com/flexbox-and-grids/how-to-efficiently-master-the-css-grid-in-a-jiffy-585d0c213577
+date: 2018-07-10 08:10:00
+slug: /lam-the-nao-de-thanh-thao-css-grid-trong-nhay-mat
+---
+
+### Giới thiệu
+
+Đây KHÔNG phải là một bài viết để học "mọi thứ" về css grid.
+Bài viết này hướng đến những người muốn có kết quả nhanh chóng và hiệu quả.
+Trong bốn phần của bài viết này, tôi sẽ chỉ cho bạn 20% cần thiết để làm được 80% những gì bạn có thể làm với CSS Grid layout.
+
+Hãy cùng tìm hiểu!
+
+### Tại sao chỉ 20%?
+
+![](https://cdn-images-1.medium.com/max/1600/1*LPf5rSOWKaSKTOUwkqfK0w.png)
+
+Bất cứ khi nào, một lập trình viên tìm kiếm sự hiệu quả - sự lười biếng sẽ giúp anh ta.
+
+CSS Grid layout rất phức tạp. Theo ý kiến của tôi, nó phức tạp hơn Flexbox. (tôi đã mất vài tuần để tìm hiểu flexbox)
+
+Không hẳn bởi vì nó "khó" mà do CSS Grid có tới 18 thuộc tính mới cộng với những khái niệm mà bạn chưa bao giờ nghe tới trước đó.
+
+Vậy, bạn cần biết tất cả những thuộc tính mới này ngay bây giờ? Ngay lập tức?
+
+Không, bạn không cần!
+
+Bạn chỉ cần học một vài thuộc tính cần thiết ngay lúc này để tạo ra kết quả mong muốn. Những thuộc tính khác có thể học sau. Đó là định nghĩa về "hiệu quả" của tôi.
+
+---
+
+### 1\. CSS Grid layout là gì ?
+
+Nếu bạn mới học bố cục trong CSS, CSS Grid có thể khá xa lạ với bạn.
+
+Bạn đã nghe nói tới Flexbox chưa?
+
+Tôi thích coi CSS Grid như là một người anh (hoặc cha) của Flexbox.
+
+Xử lý các bố cục trong CSS được coi là một công việc khó khăn và không hấp dẫn. Flexbox đã làm cho mọi thứ dễ dàng hơn - nhưng CSS Grid thậm chí còn tốt hơn.
+
+### Cái chúng ta sẽ xây dựng.
+
+Chúng ta sẽ học cách áp dụng 20% kiến thức học được để xây dựng bố cục responsive của một ứng dụng âm nhạc
+
+![a responsive music app, catty music](https://cdn-images-1.medium.com/max/2000/1*ripUP4LuXPQ851Zlq79bWQ.gif)
+
+### Phần 1: 10% bạn cần biết - Các thuật ngữ cơ bản
+
+Chúng ta hãy nhìn vào những điều đầu tiên bạn bắt buộc phải biết.
+
+---
+
+#### Grid Container là gì?
+
+Mỗi bố cục các trang web hoặc ứng dụng bạn tạo ra (hoặc thấy) về bản chất là những chiếc hộp được đặt trong những đường ranh giới xác định.
+
+![gif by chris bannister](https://cdn-images-1.medium.com/max/1600/1*uFGh3Vo2i9MneYvjqJNhRw.gif)
+
+Hiểu đơn giản, grid chỉ là "những đường kẻ". Những đường kẻ ngang và dọc xác định vị trí của các phần tử được thiết kế khác nhau.
+
+Bạn sẽ quen với grid nếu bạn đã sử dụng các phần mềm thiết kế như photoshop hoặc sketch.
+
+Trong bối cảnh của CSS Grid layout, một Grid container là phần tử cha chứa tất cả các phần tử nằm trong grid. Grid container xác định vị trí ban đầu của các đường kẻ trong grid, cả dọc và ngang.
+
+#### Grid Line là gì?
+
+Giả sử bạn có một bố cục như thế này:
+
+![supposed grid layout](https://cdn-images-1.medium.com/max/2000/1*xcID2GAZoYqhb4LYjN6Qug.png)
+
+Bố cục bao gồm một grid container với các phần tử ở bên trong
+
+![a bit of explanation](https://cdn-images-1.medium.com/max/2000/1*9K74dULhLERm5_3a37Byqw.png)
+
+Grid lines chính là những đường kẻ ngang và dọc phân chia grid thành các ô.
+
+#### Grid Cell là gì?
+
+Grid cell là đơn vị nhỏ nhất trong grid layout. Bất kỳ khoảng trống nào được xác định bởi 4 đường grid line.
+
+![The “small boxes” of grid items may be referred to as grid cells.](https://cdn-images-1.medium.com/max/2000/1*7X_NTZG0ikpVwsaB0qfdAw.png)
+
+#### Grid Area
+
+Một grid area có thể giống như một grid cell (giống như ở phần trước). Hoặc cũng có thể trải rộng trên nhiểu hoặc tất cả grid cell trong grid.
+
+Trong hình vẽ dưới đây, grid area trải rộng trên 4 ô.
+
+![](https://cdn-images-1.medium.com/max/2000/1*_4ZnWO3zlt82VMHQ_3VNXA.png)
+
+#### Grid Track là gì?
+
+Một grid track có thể xem như một tên gọi khác cho các cột và các dòng. Nó là khoảng trống giữa 2 grid line bất kỳ.
+
+Hình dưới đây là ví dụ về grid tracks
+
+![](https://cdn-images-1.medium.com/max/800/1*oan28239S-v0oJZECQPKIA.png)
+
+![](https://cdn-images-1.medium.com/max/800/1*-tby4L7UaQavuy6uc0H1LQ.png)
+
+![grid tracks](https://cdn-images-1.medium.com/max/800/1*xkbT0CjkBWb-5S_hxcBvGw.png)
+
+Vì vậy, chúng tôi đã phân loại được tất cả trong phần đầu tiên.
+
+### Phần 2: 10% còn lại mà bạn cần biết về CSS grid.
+
+Bây giờ bạn đã hiểu các thuật ngữ cơ bản, giống như một đứa trẻ mạo hiểm, hãy bắt đầu!
+
+#### Làm thế nào để định nghĩa một Grid?
+
+Giống như Flexbox, mọi thứ bắt đầu với display: grid hoặc display: inline-grid cho phiên bản inline.
+
+Ví dụ, để biến một div thành một grid container:
+
+```css
+div {
+  display: grid;
+}
+```
+
+#### Làm thế nào để tạo các cột và dòng?
+
+Để tạo các cột và các dòng trong một grid container, chúng ta sẽ sử dụng 2 thuộc tính mới: `grid-template-columns` và `grid-template-rows`.
+
+Vậy sử dụng chúng như thế nào? Khá đơn giản.
+
+`grid-template-columns` định nghĩa vị trí của các cột. `grid-template-rows` định nghĩa vị trí của các dòng.
+
+Bạn truyền giá trị vào các thuộc tính này, và chúng tạo ra các dòng và các cột.
+
+Xem ví dụ:
+
+```css
+grid-template-columns: 100px 200px 300px;
+```
+
+Đoạn code này sẽ tạo thành 3 cột mới trong grid container. Cột đầu tiên có độ rộng 100px, cột tiếp theo 200px và cột cuối 300px.
+
+![grid-template-columns: 100px 200px 300px](https://cdn-images-1.medium.com/max/2000/1*OGJmxXekTwSlW-aoTeSXEw.png)
+
+```css
+grid-template-rows: 100px 200px 300px;
+```
+
+Đoạn code này sẽ tạo 3 dòng mới trong grid container như hình dưới đây:
+
+![grid-template-rows: 100px 200px 300px](https://cdn-images-1.medium.com/max/2000/1*TcGMy7iMxXoRbqs8hL0NHw.png)
+
+Bây giờ đặt chúng cùng nhau, bạn sẽ có một grid hoàn chỉnh với các dòng và cột đã được định nghĩa.
+
+```css
+grid-template-columns: 100px 200px 300px
+grid-template-rows: 100px 200px 300px
+```
+
+### Phần 3: Bắt tay vào Code - CSS Grid
+
+Bây giờ chúng ta hãy thực hiện các bước để xây dựng bản sao của ứng dụng âm nhạc nổi tiếng, nhạc catty
+
+Để phát triển nhanh chóng, tôi sẽ sử dụng [Codepen](http://www.codepen.io). Tạo một dự án mới và hãy bắt đầu.
+
+### Làm thế nào để tạo ra bộ khung cho ứng dụng Catty Music
+
+Sau khi đã tạo một project trên codepen. Chúng ta sẽ tạo một tài liệu html cơ bản:
+
+```html
+<body>
+  <aside></aside>
+  <main></main>
+  <footer></footer>
+</body>
+```
+
+Có mục đích khi chọn cấu trúc này. Bạn sẽ sớm nhận ra điều đó.
+
+Bây giờ style tài liệu.
+
+```css
+body {
+  display: grid;
+  min-height: 100%;
+}
+```
+
+Đoạn code này sẽ biến body thành một grid-container.
+
+Bây giờ chúng ta cần tạo cấu trúc các dòng và cột trong grid.
+
+### Làm thế nào để tạo ra các dòng và các cột cho ứng dụng Catty Music
+
+Tạo các dòng và cột là khá dễ dàng.
+
+Kết quả cuối cùng chúng cần đạt được là:
+
+![final layout we seek.](https://cdn-images-1.medium.com/max/2000/1*VFkE679czY0Tb49R9GNvyg.png)
+
+Tuy nhiên, ban đầu khi thiết lập grid chúng ta cần 2 dòng và 2 cột.
+
+![initial grid setup](https://cdn-images-1.medium.com/max/2000/1*80Qn4c32kqbQzMVh-AcAoQ.png)
+
+#### Đây là một vài thứ cần chú ý về thiết lập Grid
+
+**Columns:**
+
+1.  Cột đầu tiên phải có độ rộng cố định là 50px.
+2.  Cột thứ 2 phải chiếm toàn bộ độ rộng còn lại của dòng.
+
+**Rows:**
+
+3. Dòng thứ 2 phải có chiều cao cố định là 100px.
+4. Dòng đầu tiên phải chiếm toàn bộ chiều còn lại của grid.
+
+#### Giải pháp của một người ít kinh nghiệm.
+
+Nếu bạn KHÔNG có kinh nghiệm với CSS, bạn có thể viết như thế này:
+
+```css
+body {
+   ...
+   grid-template-rows: 100% 100px;
+   grid-template-columns: 50px 100%;
+}
+```
+
+Vấn đề với giải pháp này là bạn đã vô tình tạo ra một grid với chiều rộng là 100% + 50px và chiều cao là 100% + 100px.
+
+Cái chúng ta muốn là chiều rộng và chiều cao là 100%. Vì thế hướng tiếp cần này là sai.
+
+#### Giải pháp của người đã có kinh nghiệm
+
+Nếu đã có một vài kinh nghiệm với CSS, bạn có thể làm một vài thứ thông minh hơn như thế này:
+
+```css
+body {
+   ...
+   grid-template-rows: calc(100% - 100px) 100px;
+   grid-template-columns: 50px calc(100%-50px)
+}
+```
+
+Cách này khá thông minh. Nhưng có một vấn đề - nó rất khó để bảo dưỡng.
+
+Ví dụ, nếu vì một lý do nào đó bạn phải thay đổi độ rộng cố định, bạn cũng phải thay đổi định nghĩa calc.
+
+#### Giải pháp hiệu quả nhất
+
+May mắn là CSS Grid có một đơn vị mới giúp chúng ta giải quyết vấn đề ở trên một cách dễ dàng đó là đơn vị. [factional(fr)](https://medium.com/flexbox-and-grids/the-css-fractional-unit-fr-in-approachable-plain-language-fdc47bd387f7)
+
+Đơn vị fractional giải quyết vấn đề tự động phân bố khoảng trống.
+
+Nếu bạn có grid với 3 cột như ở dưới, đơn vị fractional sẽ tự động phân bổ các khoảng trống bằng nhau.
+
+![](https://cdn-images-1.medium.com/max/1600/1*1TWb0kZ4nn6uvykRLMGtOw.png)
+
+INếu vì một vài lý do bạn thêm nhiều phần tử hơn - đừng lo lắng. Đơn vị fr sẽ phân bổ lại các khoảng trống bằng nhau.
+
+![](https://cdn-images-1.medium.com/max/1600/1*D5ILayU5dx_la2wnyn6ZYw.png)
+
+Cuối cùng, nếu bạn đã có một phần tử với độ rộng cố định, bạn có thể lấy toàn bộ khoảng trống còn lại với đơn vị fr. Như thế này:
+
+```css
+body {
+   ...
+   grid-template-rows: 1fr 100px;
+   grid-template-columns: 50px 1fr;
+}
+```
+
+And that is it — done!
+
+### Đặt tên và xác định vị trí bởi Grid Areas
+
+Chúng ta đã tạo ra hệ thống grid. Bây giờ là lúc để sử dụng nó.
+
+Mục đích của phần này học cách xác định vị trí các phần tử trong grid sử dụng grid areas.
+
+Nhắc lại một chút, một grid area là bất kỳ khoảng trống được bao bởi 4 grid line.
+
+![The “small boxes” of grid items may be referred to as grid cells.](https://cdn-images-1.medium.com/max/2000/1*7X_NTZG0ikpVwsaB0qfdAw.png)
+
+#### Làm thế nào để sử dụng grid areas?
+
+Nơi hợp lý để bắt đầu là đặt tên grid areas
+Hãy để tôi giải thích.
+Xem xét khối lệnh dưới đây:
+
+```html
+<div class="aside"></div>
+<div class="main"></div>
+<div class="footer"></div>
+```
+
+3 divs - đơn giản. Bằng cách này, Nó là ngữ nghĩa tốt hơn để sử dụng tags aside main và footer. Tôi sẽ giữ mọi thứ đơn giản.
+
+Bây giờ hãy xem đoạn code này:
+
+```css
+.main {
+  grid-area: content;
+}
+.footer {
+  grid-area: footer;
+}
+.aside {
+  grid-area: sidebar;
+}
+```
+
+#### Chuyện gì đang xảy ra ở đây
+
+Nếu biết một chút về Javascript, hay bất kỳ ngôn ngữ lập trình nào khác, thì khái niệm về biến sẽ không phải là mới với bạn.
+
+Trong Javascript, chúng ta có thể nói:
+
+```javascript
+var gridArea = 'content';
+```
+
+Cái chúng ta làm ở phía trên là, lưu chuỗi `content` vào biến `gridArea`
+
+Khai báo CSS ở phần trước tương tự như vậy.
+
+> Mọi phần tử trong grid có thể được gán tới một vùng trong grid container.
+
+Tuy nhiên, trước khi làm điều đó, chúng ta bắt buộc phải gán mỗi phần tử trong grid với một tên gọi. Giống như các biến trong Javascript.
+
+```css
+.main {
+  grid-area: content;
+}
+.footer {
+  grid-area: footer;
+}
+.aside {
+  grid-area: sidebar;
+}
+```
+
+Đoạn code ở trên nói rằng, class `.main` có tên là `content`. Class `.footer` có tên là `footer`. Cuối cùng, class `.aside` có tên là `sidebar`
+
+Bây giờ các grid items được gán tên cho mỗi vùng.
+
+Trong lập trình, các biến được thiết lập để được sử dụng ở nơi khác. Bây giờ, hãy sử dụng tên grid area.
+
+#### Vị trí Grid area
+
+Một người đàn ông trẻ có một cái bánh nướng. Anh ta có 3 đứa con và phải chia cho mỗi đứa một phần. Ai là người chia bánh thì hợp lý nhất?
+
+Chính người đàn ông đó!
+
+Người đàn ông trẻ cắt bánh và chia cho mỗi đứa trẻ một phần.
+
+![yummy!](https://cdn-images-1.medium.com/max/1600/1*xN-041OZXzMZvCJ76WRtfQ.jpeg)
+
+Đây là lý do tôi kể câu chuyện này.
+
+Giống như chiếc bánh, toàn bộ khoảng trống trong grid là của ai?
+
+Chính là grid container!
+
+Giống như người đàn ông trẻ, grid container có 3 đứa con `.aside` `.main` và `.footer`. Bây giờ grid container phải chọn cách chia toàn bộ khoảng trống trong grid cho 3 đứa con này.
+
+Và một điều nữa.
+
+Vì tất cả những đứa trẻ đều có tên, người đàn ông trẻ có thể nói: "hey Brian đây là phần của con hoặc hey Emma của con là phần này."
+
+Dễ dàng để xác định ai sở hữu phần nào của chiếc bánh, bằng cách gán mỗi phần với tên của mỗi người.
+
+Mỗi phần tử trong grid đều đã có tên bằng cách sử dụng thuộc tính grid-area.
+
+Bây giờ, hãy chia bánh!
+
+#### Thuộc tính grid-template-areas
+
+Bây giờ grid container phải chia "bánh". Gán mỗi vùng tới mỗi phần tử tương ứng.
+
+Có nhiều cách để làm điều đó, nhưng thuộc tính `grid-template-areas` là cách dễ dàng nhất để làm đó. nó chính là cái bạn cần biết để làm việc hiệu quả.
+
+#### Thuộc tính grid-template-areas làm việc như thế nào?
+
+Hãy xem đoạn code dưới đây:
+
+```css
+body {
+  grid-template-areas:
+    'sidebar  content'
+    'footer   footer';
+}
+```
+
+Cái quái gì vậy?
+
+Không cần phải bị choáng ngợp. Trong phần này, tôi sẽ giải thích nó hoạt động như thế nào - theo thuật ngữ rõ ràng.
+
+Thuộc tính grid-template-areas cung cấp một cấu trúc rất trực quan của grid.
+
+Hãy xem lại đoạn code trên một lần nữa:
+
+```css
+body {
+  grid-template-areas:
+    'sidebar  content'
+    'footer   footer';
+}
+```
+
+Bạn có thể thấy toàn bộ giá trị của thuộc tính là tên của các phần tử trong grid!
+
+`sidebar` `content` và `footer` là tên của các phần tử trong grid. Khai báo ở trên gán mỗi vùng trong grid với một phần tử tương ứng.
+
+![](https://cdn-images-1.medium.com/max/2000/1*NjMwDa_1b1vHkAbpXI_f7w.png)
+
+Hình ảnh trên sẽ giúp bạn hiểu grid được chia như thế nào.
+
+`footer` sẽ chiếm toàn bộ dòng bên dưới. `sidebar` và `content` sẽ chiếm cột đầu tiên và thứ 2 của dòng bên bên.
+
+Đến đây chúng ta có:
+
+```css
+body {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-rows: 1fr 90px;
+  grid-template-areas:
+    'sidebar  content'
+    'footer  footer';
+}
+```
+
+Kết quả sẽ như dưới đây:
+
+![STEP 1: https://codepen.io/ohansemmanuel/pen/bRWrPE](https://cdn-images-1.medium.com/max/2000/1*LNfazbNhUOy6YBEE7Sr_Uw.png)
+
+Tôi đã thêm màu sắc để hỗ trợ hình ảnh. Phần màu đỏ đại diện cho `.footer`, hai phần còn lại, phần `.main` và `.sidebar`.
+
+### Làm cho bố cục responsive - Định nghĩa lại Grid areas với Media Queries
+
+![gif by Muharrem Senyil](https://cdn-images-1.medium.com/max/1600/1*9H_Ylq3VVHRLQRTZZLYbQQ.gif)
+
+Các Grid area mà bạn đã tạo trong grid container có thể thay đổi tùy theo kích thước màn hình của người sử dụng.
+
+Dưới đây là hình ảnh ứng dụng trên màn hình điện thoại.
+
+![Catty Music, on mobile](https://cdn-images-1.medium.com/max/2000/1*Gd8H2uQF3-TVi4lq7g1UAw.png)
+
+Chúng ta sẽ refactor lại code theo hướng tiếp cận mobile first.
+
+Mobile first đơn giản là làm cho style mặc định của bạn là dành cho các thiết di động. Sau đó bạn sẽ tạo ra các thay đổi cho các màn hình lớn hơn thông qua các media query.
+
+Đặt một phần code hiện nay trong một định nghĩa media query. Như dưới đây:
+
+```css
+@media only screen and (min-width: 600px) {
+  body {
+    grid-template-columns: 50px 1fr;
+    grid-template-areas:
+      'sidebar  content'
+      'footer   footer';
+  }
+}
+```
+
+Bạn sẽ để đoạn code mặc định bên ngoài media query
+
+```css
+body {
+  display: grid;
+  grid-template-rows: 1fr 100px;
+}
+```
+
+Tại sao chúng ta đặt grid-template-rows: 1fr 100px; bên ngoài media query?
+
+Bởi vì cả màn hình di động và desktop chúng ta đều có 2 dòng.
+
+Tuy nhiên, trên màn hình desktop. Sidebar là 50px trong định nghĩa grid-template-columns. Còn trên các thiết bị di động sidebar không tồn tại.
+
+Vì thế, chúng ta sẽ định nghĩa lại khai báo `grid-template-columns` cho di động.
+
+Bây giờ với các thiết bị di động chúng ta sẽ sử dụng style này là mặc định:
+
+```css
+body {
+   grid-template-areas: "content"
+                        "footer"
+```
+
+Khá đơn giản phải không? Hãy để tôi giải thích.
+
+### Dòng chảy (hướng) của Grid
+
+Đoạn code cho di động như thế này:
+
+```css
+body {
+   grid-template-areas: "content"
+                        "footer"
+```
+
+Bởi mặc định, một grid sẽ sắp xếp các phần tử trên các dòng.
+
+Vì thế khai báo ở phía trên sẽ sắp xếp content trên một dòng và footer trên một dòng khác.
+
+Dưới đây là kết quả - sidebar sẽ ẩn trên màn hình di động:
+
+![STEP 2: https://codepen.io/ohansemmanuel/pen/qjVvjJ?editors=1100](https://cdn-images-1.medium.com/max/2000/1*WeVXg_bAwa5UKqdZHiwQ7w.gif)
+
+Với rào cản ban đầu của sự hiểu biết cách hoạt động của grids và thiết lập responsive grid, chúng ta đã xong bố cục ứng dụng!
+
+### Thêm nội dung vào trong Grid
+
+Khi kết thúc phần này chúng ta sẽ có một bố cục ứng dụng âm nhạc hoàn chỉnh. Bây giờ hãy tập trung và việc sắp xếp nội dung trong grid.
+
+#### 1\. The Sidebar
+
+Điều này có vẻ dễ nhất để bắt đầu. Hãy đi tìm nó.
+
+Sidebar bao gồm 8 icon cách đều nhau dọc theo toàn bộ chiều dài của sidebar.
+
+Hãy chèn các icon vào sidebar:
+
+```html
+<div class="aside">
+  <i class="fa fa-bars"></i>
+  <i class="fa fa-home"></i>
+  <i class="fa fa-search"></i>
+  <i class="fa fa-volume-up"></i>
+  <i class="fa fa-user"></i>
+  <i class="fa fa-spotify"></i>
+  <i class="fa fa-cog"></i>
+  <i class="fa fa-soundcloud"></i>
+</div>
+```
+
+Kết quả sẽ như thế này:
+
+![https://codepen.io/ohansemmanuel/pen/BZmbza](https://cdn-images-1.medium.com/max/2000/1*DY1tA49VLEOy0I5Fb_HmlQ.png)
+
+Các icon cũng sẽ ẩn trên màn hình di động. Và chỉ hiển thị trên các màn hình lớn hơn. Đây là hướng tiếp cận mobile first.
+
+```css
+.aside i {
+  display: none;
+}
+@media only screen and (min-width:600px) {
+  .aside i {
+    display: block;
+  }
+```
+
+Các biểu tượng được hiển thị, nhưng được căn chỉnh chưa đều.
+
+#### Sắp xếp các icon
+
+Các thẻ `i` là các phần tử `inline` -- điều đó giải thích tại sao 2 icon lại hiển thị cạnh nhau trên một dòng.
+
+Hãy sắp xếp chúng.
+
+> Các phần tử con của grid container cũng có thể trở thành các grid container. Tại sao không?
+
+#### Bước 1: Biến Sidebar thành một Grid Container
+
+Điều này sẽ cung các tính năng căn chỉnh của grid.
+
+Khi sidebar chỉ hiển thị trên các màn hình lớn hơn, đừng quên đặt nó trong media query.
+
+```css
+@media only screen and (min-width: 600px) {
+  .aside {
+    display: grid;
+  }
+
+  .aside i {
+    border: 1px solid red;
+  }
+}
+```
+
+Tôi thêm border cho mỗi icon - để chúng ta dễ phân biệt.
+
+![](https://cdn-images-1.medium.com/max/2000/1*QcpsRWdU5Q01YC-C2Et11w.png)
+
+Chuyện gì đang xảy ra ở đây?
+
+Chúng ta KHÔNG thiết lập bất kỳ dòng hay cột trong sidebar. Nhưng chúng ta thấy các icon được sắp xếp khá tốt. Grid tự động thiết lập điều đó.
+
+Đây là vị trí mặc định của các item trong một grid -- trên cùng một dòng.
+
+Một grid cũng có thể sắp xếp các phần tử sử dụng `justify-items` hay `align-items`.
+
+`justify-items` sẽ sắp xếp các phần tử theo chiều ngang.
+
+`align-items` sẽ sắp xếp các phần tử theo chiều dọc.
+
+Áp dụng điều này cho sidebar, và chúng ta có một bổ cục các icon hoàn hảo:
+
+```css
+.aside {
+     ...
+     justify-items: center;
+     align-items: center;
+  }
+```
+
+Bạn vẫn cảm thấy khó hiểu, hãy xem video dưới đây:
+
+<YouTube id="pN2rGbEfNw8" />
+
+Bây giờ chúng ta đã một bố cục hoàn hảo dành cho các icon trong sidebar.
+
+![https://codepen.io/ohansemmanuel/pen/MorYJq?editors=1100](https://cdn-images-1.medium.com/max/2000/1*gwdH9pKxjMw7MnO8vPmTgw.png)
+
+`justify-items` hay `align-items` có thể có các giá trị:
+
+- stretch
+- start
+- end
+- center
+
+Nếu đã từng làm việc với Flexbox, bạn sẽ quen với chúng.
+
+Chúng ta sẽ thêm nhiều nội dung hơn vào thiết kế hiện tại.
+
+Thêm 2 thẻ div vào main section:
+
+```html
+<div class="main">
+  <div class="main__header"></div>
+  <div class="main__body"></div>
+</div>
+```
+
+**NB:**
+
+1.  `main__header` sẽ chứa music art và playbacks:
+
+![.main__header](https://cdn-images-1.medium.com/max/2000/1*K2ikIxNuiWo8tfY-5RvBXg.png)
+
+2. `main__body `sẽ chứa chi tiết:
+
+![.main__body](https://cdn-images-1.medium.com/max/2000/1*hc80JsuD3IsxxwrAijFWzQ.png)
+
+Trong phần này chúng ta sẽ tập trung vào `main__header`
+
+Đầu tiên, thêm đoạn code html này:
+
+```html
+<div class="main__header">
+  <div class="img">
+    <img src="http://bit.ly/2sc2NJd" />
+  </div>
+  <section class="details">
+    <div>
+      <p>CattyBoard Top 100 Single Charts (11.06.36)</p>
+      <p class="sm--hide">Unknown Artist</p>
+      <p class="sm--hide">2016 . Charts . 100 songs</p>
+    </div>
+    <div>
+      <i class="fa fa-play"> &nbsp;Play all</i>
+      <i class="fa fa-plus"> &nbsp;Add to</i>
+      <i class="fa fa-ellipsis-h">&nbsp;&nbsp;More</i>
+    </div>
+  </section>
+</div>
+```
+
+Chú ý cấu trúc của tài liệu
+
+`main__header` có hai con trực tiếp. Một `div` chứa một hình ảnh và `section` chứa thông tin chi tiết của album.
+
+Kết quả của đoạn code trên khá xấu xí:
+
+![incomplete header](https://cdn-images-1.medium.com/max/1600/1*uhNqMg2RUv_bo5371BrOfQ.png)
+
+Hãy làm cho nó đẹp hơn.
+
+Cái chúng ta cần là một grid với các phần tử được sắp xếp phù hợp.
+
+Hãy sử dụng những kiến thức về grid areas
+
+Đầu tiên, định nghĩa grid area:
+
+```css
+.main__header > .img {
+  grid-area: img;
+}
+.main__header > .details {
+  grid-area: dtls;
+}
+```
+
+`div` chứa hình ảnh được đặt tên là `img`. Phần chứa thông tin chi tiết của album được đặt tên là `dtls`.
+
+Bây giờ, định nghĩa grid:
+
+```css
+.main__header {
+  display: grid;
+  grid-template-areas:
+    'img'
+    'dtls';
+}
+```
+
+`.main__header` trở thành một grid container, có 2 phần tử xếp chồng lên nhau đầu tiên là `img` tiếp theo là `dtls`. Bởi vì chúng ta đang theo hướng tiếp cận mobile first.
+
+Tại thời điểm này, không có nhiều thay đổi.
+
+![I have included borders and made the text whitish for visual aid.](https://cdn-images-1.medium.com/max/1600/1*h60PmaHUtZAMZrC5xrRtbA.png)
+
+Đây không phải là cái chúng ta muốn trên di động.
+
+Với màn hình di động, các phần tử nên được căn giữa.
+
+```css
+@media screen and (max-width: 600px) {
+  .main__header {
+    justify-items: center;
+  }
+}
+```
+
+Kết quả sẽ như dưới đây:
+
+![](https://cdn-images-1.medium.com/max/1600/1*9Yi3TudvNbbTdYtDBsqL1w.png)
+
+Tiếp theo hãy làm cho text trong `.details` căn giữa:
+
+```css
+@media screen and (max-width: 600px) {
+  .main__header > .details {
+    text-align: center;
+  }
+}
+```
+
+![](https://cdn-images-1.medium.com/max/1600/1*Dj_iJrYWYA4lpQdxuzx4Cw.png)
+
+Đã khá gần với mục tiêu chỉ cần thêm một vài điều chỉnh.
+
+Đoạn text `Unknown Artist` và `2016` . `Charts` . `100 songs` nên ẩn trên di động. Ảnh cũng nên nhỏ hơn.
+
+```css
+@media screen and (max-width: 600px) {
+  .sm--hide {
+    display: none;
+  }
+  .img > img {
+    width: 150px;
+  }
+}
+```
+
+Class `.sm--hide` sẽ ẩn trên di động. Chỉ cần thêm class tới phần tử mong muốn. Như thế này:
+
+```html
+<p class="sm--hide">Unknown Artist</p>
+<p class="sm--hide">2016 . Charts . 100 songs</p>
+```
+
+Và chúng ta có:
+
+![](https://cdn-images-1.medium.com/max/1600/1*3EldPliJB9kqZmu9B1UaRg.png)
+
+Màn hình di động đã xong. Giờ hãy thêm style cho những màn hình lớn hơn.
+
+Với màn hình lớn hơn, chúng ta cần một grid 2 cột. Style sẽ như thế này:
+
+```css
+@media only screen and (min-width: 600px) {
+  .main__header {
+    grid-template-columns: 250px 1fr;
+    grid-template-areas: 'img dtls';
+  }
+}
+```
+
+Grid đã được định nghĩa lại với 2 cột. Một có độ rộng cố định là 250px và cột kia chiếm toàn bộ khoảng trống còn lại.
+
+![https://codepen.io/ohansemmanuel/pen/gReOQJ?editors=1100](https://cdn-images-1.medium.com/max/1600/1*iFRIMSqQYAl2AhHBgsCjdw.gif)
+
+Tiến trình hiện tại của chúng ta [here](https://codepen.io/ohansemmanuel/pen/gReOQJ?editors=1100).
+
+### Phần 4: Kết hợp CSS Grid với Flexbox
+
+Trong phần này bạn sẽ học cách sử dụng Flexbox và Grid cùng nhau.
+
+Hai module này đã thay đổi cách xử lý bố cục trong CSS. Và cách hiệu quả nhất là sử dụng cả 2 module cùng nhau.
+
+Hãy đi vào chi tiết.
+
+Với phần hiển thị thông tin chi tiết của album chúng ta sẽ sử dụng flexbox.
+
+![](https://cdn-images-1.medium.com/max/2000/1*hc80JsuD3IsxxwrAijFWzQ.png)
+
+#### Làm sao để biết chỗ nào sẽ sử dụng Flexbox?
+
+Quy tắc chung là sử dụng Grid cho bố cục toàn bộ trang, còn Flexbox dành cho UI bên trong các phần tử con.
+
+Một phần tử con có thể là một flex container. Một phần tử con của flex container cũng có thể là một grid container.
+
+Tôi giả sử rằng bạn đã biết về [flexbox](https://medium.freecodecamp.org/understanding-flexbox-everything-you-need-to-know-b4013d4dc9af).
+
+Như thường lệ, hãy bắt đầu bằng html
+
+Dưới đây là một div, với một danh sách các bài hát. Danh sách các bài hát có các đoạn có chứa tên bài hát, nghệ sĩ, thời lượng của bài hát và "catty cloud sync".
+
+```html
+<div class="main__body">
+  <div>
+    <p>1. One Dance</p>
+    <p>Crake feat CatKid &amp; Cyla</p>
+    <p>2:54</p>
+    <p><span>CATTY CLOUD SYNC</span></p>
+  </div>
+  <div>
+    <p>2. Panda</p>
+    <p>Cattee</p>
+    <p>4:06</p>
+    <p><span>CATTY CLOUD SYNC</span></p>
+  </div>
+  <div>
+    <p>3. Can't Stop the Feeling!</p>
+    <p>Catin Cimberlake</p>
+    <p>3:56</p>
+    <p><span>CATTY CLOUD SYNC</span></p>
+  </div>
+  <div>
+    <p>4. Work From Home</p>
+    <p>Cat Harmony feat Colla</p>
+    <p>3:34</p>
+    <p><span>CATTY CLOUD SYNC</span></p>
+  </div>
+</div>
+```
+
+Đây là cái chúng ta có:
+
+![](https://cdn-images-1.medium.com/max/1600/1*lz7cE6DLCPeX-S6bwCVRJw.gif)
+
+`main__body` là một phần tử của grid. Chúng ta có thể biến nó thành flex container nếu điều đó hữu ích.
+
+Trong trường hợp của chúng ta, mỗi thẻ div là con trực tiếp của `main__body` cần trở thành một flex container. Chúng chứa tên bài hát, nghệ sĩ, thời gian và "catty cloud sync".
+
+```css
+.main__body > div {
+  display: flex;
+}
+```
+
+Bây giờ chia chiều rộng cho các phần tử con:
+
+```css
+.main__body > div p {
+  flex: 0 0 25%;
+}
+```
+
+![https://codepen.io/ohansemmanuel/full/pwLEBL/](https://cdn-images-1.medium.com/max/1600/1*F7_nB62n6q9TV9aDJJ23tA.png)
+
+Bạn sẽ đồng ý với tôi rằng tại thời điểm này, các yếu tố cần thiết cho bố cục đã hoàn thành.
+
+Tuy nhiên, tôi đã thực hiện một vài thay đổi. Bạn có thể xem kết quả cuối cùng [here](https://codepen.io/ohansemmanuel/full/QgxEqz/)
+
+Bạn sẽ nhận thấy rằng tôi vẫn để trống footer. Đó là bài tập cho bạn. Lời khuyên của tôi là sử dụng flexbox. Nó sẽ giúp bạn hiểu cách cả hai module này làm việc cùng nhau.
+
+---
+
+Với một vài thuộc tính của grid, bạn đã xây dựng một bố cục thực sự. Khá ấn tượng. Bạn cũng học được kỹ năng vô giá khi kết hợp CSS Grid với Flexbox.

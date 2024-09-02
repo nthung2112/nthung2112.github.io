@@ -1,0 +1,290 @@
+---
+title: 'Nghiên cứu cải thiện tốc độ web app với React và Preact: Treebo'
+author: Hung Tan Nguyen
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*0s8jbREtTX-vTJ9t5JRGaA.png'
+sourceUrl: >-
+  https://medium.com/dev-channel/treebo-a-react-and-preact-progressive-web-app-performance-case-study-5e4f450d5299
+tags:
+  - javascript
+  - react
+  - preact
+date: 2017-11-15 08:26:38
+slug: /nghien-cuu-cai-thien-toc-do-web-app-voi-react-va-preact-treebo
+---
+
+[Treebo](https://treebo.com) is India’s top rated budget hotel chain, operating in a segment of the travel industry worth $20 billion. They [recently](https://www.treebo.com/blog/google-io-2017-features-treebos-progressive-web-app/) shipped a new Progressive Web App as their default mobile experience, initially using [React](http://reactjs.com) and eventually switching to [Preact](http://preactjs.com) in production.
+
+What they saw compared to their old mobile site was **a 70%+ improvement in time to first paint , 31% improvement in** [**time-to-interactive**](https://github.com/WPO-Foundation/webpagetest/blob/master/docs/Metrics/TimeToInteractive.md)**. and loaded in under 4 seconds over 3G** for many typical visitors and on their target hardware. It was interactive in under 5s using WebPageTest’s slower 3G emulation in India.
+
+![](https://cdn-images-1.medium.com/max/2000/1*gVklUhiYIWw3LAKSL8wJjg.png)
+
+**Switching from React to Preact was responsible for a 15% improvement in time-to-interactive alone**. You can check out [Treebo.com](https://treebo.com) for their full experience but today we would like to dive into some of the technical journey that made shipping this PWA possible.
+
+![](https://cdn-images-1.medium.com/max/2000/1*QSIGKBY4t49YdOENePb2Jw.png)Treebo’s Progressive Web App
+
+### A Performance Journey
+
+#### The old mobile site
+
+Treebo’s old mobile site was powered by a monolithic Django setup. Users had to wait for a server side request for every page transition on the website. This original setup had a first paint time of 1.5s, a first meaningful paint time of 5.9s and was first interactive in 6.5s.
+
+![](https://cdn-images-1.medium.com/max/2000/1*zEQEtv1mzxBaE7lg4cpurg.png)
+
+#### A basic single-page React app
+
+For their first iteration of the rewrite Treebo started off with a **Single Page Application** built using React and a simple [webpack](https://webpack.js.org/) setup.
+
+You can take a look at the actual code used below. This generates some simple (monolithic) JavaScript and CSS bundles.
+
+<Gist id="d809f1d8fb7c5702b875435599d78d68" />
+
+This experience had a first paint of 4.8s, was first interactive in about 5.6s and their meaningful header images painted in about 7.2s.
+
+![](https://cdn-images-1.medium.com/max/2000/1*e623cjcetyonpGXys4yOLQ.png)
+
+#### Server-side Rendering
+
+Next, they went about optimizing their first paint a little so they tried out **Server-side Rendering**. **It’s important to note, server side rendering is not free. It optimizes one thing at the cost of another.**
+
+> With [server-side rendering](https://css-tricks.com/server-side-react-rendering/), your server’s response to the browser is the HTML of your page that is ready to be rendered so the browser can start rendering without having to wait for all the JavaScript to be downloaded and executed.
+
+Treebo used React’s [renderToString()](https://facebook.github.io/react/docs/react-dom-server.html#rendertostring) to render components to an HTML string and injecting state for the application on initial boot up.
+
+<Gist id="f4d08e0391e015ee295a53ff3ccabafe" />
+
+In Treebos’ case, using server side rendering dropped their first paint time to 1.1s and first meaningful paint time down to 2.4s — this improved how quickly users _perceived_ the page to be ready, they could read content earlier on and it performed slightly better at SEO in tests. But the downside was that it had a pretty negative impact on time to interactive.
+
+![](https://cdn-images-1.medium.com/max/2000/1*SSKzzeSML-gTmWZQB9EqSQ.png)
+
+Although users could _view_ content, the main thread got pegged while booting up their JavaScript and just hung there.
+
+**With SSR, the browser had to fetch and process a much larger HTML payload than before and then still fetch, parse/compile and execute the JavaScript. It was effectively doing more work.**
+
+This meant that first interactive happened about 6.6s, regressing.
+
+SSR can also push TTI back by locking up the main thread on lower-end devices.
+
+#### Code-splitting & route-based chunking
+
+The next thing Treebo looked at was **route-based chunking** to help bring down their time-to-interactive numbers.
+
+> [Route-based chunking](https://gist.github.com/addyosmani/44678d476b8843fd981ff8011d389724) aims to serve the minimal code needed to make a route interactive, by [code-splitting](https://webpack.js.org/guides/code-splitting/) the routes into “chunks” that can be loaded on demand. This encourages delivering resources closer to the granularity they were authored in.
+
+What they did here was they split out their vendor dependencies, their Webpack runtime manifests and their routes — into separate chunks.
+
+<Gist id="bc4a63c13173a1908c764c67e1fb8df2" />
+<Gist id="563e6bda38f4f5b6293ceb32f38c85a2" />
+
+This reduced the time to first interactive down to 4.8s. Awesome!
+
+The only downside was that it started the current route’s JavaScript download only after their initial bundles were done executing, which was also not ideal.
+
+But it did at least have some positive impact on the experience. For route-based code-splitting and this experience, they’re doing something a little bit more implicit. They’re using React Router’s declarative support for getComponent with a webpack import() call to asynchronously load in chunks.
+
+![](https://cdn-images-1.medium.com/max/2000/1*YEJIN_D73FLy6bT-F2p1WA.png)
+
+#### The PRPL Performance Pattern
+
+Route-based chunking is a great first step in intelligently bundling code for more granular serving and caching. Treebo wanted to build on this and looked to the [**PRPL pattern**](https://developers.google.com/web/fundamentals/performance/prpl-pattern/)for inspiration.
+
+> PRPL is a pattern for structuring and serving PWAs, with an emphasis on the performance of app delivery and launch.
+
+PRPL stands for:
+
+- **Push** critical resources for the initial URL route.
+- **Render** initial route.
+- **Pre-cache** remaining routes.
+- **Lazy-load** and create remaining routes on demand.
+
+![](https://cdn-images-1.medium.com/max/2000/1*wSy1jUPr08N8UKL_fHhXlw.png)A PRPL visualization by Jimmy Moon
+
+The “Push” part encourages serving an unbundled build designed for server/browser combinations that support HTTP/2 to deliver the resources the browser needs for a fast first paint while optimizing caching. The delivery of these resources can be triggered efficiently using [link-rel-preload](https://developers.google.com/web/updates/2016/03/link-rel-preload) or [HTTP/2 Push](https://developers.google.com/web/fundamentals/performance/http2/#server-push).
+
+Treebo opted to use `<link rel=”preload” />` to preload the current route’s chunk ahead of time. This had the impact of dropping their first interactive times since the current route’s chunk was already in the cache when webpack made a call to fetch it after their initial bundles finished executing. It shifted the time down a little bit and so the first interactive happened at the 4.6s mark.
+
+![](https://cdn-images-1.medium.com/max/2000/1*Uhwf9VgUNDWtxV7Gp9NZkg.png)
+
+The only con they had with preload is that it’s not implemented cross-browser. However, there’s an implementation of link rel preload in Safari Tech Preview. I’m hopeful that it’s going to land and stick this year. There’s also work underway to try landing it in Firefox.
+
+#### HTML Streaming
+
+> One difficulty with renderToString() is that it is synchronous, and it can become a performance bottleneck in server-side rendering of React sites. Servers won’t send out a response until the entire HTML is created. When web servers stream out their content instead, browsers can render pages for users before the entire response is finished. Projects like [react-dom-stream](https://github.com/aickin/react-dom-stream) can help here.
+
+To improve perceived performance and introduce a sense of progressive rendering to their app, Treebo looked to **HTML Streaming**. They would stream the head tag with link rel preload tags set up to early preload in their CSS and their JavaScripts. They then perform their server side rendering and send the rest of the payload down to the browser.
+
+The benefit of this was that resource downloads started earlier on, dropping their first paint to 0.9s and first interactive to 4.4s. The app was consistently interactive around the 4.9/5 second mark.
+
+![](https://cdn-images-1.medium.com/max/2000/1*6PgaKR-HCQctzQVE7dIRqg.png)
+
+The downside here was that it kept the connection open for a little bit longer between the client and server, which could have issues if you run into longer latency times. For HTML streaming, Treebo defined an early chunk with the `<head>` content, then they have the main content and the late chunks. All of these being injected into the page. This is what it looks like:
+
+<Gist id="33142b2eae0806210ecead567dceab75" />
+
+Effectively, the early chunk has got their rel=preload statements for all of their different script tags. The late chunk has got the server rendered html and anything that’s going to include state or actually use the JavaScript that’s being loaded in.
+
+#### Inlining critical-path CSS
+
+> CSS Stylesheets can block rendering. Until the browser has requested, received, downloaded and parsed your stylesheets, the page can remain blank. By reducing the amount of CSS the browser has to go through, and by inlining ([critical-path styles](https://jonassebastianohlsson.com/criticalpathcssgenerator/#what-is)) it on the page, thus removing a HTTP request, we can get the page to render faster.
+
+Treebo added support for **Inlining their critical-path CSS** for the current route and asynchronously loading in the rest of their CSS using [loadCSS](https://github.com/filamentgroup/loadCSS) on DOMContentLoaded.
+
+It had the effect of removing the critical-path render blocking link tag for stylesheets and inlining fewer lines of core CSS, improving first paint times to about 0.4s.
+
+<Gist id="f7410178545720e260898de3b5054276" />
+
+The downside was that time to first interactive went up a bit to 4.6s as the payload size was larger with inline styles and took time to parse before JavaScript could be executed.
+
+![](https://cdn-images-1.medium.com/max/2000/1*pnXHVJYx4wnb5NogNcBcTg.png)
+
+#### Offline-caching static assets
+
+> A [Service Worker](https://developers.google.com/web/fundamentals/getting-started/primers/service-workers) is a programmable network proxy, allowing you to control how network requests from your page are handled.
+
+Treebo added support for **Service Worker** caching of their static assets as well a custom offline page. Below we can see their Service Worker registration and how they used [sw-precache-webpack-plugin](https://www.npmjs.com/package/sw-precache-webpack-plugin) for resource caching”
+
+<Gist id="fb2b569631a5c6d5585951ae516302ea" />
+![](https://cdn-images-1.medium.com/max/2000/0*TwNbHKi9HH60PKa7.)
+
+Caching static assets like their CSS and JavaScript bundles means pages load up (almost) instantly on repeat visits as they load from the disk cache rather than having to go back out to the network each time. Diligently defined caching headers can have this same effect with respect to disk cache hit-rates, but it’s Service Worker that gives us offline support.
+
+![](https://cdn-images-1.medium.com/max/1600/0*ISP4LE8o1LO-DbFI.)
+
+Serving JavaScript cached using Service Worker using the Cache API (as we covered in [JavaScript Start-up Performance](https://medium.com/reloading/javascript-start-up-performance-69200f43b201)) also has the nice property of early-opting Treebo into V8’s code cache so they save a little time on start-up during repeat visits.
+
+Next, Treebo wanted to try getting their vendor bundle-size and JS execution time down, so they switched from React to **Preact** in production.
+
+#### Switching from React to Preact
+
+[Preact](http://preactjs.com) is a tiny 3KB alternative to React with the same ES2015 API. It aims to offer high performance rendering with an optional compatibility later (preact-compat) that works with the rest of the React ecosystem, like Redux.
+
+Part of Preact’s smaller size comes from removing Synthetic Events and PropType validations. In addition it:
+
+- Diffs Virtual DOM against the DOM
+- Allows props like class and for
+- Passes (props, state) to render
+- Uses standard browser events
+- Supports fully async rendering
+- Subtree invalidation by default
+
+In a number of PWAs, switching to Preact has led to smaller JS bundle sizes and lower initial JavaScript boot-up times for the application. Recent PWA launches like Lyft, Uber and Housing.com all use Preact in production.
+
+**Note: Working with a React codebase and want to use Preact? Ideally, you should use preact and preact-compat for your dev, prod and test builds. This will enable you to discover any interop bugs early on. If you would prefer to only alias preact and preact-compat in Webpack for production builds (e.g if your preference is using Enzyme), make sure to thoroughly test everything works as expected before deploying to your servers.**
+
+In Treebo’s case, this switch had the impact of dropping their vendor bundle sizes from 140kb all the way down to 100kb. This is all gzipped, by the way. It dropped first interactive times from **4.6s to 3.9s** on Treebo’s target mobile hardware which was a net win.
+
+![](https://cdn-images-1.medium.com/max/2000/1*asckjwAnPWgEnH5UcAKd3w.png)
+
+You can do this in your Webpack config by aliasing react to [preact-compat](https://github.com/developit/preact-compat), and react-dom to preact-compat as well.
+
+<Gist id="3a435a65e8a78957c97a27e9589ef38a" />
+
+The downside to this approach was that they did have to end up putting together a few workarounds in order to get Preact working exactly with all the different pieces of the React ecosystem that they wanted to use.
+
+Preact tends to be a strong choice for the 95% of cases you would use React; for the other 5% you may end up needing to file bugs to work around edge-cases that are not yet factored in.
+
+_Notes: As WebPageTest does not currently offer a way to test real Moto G4s directly from India, performance tests were run under the “Mumbai — EC2 — Chrome — Emulated Motorola G (gen 4) — 3GSlow — Mobile” setting. Should you wish to look at these traces they can be found_ [_here_](https://gist.github.com/addyosmani/d2fc259e1f1d19b64ae0fcbdfac025a2)_._
+
+#### **Skeleton screens**
+
+> “A skeleton screen is essentially a blank version of a page into which information is gradually loaded.”
+
+> ~Luke Wroblewski
+
+![](https://cdn-images-1.medium.com/max/2000/1*sahnJCMruB6mmvjMwzDkUQ.png)
+
+Treebo like to implement their skeleton screens using preview enhanced components (a little like skeleton screens for each component). The approach is basically to enhance any atomic component (Text, Image etc) to have a preview version, such that if the source data that is required for the component is not present, it shows the preview version of the component instead.
+
+For example, if you look at the hotel name, city name, price etc in the list items above, they’re implemented using Typography components like `<Text />` which take two extra props, preview and previewStyle which is used like so.
+
+<Gist id="fb053d71edcf002ccb88a278a2fec306" />
+
+Basically, if the hotel.name does not exist then the component changes the background to a greyish color with the width and other styles set according to the previewStyle passed down (width defaults to 100% if no previewStyle is passed).
+
+<Gist id="41a92ed1059756aed91dfe4afe42d60a" />
+
+Treebo likes this approach because the logic to switch to the preview mode is independent of the data actually being shown which makes it flexible. If you look at the “Incl. of all taxes” part, it’s just static text, which could have been shown right at the start but that would’ve looked very confusing to the user since the prices are still loading during the api call.
+
+So to get the static text “Incl. of all prices” into a preview mode alongside the rest of the ui they just use the price itself as the logic for the preview mode.
+
+<Gist id="65d5f5932241ba68473a55c09707a00e" />
+
+This way while the prices are loading you get a preview UI and once the api succeeds you get to see the data in all its glory.
+
+### **Webpack-bundle-analyzer**
+
+At this point, Treebo wanted to perform some bundle analysis to look at what other low-hanging fruit they could optimize.
+
+**Note: If you’re using a library like React on mobile, it’s important to be diligent about the other vendor libraries you are pulling in. Not doing so can negatively impact performance. Consider better chunking your vendor libraries so that routes only load those that are needed**
+
+Treebo used [webpack-bundle-analyzer](https://www.npmjs.com/package/webpack-bundle-analyzer) to keep track of their bundle size changes and to monitor what modules are contained in each route chunk. They also use it to find areas where they can optimize to reduce bundle sizes such as stripping moment.js’ locales and reusing deep dependencies.
+
+#### Optimizing moment.js with webpack
+
+Treebo relies heavily on [moment.js](https://momentjs.com/) for their date manipulations. When you import moment.js and bundle it with Webpack, your bundle will include all of moment.js and it’s locales by default which is ~61.95kb gzipped. This seriously bloats your final vendor bundle size.
+
+![](https://cdn-images-1.medium.com/max/2000/0*hCQTD69-U1v7tO8x.)
+
+To optimize the size of moment.js, there are [two webpack plugins](https://github.com/jmblog/how-to-optimize-momentjs-with-webpack) available: [IgnorePlugin](https://webpack.js.org/plugins/ignore-plugin/), [ContextReplacementPlugin](https://webpack.js.org/plugins/context-replacement-plugin/)
+
+Treebo opted to remove all locale files with the IgnorePlugin since they didn’t need any of the them.
+
+**new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)**
+
+With the locales stripped out, the moment.js’ bundled size dropped to ~16.48kb gzipped.
+
+![](https://cdn-images-1.medium.com/max/1600/0*ZjW0M4b_xhN_GFaE.)
+
+The biggest improvement as a side effect of stripping out moment.js’ locales was that the vendor bundle size dropped from ~179kb to ~119kb. That’s a massive 60kb drop from a critical bundle that has to be served on first load. All this translates to a considerable decrease in first interaction times. You can read more about optimizing moment.js [here](https://github.com/jmblog/how-to-optimize-momentjs-with-webpack).
+
+#### Reusing existing deep dependencies
+
+Treebo was initially using the “qs” module to perform query string operations. Using the webpack-bundle-analyzer output they found that “react-router” included the “history” module which in-turn included the “query-string” module.
+
+![](https://cdn-images-1.medium.com/max/1600/0*8yOSbnWVyHeXltKM.)
+
+Since there were two different modules both accomplishing the same operations, replacing “qs” with this version of “query-string” (by installing it explicitly) in their source code, dropped their bundle size by a further 2.72kb gzipped (size of the “qs” module).
+
+Treebo have been good open source citizens. They’ve been using a lot of open source software. In return, they’ve actually open sourced most of their Webpack configuration, as well as a boilerplate that contains a lot of the set up they’re using in production. You can find that here: [https://github.com/lakshyaranganath/pwa](https://github.com/lakshyaranganath/pwa)
+
+![](https://cdn-images-1.medium.com/max/1600/0*u6wzzX7XAxJFBQ0T.)
+
+They’ve also committed to trying to keep that up to date. As they evolve you can take advantage of them as another PWA reference implementation.
+
+### **Conclusions and the future**
+
+Treebo knows that no application is perfect, they actively explore many methods to keep improving the experience they deliver to their users. Some of which are:
+
+**Lazy Loading Images**
+Some of you might have figured out from the network waterfall graphs before that the website image downloads are competing for bandwidth with the JS downloads.
+
+![](https://cdn-images-1.medium.com/max/2000/0*a_0WeA_JrALu8-lV.)
+
+Since image downloads are triggered as soon as the browser parses the img tags, they share the bandwidth during JS downloads. A simple solution would be lazy loading images only when they come into the user’s viewport, this will see a good improvement in our time to interactive.
+
+Lighthouse highlights these problems well in the offscreen images audit:
+
+![](https://cdn-images-1.medium.com/max/1600/1*fbZP4KSAzZdUD6_q1WnO1Q.png)
+
+**Dual Importing**
+
+Treebo also realise that while they are asynchronously loading the rest of the CSS for the app (after inlining the critical css), this approach is not viable for their users in the long run as their app grows. More features and routes means more CSS, and downloading all of that leads to bandwidth hogging and wastage.
+
+Merging approaches followed by [loadCSS](https://github.com/filamentgroup/loadCSS) and [babel-plugin-dual-import](https://github.com/faceyspacey/babel-plugin-dual-import), Treebo changed their approach to loading CSS by using an explicit call to a custom implemented importCss(‘chunkname’) to download the CSS chunk in parallel to their import(‘chunkpath’) call for their respective JS chunk.
+
+<Gist id="834e4e3efdba3766770849f688a275a8" />
+
+With this new approach, a route transition results in two parallel asynchronous requests, one for JS and the other for CSS unlike the previous approach where all of the CSS was being downloaded on DOMContentLoaded. This is more viable since a user will only ever download the required CSS for the routes they are visiting.
+
+**A/B Testing** Treebo are currently implementing an AB testing approach with server side rendering and code splitting so as to only push down the variant that user needs during both server and client side rendering. (Treebo will follow up with a blog post on how they tackled this).
+
+**Eager Loading** Treebo ideally don’t want to always load all the split chunks of the app on load of the initial page since they want to avoid the bandwidth contention for critical resource downloads — this also wastes precious bandwidth for mobile users especially if you’re not caching it with service-worker for their future visits. If we look at how well Treebo is doing on metrics like consistently interactive, there’s still much room for improvement:
+
+![](https://cdn-images-1.medium.com/max/2000/1*jSAh4rt_B2qhJsKfYMfuBA.png)
+
+This is an area they’re experimenting with improving. One example is eager loading the next route’s chunk during the ripple animation of a button. onClick Treebo make a webpack [dynamic import()](https://webpack.js.org/guides/code-splitting/#dynamic-imports) call to the next route’s chunk entry and delay the route transition with a setTimeout. They also want to make sure that the next route’s chunk is small enough to be downloaded within the given 400ms timeout on a slow 3g network.
+
+### That’s a wrap.
+
+It’s been fun collaborating on this write-up. There’s obviously more work to be done, but we hope you found Treebo’s performance journey an interesting read :) You can find us over on twitter at [@addyosmani](https://medium.com/@addyosmani 'Medium profile for @addyosmani') and [@\_\_lakshya](https://medium.com/@__lakshya 'Medium profile for @__lakshya') (yep, double underscore xD) we would love to hear your thoughts.
+
+_With thanks to_ [_@\_zouhir_](https://twitter.com/@_zouhir)_,_ [_@\_developit_](https://twitter.com/@_developit) _and_ [_@samcccone_](https://twitter.com/@samccone) _for their reviews and input._

@@ -1,0 +1,157 @@
+---
+title: Sử dụng Google Sheets để lưu trữ dữ liệu web
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: 'https://thecodepost.org/wp-content/uploads/2019/12/thecodepost.org_.png'
+sourceUrl: 'https://www.thecodepost.org/using-google-sheets-as-website-database/'
+date: '2019-11-01T10:30:00.000Z'
+slug: /su-dung-google-sheets-dje-luu-tru-du-lieu-web
+---
+
+Google Sheets is a very popular online spreadsheet application that anyone with a Google account can use totally free. It is very intuitive and even people with no prior experience to Spreadsheet applications will find it easy to use.
+
+Web **[Content Management Systems](https://kinsta.com/knowledgebase/content-management-system/)** typically use the user friendly interface for the end user to manage a website content. The website manager does not have to depend on the developer for creation of new pages, posts, tags or the like. This added abstraction allows non developers to manage their websites easily. This is the reason why Content Management Systems like WordPress, Joomla and Drupal have become so popular.
+
+Typically, Web Content Management Systems (CMS) are of two types. One using the traditional approach uses a relational database like MySQL for the backend storage. A more recent trend has seen database less CMS like [**Hugo**](https://gohugo.io/). These store the data in plain text files. For the end user or the website manager, there is no difference as the user friendly interface is visible to him/her regardless of the type of CMS he/she uses.
+
+### When not to use a traditional CMS
+
+For a rather complicated website, the use of a full-fledged content management system makes sense. There is a lot of content to be managed. There are plugins available to extend functionality. For single page websites or simpler ones with a few pages, using a traditional CMS is not a very smart thing to do.
+
+The following points are important to consider --
+
+1.  The header that a CMS loads is usually more feature rich -- meaning it has support for a lot more types of features that one may require. However, the included scripts are loaded by the CMS itself -- even if you don't use it. This adds to unnecessary bandwidth usage.
+2.  A traditional RDBMS will be an additional overhead that allows database storage at the cost of speed. For a single page website, maintaining a fully functional database on the server for serving requests for each page visit is a waste of resources. A headless or static CMS that does not use a database will be faster and use far less resources.
+
+### The advantage of using Google Sheets as backend
+
+Google sheets is easily accessible and easy to use, even for those who have no development experience. The following advantages are worth noticing --
+
+1.  Easy to use, no learning curve needed
+2.  Accessible and platform independent. All one needs is a browser and a Google account.
+3.  Version control is a part of the product offering. If there is an error, you can revert to a history version easily.
+4.  Ability to share the sheets with those you want to with role based rights. This is analogous to sharing access credentials to a full CMS.
+
+### How to use Google Sheets as a data source
+
+This is fairly simple. You have multiple options to fetch information from Google Sheets. The Google Sheets API will give you access to all the data you need to view and manipulate.
+
+**Step 1: **You can get a JSON response with the entire spreadsheet data. Publish the spreadsheet on the Web first.
+
+![](http://img.thecodepost.org/2019/12/publish-google-sheets-to-web-menu-1024x548.png)
+
+Click on File and click on Publish to Web
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/publish-google-sheets-to-web-1024x548.png)
+
+You can share the link to the people who would be adding data to your site
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/get-google-sheets-id-1024x306.png)
+
+Copy the sheet id starting from /d to the ending forward slash (excluding it)
+
+**Step 2: **Now check out this URL -- https://spreadsheets.google.com/feeds/cells/SHEET_CODE/SHEET_NUMBER/public/full?alt=json
+
+Open the Google Sheets and copy the sheet code and sheet number.
+
+For example, my sheet is here https://docs.google.com/spreadsheets/d/1clakCW5TxaIAEhr7qujT5x3j3Sf7uGRiL-a4zjou4-I/
+
+My sheet code is _1clakCW5TxaIAEhr7qujT5x3j3Sf7uGRiL-a4zjou4-I_ and my sheet number is 1.
+
+Now feed them into the above URL and you will find a JSON response. -- https://spreadsheets.google.com/feeds/cells/1clakCW5TxaIAEhr7qujT5x3j3Sf7uGRiL-a4zjou4-I/1/public/full?alt=json_
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/Screenshot-from-2019-12-08-23-39-58.png)
+
+You can get a JSON response from Google Sheets without using any third party tool
+
+**Alternative Step 2: **The other option is to use third party APIs that actually filter out the unnecessary information (metadata) from the previous JSON response in point ii and provides the content of the sheet directly in simple JSON response.
+
+**'[Tabletop js](https://github.com/jsoma/tabletop)**' is a good example that 'gives spreadsheets legs'.\\  
+This is what I will use in this case. If you want to use the JSON response in point ii, you can do that. The advantage is that you will not have to load an extra JavaScript, but the extra effort is not worth it in my opinion.
+
+### How to integrate Google Sheets as backend
+
+Step 1: First create a static website using whatever tools you have at your disposal. A simple text editor should be fine. I am using Bootstrap for my basic styling requirements, so that it looks professional and familiar.
+
+Step 2: Include the tabletop JavaScript in your page so that the Google Spreadsheet parsers can be used.
+
+```javascript
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js"></script>
+```
+
+Step 3: Initiate a script block and store the path of the spreadsheet in a variable.
+
+Follow up with a \_init() \_function with a key, callback and set simpleSheet to true.
+
+Create a new function _showInfo_ and pass data and tabletop as arguments. This is interesting because tabletop (after _init()_) automatically holds the data of the sheet you assigned in the sheet variable in Step 2.
+
+Step 4: Create a basic card based structure that will repeat for the number of rows there are with details.
+
+```html
+<div class="col-md-4">
+  <h4 style="text-align:center;"></h4>
+  <img class="img-thumbnail rounded mx-auto d-block" style="height:200px;" alt="" src=""</img>
+  <p style="text-align: justify; text-justify: inter-word;"></p>
+  <p><b>Status:</b></p>
+  <p><b>Built Date: </b></p>
+  <p><b>Destroyed Date: </b></p>
+  <p><b>Destroyed by: </b></p>
+  <p><a class="btn btn-outline-info href="#">View details</a></p>
+</div>
+```
+
+**Step 5:** Now go back to the sheet and note down the column headers. This is how it looks now.
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/google-sheets-headers-1024x173.png)
+
+Google Sheets Headers -- note that they are all lowercase. This helps Tabletop.
+
+**Note: **Tabletop requires you to follow a simple guideline for naming column headers. The headers should be the first row and each of the header names should start with a small letter.
+
+Accessing the data is simple. For instance if your header cell is named 'name', getting all names from the sheet will require you to iterate i over data\[i\].name.
+
+Therefore for my headers in the sheet, the respective data fields are --
+
+1.  data\[i\].no
+2.  data\[i\].summary
+3.  data\[i\].datebuilt
+4.  data\[i\].destroyedby
+5.  data\[i\].status
+6.  data\[i\].details_link
+
+So the **_Step 4_** can be re-written as --
+
+```html
+<div class="col-md-4">
+  <h4 style="text-align:center;">'+data[i].name+'</h4>
+  <img class="img-thumbnail rounded mx-auto d-block" style="height:200px;" alt="'+data[i].name+'" src="'+data[i].imagesrc+'"</img>
+  <p style="text-align: justify; text-justify: inter-word;">' + data[i].summary + '</p>
+  <p><b>Status:</b> '+ data[i].status + '</p>
+  <p><b>Built Date: </b> '+ data[i].builtdate + '</p>
+  <p><b>Destroyed Date: </b> '+ data[i].destroyeddate + '</p>
+  <p><b>Destroyed by: </b> '+ data[i].destroyedby + '</p>
+  <p><a class="btn btn-outline-info" target="_blank" href="'+data[i].details_link+'">View details</a></p>
+</div>
+```
+
+**Step 6:**
+
+Load the file up and access it over localhost. It should take a couple of seconds to actually fetch the data after loading the JavaScript, but the static content will be loaded in an instant. The appearance of the page to the end user can be further improved if the hero section of the page is enlarged to cover the entire page by default. By the time he is ready to scroll down, the images and relevant data will already be loaded.
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/google-sheets-as-cms-local-1024x526.png)
+
+Change any data in the Google Sheets and you will see the changes done here as well
+
+You can also debug the issues by simply enabling the Console of your browser's Developer Tools. The JSON response with the data object and its contents will be output there by default. If there is a parsing error, you can make sure the object returns the contents correctly.
+
+![](https://thecodepost.org/wp-content/uploads/2019/12/data-object-from-google-sheets-1024x529.png)
+
+The data array is output in the console
+
+You can share the sheet with edit access to only those who you trust and your site will be up and running without depending on any other heavy server/database resource.
+
+This may run into issues if there are too many records as AJAX like request will slow down to a crawl, so a pagination may be necessary. Using Apps Script on the Spreadsheet itself or conditional JavaScript logic in the page, this can be implemented.
+
+I have hosted this on Github as well. You can [**find the site**](https://sarthakganguly.github.io/mutewitnesses/) and the [**code in the links herein**](https://github.com/sarthakganguly/mutewitnesses).

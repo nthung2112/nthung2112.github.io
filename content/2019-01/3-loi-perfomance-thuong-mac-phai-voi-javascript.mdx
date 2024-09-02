@@ -1,0 +1,82 @@
+---
+title: 3 lỗi perfomance thường mắc phải với JavaScript
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - perfomance
+categories: []
+sourceUrl: >-
+  https://hackernoon.com/3-javascript-performance-mistakes-you-should-stop-doing-ebf84b9de951
+date: 2019-01-18 21:20:00
+slug: /3-loi-perfomance-thuong-mac-phai-voi-javascript
+---
+
+Điều gì sẽ xảy ra nếu tôi nói với bạn mọi thứ bạn biết là sai lầm, điều gì sẽ xảy ra nếu bạn tìm hiểu một số tính năng chính mà ECMAScript yêu thích của chúng ta đã xuất bản trong những năm gần đây, thực sự là những bẫy performance nguy hiểm, được gói gọn trong một line callback function ?
+Câu chuyện này bắt đầu từ vài năm trước, trở lại thời kỳ ngây thơ của ES5...
+
+![](https://cdn-images-1.medium.com/max/1600/0*9ZI7OIRHE7ARhiuK)
+
+Tôi vẫn còn nhớ ngày đó, ES5 đã được phát hành và các hàm array mới tuyệt vời đã được giới thiệu cho JavaScript. Trong số đó có forEach, reduce, map, filter - chúng làm cho chúng ta cảm thấy ngôn ngữ đang phát triển, có nhiều chức năng hơn, viết mã trở nên thú vị và mượt mà hơn, và kết quả dễ đọc và dễ hiểu hơn.
+
+Đồng thời, một môi trường mới phát triển - Node.js, nó cho chúng ta khả năng chuyển đổi dễ dàng từ front-end sang back-end trong khi thực sự muốn phát triển full stack development.
+
+Ngày nay, Node.js, sử dụng ECMAScript mới nhất trên V8, đang cố gắng được coi là một phần của các ngôn ngữ phát triển phía server-side lớn và do đó, nó cần phải chứng minh hiệu suất xứng đáng. Vâng, có rất nhiều thông số cần được tính đến, và vâng, không có ngôn ngữ nào vượt trội hơn tất cả. Nhưng, việc viết JavaScript bằng cách sử dụng các tính năng vượt trội được cung cấp như chức năng array đã đề cập ở trên có giúp ích hay làm hại performance ứng dụng của bạn không?
+
+Moreover, client-side javascript is claiming to be a reasonable solution for more than just presentation\view, as end-users computers grow stronger, and networks faster — but can we rely on this when our application requires blazing fast performance and might be a very large and complex one?
+
+Hơn nữa, javascript phía client-side là một giải pháp hợp lý cho nhiều thứ hơn là chỉ view, vì máy tính của người dùng cuối phát triển mạnh hơn và mạng nhanh hơn - nhưng chúng ta có thể dựa vào điều này khi ứng dụng của chúng tôi yêu cầu hiệu năng nhanh và có thể là một rất lớn và phức tạp?
+
+Để kiểm tra những câu hỏi này, tôi đã thử so sánh một vài kịch bản và đi sâu vào để hiểu kết quả mà tôi nhận được. Tôi đã thực hiện các thử nghiệm sau trên Node.js v10.11.0 và trong trình duyệt Chrome, cả trên macOS.
+
+#### **1\. Looping Over an Array**
+
+The first scenario which came to mind was summing an array of 10k items, this is a valid real-life solution I stumbled upon while trying to fetch a long table of items from the database and enhance it with the total sum, without having an additional query to the DB.
+
+I compared the summing of random 10k items using for, for-of, while, forEach, and reduce. Running the tests 10,000 times returned the following results:
+
+```javascript
+For Loop, average loop time: ~10 microseconds
+For-Of, average loop time: ~110 microseconds
+ForEach, average loop time: ~77 microseconds
+While, average loop time: ~11 microseconds
+Reduce, average loop time: ~113 microseconds
+```
+
+While googling how to sum an array, reduce was the best-offered solution but it’s the slowest. My go-to forEach wasn’t much better. Even the newest for-of (ES6) provides inferior performance. It turns out, the good old for loop (and also while) provides the best performance by far — 10x better!
+
+How can the newest and recommended solution make JavaScript so much slower? The cause of this pain comes from two main reasons, reduce and forEach requires a call back function to be executed which is called recursively and bloats the stack, and additional operation and verification which are made over the executed code (described [here](https://www.ecma-international.org/ecma-262/5.1/#sec-15.4.4.21)).
+
+#### **2\. Duplicating an Array**
+
+While this sounds like a less interesting scenario, this is the pillar of immutable functions, which doesn’t modify the input when generating an output.
+
+Performance testing findings here again show the same interesting trend — when duplicating 10k arrays of 10k random items, it is faster to use the old school solutions. Again the trendiest ES6 spread operation `[…arr]` and Array from `Array.from(arr)` plus the ES5 map `arr.map(x => x)` are inferior to the veteran slice `arr.slice()` and concatenate `[].concat(arr)`.
+
+```javascript
+Duplicate using Slice, average: ~367 microseconds
+Duplicate using Map, average: ~469 microseconds
+Duplicate using Spread, average: ~512 microseconds
+Duplicate using Concat, average: ~366 microseconds
+Duplicate using Array From, average: ~1,436 microseconds
+Duplicate manually, average: ~412 microseconds
+```
+
+#### **3\. Iterating Objects**
+
+Another frequent scenario is iterating over objects, this is mainly necessary when we try to traverse JSON’s and objects, and while not looking for a specific key value. Again there are the veteran solutions like the for-in `for(let key in obj)`, or the later `Object.keys(obj)` (presented in es6) and `Object.entries(obj)` (from ES8) which returns both key and value.
+
+Performance analysis of 10k objects iterations, each of which contains 1,000 random keys and values, using the above methods, reveals the following.
+
+```javascript
+Object iterate For-In, average: ~240 microseconds
+Object iterate Keys For Each, average: ~294 microseconds
+Object iterate Entries For-Of, average: ~535 microseconds
+```
+
+The cause is the creating of the enumerable array of values in the two later solutions, instead of traversing the object directly without the keys array. But the bottom line result is still causing concerns.
+
+#### **Bottom Line**
+
+My conclusion is clear — if blazing fast performance is key for your application, or if your servers require to handle some load — using the coolest, more readable, cleaner options will blow a major punch to your application performance — which can get up to 10 times slower!
+
+Next time, before blindly adopting the slickest new trends, make sure they also align with your requirements — for a small application, writing fast and a more readable code is perfect — but for stressed servers and huge client-side applications, this might not be the best practice.

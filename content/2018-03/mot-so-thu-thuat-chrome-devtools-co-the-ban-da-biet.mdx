@@ -1,0 +1,108 @@
+---
+title: Một số thủ thuật Chrome DevTools có thể bạn đã biết
+author: Hung Tan Nguyen
+tags:
+  - tips
+  - chorme
+categories:
+  - Tips
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*7B6B7FIxj18TSeYxh1ssLA.png'
+sourceUrl: >-
+  https://medium.freecodecamp.org/cool-chrome-devtools-tips-and-tricks-you-wish-you-knew-already-f54f65df88d2
+date: 2018-03-25 14:54:00
+slug: /mot-so-thu-thuat-chrome-devtools-co-the-ban-da-biet
+---
+
+### 1. Drag-and-drop in the Elements panel
+
+In the Elements panel, you can drag and drop any HTML element and change its position across the page
+
+![Drag-and-drop in the Elements panel](https://cdn-images-1.medium.com/max/1600/1*YJ4pbintkGmF67YSLH7UEQ.gif)
+
+### 2. Reference the currently selected element in the Console
+
+Select a node in the Elements panel, and type $0 in the console to reference it.
+
+If you’re using jQuery, you can enter $($0) to access the jQuery API on this element.
+
+![Reference the currently selected element in the Console](https://cdn-images-1.medium.com/max/1600/1*Ua9Z12CO8LYWcx5L2zpQAw.gif)
+
+### 3. Use the value of the last operation in the Console
+
+Use $\_ to reference the return value of the previous operation executed in the Console
+
+![Use the value of the last operation in the Console](https://cdn-images-1.medium.com/max/1600/0*zxJYnGdu8QUPGSiW.gif)
+
+### 4. Add CSS and edit the element state
+
+In the Elements panel there are two super useful buttons.
+
+The first lets you add a new CSS property with any selector you want, but pre-filling the currently selected element:
+
+![Add CSS rules](https://cdn-images-1.medium.com/max/1600/0*SVTP4Rl82XYNc4Kp.gif)
+
+The second one lets you trigger a state for the selected element, so you can see the styles applied when it’s active, hovered, or on focus.
+
+![Edit the element state](https://cdn-images-1.medium.com/max/1600/0*1nCZIzP73fr2xAwQ.png)
+
+### 5. Save to file the modified CSS
+
+Click the name of the CSS file that you edited. The inspector opens it into the Sources pane, and from there you can save it with the live edits you applied.
+
+This trick does not work for new selectors added using +, or into the element.style properties, but only for modified, existing ones.
+
+![Save to file the modified CSS](https://cdn-images-1.medium.com/max/1600/1*7Q-CbjzcXYR20dbtmyMbJw.gif)
+
+### 6. Screenshot a single element
+
+Select an element and press cmd-shift-p (or ctrl-shift-p in Windows) to open the Command Menu, and select **Capture node screenshot**
+
+![Screenshot a single element](https://cdn-images-1.medium.com/max/1600/0*CjWhHTmoZbCeMXSw.gif)
+
+### 7. Find an element using CSS selectors
+
+Pressing cmd-f (ctrl-f in Windows) opens the search box in the Elements panel.
+
+You can type any string in there to match the source code, or you can also use CSS selectors to have Chrome generate an image for you:
+
+![Find an element using CSS selectors](https://cdn-images-1.medium.com/max/1600/0*ipqpirAGqDRlEbes.gif)
+
+### 8. Shift-enter in the Console
+
+To write commands that span over multiple lines in the Console, press shift-enter.
+
+Once you’re ready, press enter at the end of the script to execute it:
+
+![Shift-enter in the Console to write multiline commands](https://cdn-images-1.medium.com/max/1600/0*QizwVdkFs7FC1kv1.gif)
+
+You can clear the console using the _Clear_ button on the top-left of the console, or by pressing ctrl-l or cmd-k.
+
+### 9. Go to…
+
+In the Sources panel:
+
+- cmd-o (ctrl-o in Windows), shows all the files loaded by your page.
+- cmd-shift-o (ctrl-shift-o in Windows) shows the functions (or classes) in the current file.
+- cmd-l (ctrl-l in Windows) goes to a specific line.
+
+![Go to file](https://cdn-images-1.medium.com/max/1600/0*mxGuyBT02JoiSlb-.png)
+
+### 10. Watch Expression
+
+Instead of writing again and again a variable name or an expression you are going to check a lot during a debug session, add it to the _Watch Expression_ list.
+
+![Watch Expression](https://cdn-images-1.medium.com/max/1600/0*gSpZcWiUho4z9DoW.gif)
+
+### 11. XHR/Fetch debugging
+
+From the debugger open the **XHR/Fetch Breakpoints** panel.
+
+You can set it to break any time a XHR/Fetch call is sent, or just on specific ones:
+
+![XHR/Fetch debugging](https://cdn-images-1.medium.com/max/1600/0*r_-hBTOJ23eSDX-g.png)
+
+### 12. Debug on DOM modifications
+
+Right-click an element and enable _Break on Subtree Modifications._ Whenever a script traverses that element’s children and modifies them, the debugger stops automatically to let you inspect what’s happening.
+
+![Debug on DOM modifications](https://cdn-images-1.medium.com/max/1600/0*VYABHtIwKZ5eeu-p.png)

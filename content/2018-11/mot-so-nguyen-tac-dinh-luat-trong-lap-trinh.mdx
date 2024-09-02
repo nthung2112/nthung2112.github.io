@@ -1,0 +1,132 @@
+---
+title: 'Một số nguyên tắc, định luật trong lập trình'
+author: Hung Tan Nguyen
+tags: []
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/800/1*y2ULNDQK6jlUJkOfGa5obw.jpeg'
+sourceUrl: 'https://qiita.com/hirokidaichi/items/d6c473d8011bd9330e63'
+date: 2018-11-06 07:29:00
+slug: /mot-so-nguyen-tac-dinh-luat-trong-lap-trinh
+---
+
+## Nguyên tắc Demeter
+
+Còn có tên gọi khác là nguyên tắc “càng biết ít càng tốt”.
+
+Demeter là tên gọi của Nữ thần nông nghiệp, cũng là nữ thần phân phát trong thần thoại Hi Lạp. Tên bà được dùng để đánh dấu sự ra đời của nguyên tắc này, đây có thể xem là một triết lý nền tảng của việc lập trình được sinh ra từ một aspect-oriented programming (AOP) project cùng tên.
+
+Quan điểm cơ bản của nguyên tắc này chính là : tối giản sự hiểu biết của 1 object về cấu trúc, thuộc tính của các object khác ngoài nó (bao gồm các thành phần con).
+
+[http://en.wikipedia.org/wiki/Law_of_Demeter](http://en.wikipedia.org/wiki/Law_of_Demeter)
+
+Nói một cách đơn giản là không được tiếp xúc với thuộc tính, method của các object khác một cách trực tiếp.
+
+```javascript
+#Vi phạm nguyên tắc Demeter
+console.log(aStudent.class.grade)
+
+#Không vi phạm nguyên tắc Demeter
+console.log(aStudent.getGrade())
+```
+
+## Định luật Wirth
+
+“Software gets slower faster than hardware gets faster” – “Tốc độ tiến hóa của phần cứng không bằng tốc độ thoái hóa của phần mềm.”
+
+[http://en.wikipedia.org/wiki/Wirth’s_law](http://en.wikipedia.org/wiki/Wirth%E2%80%99s_law)
+
+Có lẽ ý chính của nó là : lập trình ngày càng dùng nhiều tài nguyên phong phú nên framework phải luôn tiến hóa để phục vụ cho việc đó. Suy ra, tốc độ phần cứng dù có tang lên đi nữa thì tốc độ phần mềm cũng chẳng hề thay đổi gì.
+
+## Định luật Brook
+
+Đây là một định luật dựa trên kinh nghiệm thực tế : “Đưa thêm người vào 1 project đang chậm, sẽ chỉ khiến nó càng chậm hơn.”
+
+Hay có thể nói theo một cách khác nữa là “Tập hợp 9 bà bầu lại cũng không thể khiến đứa trẻ ra đời sau 1 tháng.”
+
+Luận thuyết cơ bản của định luật này là
+
+- Cần thời gian để quen với project
+- Công sức dành cho việc communication sẽ tăng
+
+[http://en.wikipedia.org/wiki/Brooks's_law](http://en.wikipedia.org/wiki/Brooks%27s_law)
+
+## Định luật Conway
+
+“Organizations which design systems … are constrained to produce designs which are copies of the communication structures of these organizations.”
+
+“Một công ty thiết kế hệ thống thế nào cũng sẽ làm ra những thiết kế giống y hệt với thiết kế hệ thống của chính công ty họ.”
+
+[http://en.wikipedia.org/wiki/Conway's_law](http://en.wikipedia.org/wiki/Conway%27s_law)
+
+Nghiên cứu gần đây chỉ ra rằng hệ thống của công ty là nhân tố ảnh hưởng lớn nhất đến vấn đề phát sinh ra bug của sản phẩm.
+
+[http://research.microsoft.com/apps/pubs/default.aspx?id=70535](http://research.microsoft.com/apps/pubs/default.aspx?id=70535)
+
+## Nguyên tắc bất ngờ nhỏ nhất (least astonishment)
+
+Trong trường hợp trên cùng 1 interface có 2 yếu tố hành xử mâu thuẫn với nhau, hoặc cách hành xử không rõ ràng thì cần phải chọn cách hành xử nào gây bất ngờ ít nhất cho người sử dụng.
+
+[http://en.wikipedia.org/wiki/Principle_of_least_astonishment](http://en.wikipedia.org/wiki/Principle_of_least_astonishment)
+
+Đây là 1 nguyên tắc về giao diện người dùng.
+
+Một ví dụ đơn giản :
+
+Trên 1 interface có 2 chức năng :
+
+- Ấn ctrl+Q để thoát chương trình.
+- Nhập macro (lưu 1 tổ hợp phím mang 1 chức năng nào đó để tiện cho việc sử dụng về sau).
+
+Sẽ có trường hợp user muốn dùng Ctrl+Q cho macro của mình, nên hành xử đúng với nguyên tắc bất ngờ nhỏ nhất chính là : trong khi nhập macro thì ctrl+Q được coi như là tổ hợp phím bình thường, không phải là lệnh tắt chương trình. Đây chính là điều gây bất ngờ ít nhất cho người dùng.
+
+## Nguyên tắc Boy Scout
+
+Nguyên tắc của các tổ chức Boy scout chính là : lúc đi phải sạch đẹp hơn lúc đến.
+
+Trong lĩnh vực lập trình thì nguyên tắc đó sẽ được hiểu là “Khi bạn checkin 1 module thì lúc đó nó phải đẹp hơn lúc bạn checkout.”
+
+## Nguyên tắc YAGNI
+
+Viết tắt của “You ain’t gonna need it” – Cái (chức năng, phần) ấy rồi sẽ không cần thiết.
+
+Đó là một câu khẩu ngữ nhắc nhở người lập trình rằng trong quy trình Extreme Programming (lập trình cực hạn) thì : “Chưa phải lúc cần thiết thì chưa được phép làm.”
+
+## Nguyên tắc DRY
+
+Viết tắt của “Don’t repeat yourself” – với ý nghĩa là “Đừng lặp lại những gì giống nhau”.
+
+[http://en.wikipedia.org/wiki/Don't_repeat_yourself](http://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
+
+Khi nguyên tắc này được áp dụng tốt, dù ta có thay đổi 1 phần thì những phần không liên quan cũng sẽ không bị thay đổi theo. Hơn nữa, những phần có liên quan sẽ được thay đổi cùng 1 lượt, giúp ích rất nhiều cho cả khâu estimate và khâu thực hiện.
+
+## Nguyên tắc KISS
+
+Viết tắt của “Keep it simple, stupid” – “Cứ đơn giản thôi, đồ ngu!”. Đây là 1 triết lí của Hải quân Mỹ.
+
+[http://en.wikipedia.org/wiki/KISS_principle](http://en.wikipedia.org/wiki/KISS_principle)
+
+Những triết lý tương tự có thể kể đến là :
+
+**Phương châm dao cạo Okham (Okham’s razor)** – “Không đưa ra nhiều giả thiết nếu không cần thiết. Cái gì cần ít giả thiết để chứng minh sẽ không thể chứng minh được bằng nhiều giả thiết.”
+
+**Albert Einstein** – “Làm cái gì cũng nên đơn giản nhất có thể, nhưng đơn giản quá thì không được”.
+
+**Leonardo da Vinci** – “Đơn giản nhất chính là điêu luyện nhất”.
+
+**Antoine de Saint- Exupéry** – “Hoàn hảo, không phải là không thêm vào được nữa, mà là không thể bớt đi được nữa”.
+
+## Nguyên tắc SOLID
+
+Tập hợp những nguyên tắc trong lập trình hướng đối tượng. Các chữ cái đầu hợp lại thành SOLID.
+
+[http://en.wikipedia.org/wiki/SOLID\_(object-oriented_design)](<http://en.wikipedia.org/wiki/SOLID_(object-oriented_design)>)
+
+**SRP (Single Responsibility Principle)** – “Một class chỉ được có 1 nhiệm vụ” hay nói cách khác, “nếu muốn chỉnh sửa class thì chỉ được phép có 1 và chỉ 1 lý do”.
+
+**OCP (Open/closed principle)** – “Mở class khi cần mở rộng nó, đóng class khi cần chỉnh sửa nó”.
+
+**LSP (Liskov substitution principle)** – “Subtype phải luôn có thể được thay thế bằng supertype”.
+
+**ISP (Interface segregation principle)** – “Việc dùng nhiều interface cho các client khác nhau, tốt hơn là việc chỉ dùng 1 interface cho cùng lúc nhiều mục đích” hay nói cách khác “Không được phép hạn chế access vào những method mà client không sử dụng”.
+
+**DIP (Dependency inversion principle)** – “Module tầng trên không được phụ thuộc vào module tầng dưới. Bất cứ module nào cũng phải phụ thuộc vào cái trừu tượng, không phải vào cái cụ thể”.

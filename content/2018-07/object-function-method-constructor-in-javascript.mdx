@@ -1,0 +1,278 @@
+---
+title: 'Object, Function, Method, Constructor in JavaScript'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: 'https://kipalog.com/posts/Object--Function--Method--Constructor-in-JavaScript'
+coverImage: 'https://cdn-images-1.medium.com/max/800/1*pWfJGrCbLcK6cy5TDT4DiA.jpeg'
+date: 2018-07-24 12:02:00
+slug: /object-function-method-constructor-in-javascript
+---
+
+**TL;DR**
+
+Lưu ý một chút về cách trình bày: `.propname` tức là public property có tên là "propname" của một đối tượng
+
+## Bắt đầu với Object, Function và Method
+
+- JavaScript's object giống như một cái túi (hay một vùng nhớ) chứa các property (thuộc tính) ở bên trong nó. Những property trong JavaScript đều public và được lưu trữ theo cấu trúc **Mapping (tức key-value pair)**.
+- Function trong JavaScript được xem là first-class object (cũng tương tự như object và ta sẽ gọi nó là **functionObject**).
+- Chính vì JavaScript's function được xem như object nên ta có thể return (trả về), pass to parameter (truyền vào function khác thông qua đối số), store in variable (lưu trữ trong biến) or store in Object's property (lưu trữ trong property của Object => lúc đó function được gọi là method),...
+
+## Prototypes
+
+- Prototype của object là một internal property (có thể hiểu là một property nội tại ẩn bên trong), ta sẽ gọi nó là `{Prototype}`. JavaScript standard không cung cấp cách thức để truy xuất `**{Prototype}**` property từ một object. **Lưu ý `{Prototype}` bản thân nó cũng là một object**.
+- Giống như bao ngôn ngữ lập trình OOP khác, JavaScript có thể tạo object từ một function được gọi là **constructor**.
+- Vì constructor là function và là functionObject nên nó cũng có `{Prototype}` property.
+- JavaScript standard cung cấp một public property cho functionObject là `.prototype` để truy xuất prototype của function.**Lưu ý đối tượng được truy xuất thông qua public property `.prototype` không phải là `{Prototype}` property của functionObject**.
+
+### Properties lookup
+
+- JavaScript's object có thể ủy thác một số property của nó cho `{Prototype}`. Và bản thân `{Prototype}` cũng làm tương tự; Tất cả đều hướng đến Build-in `Object.prototype`. **Lưu ý Build-in `Object.prototype` bằng _null_**
+
+```
+object --chứa--> {Prototype}
+và bản thân {Prototype} cũng là object
+{Prototype} --chứa--> {Prototype}'s {Prototype}
+và bản thân {Prototype}'s {Prototype} cũng là object
+{Prototype}'s {Prototype} --chứa--> {Prototype}'s {Prototype}'s {Prototype}
+.....
+..... --chứa--> Build-in Object.prototype
+(end)
+```
+
+- Hiện tượng trên người ta gọi là Inheritance (kế thừa) trong JavaScript thông qua prototype. Do đó JavaScript là một **prototype-base OOP language**
+- Ở ví dụ trên, ta thấy xảy ra đệ quy, người ta gọi là `**{Prototype} chain**`. tức duyệt xuyên suốt các `{Prototype}`
+- Khi gọi một property ra từ object thì đầu tiên hệ thống sẽ kiểm tra xem property đó có nằm trong object đó không. Nếu không, chúng sẽ chuyển hướng qua tìm property đó trong object's `{Prototype}`. Quá trình đệ quy cứ thế được thực hiện cho đến khi tìm đến Build-in Object.prototype thì dừng lại.
+
+### Setting properties
+
+- Khi một property được set giá trị, property đó không có trong object thì nó sẽ được tạo mới, hệ thống tự động bỏ qua việc tìm kiếm nó trong `{Prototype}`. Property mới được thêm vào object sẽ làm mờ nhạt property trùng tên (nếu có) trong `{Prototype}` chain
+- `{Prototype}` của object bị ảnh hưởng khá mạnh bởi public property `.prototype` của constructor. Ta có thể quyết định `{Prototype}` của một object thông qua việc điều chỉnh `.prototype` property của constructor.
+- Khi constructor được gọi thực thi (hay nói cách khác function được gọi theo Constructor Format) (xem phần **footnotes**) thì một object mới được sinh ra. `{Prototype}` của object mới và public property `.prototype` của constructor sẽ tham chiếu cùng một đối tượng.
+
+## Tiếp theo sẽ là gì? Ta cùng hình dung
+
+Trước tiên sẽ là mối liên quan giữa public property `.prototype` và `{Prototype}`. hình ellipse biểu diễn object, mũi tên biểu diễn property của object đó tham chiếu đến một object khác. `{Prototype}` chain sẽ được tô mũi tên mày xanh lá.
+
+### 1: Define constructor:
+
+```javascript
+function MyConstructor() {}
+```
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/rkuzvvigqw_1.png)
+
+Ta dễ dàng thấy MyConstructor được biểu diễn trong hình Ellipse, tức nó là function và là functionObject và sẽ được dùng như constructor.
+
+**Ghi nhớ rằng**: chỉ những public property `.prototype` của functionObject, là những object mặc định sở hữu public property `.constructor`  
+Tức là theo ví dụ trên: MyConstructor.prototype là giá trị mặc định cho property `.prototype` của MyConstructor. Và nó mặc định sở hữu property `.constructor` trỏ ngược về MyConstructor
+
+Phần còn lại trong bức ảnh minh họa rõ ràng những khái niệm đã đề cập ở phần đầu bài viết
+
+Bước kế tiếp ta sẽ bỏ qua phần `{Prototype}` chain của MyConstructor cho gọn, vì chúng không thay đổi và cũng không liên quan đến những gì được trình kế tiếp sau đây.
+
+### 2: Assign new prototype property:
+
+```javascript
+MyConstructor.prototype = {};
+```
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/iafa0yzffc_2.png)
+
+Ta thay `.prototype` mặc định của MyConstructor bằng một đối tượng mới. Đặc biệt đối tượng này không có property `.constructor`
+
+### 3: Call constructor to create new object:
+
+```javascript
+var myobject = new MyConstructor();
+```
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/1j0lr35ama_3.png)
+
+Như đã trình bày ở mục **setting propertites** của bài viết, ta dễ dàng thấy được `{Prototype}` của myobject và property `.prototype` của MyConstructor tham chiếu đến cùng một đối tượng.
+
+Vậy bây giờ dựa theo mục **properties lookup**, ta thử truy xuất một property bất kì từ myobject. Ta chọn property có tên là constructor, chuyện gì sẽ xảy ra
+
+```javascript
+myobject.constructor = ?
+```
+
+Đơn giản, áp dụng `{Property}` chain, ta sẽ có ngay đáp án. Bây giờ cùng thu gọn tất cả những đoạn code ta viết lại:
+
+```javascript
+function MyConstructor() {}
+MyConstructor.prototype = {};
+var myobject = new MyConstructor();
+
+myobject.constructor == Object; // true
+myobject.constructor.prototype == Object.prototype; // true
+```
+
+**Ghi chú**: Nếu nhìn lại ta sẽ hiểu vì sao ngay từ bước **#2** ta lược bỏ đi phần `{Prototype}` của MyConstructor là đúng đắn
+
+### Thế nếu dùng instanceof kết quả như thế nào?
+
+Viết lại nguyên văn:  
+ "Javascript provides the instanceof operator that’s intended to check the prototype chain of the object you’re dealing with."
+
+Từ những bước ở trên, ta có thể nghĩ rằng đoạn code sau sẽ trả về false
+
+```javascript
+function MyConstructor() {}
+MyConstructor.prototype = {};
+var myobject = new MyConstructor();
+
+myobject instanceof MyConstructor; // true
+```
+
+nhưng thực chất, nó chạy ổn và còn hơn thế nữa:
+
+```javascript
+function MyConstructor() {}
+MyConstructor.prototype = {};
+var myobject = new MyConstructor();
+
+myobject instanceof Object; // true
+```
+
+Khi instanceof được gọi, nó **hoạt động dựa trên `{Prototype}` chain. Và nó chẳng đá động hay lệ thuộc vào property** `.constructor`
+
+cùng nhìn lại hình ở bước **#3**
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/38d3vbr9vo_4.png)
+
+Cứ tới một "trạm" tức đối tượng tham chiếu bởi `{Prototype}`, nó check xem đối tượng này được tham chiếu thông qua `.prototype` property của ai.  
+Đầu tiên dừng tại đối tượng {}, nó check và phát hiện ra {} được tham chiếu thông qua `.prototype` property của MyConstructor, suy ra:
+
+```javascript
+myobject instanceof MyConstructor; // true
+```
+
+Tiếp theo dừng tại đối tượng Object.prototype nó phát hiện ra Object.protoype tham chiếu thông qua `.prototype` property của build-in Object, suy ra:
+
+```javascript
+myobject instanceof Object; // true
+```
+
+Có ổn rồi, nhưng ta vẫn có thể tìm ra những điều bất thường nếu chịu khó mò mẫm:
+
+```javascript
+function MyConstructor() {}
+var myobject = new MyConstructor();
+MyConstructor.prototype = {};
+
+[
+  myobject instanceof MyConstructor, // false !
+  myobject.constructor == MyConstructor, // true !
+  myobject instanceof Object,
+]; // true
+```
+
+ở đoạn code trên ta đổi thứ tự của hai dòng code, myobject được tạo ra trước sau đó MyConstructor mới đổi giá trị của `.prototype` property.  
+Do đó `{Prototype}` chain sẽ trông như vầy:
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/hh0v85pb9l_5.png)
+
+Đúng như dự đoán `{Prototype}` của object sẽ tham chiếu đến đối tượng cũ mà `.prototype` property của MyConstructor từng tham chiếu.
+
+Điều này làm thay đổi `{Prototype}` chain và có thêm sự xuất hiện của `.constructor` property của old `MyConstructor.prototype` dẫn đến `{Prototype}` của object và `.prototype` property của MyConstructor không tham chiếu đến cùng một đối tượng.  
+Dừng tại `{Prototype}` đầu tiên là đối tượng old `MyConstructor.prototype`, nó không phát hiện ra đối tượng đó được tham chiếu thông qua `.prototype` property của ai cả. Tiếp tục `{Prototype}` thứ hai, là `Object.prototype` thì quá rõ ràng, suy ra:
+
+```javascript
+myobject instanceof MyConstructor, // false !
+  myobject instanceof Object; // true
+```
+
+Ngoài ra, thông qua `{Prototype}` chain (xem lại mục **properties lookup**), thì ta thấy `.constructor` property đầu tiên được bắt gặp trong old `MyConstructor.prototype` nên
+
+```javascript
+myobject.constructor == MyConstructor, // true !
+```
+
+là điều dễ hiểu.
+
+## Một số nhận định
+
+#### Constructors không phải classes
+
+Nhìn lại các class-based OOP language (như Java, C#,...), các classes kế thừa từ những classes khác, và object là instance của những classes đó. Các properties và methods được chia sẻ giữa các instances. Và việc chia sẻ đó bị chi phối bởi **access modifier** (public, private, internal, protected,......)
+
+Javascript cũng có khái niệm kế thừa, chia sẻ properties và methods thông qua prototype. Nhưng thực tế `{Prototype}` của constructor và `{Prototype}` chain của object được tạo ra từ constructor đó, lại hoàn toàn khác biệt, không liên quan đến nhau.
+
+#### Constructors không hoạt động như class-based initializer
+
+Để có được khái niệm kế thừa thông qua prototype, Khi constructor được gọi nó tiến hành liên kết `{Prototype}` property của object với `.prototype` property của chính nó. Những gì còn lại là việc constructor thêm vào một số properties, methods khác cho object
+
+#### Constructors chỉ là functions
+
+Xem lại bước **#1**, ta thấy MyConstructor chẳng khác gì một function bình thường. Vì vậy bất kì user-defined function nào trong Javascript cũng tự động có `.prototype` property tham chiếu đến một đối tượng sở hữu `.constructor` property tham chiếu ngược về function đó
+
+Bất cứ user-defined function nào cũng được gọi thực thi như một constructor bằng cách thêm vào từ khóa new. Cách làm đó sẽ truyền object mới được tạo bởi từ khóa new vào trong constructor function, và phần việc còn lại của constructor thì như đã nói ở bên trên
+
+#### References
+
+(tham khảo từ [bài viết của zeekat/articles](https://zeekat.nl/articles/constructors-considered-mildly-confusing.html) với một số chỉnh sửa theo hiểu biết của bản thân và để phù hợp với Tiếng Việt)  
+(xem thêm [constructor in Javascript object](https://stackoverflow.com/questions/1114024/constructors-in-javascript-objects))  
+(xem thêm [Javascript inheritance and the constructor property](https://stackoverflow.com/questions/8093057/javascript-inheritance-and-the-constructor-property/8096017#8096017))  
+(xem thêm [ECMA-262 lastest version](https://tc39.github.io/ecma262/#sec-fundamental-objects))
+
+#### Footnotes
+
+\[1\]  
+John G Harris từng viết trong comp.lang.javascript rằng những gì trình bày ở bên trên cũng tương đối chưa đúng hoàn toàn. Về mặt lý thuyết, host system có thể sẽ đổi `Object.prototype` property bằng một thứ gì đó khác. Một số thảo luận chấp thuận rằng `Object.prototype` chỉ được read-only. Nhưng ở một số browser (firefox) thì ta có thể gán giá trị mới cho `Object.prototype` mà không có lỗi nào xảy ra.
+
+\[2\]  
+có 4 cách để gọi thực thi (invocation) một function trong JavaScript  
+(_giữ nguyên văn cho dễ hiểu_)
+
+**Function form:**
+
+```javascript
+functionObject(arguments);
+```
+
+When a function is called in the function form, this is set to the global object.
+
+- that is not very useful (fixed in ES5/Strict)
+- an inner function does not get access to the outer this
+
+**Method form:**
+
+```javascript
+thisObject.methodName(agurments);
+thisObject['methodName'](arguments);
+```
+
+When a function is called in the method form, this is set to thisObject, the object containning the function.  
+this allows method to have a reference to the object of interest
+
+**Constructor form:**
+
+```javascript
+new functionObject(arguments);
+```
+
+- When a function is called with the new operator, a new object is created and assigned to this.
+- If there is not an explicit return value, then this will be returned.
+- Used in the Pseudoclassical style
+
+**Apply form:**
+
+```javascript
+functionObject.apply(thisObject, [arguments]);
+functionObject.call(thisObject, arguments....);
+```
+
+- A function's apply or call method allows for calling the function,explicitly specifying thisObject.
+- It can also take an array of parameters or a sequence of paramenters.
+
+```javascript
+// the definition of call method
+Funtion.prototype.call = function (thisObject) {
+  return this.apply(thisObject, Array.prototype.slice.apply(arguments, [1]));
+};
+```
+
+![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/dnry2vj88r_this.png)

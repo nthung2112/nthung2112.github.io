@@ -1,0 +1,418 @@
+---
+title: Làm thế nào để kết hợp NodeJS Back End với ReactJS Front End
+author: Hung Tan Nguyen
+date: 2017-11-04 23:34:28
+sourceUrl: https://hackernoon.com/how-to-combine-a-nodejs-back-end-with-a-reactjs-front-end-app-ea9b24715032
+coverImage: https://cdn-images-1.medium.com/max/1600/1*-NOQtyJAGQ1RNC3iVt_thA.png
+tags: [nodejs, react]
+slug: /lam-the-nao-de-ket-hop-nodejs-back-end-voi-reactjs-front-end
+---
+
+---
+
+In this post, I want to show how you can build the front and back end of a website using NodeJS for the back end. We’ll use node to create endpoints, and set up a database in JSON format. Then, we’ll create a front end application using React that will post to the database, and also fetch data from it.
+
+For this example, I’ll be making a guestbook, where users can submit their names and leave messages. Because users won’t need to log in, or retrieve any data, I won’t need to store anything in a session. Here’s the way this will likely work:
+
+![](https://cdn-images-1.medium.com/max/1600/1*1jc_PHELP7D04nUsZb3zmQ.png)
+
+Basically, we will have this all one one page, with a form for submitting a message, alongside the actual guestbook. To make this work we’’ll start by creating the endpoints for our POST and GET requests. We’ll set up our database, deploy it, so that we can create a React app, and pull data from the online API.
+
+Here’s the order in which I like to do things. You may prefer to work differently. This process makes sense to me, because each step builds on the step before it. During this tutorial, I’ll go through each step in more detail.
+
+![](https://cdn-images-1.medium.com/max/1600/1*AzwpcG8i0GA3mxmHMenLeQ.png)
+
+To see how the finished project could work, here’s a link to my project:
+
+[http://ethan.jarrell.webdeveloper.surge.sh/GuestBook](http://ethan.jarrell.webdeveloper.surge.sh/GuestBook)
+
+### STEP 1 -
+
+Our database collection will contain 2 items:
+
+1.  The name of the user
+2.  The message the user writes
+
+If you haven’t already done so, go ahead and install MongoDB, and get it running on port 27017\. Then, on the command line, we’ll create the database.
+
+We’ll call our database signatures. And the collection, guest_signatures.
+
+```javascript
+> Show dbs
+> Use signatures
+switched to db signatures
+> show collections
+> db.createCollection(guest_signatures)
+```
+
+Now that we have that set up, we can switch to the text editor, and create the models for the database.
+
+### STEP 2 -
+
+Use the command line to start a new express app. Make the new directory, and then use npm init to create the app. This will automatically create your pkg.JSON file.
+
+Since this will be a very basic app, we’ll only need 2 other files in our express app. One for our routes. I like to include all my dependencies in this file as well. Then our second fill will be for our models/schema. We’ll tackle the model file first. It should look something like this:
+
+```javascript
+const mongoose = require('mongoose');
+let Schema = mongoose.Schema;
+
+const signatureSchema = new Schema({
+  guestSignature: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true,
+  },
+  message: {
+    type: mongoose.Schema.Types.Mixed,
+    required: true,
+  },
+});
+
+const Signature = mongoose.model('Signature', signatureSchema);
+module.exports = Signature;
+```
+
+### STEP 3 -
+
+Before we create our endpoints here, let’s go ahead an list our dependencies at the top of our file. We don’t need too many.
+
+```javascript
+//====LIST DEPENDENCIES===//
+const express = require('express');
+const parseurl = require('parseurl');
+const bodyParser = require('body-parser');
+const path = require('path');
+const expressValidator = require('express-validator');
+const mongoose = require('mongoose');
+const Signature = require('./models/signature.js');
+const app = express();
+const url = 'mongodb://localhost:27017/signatures';
+//=========================//
+```
+
+You don’t necessarily need to connect with mongoose, so feel free to use MongoClient, if you prefer that. We’re also using the Signature schema that we just created in the previous step.
+
+Now, let’s create our endpoints. We only have one model, and we’re only going to read and write to it for now, so we’re only going to have 2 endpoints.
+
+1.  Our root directory “/”, where we’ll redirect to our API
+2.  Our api, we’ll call “/api/signatures, where we’ll read and write to.
+
+At our API endpoint, we’ll have a GET and a POST. We’ll reference our models, using the find() and create() methods for GET and POST respectively. And our response will need to be in JSON format, so that we can easily access the data there from React later on. Here’s how those endpoints might look:
+
+```javascript
+//====ROOT DIRECTORY===//
+app.get('/', function (req, res) {
+  res.json('you did it');
+});
+
+//==========================//
+
+//====GET ALL SIGNATURES===//
+
+app.get('/api/signatures', function (req, res) {
+  Signature.find({}).then((eachOne) => {
+    res.json(eachOne);
+  });
+});
+
+//==========================//
+
+//====POST NEW SIGNATURE===//
+
+app.post('/api/signatures', function (req, res) {
+  Signature.create({
+    guestSignature: req.body.SignatureOfGuest,
+    message: req.body.MessageofGuest,
+  }).then((signature) => {
+    res.json(signature);
+  });
+});
+//==========================//
+```
+
+The only thing I didn’t really mention was the req.body.SignatureOfGuest and req.body.MessageofGuest. Everything else in this section refers to something we’ve already created, like our database, collections and models. This refers to the name of the field that we’ll use in our React App, Our input will have to use the names SignatureOfGuest and MessageofGuest, so we’ll need to remember that.
+
+### STEP 4 -
+
+Now, we’ll want to connect to our local database from out text editor. If you remember, we had this constant in our list:
+
+```javascript
+const url = 'mongodb://localhost:27017/signatures';
+```
+
+We’ll write a function using this constant to connect to our local database.
+
+```javascript
+//====MONGOOSE CONNECT===//
+mongoose.connect(url, function (err, db) {
+  if (err) {
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+  } else {
+    console.log('Connection established to', url);
+  }
+});
+//==========================//
+```
+
+In order to make sure everything is working properly, we’ll also need to add an app.listen at the end of our file.
+
+At this point, it’s a good idea to pause, and make sure the endpoints and local connection works. You can do that by using Postman to make GET and POST requests. If the endpoints or connections don’t work, you should be able to diagnose the problem here based on the error messages you receive. If everything is working, it should allow you to appropriately read and write to the database.
+
+Once everything is working, it’s time to set up our account on Heroku and Mlab.
+
+### STEP 5-
+
+Sign up for a Heroku account [here](https://signup.heroku.com/). And create an mLab account [here](https://mlab.com/signup/).
+
+### STEP 6 -
+
+1.  After creating your mLab account, click on the Create New button and select a Single node sandbox. There are paid options as well, but the sandbox has plenty of space for getting started. Give your database a name. Since my local database is signatures, I’m using the same name for my mLab database.
+2.  Now that you have your database created, you can start a new collection from here.
+3.  You will also need to add a User or Users who can access your database. Without doing this step, and adding yourself as a User with access, authentication will always fail when you try to deploy it.
+
+Now your database is running on mLab. When you click on the database, you should see some information at the top, telling you how to integrate the connection. It should look something like this:
+
+```javascript
+mongodb://<dbuser>:<dbpassword>[@ds7](http://twitter.com/ds129024 "Twitter profile for @ds129024")9234.mlab.com:9234/signatures
+```
+
+The actual url of the database will just have the username and password replaced with your username and password.
+
+Now let’s head back to our text editor. We currently have the database running locally at this location:
+
+```javascript
+const url = 'mongodb://localhost:27017/signatures';
+```
+
+To change it, so that we are connected to mLab, simply update the url variable with the information from mLab. It should look something like this:
+
+```javascript
+const url = 'mongodb://username:password@ds79234.mlab.com:9234/signatures';
+```
+
+However, you’ll likely be putting this on github, or another public place. You don’t want your mlab username and password in a public sphere where anyone can see it. To fix that, we’ll set an environment variable on the command line, and then update our url variable one more time in the text editor. On the command line, use this command:
+
+```javascript
+export MONGOLAB_URI="mongodb://username:password@ds79234.mlab.com:9234/signatures';
+```
+
+Of course, replacing it with your own username, password, numbers and database name. Now, back in our text editor, we will change our url variable to the following:
+
+```javascript
+const url = process.env.MONGOLAB_URI;
+```
+
+We’ll also want to change our app.listen to reflect the new port. It could look like this:
+
+```javascript
+app.listen(process.env.PORT || 3000);
+console.log('starting applicaiton.  Good job!');
+```
+
+This way, it will try to run from mongolab, but if it can’t make the connection, it will still listen on port 3000 by default. This will also allow you to run the app locally or from mlab, in case you want to test changes on the local version.
+
+The final step in making the connection is deploying your code to your Heroku App. to do this, you can use the following code from the command line:
+
+```javascript
+heroku config:set MONGOLAB_URI=mongodb://username:password@ds79234.mlab.com:9234/signatures
+```
+
+Your app should be successfully deployed on heroku, and you can open it from there now. If you are getting errors, double check to make sure it’s running locally. If so, then it’s probably an error along the way in the connection.
+
+In these last two steps, there’s quite a bit of repetitive code. I’m going to outline the high level code here.
+
+### STEP 7 -
+
+Use ‘create-react-app’ from the command line to create a new react app.
+
+### STEP 8 -
+
+Now, we’ll want to create a form, to allow for user input. Here’s how we do that.
+
+1.  In a new component, we’ll create a new class.
+
+```javascript
+class GuestBook extends Component
+```
+
+2\. We’ll use a constructor and super method to pass props down.
+
+```javascript
+constructor(props) {
+    super(props);
+```
+
+3\. Use the this keyword to handle the name and message of guest, and bind it to (this).
+
+```javascript
+this.handleSignatureOfGuest = this.handleSignatureOfGuest.bind(this);
+this.handleMessageofGuest = this.handleMessageofGuest.bind(this);
+```
+
+4\. Set the state of the name and message of guest to an empty string.
+
+```javascript
+this.state = {
+  SignatureOfGuest: '',
+  MessageofGuest: '',
+};
+```
+
+5\. Listen for an event on the state of both the name and message input.
+
+```javascript
+handleSignatureOfGuest(event) {
+    this.setState({ SignatureOfGuest: event.target.value });
+  }
+  handleMessageofGuest(event) {
+      this.setState({ MessageofGuest: event.target.value });
+    }
+```
+
+6\. Create a function that changes the name and message to the value of the target input.
+
+```javascript
+addToGuestBook = event => {
+    event.preventDefault();
+    this.setState({
+      SignatureOfGuest: event.target.value,
+      MessageofGuest: event.target.value,
+});
+```
+
+7\. I’m now using axios to post the input data to our database, which is on heroku.
+
+```javascript
+axios.post('<[your-heroku-url here>'](https://ancient-sea-87841.herokuapp.com/api/signatures%27), {
+        SignatureOfGuest: this.state.SignatureOfGuest,
+        MessageofGuest: this.state.MessageofGuest,
+      })
+    .then(response => {
+      console.log(response, 'Signature added!');
+    })
+    .catch(err => {
+      console.log(err, 'Signature not added, try again');
+    });
+```
+
+8\. Then I’m resetting the state of the input to an empty string.
+
+```javascript
+this.setState({
+      SignatureOfGuest: "",
+      MessageofGuest: "",
+    });
+};
+```
+
+9\. Finally, we’ll make a render method, and return our page with the input fields. Inside the input of each field, we’ll give it an onChange, name, and value. the onChange will be set to the.handlemessage or this.handlename, for each field. The name of each field will be set to what we called it in our node app. The value will use state, and we’ll set that to this.state.message, and this.state.name.
+
+```javascript
+<input
+           onChange={this.handleSignatureOfGuest}
+           name="SignatureOfGuest"
+           className="NameinputForm"
+           value={this.state.SignatureOfGuest}
+           placeholder="Enter your name"
+            />
+  <textarea
+              onChange={this.handleMessageofGuest}
+              name="MessageofGuest"
+              className="MessageinputForm"
+              value={this.state.MessageofGuest}
+              placeholder="Type a message"
+               />
+```
+
+10\. Then we’ll add a submit button, where we call the function from earlier.
+
+```javascript
+<button
+  className="submitbuttonguestbook"
+  type="submit"
+  onClick={this.addToGuestBook}
+>
+  Submit to Guestbook
+  <i className="GuestBookButton2" aria-hidden="true" />
+</button>
+```
+
+### STEP 9-
+
+Now we’ll make another component where we’ll render the data that’s being stored in our database. Then we can export that component, and put it on our guestbook page.
+
+Inside this component we’ll do the following:
+
+1.  In a new component, we’ll create a new class.
+
+```javascript
+class GuestNames extends Component {
+```
+
+2\. We’ll use a constructor and super method to pass props down.
+
+```javascript
+constructor(props) {
+    super(props);
+```
+
+3\. Use this.state to set the state of our guestbook messages to an empty string.
+
+```javascript
+this.state = {
+  messages: '',
+};
+```
+
+4\. Use a componentDidMount lifecycle method
+
+```javascript
+componentDidMount() {
+```
+
+5\. Inside that method we’ll use fetch and the url of our heroku api to fetch the information from the database.
+
+```javascript
+fetch('<your-heroku-url-goes-here>['](https://ancient-sea-87841.herokuapp.com/api/signatures%27))
+    .then(results => {
+      return results.json();
+```
+
+6\. We’ll map over the data, and return the data we want.
+
+```javascript
+data.map((msg) => {
+        return(
+          <div key={msg.results}>
+            <h3 className="h3msg">{msg.message}</h3><h2 className="h2sig">-{msg.guestSignature}</h2>
+          </div>
+```
+
+7\. Now we’ll use this.setState to set the state of the messages to the new state using the data we just fetched.
+
+```javascript
+this.setState({ messages: messages });
+```
+
+8\. Now we’ll create render mehod.
+
+```javascript
+render() {
+```
+
+9\. Inside the render method, we’ll create JSX elements to render our data inside the component. I’m using this.state.messages inside an `<h6>` tag.
+
+```javascript
+return (<div className="guestdataContainer">
+          <h6>Guestbook Messages</h6>
+          {this.state.messages}
+        </div>
+```
+
+10\. Finally, we’ll export the component, so we can use it on other pages.
+
+```javascript
+export default GuestNames;
+```
+
+Again, if you have any questions feel free to reach out. Thanks!

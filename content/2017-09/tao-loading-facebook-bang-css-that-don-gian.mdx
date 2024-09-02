@@ -1,0 +1,325 @@
+---
+title: Tạo loading Facebook bằng CSS thật đơn giản!
+author: Hung Tan Nguyen
+date: 2017-09-27 11:31:18
+sourceUrl: https://kipalog.com/posts/Gia-nhu-tao-loading-Facebook-bang-CSS-that-don-gian
+tags: [css, trick]
+slug: /tao-loading-facebook-bang-css-that-don-gian
+---
+
+Dạo gần đây nhà mình hay mất mạng, mà ai cũng biết rồi dân IT, Design, Gaming, XXX, mà không có internet thì hỡi ơi cứ như là sống ở thời kì đồ đá.
+
+Nhưng cũng nhờ thế mà tình cờ phát hiện được cái loading hay hay của facebook, twitter, bitbucket ... nếu mạng bạn quá chậm nó sẽ show ra tương tự giống này.
+
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/4i0dnfi0me_Screen%20Shot%202017-03-02%20at%2010.31.06%20AM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/4i0dnfi0me_Screen%20Shot%202017-03-02%20at%2010.31.06%20AM.png)
+
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/jpoxotnryg_Screen%20Shot%202017-03-02%20at%204.13.50%20PM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/jpoxotnryg_Screen%20Shot%202017-03-02%20at%204.13.50%20PM.png)
+Sau đây là chút tò mò và mô phỏng để có được sự nhấp nháy kì lạ đó.
+
+<YouTube id="wAtI6ACXbM4" />
+
+### Vẽ Photoshop cái khung
+
+Bước này chỉ để chảnh chó là biết Photoshop thôi nha, chớ ai dùng gì vẽ cũng được, hoặc đếch cần vẽ cũng chẳng sao :D!
+
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/vfjbxy99p5_Screen%20Shot%202017-03-03%20at%2011.06.34%20AM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/vfjbxy99p5_Screen%20Shot%202017-03-03%20at%2011.06.34%20AM.png)<a></a>
+
+Mình chụp cái hình nó lại, mở cái gì đó lên check lại được mấy cái mã màu của nó.
+Cụ thể là:
+
+- Thumnail: **#f6f7f9**;
+- background: **#e9ebee**;
+- background line: **#ebedf0**;
+- box-shadow: **#d0d1d5**;
+
+còn thiếu màu trắng tinh của **trung tình** cho các box bự.
+Các bác có thắc mắc vụ lấy mã màu gì không? Nói chung các bác lấy mã nào cũng được tại đang chém nên vẽ bậy đó thôi.
+
+Okay, xong vụ lấy mã màu, giờ thì xác định vị trí cũng như kích thước của từng thành phần trong của cái box này.
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/b816itugz9_Screen%20Shot%202017-03-03%20at%2011.11.55%20AM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/b816itugz9_Screen%20Shot%202017-03-03%20at%2011.11.55%20AM.png)<a></a>
+
+Cụ thể là:
+
+- Thumbnail: 40x40
+- Line: height 6px còn width thì tuỳ chỉnh thấy đụp đụp là ổn nhé các bác
+- Khoản cách của line: 13px, số hơi xui tí.
+- Cái box bự: 520x325.
+
+<YouTube id="GM8prMEsJiM" />
+
+Thế là có dữ liệu thô rồi, nhào vào phần lên cúc trúc html nào.
+
+### Lên cấu trúc HTML
+
+Rồi bây giờ chúng ta tạo 1 thưc mục, tạo 1 file tên là **index.html** mở nó lên bằng editor nào mà bạn thích, rồi chiến:
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/bicnul27yb_Screen%20Shot%202017-03-03%20at%2011.33.20%20AM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/bicnul27yb_Screen%20Shot%202017-03-03%20at%2011.33.20%20AM.png)<a></a>
+
+Nghía qua cái box bằng đôi mắt không được **lé** của chúng ta thì các thành phần chính như sao:
+
+- Cái box to **class="box-loading"**
+- Cái thumbnail **class="box-thumbnail"**
+- Có khoản 5 cái line với các kích thước khác nhau nên chúng ta có thể đặt tên là "box-line-xs, -sm, -df, -lg, -lgx"
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Loading-facebook</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="box-loading">
+      <div class="box-thumbnail"></div>
+
+      <div class="box-line-sm"></div>
+      <div class="box-line-xs"></div>
+
+      <div class="box-line-df"></div>
+      <div class="box-line-lgx"></div>
+      <div class="box-line-lg"></div>
+    </div>
+  </body>
+</html>
+```
+
+<YouTube id="9O9c_c1FK7o" />
+
+Okay vậy là xong rồi cái phần html nhé, quá nhanh và quá huy hiểm.
+
+### Lên cấu trúc CSS
+
+Đã done html rồi thì bây giờ ta tạo 1 file **style.css** nhé. Để tô màu chơi cho vui thôi.
+Nhớ link vào file html nhé
+
+```html
+<link href="style.css" />
+```
+
+Sau đó ta mở file style.css và viết vào giống thế lầy.
+
+```css
+body {
+  background: #e9ebee;
+}
+.box-loading {
+  background: #fff;
+  height: 325px;
+  width: 520px;
+  display: block;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  -o-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  margin: 0 auto;
+}
+```
+
+Để có được kết quả là cái box:
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/adbekb29q8_Screen%20Shot%202017-03-03%20at%2012.07.33%20PM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/adbekb29q8_Screen%20Shot%202017-03-03%20at%2012.07.33%20PM.png)<a></a>
+
+> Canh chỉnh box content
+
+<YouTube id="i239gN6nfGM" />
+
+Phần box-shadow mình viết như thế để nó gần giống với mã màu của cái line trên facebook và cũng như là all device, để vào phần Sass các bạn sẽ thấy thú vị hơn ở chổ này nhé.
+
+Tiếp đến là mấy cái line:
+
+```css
+body {
+  background: #e9ebee;
+}
+// cái nào có class là box- thì nó sẽ nhận css
+[class*="box-"] {
+  height: 6px;
+  width: 400px;
+  background: #f6f7f9;
+  margin-bottom: 13px;
+  margin-right: 5px;
+}
+
+.box-loading {
+  background: #fff;
+  height: 305px;
+  width: 500px;
+  padding: 10px;
+  display: block;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -o-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  -o-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  margin: 0 auto;
+}
+
+.box-thumbnail {
+  height: 40px;
+  width: 40px;
+  float: left;
+  margin-right: 20px;
+  display: inline-block;
+}
+// chịu khó viết style cho từng line nhé
+.box-line-sm {
+  width: 120px;
+  margin-top: 10px;
+  margin-left: 50px;
+}
+.box-line-xs {
+  width: 80px;
+  margin-left: 50px;
+}
+.box-line-df {
+  margin-top: 30px;
+  width: 380px;
+}
+.box-line-lg {
+  width: 200px;
+}
+.box-line-lgx {
+  width: 450px;
+}
+```
+
+[![alt text](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/2e5amwtrb6_Screen%20Shot%202017-03-03%20at%204.01.05%20PM.png)](https://s3-ap-southeast-1.amazonaws.com/kipalog.com/2e5amwtrb6_Screen%20Shot%202017-03-03%20at%204.01.05%20PM.png)<a></a>
+
+<YouTube id="yxtX-CuIb7c" />
+
+### Animation CSS loading
+
+Các bạn thấy nãy giờ toàn là trò mèo đúng không? Giờ chúng ta mới vào phần trọng tâm của cái loading facebooking
+
+<YouTube id="_jARHUUT4N0" />
+
+```javascript
+[class*="box-line"],
+.box-thumbnail {
+    animation: timeline; // tên của animation để truyền action
+    animation-duration: 1s; // thời gian thực thi action
+    animation-timing-function: linear; // hiệu ứng cho action, có nhiều lắm thực chất nó là cubic-bezier, ai muốn custom thì xem link này http://cubic-bezier.com
+    animation-iteration-count: infinite; // số lần chạy action, mình cho nó vô tận luôn
+    background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%); // gradient cho từng cái line
+    background-size: 800px auto; // kích thước của cái bóng mờ mờ (gradient)
+}
+// hành động của animation cho nó chạy từ trái sang phải
+@keyframes timeline {
+  0% {
+    background-position: -350px 0;
+}
+  100% {
+    background-position: 400px 0; }
+}
+```
+
+### Recode CSS thành SASS
+
+Cái này cũng chẳng có gì hấp dẫn lắm, nhưng viết luôn cho bác nào thích chơi với thằng thứ ba thì chơi:
+
+<YouTube id="kXOlIGH6L6Y" />
+
+```scss
+body {
+  background: #e9ebee;
+}
+
+[class*='box-'] {
+  height: 6px;
+  width: 400px;
+  background: #f6f7f9;
+  margin-bottom: 13px;
+  margin-right: 5px;
+}
+@mixin box-shadow($box_shadow) {
+  box-shadow: $box_shadow;
+  -o-box-shadow: $box_shadow;
+  -moz-box-shadow: $box_shadow;
+  -webkit-box-shadow: $box_shadow;
+}
+@mixin border-radius($border_radius) {
+  border-radius: $border_radius;
+  -o-border-radius: $border_radius;
+  -moz-border-radius: $border_radius;
+  -webkit-border-radius: $border_radius;
+}
+.box {
+  &-loading {
+    background: #fff;
+    height: 305px;
+    width: 500px;
+    padding: 10px;
+    display: block;
+    margin: 0 auto;
+    @include box-shadow(0 0 0 rgba(0, 0, 0, 0.1));
+    @include border-radius(3px);
+  }
+  &-thumbnail {
+    height: 40px;
+    width: 40px;
+    float: left;
+    margin-right: 20px;
+    display: inline-block;
+  }
+}
+.box-line {
+  &-sm {
+    width: 120px;
+    margin-top: 10px;
+    margin-left: 50px;
+  }
+  &-xs {
+    width: 80px;
+    margin-left: 50px;
+  }
+  &-df {
+    margin-top: 30px;
+    width: 380px;
+  }
+  &-lg {
+    width: 200px;
+  }
+  &-lgx {
+    width: 450px;
+  }
+}
+
+[class*='box-line'],
+.box-thumbnail {
+  animation: timeline;
+  animation-duration: 1s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+  background-size: 800px auto;
+  background-position: 100px 0;
+}
+@keyframes timeline {
+  0% {
+    background-position: -350px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+```
+
+Các bác có thể xem trên này luôn cho tiện nhá.
+
+<Codepen url="https://codepen.io/tuds/embed/RpaJNO" height="500px" />
+
+### Lời kết
+
+Okay thế là có cái loading của facebook rồi, mặt dù là hàng face nhưng hi vọng cũng có thế giúp ít cho bác nào muốn dùng.
+
+Lưu ý:
+
+Bạn nên đọc lại kỹ một chút về các thuộc tính
+**background: linear-gradient, background-size, background-position và các thuộc tính animation, trước khi làm**
+Nên tự gõ, đừng copy rồi paste, vì như thế bạn chẳng nhớ gì đâu.

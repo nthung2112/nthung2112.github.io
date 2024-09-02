@@ -1,0 +1,279 @@
+---
+title: >-
+  Cách Javascript hoạt động P15: Bên trong Class & Inheritance + Transpiling với
+  Babel & Typescript
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-the-internals-of-classes-and-inheritance-transpiling-in-babel-and-113612cdc220
+coverImage: 'https://cdn-images-1.medium.com/max/1000/1*G9cxwM-sZtK-LZjRq7Ii1g.png'
+date: 2018-11-25 16:37:00
+slug: /cach-javascript-hoat-dong-p15-ben-trong-class-inheritance-transpiling-voi-babel-typescript
+---
+
+Chào các bạn đến với bài thứ 15 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Ngày nay, cách phổ biến nhất để dựng cấu trúc của bất kỳ dự án phần mềm nào là sử dụng class. Trong bài viết này, chúng ta sẽ cùng khám phá các cách khác nhau để triển khai class trong Javascript và làm thế nào ta có thể xây dựng cây thứ bậc của class (class hierarchy). Chúng ta sẽ bắt đầu bằng cách đào sâu tìm hiểu cách hoạt động của prototype và phân tích những cách để giả lập kế thừa class trong các thư viện nổi tiếng. Tiếp đến ta sẽ xem làm cách nào mà transpiling có thể thêm những tính năng không được hỗ trợ chính thức cho ngôn ngữ và cách mà nó được dùng trong Babel & Typescript để giới thiệu về sự hỗ trợ của class trong ECMAScript 2015\. Cuối cùng, ta sẽ kết thúc với một vài ví dụ về class được triển khai native trong V8.
+
+# Khái quát
+
+Trong Javascript, về bản chất không có kiểu dữ liệu nguyên thủy và mọi thứ tạo ra đều là object. Ví dụ, nếu ta tạo 1 string:
+
+```javascript
+const name = 'SessionStack';
+```
+
+Thì chúng ta có thể gọi nhiều phương thức khác nhau trên object vừa mới được tạo ra:
+
+```javascript
+console.log(a.repeat(2)); // SessionStackSessionStack
+console.log(a.toLowerCase()); // sessionstack
+```
+
+Không giống như các ngôn ngữ khác, trong Javascript, khai báo string hay number sẽ tự động tạo ra một object mà nó sẽ đóng gói giá trị đó và cung cấp nhiều phương thức khác nhau có thể thực thi được kể cả với các kiểu dữ liệu nguyên thủy.
+
+Một sự thật thú vị khác là những kiểu dữ liệu phức tạp, chẳng hạn như array, cũng là object. Nếu bạn nhìn kỹ hơn vào typeof của một array, bạn sẽ thấy nó là object. Số index của mỗi phần tử trong danh sách chính là thuộc tính của object. Vì thế khi bạn truy xuất một phần tử bằng số index trong array, bạn thực ra chỉ truy xuất vào thuộc tính của object array và trả về giá trị của nó. Khi nói về vấn đề lưu trữ dữ liệu thì 2 định nghĩa sau là giống hệt nhau:
+
+```javascript
+let names = [“SessionStack”];
+
+let names = {
+  “0”: “SessionStack”,
+  “length”: 1
+}
+```
+
+Kết quả là thời gian cần để truy xuất 1 phần tử trong array và 1 thuộc tính của object là như nhau. Thật khó để nhận ra. Trước đây, trong 1 project, tác giả phải thực hiện quá trình tối ưu hóa rất lớn cho một đoạn code quan trọng. Sau khi thử tất cả các lựa chọn dễ, tác giả đã thay thế toàn bộ object được dùng trong project bằng array. Về lý thuyết, truy xuất 1 phần tử trong 1 array thì nhanh hơn truy xuất 1 key trong hash map (bản đồ băm). Tác giả đã ngạc nhiên rằng cách làm này không mang lại một chút hiệu quả hơn với hiệu năng. Trong Javascript, cả array và object đều được triển khai về việc truy xuất 1 key trong hash map và sẽ tốn cùng 1 lượng thời gian như nhau.
+
+# Giả lập class với prototype
+
+Khi nghĩ về object, thứ đầu tiên xuất hiện chính là class. Tất cả chúng ta thông thường đều xây dựng cấu trúc của ứng dụng dựa trên class và các mối quan hệ giữa chúng với nhau. Mặc dù object trong Javascript xuất hiện khắp nơi, ngôn ngữ này lại không sử dụng kiểu kế thừa truyền thống dựa trên class. Thay vào đó nó dùng [prototype](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Details_of_the_Object_Model).
+[![](https://cdn-images-1.medium.com/max/1000/0*SufKRGfPZIDlw1OG)
+
+Trong Javascript, mọi object được kết nối đến object khác - chính là prototype của nó. Khi bạn thử truy xuất 1 thuộc tính hoặc phương thức trên 1 object, quá trình tìm kiếm (thuộc tính/phương thức) sẽ bắt đầu với chính object đó trước. Nếu không tìm thấy thì nó sẽ tiếp tục với prototype của object đó.
+
+Chúng ta sẽ thử với 1 ví dụ đơn giản về định nghĩa constructor cho 1 class:
+
+```javascript
+function Component(content) {
+  this.content = content;
+}
+
+Component.prototype.render = function () {
+  console.log(this.content);
+};
+```
+
+Ta thêm hàm render vào prototype bởi vì chúng ta muốn mỗi instance của Component đều có thể tìm thấy nó. Khi bạn gọi phương thức này trên mỗi instance của class Component, quá trình tìm kiếm đầu tiên sẽ thực hiện trên chính instance đó. Sau đó nó tiếp tục thực hiện tìm trên prototype và tại đây thì phương thức render được tìm thấy.
+![](https://cdn-images-1.medium.com/max/1000/0*hZbijxS0vXu8vUmz)
+
+Giờ ta thử mở rộng class Component ra, ta sẽ thêm vào một class con:
+
+```javascript
+function InputField(value) {
+  this.content = `<input type="text" value="${value}" />`;
+}
+```
+
+Nếu ta muốn InputField mở rộng chức năng của class Component và có thể gọi phương thức render của nó thì ta cần phải thay đổi prototype. Khi 1 phương thức được gọi trên instance của class con, ta không muốn tìm kiếm trong prototype trống rỗng của nó. Quá trình tìm kiếm sẽ tiếp tục ở class Component.
+
+```javascript
+InputField.prototype = Object.create(new Component());
+```
+
+Bằng cách này, phương thức render có thể được tìm thấy trong prototype của class Component. Để có thể kế thừa, ta cần kết nối prototype của InputField đến 1 instance của class Component. Nhiều thư viện sử dụng phương thức [Object.setPrototypeOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/setPrototypeOf) để làm việc này.
+
+![](https://cdn-images-1.medium.com/max/1000/0*avLiOV_zXLxOgBee)
+
+Tuy nhiên đây không phải là việc duy nhất mà ta cần làm. Mỗi khi mở rộng 1 class, ta cần chú ý:
+
+- Đặt prototype của class con là 1 instance của class cha
+- Gọi constructor của class cha trong constructor của class con để quá trình khởi tạo logic trong constructor của class cha có thể được thực thi.
+- Giới thiệu cách truy xuất phương thức từ class cha. Bạn cần phải làm thế khi muốn ghi đè 1 phương thức và bạn muốn gọi đến phần triển khai gốc trong phương thức ở class cha.
+
+Như bạn thấy thì nếu muốn sử dụng tất cả tính năng của kế thừa dựa trên class thì bạn cần thực thi phần logic phức tạp này mỗi lần kế thừa. Mỗi khi bạn cần tạo ra nhiều class thì tốt nhất là đóng gói mớ logic ấy trong 1 (hoặc vài) hàm để có thể tái sử dụng. Đây là cách mà các developer trước đây giải quyết vấn đề kế thừa dựa trên class - bằng cách giả lập với nhiều thư viện khác nhau. Những giải pháp này trở nên rất phổ biến và rõ ràng là có thiếu sót trong ngôn ngữ Javascript. Đó là lý do mà cú pháp mới để tạo class và hỗ trợ kế thừa class được giới thiệu trong bản sửa đổi lớn đầu tiên của ECMAScript 2015.
+
+# Transpiling class
+
+Khi tính năng mới của ES6 (hay ECMAScript 2015) được đề xuất, cộng đồng Javascript developer không ngồi yên chờ đợi tất cả các engine và trình duyệt bắt đầu hỗ trợ nó. Một cách tốt hơn để đạt được là thông qua transpile. Nó cho phép 1 đoạn code viết trong ECMAScript 2015 được biến đổi thành Javascript mà tất cả trình duyệt đều có thể hiểu. Bao gồm cả khả năng viết class với kế thừa dựa trên class và transpile chúng thành code hoạt động được.
+![](https://cdn-images-1.medium.com/max/1000/0*QhRSzkngh6Aty-nD)
+
+Một trong số những transpiler nổi tiếng nhất cho Javascript là Babel. Giờ thì cùng xem transpile hoạt động thế nào, ta sẽ áp dụng nó cho đoạn code về Component viết ở trên nhé:
+
+```javascript
+class Component {
+  constructor(content) {
+    this.content = content;
+  }
+
+  render() {
+    console.log(this.content);
+  }
+}
+
+const component = new Component('SessionStack');
+component.render();
+```
+
+Và đây là những gì Babel transpile ra:
+
+```javascript
+var Component = (function () {
+  function Component(content) {
+    _classCallCheck(this, Component);
+
+    this.content = content;
+  }
+
+  _createClass(Component, [
+    {
+      key: 'render',
+      value: function render() {
+        console.log(this.content);
+      },
+    },
+  ]);
+
+  return Component;
+})();
+```
+
+Như bạn thấy, code được biến đổi thành ECMAScript 5, loại có thể được thực thi trên bất kỳ môi trường nào. Ngoài ra còn có 1 số hàm được thêm vào. Chúng là 1 phần của thư viện Babel tiêu chuẩn.
+
+Hàm \_classCallCheck và \_createClass có mặt như 1 phần trong kết quả biên dịch. Hàm đầu tiên đảm bảo hàm constructor không bao giờ được gọi như 1 hàm bình thường. Điều này được thực hiện bằng việc kiểm tra có hay không ngữ cảnh mà trong đó hàm được đánh giá là 1 instance của object Component. Code sẽ kiểm tra nếu
+nó trỏ đến instance. Hàm thứ 2 \_createClass xử lý việc tạo ra các thuộc tính cho object và được truyền vào dưới dạng danh sách các object với key & value.
+
+Để khám phá về cách kế thừa hoạt động ra sao thì ta cùng phân tích class InputField được kế thừa từ Component
+
+```javascript
+class InputField extends Component {
+  constructor(value) {
+    const content = `<input type="text" value="${value}" />`;
+    super(content);
+  }
+}
+```
+
+Kết quả sau khi xử lý transpile với Babel:
+
+```javascript
+var InputField = (function (_Component) {
+  _inherits(InputField, _Component);
+
+  function InputField(value) {
+    _classCallCheck(this, InputField);
+
+    var content = '<input type="text" value="' + value + '" />';
+    return _possibleConstructorReturn(
+      this,
+      (InputField.__proto__ || Object.getPrototypeOf(InputField)).call(
+        this,
+        content
+      )
+    );
+  }
+
+  return InputField;
+})(Component);
+```
+
+Trong ví dụ trên, logic kế thừa được đóng gói trong hàm \_inherits. Nó thực hiện cùng y chang hành động mà chúng ta đã mô tả trong phần trước bằng cách cài đặt prototype của class con trở thành 1 instance của class cha.
+
+Để transpile code, Babel thực hiện nhiều quá trình chuyển đổi. Đầu tiên code ECMAScript 2015 được parse và biến đổi thành một dạng thể hiện trung gian, gọi là **Abstract Syntax Tree**, chính là chủ đề ta đã thảo luận ở [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-14---Parsing--Abstract-Syntax-Tree---meo-giam-toi-da-thoi-gian-parse). Sau đó cây này được biến đổi lần nữa thành 1 cây AST khác mà mỗi node của nó được biến đổi thành phần tương ứng trong ECMAScript 5\. Cuối cùng cây AST được chuyển ngược lại thành code.
+
+# AST trong Babel
+
+Một cây AST sẽ có nhiều node, mỗi node chỉ có duy nhất 1 node cha. Trong Babel, tồn tại 1 kiểu cơ bản cho các node. Nó chưa thông tin về loại node và vị trí của chúng trong code. Có nhiều loại node khác nhau, chẳng hạn như Literals thể hiện string, number, null, vân vân. Cũng có cả node Statements dành cho các luồng kiểm soát (if) và vòng lặp (for, while). Có cả node đặc biệt dành cho class. Nó là 1 con (child) của class Node cơ bản. Nó mở rộng bằng cách thêm các trường để lưu tham chiếu đến class cơ bản và body của class như là 1 node riêng biệt.
+
+Giờ ta sẽ biến đổi đoạn code sau thành cây AST
+
+```javascript
+class Component {
+  constructor(content) {
+    this.content = content;
+  }
+
+  render() {
+    console.log(this.content);
+  }
+}
+```
+
+Đây là kết quả:
+![](https://cdn-images-1.medium.com/max/1000/0*-OqUfzpRtgDJQjXY)
+
+Sau khi tạo ra cây AST, mỗi node được biến đổi thành node ECMAScript 5 tương đương với nó và chuyển ngược lại thành code thường theo tiêu chuẩn của ECMAScript 5\. Quá trình này được thực hiện bằng 1 tiến trình tìm kiếm node nằm ở vị trí xa nhất với root node và biến đổi chúng thành code. Sau đó node cha của nó sẽ được biến đổi bằng đoạn code đã sinh ra cho các node con của nó. Quá trình này được gọi là [depth-first traversal](https://en.wikipedia.org/wiki/Depth-first_search)
+
+Trong ví dụ trên, đầu tiên code của 2 node MethodDefinition sẽ được sinh ra, theo sau nó là code của node ClassBody và cuối cùng là node ClassDeclaration
+
+# Transpile với TypeScript
+
+Một framework phổ biến khác hỗ trợ khả năng transpile chính là TypeScript. Nó giới thiệu cú pháp kiểu mới để viết ứng dụng Javascript và được biến đổi thành ECMAScript 5 mà có thể chạy trên bất kỳ trình duyệt hay engine nào. Dưới đây là phần triển khai của class Component trong TypeScript:
+
+```javascript
+class Component {
+  content: string;
+  constructor(content: string) {
+    this.content = content;
+  }
+  render() {
+    console.log(this.content);
+  }
+}
+```
+
+Và đây là cây AST được sinh ra:
+![](https://cdn-images-1.medium.com/max/1000/0*j3zkSjnrL4fnCK3A)
+
+Nó hỗ trợ kế thừa:
+
+```javascript
+class InputField extends Component {
+  constructor(value: string) {
+    const content = `<input type="text" value="${value}" />`;
+    super(content);
+  }
+}
+```
+
+Kết quả transpile ra:
+
+```javascript
+var InputField = /** @class */ (function (_super) {
+  __extends(InputField, _super);
+  function InputField(value) {
+    var _this = this;
+    var content = '<input type="text" value="' + value + '" />';
+    _this = _super.call(this, content) || this;
+    return _this;
+  }
+  return InputField;
+})(Component);
+```
+
+Kết quả cuối cùng một lần nữa lại là ECMAScript 5 với 1 số hàm thêm vào từ thư viện của TypeScript. Logic được đóng gói trong \_\_extends là giống y hệt như những gì chúng ta đã thảo luận ở phần trước.
+
+Với Babel và TypeScript càng ngày càng được đón nhận nồng nhiệt, class tiêu chuẩn và kế thừa dựa trên class trở thành 1 cách chuẩn của phần cấu trúc những ứng dụng Javascript. Điều này đẩy nhanh tiến độ về native support (hỗ trợ tự nhiên) cho class trên trình duyệt.
+
+# Native support (hỗ trợ tự nhiên)
+
+Vào năm 2014, [native support cho class](https://www.chromestatus.com/feature/4633745457938432) được giới thiệu trong Chrome. Nó cho phép cú pháp khai báo class được thực hiện mà không cần phải dùng đến các thư viện hay transpiler.
+![](https://cdn-images-1.medium.com/max/1000/0*jJuHfRMipW8PPcb0)
+
+Quá trình triển khai class một cách tự nhiên được gọi là syntax sugar (cú pháp ngọt ngào). Đây chỉ là 1 cú pháp dễ chịu có thể biên dịch xuống thành cùng loại với kiểu nguyên thủy đang được hỗ trợ mặc định trong ngôn ngữ. Bạn có thể dùng kiểu định nghĩa class mới, dễ dùng hơn, nhưng cuối cùng nó cũng quay về tạo constructor và gán prototypes
+
+![](https://cdn-images-1.medium.com/max/1000/0*c2HpOiUYMimMXHv2)
+
+# Sự hỗ trợ của V8
+
+Cùng xem cách hoạt động của native support cho class trong ECMAScript 2015 trên V8\. Như ta đã thảo luận ở [bài trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-14---Parsing--Abstract-Syntax-Tree---meo-giam-toi-da-thoi-gian-parse), đầu tiên cú pháp mới cần được parse thành code Javascript cũ và thêm vào cây AST. Vì thế kết quả của định nghĩa class là 1 node mới (loại [ClassLiteral](https://github.com/v8/v8/blob/a86fa968136f0ec6237f51a0d535fbd932868d4d/src/ast/ast.h#L2421)) được thêm vào cây.
+
+Node này chứa 1 vài thứ. Đầu tiên, nó giữ constructor ở 1 hàm khác. Nó cũng chứa 1 danh sách các thuộc tính của class. Chúng có thể là phương thức, getter, setter, các trường public hay private. Node này cũng chứa luôn tham chiếu đến class cha mà chính class cha này lại nữa chứa constructor & danh sách các thuộc tính và class cha khác (của nó).
+
+Một khi ClassLiteral này được [chuyển thành code](https://github.com/v8/v8/blob/be3a1df9008ee78d1101855d3044db54a203f515/src/interpreter/bytecode-generator.cc#L1818), nó được dịch 1 lần nữa thành các hàm và prototypes.
+
+Với team tại [SessionStack](https://www.sessionstack.com/?utm_source=medium&utm_medium=blog&utm_content=classes-inheritance-transpiling-outro), tối ưu hóa từng phần nhỏ của code là cực kỳ quan trọng những cũng là 1 công việc rất thách thức. Có 2 lý do cho việc cần thiết phải tối ưu hóa mức độ cao.
+
+Đầu tiên, thư viện của họ sẽ tích hợp với trong webapp, nó thu thập dữ liệu từ phiên làm việc của user, chẳng hạn như sự kiện, thay đổi trên DOM, dữ liệu mạng, biệt lệ, thông báo lỗi, vân vân. Thu thập thông tin mà không làm ảnh hưởng đến hiệu năng của webapp là 1 thách thức khó mà team của tác giả đã giải quyết thành công.

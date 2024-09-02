@@ -1,0 +1,142 @@
+---
+title: Cách tối ưu trang web của bạn với nén Gzip
+author: Hung Tan Nguyen
+tags: []
+categories: []
+sourceUrl: >-
+  https://betterexplained.com/articles/how-to-optimize-your-site-with-gzip-compression/
+coverImage: 'https://cdn-images-1.medium.com/max/800/1*3Zb11Eb-5gsFQ0jmSvfEyQ.jpeg'
+date: 2018-08-07 20:45:00
+slug: /cach-toi-uu-trang-web-cua-ban-voi-nen-gzip
+---
+
+Nén là một phương pháp đơn giản, hiệu quả để tiết kiệm băng thông và tăng tốc trang web của bạn. Tôi đã ngần ngại khi gợi ý sử dụng nén gzip khi [tăng tốc tải file javascript của bạn](https://betterexplained.com/articles/speed-up-your-javascript-load-time/) vì một vài vấn đề ở trình duyệt cũ.
+
+Nhưng giờ là thế kỷ 21. Hầu hết các truy cập đến trang của tôi đều từ các trình duyệt hiện đại, và thẳng thắn mà nói, hầu hết người dùng của tôi đều am hiểu công nghệ. Tôi không muốn làm mọi người chậm lại vì một vài người đang bám lấy IE 4 trên Windows 95. Google và Yahoo dùng nén gzip. Một trình duyệt hiện đại cần được tận hưởng nội dung và tốc độ của web hiện đại - vậy thì sử dụng gzip mã hóa nó. Dưới đây là cách cài đặt.
+
+## Khoan, khoan, khoan: tại sao chúng ta lại làm điều này?
+
+Trước khi chúng ta bắt đầu, tôi nên giải thích nội dung được mã hóa là gì. Khi bạn yêu cầu một file, ví dụ như `http://www.yahoo.com/index.html`, trình duyệt của bạn nói chuyện với một web server. Đoạn hội thoại sẽ diễn ra kiểu như sau:
+
+![](https://betterexplained.com/wp-content/uploads/compression/HTTP_request.png)
+
+1.  Trình duyệt: Này, **GET** cho tôi /index.html
+2.  Server: Ok, để tôi tìm xem index.html có không
+3.  Server: Tìm thấy rồi! Mã phản hồi của anh đây (200 OK) và tôi đang gửi file.
+4.  Trình duyệt: 100KB? Ôi... chờ tí, chờ tí... ok, tải được rồi nhé.
+
+Dĩ nhiên, header và giao thức thực tế sẽ hình thức hơn nhiều (quan sát chúng với [Live HTTP Headers](https://betterexplained.com/articles/how-to-debug-web-applications-with-firefox/) nếu bạn muốn).
+
+Nhưng nó hoạt động, và bạn nhận được file.
+
+## Thế vấn đề là gì?
+
+Chà, hệ thống hoạt động, nhưng không hiệu quả. 100KB là **một đống text**, và thành thật thì, HTML khá là trùng lặp. Mỗi thẻ `<html>`, `<table>` và `<div>` đều có một thẻ đóng gần như tương tự. Các từ lặp đi lặp lại trong cả document. Bạn chia nó ra như thế nào thì HTML (và người anh em mạnh mẽ của nó, XML) đều không tinh gọn.
+
+Và xử lý thế nào với một file quá lớn? Nén nó!
+
+Nếu chúng ta có thể gửi một file .zip đến trình duyệt (index.html.zip) thay vì index.html thông thường, chúng ta sẽ tiết kiệm được băng thông và thời gian tải. Trình duyệt có thể tải file đã nén, giải nén nó, và sau đó hiển thị cho người dùng, người đang có tâm trạng tốt vì trang tải nhanh. Đoạn hội thoại giữa trình duyệt và server sẽ trông như sau:
+
+![](https://betterexplained.com/wp-content/uploads/compression/HTTP_request_compressed.png)
+
+1.  Trình duyệt: Này, tôi có thể **GET** index.html không? Tôi sẽ lấy phiên bản nén của nó nếu anh có.
+2.  Server: Để tôi tìm... ừ, có đây. Và anh sẽ lấy bản nén? Tuyệt.
+3.  Server: Ok, tôi tìm thấy index.html (200 OK), và tôi đang nén và gửi nó qua cho anh.
+4.  Trình duyệt: Tuyệt! Chỉ có mỗi 10KB. Tôi sẽ giải nén và hiển thị cho người dùng.
+
+Công thức rất đơn giản: File nhỏ hơn = tải nhanh hơn = **người dùng hạnh phúc**.
+
+Không tin tôi à? Phần HTML của trang chủ của Yahoo giảm từ 101KB xuống còn 15KB sau khi nén:
+
+![](https://betterexplained.com/wp-content/uploads/compression/yahoo.png)
+
+## Chi tiết (không quá) lằng nhằng
+
+Phần khó trong quá trình trao đổi này là trình duyệt và server phải biết rằng việc gửi nhận file nén là được chấp nhận. Việc đồng ý này bao gồm 2 phần
+
+- **Trình duyệt gửi một header** nói với server rằng nó chấp nhận nội dung được nén (gzip và deflate là 2 cách nén): `Accept-Encoding: gzip, deflate`
+- **Server gửi một phản hồi** nếu nội dung thực sự được nén: `Content-Encoding: gzip`
+
+Nếu server không gửi content-encoding trong header của phản hồi, điều đó có nghĩa là file không được nén (điều mặc định ở nhiều server). Header "Accept-Encoding" chỉ là một yêu cầu từ trình duyệt, không phải mệnh lệnh. Nếu server không muốn gửi về nội dung được nén, trình duyệt sẽ phải tải về phiên bản nặng nề thông thường.
+
+## Thiết lập server
+
+"Tin tốt" là chúng ta không thể kiểm soát được trình duyệt. Nó sẽ gửi header `Accept-Encoding: gzip, deflate` hoặc là không.
+
+Công việc của chúng ta là cấu hình server để nó trả về nội dung được nén nếu trình duyệt có thể xử lý, tiết kiệm băng thông cho mọi người (và đem lại một người dùng hạnh phúc).
+
+Đối với IIS, [bật cấu hình nén](<https://technet.microsoft.com/en-us/library/cc771003(WS.10).aspx>) ở trong cài đặt.
+
+Trong Apache, [bật cấu hình nén nội dung xuất](https://httpd.apache.org/docs/2.0/mod/mod_deflate.html) khá là đơn giản. Thêm các dòng sau vào file .htaccess:
+
+```javascript
+# compress text, html, javascript, css, xml:
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+
+# Or, compress certain file types by extension:
+<files *.html>
+SetOutputFilter DEFLATE
+</files>
+```
+
+Apache có 2 tùy chọn nén:
+
+- **mod_deflate** dễ dàng cài đặt và là chuẩn.
+- **mod_gzip** có vẻ mạnh hơn: bạn có thể nén trước nội dung.
+
+Deflate nhanh và hoạt động được, nên tôi sử dụng nó; dùng mod_gzip nếu bạn thấy thích. Trong cả 2 trường hợp, Apache đều kiểm tra xem trình duyệt có gửi header "Accept-Encoding" không và gửi lại phiên bản nén hoặc phiên bản thường của file. tuy nhiên, một số trình duyệt cũ sẽ phát sinh vấn đề (chi tiết bên dưới) và có một số chỉ lệnh đặc biệt mà bạn có thể thêm vào để sửa.
+
+Nếu bạn không thể thay đổi file .htaccess, bạn có thể [dùng PHP](https://perishablepress.com/press/2007/03/26/fast-effective-php-compression/) để trả về nội dung nén. Thêm phần mở rộng .php vào file html của bạn và thêm đoạn code này ở đầu file:
+
+```php
+<?php
+if (substr_count($_SERVER[‘HTTP_ACCEPT_ENCODING’], ‘gzip’))
+   ob_start(“ob_gzhandler”);
+else ob_start();
+?>
+```
+
+Chúng ta kiểm tra header "Accept-Encoding" và trả về phiên bản nén gzip của file (ngược lại là phiên bản thường). Việc này gần như là tự xây dựng webserver của bạn (rất thú vị!). Nhưng thực sự thì, hãy thử sử dụng Apache để nén nội dung trả về nến bạn có thể. Bạn không muốn nghịch ngợm mấy file của mình đâu.
+
+## Xác minh nội dung nén của bạn
+
+Khi bạn đã cấu hình xong server của mình, hãy kiểm tra để đảm bảo rằng bạn thực sự trả về nội dung nén.
+
+- **Online**: sử dụng [công cụ kiểm tra gzip online](http://www.gidnetwork.com/tools/gzip-test.php) để kiểm tra liệu trang của bạn có được nén không.
+- **Trên trình duyệt**: trong Chrome, mở Developer Tools > Network (Firefox/IE sẽ tương tự). Tải lại trang, và nhấn vào dòng network tương ứng với trang (ví dụ www.google.com). Header `Content-Encoding: gzip` nghĩa là nội dung trả về đã được nén.
+
+![](https://betterexplained.com/wp-content/uploads/2007/04/chrome-gzip-header.png)
+
+Nhấn biểu tượng "Use large rows" để hiển thị thêm thông tin, bao gồm cả kích cỡ file nén và kích cõ thực.
+
+![](https://betterexplained.com/wp-content/uploads/2007/04/request-size.png)
+
+Hãy chuẩn bị cho điều kỳ diệu ở kết quả. [Trang chủ của instacalc](http://instacalc.com/) thu lại từ 36k xuống còn 10k, giảm 75% kích cỡ.
+
+## Thử một số ví dụ
+
+Tôi đã làm một số trang và một [ví dụ cho phép tải về](https://betterexplained.com/examples/compressed/compression-example.zip):
+
+- [index.html](https://betterexplained.com/examples/compressed/index.html) - không nén (trên server này, tôi mặc định sử dụng nén)
+- [index.htm](https://betterexplained.com/examples/compressed/index.htm) - nén với Apache .htaccess sử dụng luật \*.htm
+- [index.php](https://betterexplained.com/examples/compressed/index.php) - nén sử dụng PHP header
+
+Cứ thoải mái tải file, để chúng trong server của bạn và chỉnh sửa các cài đặt.
+
+## Lưu ý
+
+Dù khá thú vị nhưng HTTP Compression cũng chứa một số vấn đề. Dưới đây là những thứ cần phải coi chừng:
+
+- **Trình duyệt cũ**: Phải, một số trình duyệt vẫn còn có rắc rối với nội dung nén (chúng nói rằng có thể chấp nhận nội dung nén, nhưng thực sự thì không thể). Nếu trang của bạn bắt buộc phải hoạt động với Netscape 1.0 trên Windows 95, bạn có lẽ sẽ không muốn dùng HTTP Compression. Apache mod_deflate có [một số luật](https://httpd.apache.org/docs/2.0/mod/mod_deflate.html#recommended) cho phép tránh việc nén trên một số trình duyệt cũ.
+- **Nội dung đã nén**: Hầu hết ảnh, nhạc và video đều đã được nén. Đừng tốn thời gian nén chúng lần nữa. Trên thực tế, bạn sẽ chỉ muốn nén "big 3" (HTML, CSS và Javascript).
+- **CPU-load**: nén nội dung khi nhận được yêu cầu sẽ tiêu tốn thời gian của CPU và tiết kiệm băng thông. Thường thì đây là sự đánh đổi tốt nếu biết tốc độ nén. Có nhiều cách để nén trước các nội dung tĩnh và gửi các bản nén này. Việc này cần được cấu hình thêm; cho dù không thể thì việc nén nội dung trả về vẫn là điều tốt. Sử dụng CPU cho người dùng có trải nghiệm nhanh hơn cũng khá là đáng, khi sự chú ý không đáng kể.
+
+Nén là một trong những cách nhanh nhất để cải thiện hiệu năng cho trang web của bạn. Hãy đi, cài đặt, và để cho người dùng của bạn thận hưởng lợi ích nó mang lại.

@@ -1,0 +1,368 @@
+---
+title: 'Cách Javascript hoạt động P5: Hiểu sâu về WebSocket & HTTP/2 với SSE'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-deep-dive-into-websockets-and-http-2-with-sse-how-to-pick-the-right-path-584e6b8e3bf7
+date: 2018-11-16 07:04:00
+slug: /cach-javascript-hoat-dong-p5-hieu-sau-ve-websocket-http-2-voi-sse
+---
+
+Chào các bạn đến với bài thứ 5 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Trong phần này chúng ta sẽ đào sâu với thế giới của những giao thức giao tiếp, ánh xạ (mapping) và thảo luận về những thuộc tính cũng như thành phần của chúng. Chúng ta sẽ đưa ra 1 so sánh nhỏ giữa WebSockets và HTTP/s. Cuối cùng, team SessionStack sẽ chia sẻ một vài ý tưởng về việc lựa chọn phương thức nào cho phù hợp với giao thức mạng.
+
+# Giới thiệu
+
+Ngày nay những webapp phức tạp có nhiều tính năng, UI động xuất hiện như trăm hoa đua nở. Cũng không phải bất ngờ, internet cũng đã phát triển được một quãng đường khá dài kể từ khi bắt đầu.
+
+Ban đầu, internet không được xây dựng để dành cho những app động và phức tạp. Nó được hình thành như là một tập hợp của các trang HTML, kết nối với nhau để cấu thành nên khái niệm về "Web" chứa thông tin. Phần lớn mọi thứ được xây dựng xung quanh mô hình request/response nổi tiếng của HTTP. Một client tải trang và không có gì xảy ra cho đến khi user bắt đầu click và di chuyển đến trang tiếp theo.
+
+Khoảng năm 2005, AJAX được giới thiệu và rất nhiều người đã khám phá khả năng tạo kết nối giữa client và server theo 2 chiều (**bidirectional**). Và vẫn như thế, tất cả giao tiếp HTTP được chỉ đạo bởi client yêu cầu user tương tác hoặc thực hiện theo chu kỳ để lấy dữ liệu mới từ server.
+
+# Tạo một HTTP “2 chiều”
+
+Công nghệ cho phép server gửi dữ liệu về client một cách "chủ động" đã phát triển được 1 thời gian. Push và Comet là ví dụ.
+
+Một trong số mẹo nổi tiếng để tạo ra ảo giác rằng server đang gửi dữ liệu về client được gọi là long polling. Với long polling, client mở kết nối HTTP đến server và giữ nó tiếp tục mở cho đến khi có response trả về. Mỗi khi server có dữ liệu mới cần được gửi, nó chuyển giao thông tin dưới dạng một response.
+
+Cùng xem một ví dụ đơn giản về long polling:
+
+```javascript
+(function poll() {
+  setTimeout(function () {
+    $.ajax({
+      url: 'https://api.example.com/endpoint',
+      success: function (data) {
+        // Làm gì đó với `data`
+        // ...
+
+        // Cài đặt poll mới theo đệ quy
+        poll();
+      },
+      dataType: 'json',
+    });
+  }, 10000);
+})();
+```
+
+Đây là một hàm tự thực thi cơ bản chạy một cách tự động lần đầu tiên. Nó sẽ cài đặt một khoảng thời gian 10 giây và sau mỗi lời gọi Ajax bất đồng bộ đến server, callback lại gọi ajax lần nữa.
+
+Vài kỹ thuật khác có thể kể đến như [Flash](http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/net/Socket.html), request nhiều thành phần XHR và [htmlfiles](http://cometdaily.com/2007/12/27/a-standards-based-approach-to-comet-communication-with-rest/) nổi tiếng.
+
+Tất cả những phương pháp này đều có chung một vấn đề: Chúng qua mặt HTTP, làm cho chúng không phù hợp với những app có độ trễ thấp. Giả sử như game bắn súng nhiều người chơi trên trình duyệt hoặc bất kỳ game onlinen nào có đối thủ thực.
+
+# Giới thiệu WebSockets
+
+Thông số kỹ thuật của WebSocket định nghĩa một kết nối API dạng "socket" (ổ cắm điện!) giữa trình duyệt và server. Theo nghĩa đen thì có 1 kết nối cố định giữa client và server và cả 2 bên có thể gửi dữ liệu bất kỳ lúc nào.
+
+![](https://cdn-images-1.medium.com/max/1000/1*a4lA5FYDkjA9mv53NPKtOg.png)
+
+Client thiết lập một kết nối WebSocket thông qua một tiến trình được gọi là WebSocket handshake (bắt tay WebSocket). Tiến trình này bắt đầu với client gửi một request HTTP thông thường đến server. Nó kèm theo header Upgrade để thông báo cho server rằng client muốn tạo một kết nối WebSocket.
+
+Cùng xem thử quá trình mở kết nối WebSocket như thế nào ở phía client:
+
+```javascript
+// Create a new WebSocket with an encrypted connection.
+var socket = new WebSocket('ws://websocket.example.com');
+```
+
+> WebSocket URL sử dụng ws scheme. Chúng ta còn có cả wss cho những kết nối WebSocket bảo mật hơn, tương tự như HTTPS.
+
+Scheme này bắt đầu một tiến trình mở kết nối WebSocket đến websocket.example.com.
+
+Dưới đây là 1 ví dụ đơn giản của header của request khởi tạo.
+
+```javascript
+GET ws://websocket.example.com/ HTTP/1.1
+Origin: http://example.com
+Connection: Upgrade
+Host: websocket.example.com
+Upgrade: websocket
+```
+
+Nếu server hỗ trợ giao thức WebSocket, nó sẽ đồng ý để nâng cấp và giao tiếp thông qua header Upgrade trong response.
+
+Cùng xem phần thiết lập của nó trong Node.js như thế nào:
+
+```javascript
+// Chúng ta sẽ dùng https://github.com/theturtle32/WebSocket-Node
+// Triển khai WebSocket
+var WebSocketServer = require('websocket').server;
+var http = require('http');
+
+var server = http.createServer(function (request, response) {
+  // xử lý HTTP request.
+});
+server.listen(1337, function () {});
+
+// tạo server
+wsServer = new WebSocketServer({
+  httpServer: server,
+});
+
+// WebSocket server
+wsServer.on('request', function (request) {
+  var connection = request.accept(null, request.origin);
+
+  // Đây là callback quan trọng nhất,chúng ta sẽ
+  // xử lý thông tin của client ở đây.
+  connection.on('message', function (message) {
+    // Xử lý thông tin WebSocket
+  });
+
+  connection.on('close', function (connection) {
+    // Đóng kết nối
+  });
+});
+```
+
+Sau khi thành lập kết nối, server trả về:
+
+```javascript
+HTTP/1.1 101 Switching Protocols
+Date: Wed, 25 Oct 2017 10:07:34 GMT
+Connection: Upgrade
+Upgrade: WebSocket
+```
+
+Khi kết nối đã được thiết lập, sự kiện open sẽ được bắn ra cho instance WebSocket ở phía client:
+
+```javascript
+var socket = new WebSocket('ws://websocket.example.com');
+
+// Hiện thông báo khi kết nối WebSocket thành công.
+socket.onopen = function (event) {
+  console.log('WebSocket is connected.');
+};
+```
+
+Giờ thì quá trình "bắt tay" đã hoàn tất, kết nối khởi tạo HTTP được thay thế bằng WebSocket và sử dụng cùng loại nền tảng kết nối TCP/IP. Tại thời điểm này, cả 2 bên đều có thể gửi dữ liệu.
+
+Với WebSocket, bạn có thể truyền bao nhiêu thông tin tùy thích mà không cần phải gánh chịu những chi phí không đáng có liên quan đến request HTTP truyền thống. Dữ liệu được truyền đi thông qua WebSocket dưới dạng tin nhắn (message), mỗi tin nhắn bao gồm một hoặc nhiều _frame_ chứa dữ liệu bạn gửi đi (gọi là _kiện hàng_ - _payload_). Để đảm bảo message có thể tái cấu trúc một cách chính xác khi nó đến với client, mỗi frame được gán cứng từ 4-12 byte thông tin về payload. Sử dụng hệ thống thông tin dựa trên frame như thế này giúp giảm tải khối lượng dữ liệu dư thừa (non-payload data) phải truyền đi, có thể làm cho độ trễ giảm đi đáng kể.
+
+**Lưu ý**: _Đặc biệt chú ý là client chỉ được thông báo về message mới một khi tất cả frame đều được nhận và payload message gốc được tái cấu trúc đầy đủ_
+
+# WebSocket URLs
+
+Chúng ta có đề cập sơ qua về WebSocket URL scheme ở trên. Trong thực thế, chúng giới thiệu có 2 scheme mới là ws:// và wss://
+
+URL có cấu trúc ngữ pháp cụ thể về scheme. WebSocket URL đặc biệt vì nó không hỗ trợ nhóm ký tự anchor (có dấu thăng ở trước, ví dụ: #đây_là_anchor).
+
+Có những luật chung được áp dụng cho cả style của WebSocket URL và HTTP URL. ws không được mã hóa, nó có cổng mặc định là 80 trong khi đó wss yêu cầu mã hóa TLS và dùng cổng 443 mặc định.
+
+# Framing protocol (Giao thức framing)
+
+Cùng đào sâu một chút về framing protocol với những gì [RFC](https://tools.ietf.org/html/rfc6455) cung cấp:
+
+```javascript
+0                   1                   2                     3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-------+-+-------------+-------------------------------+
+|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+|N|V|V|V|       |S|             |   (if payload len==126/127)   |
+| |1|2|3|       |K|             |                               |
++-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+|     Extended payload length continued, if payload len == 127  |
++ - - - - - - - - - - - - - - - +-------------------------------+
+|                               |Masking-key, if MASK set to 1  |
++-------------------------------+-------------------------------+
+| Masking-key (continued)       |          Payload Data         |
++-------------------------------- - - - - - - - - - - - - - - - +
+:                     Payload Data continued ...                :
++ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+|                     Payload Data continued ...                |
++---------------------------------------------------------------+
+```
+
+Theo như RFC định nghĩ về WebSocket thì nó chỉ có duy nhất một header trước mỗi gói tin, và nó khá phức tạp. Chúng ta cùng tìm hiểu:
+
+- fin (1 bit): biểu thị nếu frame đó là frame cuối cùng tạo nên message. Hầu hết message đều có thể chứa trong một frame duy nhất và bit này luôn có giá trị. Thực nghiệm cho thấy Firefox tạo 1 frame thứ 2 sau mỗi 32K.
+- rsv1, rsv2, rsv3 (Mỗi thứ 1 bit): phải bằng 0 trừ khi có một [extension](https://tools.ietf.org/html/rfc6066) (đại khái như tiện ích mở rộng) được trao đổi và nó định nghĩa ý nghĩa cho giá trị khác 0\. Nếu nhận về một giá trị khác 0 và không có extension nào xác định ý nghĩa của giá trị khác 0 đó được trao đổi thì người nhận cuối sẽ bị mất kết nối.
+- opcode (4 bit): nó cho biết những gì frame đại diện. Có những giá trị sau đây được dùng:
+  - 0x00: frame này tiếp tục payload từ frame trước đó.
+  - 0x01: frame này chứa dữ liệu chữ (text).
+  - 0x02: frame này chứa dữ liệu nhị phân (binary).
+  - 0x08: frame này hủy kết nối.
+  - 0x09: frame này là ping.
+  - 0x0a: frame này là pong.
+
+(Bạn có thể thấy rằng có nhiều giá trị không sử dụng, chúng được dự trữ cho tương lai khi cần)
+
+- mask (1 bit): biểu thị nếu kết nối đã được che đậy (mask). Rõ ràng là mỗi message từ client đến server _phải được che đậy_ và về mặt kỹ thuật thì nó sẽ hủy kết nối nếu không được che đậy.
+- payload_len (7 bit): độ dài của payload. WebSocket frame có những độ dài theo các khoảng tính theo byte như sau:
+  - 0-125 biểu thị độ dài của payload
+  - Nếu là 126 byte thì 2 byte tiếp theo biểu thị độ dài payload dưới dạng số nguyên 16bit không dấu
+  - Nếu là 127 byte thì 8 byte tiếp theo biểu thị độ dài payload dưới dạng số nguyên 64bit không dấu
+  - Vậy là độ dài payload sẽ vào khoảng ~7bit, 16bit hoặc 64bit.
+- masking-key (32 bit): tất cả frame được gửi từ client đến server sẽ được che đậy (mask) bằng một giá trị 32bit đính kèm trong frame.
+- payload: Dữ liệu thật sự cần được che đậy. Độ dài của nó chính là payload_len
+
+Tại sao WebSocket lại dựa trên frame (frame-based) mà không dựa trên dòng chảy (stream-based)? Có trời mới biết, tác giả cũng không biết vì sao nên nếu bạn có thông tin gì về điều này thì có thể nhắn tin đến tác giả. Ngoài ra thì có [một topic thảo luận rất tốt về vấn đề này trên HackerNews](https://news.ycombinator.com/item?id=3377406), bạn có thể tham khảo.
+
+# Dữ liệu trên frame
+
+Như đã nói ở trên, dữ liệu có thể phân mảnh thành nhiều frame. Frame đầu tiên chuyển giao dữ liệu có một opcode biểu thị kiểu dữ liệu đang được truyền. Điều này cần thiết bởi vì Javascript hầu như không có hỗ trợ cho kiểu dữ liệu nhị phân (binary) khi nó được xây dựng. 0x01 biểu thị kiểu encode văn bản UTF-8, 0x02 là dữ liệu nhị phân. Đa số mọi người sẽ chuyển giao JSON trong trường hợp bạn muốn chọn opcode văn bản. Khi bạn phát tín hiệu (emit) dữ liệu nhị phân nó sẽ được thể hiện trên trình duyệt dưới dạng cụ thể là [Blob](https://developer.mozilla.org/en-US/docs/Web/API/Blob).
+
+API để gửi dữ liệu thông qua WebSocket khá đơn giản:
+
+```javascript
+var socket = new WebSocket('ws://websocket.example.com');
+socket.onopen = function (event) {
+  socket.send('Some message'); // Gửi dữ liệu đến server.
+};
+```
+
+Khi WebSocket nhận dữ liệu (ở phía client), một sự kiện message được bắn ra. Sự kiện này bao gồm một thuộc tính gọi là data có thể dùng để truy cập nội dung của message.
+
+```javascript
+// Xử lý message gửi đi từ server.
+socket.onmessage = function (event) {
+  var message = event.data;
+  console.log(message);
+};
+```
+
+Bạn có thể khám phá dữ liệu một cách dễ dàng trong mỗi frame trong kết nối WebSocket sử dụng tab Network trong Chrome DevTools:
+
+![](https://cdn-images-1.medium.com/max/1000/1*Sz4wI2ukt91vRrgf8UonWw.png)
+
+# Sự phân mảnh
+
+Dữ liệu payload có thể được chia thành nhiều frame riêng. Nơi nhận có nhiệm vụ lưu đệm chúng cho đến khi bit fin được set. Thế nên bạn có thể chuyển 1 chuỗi "Hello World" trong 11 gói tin của 6 (độ dài header) + 1 byte cho mỗi gói. Sự phân mảnh không được chấp nhận cho gói tin điều khiển (control packages). Tuy nhiên, đặc điểm kỹ thuật muốn bạn có thể xử lý những frame điều khiển xen kẽ nhau. Đó là trường hợp gói tin TCP nhận được có thứ tự lộn xộn.
+
+Logic để kết nối frame được mô tả sơ lược như sau:
+
+- Nhận frame đầu tiên
+- Ghi nhớ opcode
+- Nối các frame payload lại với nhau cho đến khi bit fin được set.
+- Giả định rằng opcode cho mỗi gói tin là 0
+
+Mục đích chính của sự phân mảnh là cho phép gửi message khi không biết rõ kích thước ban đầu của message. Với sự phân mảnh, server có thể chọn một kích thước buffer (bộ đệm) phù hợp và khi buffer đầy thì ghi mảnh (fragment) đó vào network. Trường hợp sử dụng phụ của sự phân mảnh là truyền tin đa luồng (multiplexing), vốn dĩ không cần một message lớn trên một kênh logic để tiếp nhận toàn bộ kênh đầu ra, vì thế multiplexing cần phải giải phóng để cắt message ra thành nhiều mảnh để có thể chia sẻ đến kênh đầu ra tốt hơn.
+
+# Heartbeating (nhịp tim) là gì ?
+
+Tại một thời điểm sau khi "bắt tay" (handshake), cả client và server có thể lựa chọn để gửi đi một ping đến phía kia. Khi ping được nhận, người nhận phải gửi ngược lại một pong ngay khi có thể. Đó gọi là heartbeat (nhịp tim đập). Bạn có thể dùng nó để đảm bảo client vẫn đang được kết nối.
+
+Một ping hay pong chỉ là frame bình thường, không phải frame điều khiển. Ping có opcode là 0x9 và opcode của pong là 0xA. Khi bạn nhận được ping, gửi ngược lại pong với chính xác cùng dữ liệu Payload như ping (với ping và pong thì độ dài payload tối đa là 125). Bạn cũng có thể nhận được pong mà chưa từng gửi ping. Nếu nó xảy ra thì bỏ qua, quên nó đi.
+
+Heartbeat có thể rất có ích. Có nhiều dịch vụ (chẳng hạn như bộ cân bằng tải - load balancer) sẽ hủy những kết nối đứng yên (idle). Thêm nữa, bên nhận không thể biết nếu bên kia (bên gửi) đã bị kết thúc hay chưa. Chỉ có đến lần gửi thông tin tiếp theo ta mới nhận ra có gì đó không ổn.
+
+# Xử lý lỗi
+
+Bạn có thể xử lý bao nhiêu lỗi xảy ra cũng được bằng cách listen đến sự kiện error.
+Ví dụ:
+
+```javascript
+var socket = new WebSocket('ws://websocket.example.com');
+
+// Xử lý lỗi xảy ra.
+socket.onerror = function (error) {
+  console.log('WebSocket Error: ' + error);
+};
+```
+
+# Đóng kết nối
+
+Để đóng kết nổi thì client hoặc server phải gửi một frame điều khiển với dữ liệu chứa opcode 0x8. Ngay khi nhận được frame đó thì bên nhận sẽ gửi trả một frame đóng (close). Bên gửi sẽ đóng kết nối. Bất kỳ thông tin nào nhận được sau khi đóng kết nối đều bị vứt bỏ.
+
+Đây là cách bạn khởi tạo quá trình đóng kết nối WebSocket từ client:
+
+```javascript
+// Đóng nếu kết nối đang được mở.
+if (socket.readyState === WebSocket.OPEN) {
+  socket.close();
+}
+```
+
+Để thực hiện dọn dẹp sau khi đóng kết nối thành công, bạn có thể thêm một event listener vào sự kiện close:
+
+```javascript
+// Dọn dẹp những thứ cần thiết.
+socket.onclose = function (event) {
+  console.log('Disconnected from WebSocket.');
+};
+```
+
+Server lắng nghe sự kiện close để xử lý nếu cần:
+
+```javascript
+connection.on('close', function (reasonCode, description) {
+  // Kết nối đang bị đóng.
+});
+```
+
+# So sánh WebSockets và HTTP/2
+
+Trong khi HTTP/2 cung cấp nhiều thứ, nó lại không hoàn toàn thay thế sự cần thiết cho các công nghệ push/streaming hiện có.
+
+Điều quan trọng đầu tiên về HTTP/2 mà ta cần chú ý là nó không phải là một thay thế cho tất cả HTTP. Những động từ, mã status và đa số các loại header sẽ vẫn như cũ. HTTP/2 hướng đến cải thiện sự hiệu quả trong cách mà dữ liệu truyền trên đường dây.
+
+Giờ nếu so sánh HTTP/2 với WebSocket thì ta có nhiều thứ tương đồng:
+
+|              | HTTP/2                            | WebSocket             |
+| ------------ | --------------------------------- | --------------------- |
+| Headers      | Được nén (HPACK)                  | Không nén             |
+| Binary       | Có                                | Nhị Phân hoặc Văn Bản |
+| Multiplexing | Có                                | Có                    |
+| Sự ưu tiên   | Có                                | Không                 |
+| Nén          | Có                                | Có                    |
+| Đinh hướng   | Client/Server hoặc là Server Push | 2 chiều               |
+| Full-duplex  | Có                                | Có                    |
+
+Như đã thấy ở trên, HTTP/2 giới thiệu tính năng [Server Push](https://en.wikipedia.org/wiki/Push_technology?oldformat=true) để cho phép server gửi tài nguyên một cách chủ động đến bộ đệm phía client. Tuy nhiên, nó không cho phép tự ý push dữ liệu xuống client. Server push chỉ được xử lý bằng browser và không được bật trong code của ứng dụng, nghĩa là không có API cho app để get thông báo từ những sự kiện như thế này.
+
+Đây là nơi Sự kiện server gửi thông tin (Server-Sent Events - SSE) trở nên rất có ích. SSE là 1 cơ chế cho phép server push dữ liệu bất đồng bộ về client một khi kết nối client-server được thiết lập. Server có thể lựa chọn để gửi dữ liệu khi nào một "cục" dữ liệu mới đã sẵn sàng. Nó có thể được cân nhắc như là mô hình đăng ký-xuất bản ([publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern)) 1 chiều. Nó cũng cung cấp một chuẩn Javascript client API tên là EventSource được triển khai trong đa số các trình duyệt hiện đại như là 1 phần của tiêu chuẩn HTML5 bởi [W3C](https://www.w3.org/TR/eventsource/). Chú ý rằng trình duyệt không hỗ trợ [EventSource API](http://caniuse.com/#feat=eventsource) cũng có thể dễ dàng polyfill.
+
+Bởi vì SSE dựa trên HTTP, nó có thể phù hợp với HTTP/2 và có thể kết hợp để đạt được sự tốt nhất của cả 2 bên: HTTP/2 xử lý tầng giao vận (transport layer) hiệu quả dựa trên các luồng multiplex và SSE cung cấp API cho app để thực hiện push.
+
+Để hiểu hoàn toàn về Stream và Multiplexing, đầu tiên ta cần biết sơ lược về định nghĩa tại IETF: _một "stream" là chuỗi tuần tự 2 chiều và độc lập của nhiều frame được trao đổi giữa client và server trong một kết nối HTTP/2\. Mộ trong số những đặc tính chính của nó là một kết nối HTTP/2 có thể chứa đồng thời nhiều stream đang mở với frame endpoint xen kẽ từ nhiều stream._
+
+![](https://cdn-images-1.medium.com/max/1000/1*pSh7IORJoUXbwCjyJ7fM9A.png)
+
+Phải nhớ rằng SSE là dựa trên HTTP. Nghĩa là với HTTP/2, không chỉ nhiều stream SSE được xen kẽ trên một kết nối TCP mà cũng cơ chế đó có thể thực hiện với sự kết hợp của nhiều stream SSE (push từ server đến client) và nhiều client request (client đến server). Nhờ ơn HTTP/2 và SSE mà giờ đây chúng ta đã có một kết nối HTTP 2 chiều thuần túy với API đơn giản để code ứng dụng có thể đăng ký cho server push. Thiếu đi khả năng giao tiếp 2 chiều thường được xem như là một bước cải lùi khi so sánh SSE với WebSocket. Cảm ơn HTTP/2, nhờ nó mà điều này không còn là vần đề nữa. Thêm nữa là nó mở ra cơ hội để bỏ qua WebSocket và tập trung vào những công nghệ thay thế dựa trên HTTP.
+
+# Làm thế nào để chọn giữa WebSocket & HTTP/2?
+
+WebSocket chắc chắn sẽ tồn tại trong sự thống trị của HTTP/2 + SSE, chủ yếu bởi vì nó là công nghệ đã được đón nhận và trong nhiều trường hợp cụ thể nó có sự vượt trội so với HTTP/2 như cách nó được xây dựng cho khả năng giao tiếp 2 chiều với ít chi phí tốn kém (ví dụ: headers).
+
+Giả sử bạn muốn xây dựng game MMO (Massive Multiplayer Online: Game nhiều người chơi trực tuyến) cần một lượng khổng lồ message từ cả 2 đầu kết nối. Trong những trường hợp như thế thì WebSocket thể hiện rất rất tốt.
+
+Tổng quát thì sử dụng WebSocket khi nào bạn cần một kết nối với độ trễ rất thấp, gần như là realtime giữa client & server. Nhớ kỹ rằng việc này có thể yêu cầu bạn cân nhắc lại cách xây dựng ứng dụng server-side của bạn, cũng như chuyển sang tập trung vào những công nghệ như event queue.
+
+Nếu trường hợp của bạn cần hiển thị tin tức thị trường, dữ liệu thị trường, ứng dụng chat... theo thời gian thực, sử dụng HTTP/2 + SSE sẽ cung cấp cho bạn kênh giao tiếp 2 chiều hiệu quả trong khi gặt hái nhiều lợi ích khi hoạt động trong thế giới của HTTP:
+
+- WebSocket thường gây ra khó khăn khi cân nhắc sự tương thích với hạ tầng web hiện tại cũng như nó nâng cấp kết nối HTTP đến một giao thức hoàn toàn khác mà không có gì dính dáng tới HTTP.
+- Mở rộng và bảo mật: những thành phần của web (firewall, phát hiện xâm nhập, cân bằng tải) được xây dựng, bảo trì và thiết đặt với tư tưởng của HTTP, một môi trường cho ứng dụng lớn và nghiêm ngặt sẽ ưu tiên khả năng phục hồi, bảo vật và khả năng mở rộng.
+
+Bạn cũng cần phải cân nhắc về vấn đề hỗ trợ của trình duyệt:
+
+![](https://cdn-images-1.medium.com/max/1000/1*YFr59cEF2qxzjjleebvbcQ.png)
+
+Khá tốt phải không nào?
+
+Nhưng với HTTP/2 thì không hẳn:
+
+![](https://cdn-images-1.medium.com/max/1000/1*C1VWSKOx89vqdiSiflDRJw.png)
+
+- Chỉ có TLS (Cũng không tệ lắm)
+- Hỗ trợ một phần cho IE11 nhưng chỉ trên Windows 10
+- Chỉ hỗ trợ OSX 10.11 trở lên trên Safari
+- Chỉ hỗ trợ HTTP/2 nếu bạn có thể điều hướng nó qua APLN (server của bạn cũng cần phải hỗ trợ nó rõ ràng)
+
+Hỗ trợ SSE thì tốt hơn một chút:
+
+![](https://cdn-images-1.medium.com/max/1000/1*9ryMUEZhtbTg7lECHVz0fw.png)
+
+Chỉ có IE/Edge là không hỗ trợ (Opera Mini cũng thế). Vẫn có những polyfill khá tốt để giúp chúng ta làm viêc với SSE trên IE/Edge.
+
+# SessionStack lựa chọn như thế nào?
+
+Team SessionStack sử dụng cả 2 WebSocket và HTTP, tùy thuộc vào từng trường hợp. Một khi bạn đã tích hợp SessionStack vào web app của bạn, nó sẽ ghi lại mọi thứ diễn ra trên app/website: những thay đổi trên DOM, tương tác của người dùng, JS exception, stack trace, những request bị fail và cả thông báo debug, cho phép bạn chạy lại (replay) những issue đã xảy ra dưới dạng video và xem chúng diễn ra như thế nào với người dùng. Tất cả đều hoạt động theo thời gian thực (real-time) và không ảnh hưởng đến hiệu năng của webapp.
+
+Điều đó nghĩa là bạn có thể tham gia vào một phiên làm việc của user, trong khi user đang hoạt động trên trình duyệt. Trong trường hợp này, team tác giả chọn sử dụng HTTP bởi vì không cần giao tiếp 2 chiều (server chỉ cần stream dữ liệu đến trình duyệt). Nếu dùng WebSocket ở đây thì sẽ rất tệ, càng khó để bảo trì và mở rộng.
+
+Tuy nhiên, thư viện SessionStack tích hợp vào trong webapp của bạn sử dụng WebSocket (nếu có thể, còn không thì HTTP). Nó sắp xếp và gửi dữ liệu về server và cũng là giao tiếp 1 chiều. Team tác giả chọn WebSocket vì trong trường hợp này vài tính năng cần thiết sử dụng giao tiếp 2 chiều.

@@ -1,0 +1,708 @@
+---
+title: 'Cách Javascript hoạt động P4: Event loop, lập trình bất đồng bộ & 5 mẹo cải thiện Async/Await'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-event-loop-and-the-rise-of-async-programming-5-ways-to-better-coding-with-2f077c4438b5
+date: 2018-11-13 23:34:00
+slug: /cach-javascript-hoat-dong-p4-event-loop-lap-trinh-bat-dong-bo-5-meo-cai-thien-async-await
+---
+
+Chào các bạn đến với bài thứ 4 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+Lần này chúng ta sẽ mở rộng những gì có trong bài đầu tiên bằng cách đánh giá những nhược điểm của môi trường đơn luồng (single thread) và làm thế nào để vượt qua chúng nhằm xây dựng những Javascript UI ấn tượng. Và vẫn như cũ, cuối bài viết tác giả sẽ chia sẻ 5 mẹo nhỏ để viết code tốt hơn với async/await.
+
+# Tại sao đơn luồng lại là giới hạn.
+
+Trong bài đầu tiên của series, chúng ta suy ngẫm về câu hỏi điều gì xảy ra khi chúng ta có 1 hàm trong callstack và hàm đó lại ngốn quá nhiều thời gian để thực thi.
+
+Hãy tưởng tượng, ta thực hiện một thuật toán chuyển đổi hình ảnh phức tạp chạy trên browser.
+
+Trong khi callstack đang thực thi các hàm, trình duyệt lại không thể làm gì cả, nó bị kẹt. Nghĩa là trình duyệt không thể vẽ, render, nó không thể chạy code khác, chỉ đơn giản là kẹt. Và vấn đề là ở đây, giao diện (UI) của app bạn sẽ hoạt động không hiệu quả.
+
+App của bạn bị kẹt.
+
+Trong một vài trường hợp thì đây không phải vấn đề nghiêm trọng. Tuy nhiên, có vấn đề còn lớn hơn nữa. Một khi trình duyệt của bạn xử lý quá nhiều thứ trong callstack, nó sẽ bị "đỡ" trong 1 khoảng thời gian dài. Tại thời điểm đó, đa số các browser sẽ chọn giải pháp hiện lỗi, hỏi người dùng có muốn hủy trang hiện tại không.
+
+Điều này thật là xấu xí và ảnh hưởng nghiêm trọng đến trải nghiệm (UX):
+
+![](https://cdn-images-1.medium.com/max/1000/1*MCt4ZC0dMVhJsgo1u6lpYw.jpeg)
+
+# Những thành phần xây dựng nên 1 chương trình JS
+
+Bạn có thể viết toàn bộ code JS trong 1 file .js duy nhất nhưng chương trình của bạn chắc chắn chứa nhiều thành phần nhỏ (gọi là những block), chỉ có một số block sẽ được **thực thi ngay** (gọi là nhóm A) và phần còn lại thì **chạy sau** (nhóm B). Đơn vị block phổ biến nhất là function (hàm).
+
+Vấn đề mà đa số các developer JS mới gặp phải là họ nghĩ rằng nhóm B không cần phải được thực thi một cách nghiêm ngặt ngay sau khi thực thi nhóm A. Nói cách khác, những nhiệm vụ không được hoàn thành ngay bây giờ thì theo lỹ thuyết nó sẽ được hoàn thành một cách bất đồng bộ, nghĩa là bạn sẽ không phải gặp tình huống blocking (bị chặn) như đề cập ở trên
+
+Ví dụ:
+
+```javascript
+// Giả sử ajax(..) là một hàm Ajax thuộc thư viện nào đó
+var response = ajax('https://example.com/api');
+
+console.log(response);
+// `response` sẽ không chứa dữ liệu trả về
+```
+
+Chắc bạn cũng nhận thấy rằng những request Ajax như thế này không chạy đồng bộ với nhau, nghĩa là tại thời điểm code thực thi, hàm ajax(...) chưa có dữ liệu trả về để gán vào biến response
+
+Một cách đơn giản cho thường gặp để "chờ" một hàm xử lý bất đồng bộ trả kết quả về đó là sử dụng callback:
+
+```javascript
+ajax('https://example.com/api', function (response) {
+  console.log(response); // "response" giờ đã có dữ liệu
+});
+```
+
+Chú ý: Bạn có thể viết những Ajax request đồng bộ, tuy nhiên đừng bao giờ làm thế. Nếu bạn viết Ajax như vậy thì UI sẽ bị block cứng đơ và người dùng sẽ không thể thực hiện các hành động như click, nhập dữ liệu, điều hướng, lăn chuột... Một trải nghiệm kinh khủng.
+
+Đây là cách mà Ajax được viết đồng bộ, nhưng làm ơn, đừng bao giờ sử dụng nó trong app của bạn:
+
+```javascript
+// Giả sử bạn đang dùng jQuery
+jQuery.ajax({
+  url: 'https://api.example.com/endpoint',
+  success: function (response) {
+    // callback ở đây.
+  },
+  async: false, // Một ý tưởng cực kỳ tồi tệ
+});
+```
+
+Chúng ta đã sử dụng Ajax request để ví dụ. Ngoài ra bạn có thể dùng bất kỳ đoạn code nào để thực hiện bất đồng bộ.
+
+Dưới đây là ví dụ khác với hàm `setTimeout(callback, milliseconds)`. Cách thức mà hàm setTimeout hoạt động là nó sẽ đặt 1 sự kiện (ở đây là sự kiện timeout) và để nó thực hiện sau:
+
+```javascript
+function first() {
+  console.log('first');
+}
+function second() {
+  console.log('second');
+}
+function third() {
+  console.log('third');
+}
+first();
+setTimeout(second, 1000); // gọi hàm `second` sau 1000ms
+third();
+```
+
+Và đây là kết quả của đoạn code trên:
+
+```javascript
+first;
+third;
+second;
+```
+
+# Mổ xẻ Event Loop (vòng lặp sự kiện)
+
+Chúng ta sẽ bắt đầu với một chút "kỳ quặc" - mặc dù JS chấp nhận code chạy bất đồng bộ (như trường hợp của setTimeout) thì cho đến khi giới thiệu ES6, JS cũng không thực sự có một khái niệm trực tiếp nào về bất đồng bộ. Bộ engine JS chưa bao giờ làm gì vượt ra khỏi việc thực thi **một** khối lệnh trong chương trình của bạn tại 1 thời điểm cố định.
+
+Bạn có thể xem chi tiết hơn về cách engine JS (cụ thể là Google V8) hoạt động như thế nào ở [bài viết trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-2---Ben-trong-engine-V8---5-meo-de-toi-uu-hoa-code).
+
+Vậy thì ai là người ra lệnh cho engine JS phải thực thi những khối lệnh trong chương trình? Trên thực tế, engine JS không chạy cô lập, nó hoạt động bên trong một môi trường chủ (hosting environment), môi trường này đối với đa số các developer chính là trình duyệt web hoặc Node.js. Thực ra, ngày nay, JS đã và đang được nhúng vào rất nhiều loại thiết bị khác nhau, từ robot cho tới bóng đèn. Mỗi một thiết bị có thể xem như là 1 loại khác nhau của môi trường chủ cho engine JS.
+
+Mẫu số chung của tất cả các môi trường đó là một cơ chế tích hợp sẵn được gọi là **event-loop** (vòng lặp sự kiện), nó xử lý quá trình thực thi của nhiều khối lệnh trong chương trình theo thời gian, mỗi lần đều gọi engine JS.
+
+Điều này nghĩa là engine JS chỉ là 1 môi trường thực thi theo yêu cầu cho bất kỳ đoạn code JS tùy ý nào. Nó chỉ là môi trường bao quanh có lịch trình cho các sự kiện (quá trình thực thi code JS).
+
+Ví dụ, khi code JS của bạn gọi Ajax request để lấy dữ liệu từ server, bạn cài đặt một đoạn code _response_ trong một hàm (gọi là callback), và engine JS sẽ truyền đạt lại với môi trường chủ: _Này, tao chuẩn bị tạm ngưng quá trình thực thi ngay bây giờ, nhưng mà khi nào mày xong việc với request đó và có một vài cục dữ liệu thì nhớ gọi lại hàm này nhé._
+
+Trình duyệt sau đó sẽ lắng nghe về response từ mạng, và khi nó có gì đó trả về cho bạn, nó sẽ lên lịch cho hàm callback được thực thi bằng cách chèn nó vào trong event loop
+
+Cùng xem sơ đồ này nào:
+
+![](https://cdn-images-1.medium.com/max/1000/1*FA9NGxNB6-v1oI2qGEtlRQ.png)
+
+Bạn có thể xem lại phần bài viết về Memory Heap & Call Stack trong [bài viết trước đây](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-1---Khai-quat-ve-engine--runtime-va-callstack)
+
+Vậy thì những Web APIs này là gì? Về bản chất, chúng là những tiến trình mà bạn không thể truy xuất (access), bạn chỉ có thể gọi nó. Chúng là những thành phần của trình duyệt mà trong đó cách xử lý đồng bộ được bắt đầu. Nếu bạn là một Node.js developer thì chúng là những C++ APIs.
+
+**Vậy cuối cùng thì event loop là cái éo gì ?**
+
+![](https://cdn-images-1.medium.com/max/1000/1*KGBiAxjeD9JT2j6KDo0zUg.png)
+
+**Event Loop** có một công việc đơn giản: theo dõi Call Stack và Callback Queue (hàng đợi các hàm callback). Nếu Call Stack đang trống, nó sẽ lấy event đầu tiên từ trong hàng đợi ra và đẩy nó vảo trong Call Stack - tức là thực thi nó.
+
+Mỗi vòng lặp như thế được gọi là 1 **tick** trong Event Loop. Mỗi sự kiện chỉ là 1 hàm callback.
+
+```javascript
+console.log('Hi');
+setTimeout(function cb1() {
+  console.log('cb1');
+}, 5000);
+console.log('Bye');
+```
+
+Cùng _thực thi_ đoạn code trên và xem điều gì xảy ra nào:
+
+1.  Trạng thái đang trống, console của trình duyệt đang trống, Call Stack đang trống. ![](https://cdn-images-1.medium.com/max/1000/1*9fbOuFXJHwhqa6ToCc_v2A.png)
+2.  `console.log('Hi')` được thêm vào Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*dvrghQCVQIZOfNC27Jrtlw.png)
+3.  `console.log('Hi')` được thực thi. ![](https://cdn-images-1.medium.com/max/1000/1*yn9Y4PXNP8XTz6mtCAzDZQ.png)
+4.  `console.log('Hi')` bị xóa khỏi Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*iBedryNbqtixYTKviPC1tA.png)
+5.  `setTimeout(function cb1() { ... })` được thêm vào Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*HIn-BxIP38X6mF_65snMKg.png)
+6.  `setTimeout(function cb1() { ... })` được thực thi. Trình duyệt tạo một timer - vốn là một phần của Web APIs. Nó sẽ thực hiện phần đếm ngược cho bạn. ![](https://cdn-images-1.medium.com/max/1000/1*vd3X2O_qRfqaEpW4AfZM4w.png)
+7.  The `setTimeout(function cb1() { ... })` được thực hiện xong và bị xóa khỏi Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*_nYLhoZPKD_HPhpJtQeErA.png)
+8.  `console.log('Bye')` được thêm vào Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*1NAeDnEv6DWFewX_C-L8mg.png)
+9.  `console.log('Bye')` được thực thi. ![](https://cdn-images-1.medium.com/max/1000/1*UwtM7DmK1BmlBOUUYEopGQ.png)
+10. `console.log('Bye')` bị xóa khỏi Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*-vHNuJsJVXvqq5dLHPt7cQ.png)
+11. Sau ít nhất 5000ms, timer hoàn thành công việc của nó và đẩy cb1 callback vào trong Callback Queue. ![](https://cdn-images-1.medium.com/max/1000/1*eOj6NVwGI2N78onh6CuCbA.png)
+12. Event Loop lấy cb1 từ trong Callback Queue và đưa nó vào trong Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*jQMQ9BEKPycs2wFC233aNg.png)
+13. cb1 được thực thi và nó thêm `console.log('cb1')` vào trong Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*hpyVeL1zsaeHaqS7mU4Qfw.png)
+14. `console.log('cb1')` được thực thi. ![](https://cdn-images-1.medium.com/max/1000/1*lvOtCg75ObmUTOxIS6anEQ.png)
+15. `console.log('cb1')` bị xóa khỏi Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*Jyyot22aRkKMF3LN1bgE-w.png)
+16. cb1 bị xóa khỏi Call Stack. ![](https://cdn-images-1.medium.com/max/1000/1*t2Btfb_tBbBxTvyVgKX0Qg.png)
+
+Ảnh gif tổng hợp lại quá trình 16 bước ở trên:
+![](https://cdn-images-1.medium.com/max/1000/1*TozSrkk92l8ho6d8JxqF_w.gif)
+
+Thật thú vị khi biết rằng ES6 có mô tả event loop hoạt động như thế nào, nghĩa là về mặt kỹ thuật, nó nằm trong phạm vi trách nghiệm của một JS engine, tức là không còn chỉ đóng vai trò môi trường chủ. Một lý do chính đáng cho sự thay đổi này chính là việc giới thiệu Promise trong ES6 bởi vì promise mới cần truy xuất trực tiếp, kiểm soát tối đa lịch trình điều hành đối với event loop queue (Sau này chúng ta sẽ thảo luận chi tiết hơn)
+
+# setTimeout(…) hoạt động như thế nào?
+
+Điều quan trọng cần phải biết là setTimeout(...) không tự động đặt callback vào trong event loop queue. Nó thiết lập một bộ đếm. Khi bộ đếm kết thúc, môi trường đặt callback vào trong event loop, vì thế những **tick** tiếp theo có thể lấy nó ra và thực thi:
+
+```javascript
+setTimeout(myCallback, 1000);
+```
+
+Nó không có nghĩa là myCallback sẽ được thực thi sau 1000ms, mà đúng hơn là, trong 1000ms, myCallback sẽ được thêm vào trong queue. Tuy nhiên queue này có thể đang có event khác đã được thêm vào trước đó, và vì thế callback của bạn sẽ phải chờ.
+
+Có một vài bài biết hoặc bài hướng dẫn dành cho người mới bắt đầu với bất đồng bộ trong JS hướng dẫn rằng ta nên setTimeout(callback, 0). Bây giờ bạn đã biết cách event loop làm việc và cách setTimeout hoạt động rồi: gọi setTimeout với thời gian là **0** chỉ vì mục đích hoãn callback lại cho tới khi Call Stack rỗng hoàn toàn.
+
+Hãy xem ví dụ dưới đây:
+
+```javascript
+console.log('Hi');
+setTimeout(function () {
+  console.log('callback');
+}, 0);
+console.log('Bye');
+```
+
+Mặc dù thời gian chờ của callback là _0ms_ nhưng kết quả in ra lại như thế này:
+
+```javascript
+Hi;
+Bye;
+callback;
+```
+
+# Jobs (công việc) trong ES6 là gì?
+
+Một khái niệm mới gọi là **Job Queue** (Hàng đợi công việc) được giới thiệu trong ES6\. Nó là lớp trên cùng của event loop queue. Nhiều khả năng bạn sẽ gặp phải nó khi xử lý vấn đề liên quan đến bất đồng bộ của Promise (Chúng ta sẽ nói về nó sau).
+
+Bây giờ thì chúng ta chỉ tìm hiểu về mặt ý tưởng cơ bản để sau này khi thảo luận về bất đồng bộ với Promise, bạn có thể hiểu về những hành động đã được lên lịch và xử lý.
+
+Tưởng tượng nó như thế này: Job queue là 1 queue được gắn vào cuối mỗi tick trong event loop queue. Mỗi hành động bất đồng bộ nhất định khi xảy ra trong 1 tick sẽ không làm cho toàn bộ event được thêm vào event loop queue nhưng thay vì thế sẽ thêm 1 item (tức là job) vào cuối job queue của tick hiện tại.
+
+Điều này nghĩa là bạn có thể thêm những tính năng khác để có thể thực thi sau và bạn có thể chắc chắn rằng nó sẽ được thực thi ngay sau đó, trước bất kỳ đoạn code nào khác.
+
+Một job có thể thêm nhiều job khác vào đoạn cuối của cùng 1 queue. Trên lý thuyết, job có thể lặp (loop) vô thời hạn (một job thực hiện thêm nhiều job khác, v..v...), do đó nó sẽ làm cho chương trình bị quá tải tài nguyên cần thiết để tiếp tục chạy. Về mặt khái niệm thì điều này tương tự như một công việc có thời gian thực thi dài hoặc là một vòng lặp vô hạn (ví dụ: while(true)).
+
+Job cũng giống như trick setTimeout(callback, 0) (set thời gian bằng _0_) nhưng được triển khai theo cách có vẻ như "chính thống" hơn và có sự đảm bảo về thứ tự: thực hiện sau, nhưng phải làm ngay khi có thể.
+
+# Callbacks
+
+Như bạn đã biết, callback là cách phổ biến nhất để thể hiện & quản lý sự bất đồng bộ trong JS. Rõ ràng, callback là mô hình bất đồng bộ cơ bản nhất trong JS. Vô số chương trình JS, kể cả những app tinh vi và phức tạp nhất thì cũng phải dùng tới callback.
+
+Ngoại trừ việc callback không xuất hiện mà không có thiếu sót. Nhiều developer đang cố gắng tìm kiếm những mô hình bất đồng bộ tốt hơn. Tuy nhiên, chúng ta không thể sử dụng bất kỳ phương pháp thay thế nào khác nếu như bạn chưa thực sự hiểu rõ về callback.
+
+Ở chương tiếp theo, chúng ta sẽ khám phá sâu hơn về vấn đề này để tìm hiểu tại sao những mô hình bất đồng bộ tinh vi khác (sẽ nói ở những bài sau) là cần thiết và được đề nghị nên sử dụng.
+
+# Callback lồng nhau (nested callback)
+
+Xem đoạn code dưới đây:
+
+```javascript
+listen('click', function (e) {
+  setTimeout(function () {
+    ajax('https://api.example.com/endpoint', function (text) {
+      if (text == 'hello') {
+        doSomething();
+      } else if (text == 'world') {
+        doSomethingElse();
+      }
+    });
+  }, 500);
+});
+```
+
+Chúng ta có 3 hàm lồng nhau, mỗi hàm thể hiện 1 bước trong chuỗi bất đồng bộ.
+
+Kiểu code như thế này thường được gọi là **callback hell**. Nhưng _callback hell_ thực sự không phải vấn đề về lồng nhau hay cách dòng, thụt lề. Câu chuyện thực sự sâu xa hơn thế nhiều.
+
+Đầu tiên, chúng ta listen một event _click_, sau đó thì chờ timer hoạt động, rồi cuối cùng là chờ cho Ajax trả kết quả về và quá trình này có thể lặp lại nhiều lần mỗi khi chúng ta click.
+
+Thoạt nhìn đoạn code này thể hiện sự đồng bộ một cách tự nhiên theo thứ tự các bước như sau:
+
+```javascript
+listen('click', function (e) {
+  // ..
+});
+```
+
+...rồi sau đó:
+
+```javascript
+setTimeout(function () {
+  // ..
+}, 500);
+```
+
+...tiếp theo là:
+
+```javascript
+ajax('https://api.example.com/endpoint', function (text) {
+  // ..
+});
+```
+
+...và cuối cùng:
+
+```javascript
+if (text == 'hello') {
+  doSomething();
+} else if (text == 'world') {
+  doSomethingElse();
+}
+```
+
+Chà, đúng là một cách thể hiện code bất đồng bộ một cách rất tự nhiên, phải không nào? _cười_
+
+# Promises
+
+Cùng xem đoạn code sau:
+
+```javascript
+var x = 1;
+var y = 2;
+console.log(x + y);
+```
+
+Rất rõ ràng rằng nó tính tổng của x và y rồi in kết quả ra console. Tuy nhiên, nếu như giá trị của x và y chưa tồn tại và vẫn còn đang chờ để được xác định thì sao? Giả sử chúng ta cần lấy giá trị của x và y từ server trước khi chúng được dùng để tính tổng.
+Tưởng tượng rằng chúng ta có một hàm loadX và loadY để thực hiện load dữ liệu cho x và y từ server và một hàm để tính tổng 2 số sau khi chúng được load xong.
+Đoạn code sẽ giống như thế này (xấu xí và phức tạp, phải không nào?):
+
+```javascript
+function sum(getX, getY, callback) {
+  var x, y;
+  getX(function (result) {
+    x = result;
+    if (y !== undefined) {
+      callback(x + y);
+    }
+  });
+  getY(function (result) {
+    y = result;
+    if (x !== undefined) {
+      callback(x + y);
+    }
+  });
+}
+// Một hàm đồng bộ hoặc bất đồng bộ để get giá trị của "x"
+function fetchX() {
+  // ..
+}
+
+// Một hàm đồng bộ hoặc bất đồng bộ để get giá trị của "y"
+function fetchY() {
+  // ..
+}
+sum(fetchX, fetchY, function (result) {
+  console.log(result);
+});
+```
+
+Có một điều quan trọng cần phải nêu lên ở đây: trong đoạn code trên, chúng ta xem x và y như những giá trị tương lai và hàm sum() không quan tâm về việc x hay y hay cả 2 biến có hay không có tồn tại giá trị.
+
+Dĩ nhiên là cách tiếp cận thô dựa trên callback này cho ta nhiều thứ đáng mong đợi. Đây chỉ là 1 bước tiến nhỏ để hiểu về ích lợi của _giá trị tương lai_ mà không cần lo lắng về khía cạnh thời gian khi chúng sẵn có.
+
+# Giá trị của Promise
+
+Cùng xem ví dụ về x + y được thực hiện với Promise:
+
+```javascript
+function sum(xPromise, yPromise) {
+  // `Promise.all([ .. ])` nhận vào 1 mảng các promise,
+  // và trả về 1 promise chờ đợi tất cả chúng hoàn thành
+  return (
+    Promise.all([xPromise, yPromise])
+
+      // khi một promise được phân giải (resolve),
+      // ta lấy giá trị x, y trả về và cộng chúng lại.
+      .then(function (values) {
+        // `values` là mảng chứa giá trị của các object
+        // từ những promise đã được resolve
+        return values[0] + values[1];
+      })
+  );
+}
+
+// `fetchX()` và `fetchY()` trả về promise
+// chứa kết quả tương ứng, có thể có
+// luôn hoặc chờ sau mới có dữ liệu
+sum(fetchX(), fetchY())
+  // Ta có 1 promise cho tổng của 2 số.
+  // Giờ thì gọi mắt xích (chain-call) hàm `.then(...)` để chờ
+  // kết quả của promise trả về.
+  .then(function (sum) {
+    console.log(sum);
+  });
+```
+
+Có 2 lớp Promise trong đoạn code này.
+
+fetchX() và fetchY() được gọi trực tiếp và giá trị trả về của chúng (**promise!**) được đẩy vào hàm sum(...). Giá trị mà những promise này thể hiện có thể sẵn sàng để dùng ngay lúc gọi hàm hoặc là sau đó 1 chút nhưng bất kể sớm hay muộn thì mỗi promise đều chuẩn hóa hành vi của nó cho giống nhau. Chúng ta suy đoán về giá trị của x và y theo hướng độc lập thời gian. Theo chu kỳ, chúng là những _giá trị tương lai_.
+
+Lớp thứ 2 là promise do hàm sum(...) tạo ra (thông qua Promise.all([ ... ])) và trả về, và cũng chờ nó get giá trị khi gọi .then(...). Khi hàm sum(...) hoàn tất, tổng _giá trị tương lai_ đã sẵn sàng và có thể in nó ra. Chúng ta ẩn phần logic chờ _giá trị tương lai_ của x và y trong hàm `sum(...).
+
+**Lưu ý**: _Bên trong sum(...), lời gọi đến Promise.all([ … ]) tạo một promise (cái này sẽ gọi đến xPromise và yPromise rồi phân giải chúng). Chain-call đến .then() sẽ tạo ra 1 promise khác và promise này sẽ trả về values[0] + values[1] ngay khi resolve (với giá trị kết quả của phép cộng). Do đó lời gọi .then(...) ta đặt ở cuối hàm .sum(...), tức là cuối đoạn code, thực ra là xử lý trên giá trị trả về của promise thứ 2 hơn là promise thứ nhất được tạo ra bởi Promise.all([ ... ]). Mặc dù vậy thì chúng ta không chain-call vào cuối hàm .then(...) sau vì làm vậy sẽ tạo thêm 1 promise và ta lại phải xử lý nó. Phần Promise chain-call này sẽ được giải thích kỹ hơn ở các phần sau trong chương này._
+
+Với Promise, lời gọi .then(...) có thể nhận 2 hàm param, hàm thứ nhất là để thực hiện thao tác với response hoàn thành (như trên), hàm thứ 2 là với trường hợp bị lỗi và bác bỏ (rejection).
+
+```javascript
+sum(fetchX(), fetchY()).then(
+  // Hàm xử lý hoàn thành
+  function (sum) {
+    console.log(sum);
+  },
+  // Hàm xử lý bác bỏ
+  function (err) {
+    console.error(err); // bummer!
+  }
+);
+```
+
+Nếu có gì đó không đúng trong quá trình get x và y hoặc là có sai sót khác thì promise mà .sum(...) trả về sẽ bị reject, hàm callback thứ 2 xử lý lỗi đã được đẩy vào .then(...) sẽ nhận giá trị reject từ promise.
+
+Bởi vì promise đóng gói trạng thái độc lập thời gian từ bên ngoài - chờ cho giá trị được xử lý hoàn thành/reject, và bản thân promise đã là độc lập thời gian, do đó nhiều promise có thể được kết hợp với nhau theo những cách có thể đoán trước được bất kể là thời gian hay kết quả.
+
+Hơn nữa, một khi promise được resolve thì nó sẽ tồn tại vĩnh viễn: nó trở thành một giá trị **bất biến** tại thời điểm đó, và có thể được lấy ra sử dụng bao nhiêu lần cũng được
+
+Thực sự là rất hữu ích khi ta nối promise thanhf 1 chuỗi:
+
+```javascript
+function delay(time) {
+  return new Promise(function (resolve, reject) {
+    setTimeout(resolve, time);
+  });
+}
+
+delay(1000)
+  .then(function () {
+    console.log('after 1000ms');
+    return delay(2000);
+  })
+  .then(function () {
+    console.log('after another 2000ms');
+  })
+  .then(function () {
+    console.log('step 4 (next Job)');
+    return delay(5000);
+  });
+// ...
+```
+
+Gọi hàm delay(2000) sẽ tạo ra 1 promise mà nó được hoàn thành trong 2000ms, sau đó trả nó về từ hàm hoàn thành trong .then() đầu tiên, điều này làm cho hàm .then(...) thứ hai sẽ chờ 2000ms
+
+**Lưu ý**: _Bởi vì giá promise là bất biến sau khi đã được resolve, chúng ta có thể truyền nó đi khắp nơi mà không cần lo lắng về việc nó bất ngờ bị thay đổi. Điều này đặc biệt có ích khi có nhiều đoạn code cùng sử dụng kết quả của 1 promise. Tính bất biến nghe có vẻ như là một chủ đề liên quan đến học thuật, nhưng thật ra nó là 1 phần rất cơ bản và có khía cạnh quan trọng trong thiết kế promise mà ta không nên bỏ qua._
+
+# Promise hay không Promise ?
+
+Một chi tiết quan trọng về promise là phải biết một giá trị thực sự là promise hay không phải. Nói cách khác, đó có phải là 1 giá trị sẽ hành xử như 1 promise?
+
+Chúng ta biết rằng promise được xây dựng bằng lệnh new Promise(...), và bạn cho rằng p instanceof Promise là đủ để kiểm tra? Thực ra thì không hẳn.
+
+Chủ yếu bởi vì bạn có thể nhận giá trị promise từ một cửa sổ trình duyệt khác (ví dụ: iframe), nó sẽ có promise riêng của nó, khác với promise trong cửa sổ/frame hiện tại của bạn, và câu lệnh check ở trên sẽ fail khi xác định instance của promise.
+
+Hơn nữa, một thư viện hay framework có thể sử dụng promise của riêng nó mà không dùng promise mặc định của ES6\. Thật ra, bạn có thể dùng promise của thư viện trên những trình duyệt cũ không hỗ trợ promise.
+
+# Nuốt chửng ngoại lệ (exception)
+
+Nếu trong quá trình tạo promise hoặc là khi tiếp nhận kết quả từ nó, một lỗi biệt lệ JS xảy ra, ví dụ như TypeError hoặc ReferenceError, exception sẽ được bắt, khi đó nó sẽ ép (force) cho promise đang chạy bị reject.
+
+Ví dụ:
+
+```javascript
+var p = new Promise(function (resolve, reject) {
+  foo.bar(); // `foo` chưa được định nghĩa, lỗi!
+  resolve(374); // Code sẽ không đến được đây :(
+});
+
+p.then(
+  function fulfilled() {
+    // không đến đây luôn :(
+  },
+  function rejected(err) {
+    // `err` sẽ là một object của exception`TypeError`
+    // từ dòng `foo.bar()`.
+  }
+);
+```
+
+Nhưng nếu như một promise được hoàn thành nhưng có lỗi exception JS trong quá trình tiếp nhận (ví dụ như trong callback của .then(...) )? Kể cả như thế thì nó cũng không bị mất, bạn sẽ thấy một chút ngạc nhiên khi biết cách mà chúng được xử lý. Đào sâu thêm 1 tí nào:
+
+```javascript
+var p = new Promise(function (resolve, reject) {
+  resolve(374);
+});
+
+p.then(
+  function fulfilled(message) {
+    foo.bar();
+    console.log(message); // không đến được đây nè.
+  },
+  function rejected(err) {
+    // không đến được đây nè.
+  }
+);
+```
+
+Có vẻ như exception từ foo.bar() thực sự đã bị nuốt trôi (swallow). Đúng là như thế. Có gì đó sâu hơn bên trong đã hoạt động sai tuy nhiên chúng ta lại không biết. Lời gọi p.then(...) cho chính nó trả về 1 promise khác và nó sẽ bị reject với ReferenceError exception.
+
+# Xử lý những biệt lệ không bị bắt (Uncaught exception)
+
+Có nhiều cách tiếp cận khác mà nhiều người cho rằng sẽ tốt hơn.
+
+Một đề nghị phổ biến đó là promise nên có thêm một phương thức done(...), nó sẽ đánh dấu chuỗi promise là đã xong (done). .done(...)không tạo ra và trả về một promise vì thế callback truyền qua .done(...) rõ ràng là không liên quan đến việc báo cáo các vấn đề xảy ra với một chuỗi promise không tồn tại.
+
+Nó hoạt động giống như bạn đã biết trong các điều kiện uncaught error: các exception bên trong một hàm reject trong .done(...) sẽ bị bắn ra ngoài developer console dưới dạng global uncaught error.
+
+```javascript
+var p = Promise.resolve(374);
+
+p.then(function fulfilled(msg) {
+  // Số number không có hàm của string,
+  // nên sẽ bắn ra lỗi
+  console.log(msg.toLowerCase());
+}).done(null, function () {
+  // Nếu có uncaught exception ở đây thì nó sẽ bị bắn ra như là một global exception
+});
+```
+
+# Điều gì xảy ra trong ES8 và Async/await
+
+Javascript ES8 giới thiệu async/await để giúp cho công việc xử lý promise dễ dàng hơn. Chúng ta sẽ lướt sơ qua những khả năng mà async/await cung cấp và xem thử làm thế nào để dùng chúng để viết code bất đồng bộ một cách phù hợp.
+
+Vậy thì đầu tiên là xem thử hoạt động của async/await.
+
+Bạn định nghĩa một hàm bất đồng bộ sử dụng định nghĩa hàm async. Những hàm như vậy sẽ trả về object [AsyncFunction](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction). Object AsyncFunction biểu diễn hàm bất đồng bộ trong đó nó thực thi code bên trong nó.
+
+Khi một hàm async được gọi, nó sẽ trả về Promise. Khi hàm async trả về giá trị, nó lại không phải promise, một promise sẽ được tạo ra tự động và được phân giải (resolve) với giá trị trả về từ hàm. Khi hàm async bắn ra exception, promise sẽ reject với giá trị bắn ra.
+
+Một hàm async có thể chứa thể hiện await, nó sẽ dừng quá trình thực thi của hàm và đợi cho promise giải quyết xong rồi quay lại thực thi tiếp và trả về giá trị đã được resolve.
+
+Bạn có thể xem như promise trong JS tương tự với Java Future hay C# Task.
+
+> Mục đích của async/await là làm đơn giản hóa quá trình sử dụng promise.
+
+Xem ví dụ sau:
+
+```javascript
+// Hàm JS bình thường
+function getNumber1() {
+  return Promise.resolve('374');
+}
+// Giống như hàm trên
+async function getNumber2() {
+  return 374;
+}
+```
+
+Tương tự, những hàm bắn ra exception tương tự với những hàm trả về promise bị reject:
+
+```javascript
+function f1() {
+  return Promise.reject('Some error');
+}
+async function f2() {
+  throw 'Some error';
+}
+```
+
+Từ khóa await chỉ có thể được dùng bên trong hàm async và cho phép bạn chờ promise một cách đồng bộ. Nếu chúng ta sử dụng promise bên ngoài một hàm async thì phải dùng tới callback:
+
+```javascript
+async function loadData() {
+  // `rp` là một hàm gọi promise.
+  var promise1 = rp('https://api.example.com/endpoint1');
+  var promise2 = rp('https://api.example.com/endpoint2');
+
+  // Hiện tại cả 2 request đều được gọi đồng thời và
+  // ta phải đợi cho nó hoàn thành.
+  var response1 = await promise1;
+  var response2 = await promise2;
+  return response1 + ' ' + response2;
+}
+// Bởi vì ta không ở trong hàm `async`
+// nên chúng ta phải dùng `then()`.
+loadData().then(() => console.log('Done'));
+```
+
+Bạn có thể định nghĩa hàm async bằng cách sử dụng async function expression (AFE - Thể hiện hàm async). Một AFE tương tự và gần giống như một async function statement (AFS). Điểm khác biệt chính giữa AFE và AFS là tên của hàm, trong AFE ta có thể bỏ qua tên để tạo hàm vô danh (anonymous function). Một AFE có thể sử dụng như một IIFE ([Immediately Invoked Function Expression](https://developer.mozilla.org/en-US/docs/Glossary/IIFE)), loại hàm được thực thi ngay sau khi nó được định nghĩa.
+
+Nó trông như thế này:
+
+```javascript
+var loadData = async function () {
+  // `rp` là một hàm gọi promise.
+  var promise1 = rp('https://api.example.com/endpoint1');
+  var promise2 = rp('https://api.example.com/endpoint2');
+
+  // Hiện tại cả 2 request đều được gọi đồng thời và
+  // ta phải đợi cho nó hoàn thành.
+  var response1 = await promise1;
+  var response2 = await promise2;
+  return response1 + ' ' + response2;
+};
+```
+
+Quan trọng là async/await được hỗ trợ và có thể chạy trên đa số các trình duyệt:
+
+[![](https://cdn-images-1.medium.com/max/1000/0*z-A-JIe5OWFtgyd2.)](https://cdn-images-1.medium.com/max/1000/0*z-A-JIe5OWFtgyd2.) <a></a>
+
+Nếu như trình duyệt nào không hỗ trợ thì ta vẫn có thể sử dụng các JS transpiler như [Babel](https://babeljs.io/docs/plugins/transform-async-to-generator/) hay [TypeScript](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-3.html)
+
+Cuối cùng thì điều quan trọng nhất là không nên chọn lựa một cách mù quáng những cách tiếp cận "mới nhất" để viết code bất đồng bộ. Tốt hơn là bạn hiểu về cấu trúc bất đồng bộ của JS, nghiên cứu tại sao nó lại là một vấn đề nghiêm túc và hiểu một cách sâu sắc về các thành phần bên trong của giải pháp mà bạn lựa chọn. Mỗi cách tiếp cận khác nhau đều có những điểm mạnh và điểm yếu, hãy cân nhắc.
+
+# 5 mẹo để viết code bất đồng bộ vừa chắc chắn vừa dễ bảo trì
+
+### 1\. **Clean code (code sạch)**:
+
+Sử dụng async/await cho phép bạn viết code ít hơn nhiều. Mỗi lần sử dụng async/await bạn có thể bỏ qua một số bước không cần thiết, ví dụ: .then(), viết hàm anonymous để xử lý responsive, đặt tên response từ callback...
+
+```javascript
+// `rp` là một hàm gọi promise
+rp(‘https://api.example.com/endpoint1').then(function(data) {
+ // …
+});
+```
+
+...so với
+
+```javascript
+// `rp` là một hàm gọi promise
+var response = await rp(‘https://api.example.com/endpoint1');
+```
+
+### 2\. **Xử lý lỗi**:
+
+Async/await giúp chúng ta có thể xử lý cả lỗi đồng bộ và bất đồng bộ với cùng một cấu trúc code: chính là try/catch nổi tiếng. Ví dụ:
+
+```javascript
+function loadData() {
+  try {
+    // Catches synchronous errors.
+    getJSON()
+      .then(function (response) {
+        var parsed = JSON.parse(response);
+        console.log(parsed);
+      })
+      .catch(function (e) {
+        // Catches asynchronous errors
+        console.log(e);
+      });
+  } catch (e) {
+    console.log(e);
+  }
+}
+```
+
+...so với
+
+```javascript
+async function loadData() {
+  try {
+    var data = JSON.parse(await getJSON());
+    console.log(data);
+  } catch (e) {
+    console.log(e);
+  }
+}
+```
+
+### 3\. **Điều kiện**:
+
+Viết code điều kiện với async/await rõ ràng hơn rất nhiều:
+
+```javascript
+function loadData() {
+  return getJSON().then(function (response) {
+    if (response.needsAnotherRequest) {
+      return makeAnotherRequest(response).then(function (anotherResponse) {
+        console.log(anotherResponse);
+        return anotherResponse;
+      });
+    } else {
+      console.log(response);
+      return response;
+    }
+  });
+}
+```
+
+...so với
+
+```javascript
+async function loadData() {
+  var response = await getJSON();
+  if (response.needsAnotherRequest) {
+    var anotherResponse = await makeAnotherRequest(response);
+    console.log(anotherResponse);
+    return anotherResponse;
+  } else {
+    console.log(response);
+    return response;
+  }
+}
+```
+
+### 4\. **Stack Frames**:
+
+Không giống như async/await, stack lỗi trả về từ một chuỗi promise làm chúng ta không biết lỗi xuất phát từ đâu mà lần:
+
+```javascript
+function loadData() {
+  return callAPromise()
+    .then(callback1)
+    .then(callback2)
+    .then(callback3)
+    .then(() => {
+      throw new Error('boom');
+    });
+}
+loadData().catch(function (e) {
+  console.log(err);
+  // Error: boom at callAPromise.then.then.then.then (index.js:8:13)
+});
+```
+
+...so với
+
+```javascript
+async function loadData() {
+  await callAPromise1();
+  await callAPromise2();
+  await callAPromise3();
+  await callAPromise4();
+  await callAPromise5();
+  throw new Error('boom');
+}
+loadData().catch(function (e) {
+  console.log(err);
+  // output
+  // Error: boom at loadData (index.js:7:9)
+});
+```
+
+### 5\. **Quá trình Debug**:
+
+Nếu bạn đã từng sử dụng promise, bạn sẽ biết rằng debug với chúng thực sự là ác mộng. Giả sử bạn đặt breakpoint bên trong .then() và dùng những lệnh debug như stop-over, debugger sẽ không đi đến .then() tiếp theo bởi vì nó "lỡ chân" bước vào code bất đồng bộ.
+Với async/await bạn có thể duyệt qua những lời gọi await chính xác như những hàm đồng bộ thông thường.
+
+**Viết code Javascript bất đồng bộ là rất quan trọng không chỉ cho app mà cả cho những thư viện nữa**.

@@ -1,0 +1,235 @@
+---
+title: Kiến trúc tổng quan của Angular 2/4 - P2
+author: Hung Tan Nguyen
+date: 2017-10-01 16:02:02
+sourceUrl: https://viblo.asia/p/angular-2-architecture-overview-p2-EyORkbyQGqB
+tags: [angular, architecture]
+slug: /kien-truc-tong-quan-cua-angular-2-4-p2
+---
+
+## Data binding
+
+Hãy tưởng tượng rằng, bạn đang phải code 1 ứng dụng web mà việc tương tác, thay đổi giá trị trên DOM diễn ra liên tục. Sẽ thực sự là 1 cơn ác mộng nếu bạn phải tự tay thực hiện toàn bộ các thao tác update, create value trên các HTML DOM khi có hành động của người dùng mà không sử dụng 1 framework nào khác ngoài mấy thư viện kiểu jQuery :-s
+
+Với Angular, chúng ta có 1 thuật ngữ là **data binding**, một cơ chế phối hợp nhịp nhàng các thành phần của **template** với **component**. Việc này rất đơn giản, chúng ta chỉ cần thêm _binding markup_ vào HTML là Angular tự hiểu và connect chúng tới Component.
+
+Như diagram bên dưới, có 4 kiểu _data binding syntax_. Mỗi kiểu đều có chiều dữ liệu từ DOM tới COMPONENT, từ COMPONENT tới DOM, và có cả kiểu có 2 chiều dữ liệu.
+
+![](https://viblo.asia/uploads/dfbd5235-6342-4a1d-9672-f78c941338c1.png)
+
+Ở ví dụ HeroListComponent, template có 3 kiểu:
+
+**`app/hero-list.component.html` (binding)**
+
+```html
+<li>{{hero.name}}</li>
+<hero-detail [hero]="selectedHero"></hero-detail>
+<li (click)="selectHero(hero)"></li>
+```
+
+- Markup 1 có chức năng hiển thị giá trị của component's _hero.name_ property với thẻ `<li>`.
+- Markup [hero] property binding truyền giá trị của selectedHero từ parent HeroListComponent tới các hero property của HeroDetailComponent.
+- (click) event binding gọi phương thức selectHero khi user **click** vào hero's name.
+
+Kiểu quan trọng thứ 4, được gọi là **Two-way data binding**. Chỉ với 1 markup notation đơn giản sử dụng ngModel directive, ta có thể kết hợp việc binding _event_ và _property_.
+
+**app/hero-detail.component.html (ngModel)**
+
+```html
+<input [(ngModel)]="hero.name" />
+```
+
+![](https://viblo.asia/uploads/a1434531-d952-4bf9-9999-58d835eaf7db.png)
+
+Angular xử lý **toàn bộ** data bindings trên mỗi JavaScript _event_, xuất phát từ gốc của cây application component duyệt tới toàn bộ components lá.
+
+**Data binding** đóng một vai trò quan trọng trong việc giao tiếp giữa **template** và **component**.
+
+**Data binding** còn là công cụ giao tiếp giữa **parent** và **child components**.
+
+## Directives
+
+_Angular templates_ là dynamic. Khi ứng dụng Angular thực hiện render template, chúng transforms DOM theo các lệnh nhận được từ **directives**.
+
+![](https://viblo.asia/uploads/a88f5717-647f-4806-b90b-fe90c558929f.png)
+
+Một **directive** là một class bắt đầu với @Directive _decorator_. Có thể coi một component là một directive-với-một-template; @Component _decorator_ thực chất là một @Directive _decorator_ kế thừa từ **template-oriented** features.
+
+> While a component is technically a directive, components are so distinctive and central to Angular applications that this architectural overview separates components from directives.
+
+Câu trích dẫn trên cho chúng ta lý do tại sao chúng ta lại tách **Component** ra khỏi **Directive** trong kiến trúc Angular.
+
+Có 2 loại **directives**: _structural_ và _attribute_ **directives**.
+
+Chúng xuất hiện giữa element tag như 1 thuộc tính (attributes).
+
+_Structural_ **directives** tùy chỉnh layout bằng cách thêm mới, xóa bỏ và thay thế elements trong DOM.
+
+Ví dụ dưới đây sử dụng 2 loại built-in _structural_ **directives**:
+
+**app/hero-list.component.html (structural)**
+
+```html
+<li *ngFor="let hero of heroes"></li>
+<hero-detail *ngIf="selectedHero"></hero-detail>
+```
+
+1.  \*ngFor giúp liệt kê các hero từ mảng heroes trong mỗi thẻ `<li>`
+2.  \*ngIf include HeroDetail component nếu có một hero được select.
+
+**Attribute** directives thay thế appearance hoặc behavior của các element. Bên trong templates, chúng chẳng có gì khác các HTML attributes thông thường, ngoại trừ tên :))
+
+**ngModel** directive, implements **two-way data binding**, là một ví dụ của attribute directive. **ngModel** thay đổi behavior của element (Ví dụ tiêu biểu là các `<input>`) bằng cách thiết lập value property hiển thị ra cũng như thay đổi chúng theo events.
+
+**app/hero-detail.component.html (ngModel)**
+
+```html
+<input [(ngModel)]="hero.name" />
+```
+
+Ngoài ra, chúng ta còn nhiều **directives** có thể chỉnh sửa cấu trúc layout (ngSwitch) hoặc thay đổi DOM elements và components (ngStyle và ngClass).
+
+Dĩ nhiên, bạn cũng có thể tự viết một **directives**. **Components** như HeroListComponent chính là một loại **custom directive**.
+
+## Services
+
+![](https://viblo.asia/uploads/091a88e9-6a22-462f-9a5c-0f6844ff7d06.png)
+
+**Service** có thể là bấy kỳ giá trị, hàm, class,... tính năng nào cần thiết cho ứng dụng của bạn hoạt động.
+
+Hầu hết mọi thứ đề có thể trở thành **service** (lol). Một **service** điển hình là một class được thu hẹp lại trong một mục đích rõ ràng.
+
+Ví dụ:
+
+- logging service
+- data service
+- message bus
+- tax calculator
+- application configuration
+
+Không có một chút đặc trưng của **Angular** về **services**. **Angular** cũng không có bất kỳ định nghĩa nào về **service**.
+
+> No service base class, and no place to register a service.
+
+Tuy nhiên **services** lại là nền tảng của bất kỳ ứng dụng Angular nào. **Components** cũng là một services.
+
+Dưới đây là một service class có nhiệm vụ logs lên browser console:
+
+**app/logger.service.ts (class)**
+
+```typescript
+export class Logger {
+  log(msg: any) {
+    console.log(msg);
+  }
+  error(msg: any) {
+    console.error(msg);
+  }
+  warn(msg: any) {
+    console.warn(msg);
+  }
+}
+```
+
+Còn đây là HeroService có nhiệm vụ lấy về mảng các heroes và trả về chúng cùng với resolved Promise. HeroService phụ thuộc vào Logger service và BackendService khác nắm giữ việc communication với server.
+
+**app/hero.service.ts (class)**
+
+```typescript
+export class HeroService {
+  private heroes: Hero[] = [];
+
+  constructor(
+    private backend: BackendService,
+    private logger: Logger) { }
+  )
+
+  getHeroes() {
+    this.backend.getAll(Hero).then( (heroes: Hero[]) => {
+      this.logger.log(`Fetched ${heroes.length} heroes.`);
+      this.heroes.push(...heroes); // fill cache
+    });
+    return this.heroes;
+  }
+}
+```
+
+> Services are everywhere.
+
+**Component classes** như một miếng thịt nạc không có mỡ =)) . Không có bất kì đoạn code nào fetch data từ server, validate user input, hoặc log lên console. Tất các các tasks đó được giao cho **services**.
+
+Công việc của một **component** lúc này không hơn việc cho phép người sử dụng trải nghiệm dịch vụ. Đứng giữa view (rendered bởi template) và tầng application logic.
+
+Khi code **Angular**, không ai ép bạn làm theo parttern này, cũng không quy định nguyên tắc gì về **service**, tuy nhiên chắc hẳn mọi người sẽ không phàn nàn nếu bạn hoàn thành 1 component với hơn 3000 lines code =))
+
+**Angular** giúp ta thực hiện các nguyên tác này dễ dàng hơn bằng cách support **Dependency injection**.
+
+## Dependency injection
+
+![](https://viblo.asia/uploads/4df0dd41-68bf-4bc9-a6ce-9fcb5c2bfd3c.png)
+
+**Dependency injection** là một cách cung cấp các new instance của một class cùng với các dependencies phụ thuộc mà nó cần. Hầu hết các **dependencies** là **services**. Angular sử dụng **dependency injection** để chuẩn bị một _new component_ cùng với các services mà nó cần.
+@
+Việc khai báo các **services** cần thiết cho một **component** cũng với kiểu dữ liệu của nó được thực hiện trong chính constructor parameters. Ví dụ về constructor của HeroListComponent và HeroService ở đây chính là một dependency :
+
+**app/hero-list.component.ts (constructor)**
+
+```typescript
+constructor(private service: HeroService) { }
+```
+
+Khi Angular khởi tạo một component, nó sẽ hỏi **injector** về các services mà component cần.
+
+Một **injector** lưu giữ container các service instances đã được tạo trước đó. Nếu có một yêu cầu về service instance không có trong container, **injector** sẽ tạo và thêm mới nó rồi add nó vào container trước khi trả lại service cho Angular. Khi tất cả các request services được giải quyết (resolved) và được hoàn thành (returned), Angular có thể gọi các component's constructor cùng với các tham số là các services. Đó chính là **dependency injection**.
+
+Quá trình injection của HeroService có thể trông giống sơ đồ sau:
+
+![](https://viblo.asia/uploads/188ec1e4-b3a9-47c6-a228-83d72a1d645a.png)
+
+Nếu injector không có HeroService, Vậy làm thể nào để Angular biết nơi cần lấy và tạo ra nó
+
+Như đã mô tả trước đó, bạn cần phải đăng ký (registered) HeroService với **provider** của HeroComponent cùng **injector**. Một provider có thể create và return một service.
+
+Bạn có thể **register providers** trong **modules** hoặc trong **components**.
+
+Thông thường, chúng ta add providers vào root module, ez, ta có instance của service tồn tại ở mọi nơi (ngon).
+
+**app/app.module.ts (module providers)**
+
+```typescript
+providers: [
+  BackendService,
+  HeroService,
+  Logger
+],
+```
+
+Một cách khác, ta có thể register ở level component trong providers property của @Component **metadata**:
+
+**app/hero-list.component.ts (component providers)**
+
+```typescript
+@Component({
+  moduleId: module.id,
+  selector:    'hero-list',
+  templateUrl: 'hero-list.component.html',
+  providers:  [ HeroService ]
+})
+```
+
+Registering ở level component nghĩa là bạn có thể lấy ra các new instance của service với mỗi một new instance của component đó.
+
+Các điểm cần nhớ về **dependency injection**:
+
+- Dependency injection được móc vào Angular framework và có thể sử dụng ở mọi nơi.
+- Injector có 2 cơ chế chính.
+  - Injector duy trì một container các service instances mà chúng đã tạo ra.
+  - Injector có thể tạo mới service instance từ provider.
+- Provider là nơi khai báo cách tạo ra service.
+- Register providers với injectors.
+
+### _THE END_
+
+## Tham khảo
+
+[https://angular.io/docs/ts/latest/guide/architecture.html](https://angular.io/docs/ts/latest/guide/architecture.html)

@@ -1,0 +1,419 @@
+---
+title: 'Cách Javascript hoạt động P3: Quản lý bộ nhớ & 4 trường hợp memory leaks phổ biến'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-memory-management-how-to-handle-4-common-memory-leaks-3f28b94cfbec
+date: 2018-11-13 23:03:00
+slug: /cach-javascript-hoat-dong-p3-quan-ly-bo-nho-4-truong-hop-memory-leaks-pho-bien
+---
+
+Mấy hôm trước chúng ta đã bắt đầu series bài viết đục khoét về Javascript và cách nó hoạt động như thế nào, bằng cách hiểu về những thành phần cơ bản và cách chúng tương tác với nhau thì chúng ta có thể viết code tốt hơn và _ngon_ hơn.
+
+Bài đầu tiên là tổng quan về series, cung cấp cái nhìn toàn cảnh về engine, runtime & callstack. Bài thứ 2 là một cái nhìn cụ thể hơn về những thành phần bên trong của bộ engine V8 của Google và một số mẹo vặt để tối ưu Javascript code.
+
+Ở bài thứ 3 này, chúng ta sẽ thảo luận về một vấn đề không kém phần quan trọng nhưng lại thường bị các dev bỏ qua do sự phức tạp ngày càng gia tăng của các ngôn ngữ lập trình thường dùng: quản lý bộ nhớ. Chúng ta cũng sẽ tìm hiểu một số mẹo để có thể xử lý những trường hợp rò rì bộ nhớ của Javascript mà team SesstionStack đã áp dụng để tránh bị rò rỉ và không làm tốn bộ nhớ của webapp.
+
+# Tổng quan
+
+Những ngôn ngữ như C có bộ quản lý bộ nhớ level thấp khá cơ bản là malloc() và free(). Những phương thức này được sử dụng để cấp phát một cách tường minh và giải phóng bộ nhớ trên hệ điều hành.
+
+Một cách tương tự, Javascript cấp phát bộ nhớ khi object, string, ... được tạo ra và _tự động_ giải phóng nó mỗi khi không được sử dụng nữa bởi một tiến trình dọn rác (garbage collection). Quá trình giải phóng tài nguyên một cách _tự động hóa_ như thế này gây ra sự nhầm lẫn và làm cho Javascript (và những ngôn ngữ bậc cao khác) developer cảm thấy "ấn tượng" nên họ thường bỏ qua vấn đề quản lý bộ nhớ. **Đây là một sai lầm lớn.**
+
+Kể cả khi làm việc với ngôn ngữ bậc cao, developer cũng nên hiểu về vấn đề quản lý bộ nhớ (ít nhất là những thứ cơ bản). Thỉnh thoảng có những vấn đề xảy ra với quản lý bộ nhớ tự động (bug hay sự giới hạn thực hiện trong GC...) mà developer cần phần hiểu để có thể xử lý một cách đúng đắn (hoặc tìm cách "đi đường vòng" vượt qua nó với ít thiệt hại nhất).
+
+# Vòng đời của bộ nhớ
+
+Dù cho bạn đang dùng ngôn ngữ lập trình nào đi nữa thì vòng đời bộ nhớ hầu như đều giống nhau:
+
+![](https://cdn-images-1.medium.com/max/1000/1*slxXgq_TO38TgtoKpWa_jQ.png)
+
+Đây là những gì xảy ra ở mỗi bước trong vòng đời:
+
+- **Cấp phát bộ nhớ**: bộ nhớ được cấp phát bởi hệ điều hành và cho phép chương trình sử dụng nó. Ở ngôn ngữ bậc thấp (như C), đây là một quá trình tường minh, rõ ràng mà developer phải xử lý. Trong các ngôn ngữ bậc cao thì phần này ngôn ngữ sẽ làm giúp bạn.
+
+- **Sử dụng bộ nhớ**: Đây là thời điểm khi chương tình của bạn sử dụng những vùng nhớ đã được cấp phát trước đó. Các thao tác Đọc và Ghi được thực hiện khi chúng ta thực thi những biến đã được khai báo trong code.
+
+- **Giải phóng bộ nhớ**: Giờ là lúc giải phóng toàn bộ những vùng nhớ mà bạn không còn dùng đến nữa để sử dụng lại về sau. Giống như phần cấp phát, bước này được thực hiện một cách tường minh trong các ngôn ngữ bậc thấp.
+
+Để hiểu thêm về các khái niệm của callstack và heap thì mời bạn xem lại [Phần 1](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-1---Khai-quat-ve-engine--runtime-va-callstack) của series.
+
+# Bộ nhớ là gì?
+
+Trước khi đi sâu vào bộ nhớ của Javascript, chúng ta sẽ duyệt sơ qua bộ nhớ cơ bản và cách hoạt động của nó.
+
+Ở phần cứng, bộ nhớ máy tính bao gồm một cơ số các [flip flops](https://vi.wikipedia.org/wiki/Flip-flop) (đại khái là 1 trạng thái đóng-mở). Mỗi flip-flop chứa một vài transistor và có thể lưu trữ 1 bit thông tin. Một flip-flop độc lập có thể được truy xuất bằng số định danh duy nhất (**unique identifier**), do đó chúng ta có thể đọc và ghi lên chúng. Và lẽ dĩ nhiên, về mặt ý tưởng chúng ta có thể công nhận rằng toàn bộ bộ nhớ máy tính là 1 mảng khổng lồ các bit có thể đọc & ghi.
+
+Về phần con người thì họ không giỏi làm việc với bit nên tổ chức chúng vào những nhóm lớn hơn, 8 bit thành 1 byte. Ngoài byte còn có word (16 hoặc 32 bit)
+
+Có rất nhiều thứ được lưu trữ trong bộ nhớ:
+
+1.  Tất cả các biến và dữ liệu được sử dụng trong các chương trình.
+2.  Code của chương trình chạy, kể cả code của hệ điều hành.
+
+Trình biên dịch và hệ điều hành làm việc với nhau để xử lý hầu như toàn bộ phần quản lý bộ nhớ nhưng chúng tôi khuyến cáo bạn nên có cái nhìn sơ lược về những gì xảy ra ở nội bộ bên trong.
+
+Khi biên dịch code, trình biên dịch sẽ xem xét các kiểu dữ liệu nguyên thủy (string, number, boolean...) và tính toán trước bao nhiêu bộ nhớ mà chúng cần sử dụng. Lượng bộ nhớ cần thiết sau đó sẽ được cấp phát cho chương tình trong không gian callstack. Vùng không gian được cấp phát được gọi là stack space bởi vì khi gọi hàm, bộ nhớ của nó được thêm vào vị trí trên cùng của bộ nhớ hiện tại. Và khi hủy bỏ, chúng bị gỡ bỏ theo quy tắc LIFO (last-in-first-out, vào sau ra trước). Ví dụ:
+
+```javascript
+int n; // 4 bytes
+int x[4]; // mảng 4 phần tử, mỗi phần tử 4 bytes
+double m; // 8 bytes
+```
+
+Trình biên dịch sẽ tính toán ngay lập tức đoạn code này cần 4 + 4 \* 4 + 8 = 28 bytes
+
+> Đó là cách hoạt động của kích thước vùng nhớ cho kiểu số integer và double. Khoảng 20 năm trước, integer là 2 byte và double là 4 byte. Code của bạn không phải phụ thuộc vào kích thước của các kiểu dữ liệu cơ bản.
+
+Trình biên dịch sẽ chèn code tương tác với hệ điều hành để yêu cầu số lượng byte cần thiết để lưu trữ các biến.
+
+Trong ví dụ trên, trình biên dịch biết chính xác bao nhiêu bộ nhớ cần thiết cho mỗi biến. Thực tế thì mỗi khi ghi dữ liệu vào biến n, nó sẽ được dịch nội bộ thành mộ thứ đại loại như "địa chỉ vùng nhớ 4127963"
+
+Để ý rằng nếu ta thử truy xuất x[4] thì ta sẽ truy xuất nhầm sang dữ liệu đang liên kết với m. Bởi vì chúng ta đang cố truy xuất vào một phần tử không tồn tại trong mảng: 4 byte này nằm ngoài vùng x[3] vốn là vùng nhớ được cấp phát cuối cùng của mảng (index đánh từ 0 :v), và vậy là có thể ta đọc/ghi nhầm sang các bit của biến m. Điều này có thể gây ra nhiều hậu quả không mong muốn cho toàn bộ chương trình. Xem hình cho rõ hơn nhé:
+
+![](https://cdn-images-1.medium.com/max/1000/1*5aBou4onl1B8xlgwoGTDOg.png)
+
+Khi một hàm gọi một hàm khác thì mỗi hàm sẽ chiếm một phần của stack. Phần đó sẽ lưu giữ tất cả những biến cục bộ cũng như một bộ đếm để ghi nhớ vị trí mà quá trình thực thi của hàm dừng lại. Khi hàm kết thúc thì vùng bộ nhớ lại được giải phóng cho thằng khác dùng.
+
+# Cấp phát động
+
+Thật không may là mọi thứ dường như không dễ như ta tưởng khi mà ta không biết bao nhiêu bộ nhớ 1 biến có thể cần tại thời điểm thực thi. Giả sử chúng ta muốn làm như sau:
+
+```javascript
+int n = readInput(); // đọc input từ người dùng
+...
+// tạo 1 mảng với "n" phần tử
+```
+
+Tại thời điểm biên dịch, trình biên dịch không biết mảng sẽ cần bao nhiêu bộ nhớ bởi vì nó được xác định bởi dữ liệu nhập vào từ phía người dùng.
+
+Vì thế nó không thể cấp phát vùng nhớ cho biến trên stack. Thay vì thế, chương trình của chúng ta cần hỏi hệ điều hành về kích thước bộ nhớ phù hợp trong khi thực thi (run-time). Vùng nhớ này được gán từ không gian _heap_. Sự khác biệt giữa cấp phát bộ nhớ động và tĩnh được tổng kết trong bảng sau:
+
+| Cấp phát tĩnh                            | Cấp phát động                       |
+| ---------------------------------------- | ----------------------------------- |
+| Biết kích thước tại thời điểm biên dịch. | Không biết kích thức lúc biên dịch  |
+| Thực hiện lúc biên dịch                  | Thực hiện lúc thực thi (runtime)    |
+| Gán vào stack                            | Gán vào heap                        |
+| Gán theo thứ tự FILO (first-in-last-out) | Gán không theo thứ tự cụ thể nào cả |
+
+Để có thể có cái nhìn sâu sắc về cấp phát bộ nhớ động, có thể chúng ta cần dành thêm thời gian tìm hiểu về **con trỏ**, nhưng như vậy thì hơi bị lạc đề. Nếu bạn thấy có hứng thú với chủ đề này thì xin lỗi phải hẹn bạn trong 1 bài viết khác rồi.
+
+# Cấp phát trong Javascript
+
+Javascript giúp developer giảm bớt trách nhiệm trong việc cấp phát bộ nhớ. JS tự làm hết mọi thứ.
+
+```javascript
+var n = 374; // cấp phát bộ nhớ cho số
+var s = 'sessionstack'; // cấp phát cho string
+var o = {
+  a: 1,
+  b: null,
+}; // cấp phát cho object và các thuộc tính của nó
+var a = [1, null, 'str']; // (giống như object) cấp phát cho
+// mảng và các giá tị của nó
+function f(a) {
+  return a + 3;
+} // cấp phát cho hàm (là 1 object có thể thực thi)
+// function expressions cũng cấp phát object
+someElement.addEventListener(
+  'click',
+  function () {
+    someElement.style.backgroundColor = 'blue';
+  },
+  false
+);
+```
+
+Một vài lời gọi hàm cũng trả về dạng cấp phát object:
+
+```javascript
+var d = new Date(); // cấp phát Date object
+var e = document.createElement('div'); // cấp phát 1 phần tử DOM
+```
+
+Phương thức có thể cấp phát giá trị hoặc object:
+
+```javascript
+var s1 = 'sessionstack';
+var s2 = s1.substr(0, 3); // s2 là 1 string mới
+// Bởi vì string là bất biến,
+// JavaScript có thể chọn không cấp phát bộ nhớ
+// mà lưu trữ phạm vi [0, 3]
+var a1 = ['str1', 'str2'];
+var a2 = ['str3', 'str4'];
+var a3 = a1.concat(a2);
+// mảng mới gồm 4 phần tử là
+// sự kết hợp của mảng a1 và a2
+```
+
+# Sử dụng bộ nhớ trong Javascript
+
+Sử dụng bộ nhớ đã được cấp phát trong Javascript có thể gói gọn một cách đơn giản trong 2 chữ **đọc/ghi**
+
+Việc này có thể thực hiện bằng cách đọc/ghi giá trị của biến hoặc thuộc tính của object hoặc truyền đối số (argument) vào 1 hàm.
+
+# Giải phóng khi không dùng bộ nhớ nữa
+
+Đa số các phần đề về quản lý bộ nhớ xảy ra ở giai đoạn này.
+
+Công việc khó nhất ở đây là tìm hiểu khi nào bộ nhớ đã được cấp phát có còn được sử dụng hay không. Thường thì nó yêu cầu developer xác định vùng nhớ nào trong chương trình không dùng nữa và giải phóng nó.
+
+Ngôn ngữ bậc cao thêm vào 1 chương tình gọi là bộ dọn rác (garbage collector - GC) thực hiện công việc đi tìm những vùng nhớ đã được cấp phát và tìm hiểu xem nó còn được sử dụng hay không, nếu không dùng nữa thì sẽ tự động giải phóng nó.
+
+Điều hơi chuối là tiến trình này chỉ tương đối đúng, bởi vì vấn đề tổng quát về việc xác định một vùng nhớ có còn được sử dụng hay không là bất khả thi (không thể thực hiện bằng thuật toán).
+
+Đa số GC hoạt động bằng cách thu thập những vùng nhớ không còn bị truy xuất đến, ví dụ: tất cả biến đang trỏ đến nó đều đi ra khỏi phạm vi thực thi. Tuy nhiên, điều này cũng lại không hẳn là chính xác vì tại bất kỳ thời điểm nào một địa chỉ vùng nhớ đều có thể được trỏ tới bởi 1 biến, nhưng biến đó lại không bao giờ được sử dụng nữa.
+
+# Quá trình dọn rác
+
+Rõ ràng cách thức để tìm được vùng nhớ "không còn dùng nữa" là bất khả thi cho nên GC thực hiện một giải pháp hạn chế cho vấn đề chung. Phần này sẽ giải thích những khái niệm cần thiết để bạn có thể hiểu được những thuật toán GC và các giới hạn của chúng.
+
+## Tham chiếu bộ nhớ
+
+Ý tưởng chính của những thuật toán GC dựa trên **tham chiếu**
+
+Trong ngữ cảnh quản lý bộ nhớ, một object A tham chiếu đến object B khác nếu như A có truy xuất đến B (có thể tường minh hoặc không tường minh). Ví dụ: một Javascript object có tham chiếu đến prototype của chính nó (**không tường minh**) và tham chiếu đến giá trị của thuộc tính của nó (**tường minh**).
+
+Trong trường hợp này, khái niệm của 1 "object" được mở rộng thành một thứ gì đó hơn là JS object thông thường và bao trùm cả function scope (hoặc là lexical scope toàn cục).
+
+> Lexical scoping định nghĩa cách mà những tên biến được phân giải trong các hàm lồng nhau: những hàm con chưa scope của hàm cha kể cả khi hàm cha đã được return.
+
+## Bộ đếm tham chiếu
+
+Đây là thuật toán dọn rác đơn giản nhất. Một object được đánh giá là "rác có thể dọn" nếu như không có tham chiếu nào trỏ đến nó.
+
+Ví dụ:
+
+```javascript
+var o1 = {
+  o2: {
+    x: 1,
+  },
+};
+// Tạo 2 object
+// 'o1' tham chiếu đến 'o2' vì nó là 1 thuộc tính của 'o1'
+// Hiện tại không có rác để dọn.
+
+var o3 = o1; // biến 'o3' đang tham chiếu tới cùng 1 object với 'o1'
+
+o1 = 1; // giờ thì object được tham chiếu trước đó bởi 'o1'
+// chỉ còn lại 1 tham chiếu duy nhất là 'o3'
+
+var o4 = o3.o2; // tham chiếu đến thuộc tính 'o2'
+// object này giờ có 2 tham chiếu:
+// một là thuộc tính của 'o3': o3.o2
+// hai là biến 'o4'
+
+o3 = '374'; // Giờ thì object trước đây là của o1 không còn tham chiếu nữa.
+// Nó có thể bị dọn dẹp bởi GC
+// Tuy nhiên thuộc tính 'o2' của nó thì vẫn còn
+// được tham chiếu bởi biến 'o4' nên chưa bị dọn
+
+o4 = null; // thuộc tính 'o2' trước đây trong 'o1' giờ
+// đã không còn gì tham chiếu đến nó
+// lần này thì GC có thể dọn nó được rồi.
+```
+
+## Vấn đề từ tham chiếu vòng tròn
+
+Có một số giới hạn liên quan đến tham chiếu vòng tròn. Trong ví dụ sau, 2 object được tạo ra và được tham chiếu lẫn nhau, tạo thành 1 vòng tròn. Chúng sẽ được đẩy ra ngoài scope sau khi hàm kết thúc nên về mặt lý thuyết thì chúng vô dụng và có thể được giải phóng. Tuy nhiên, thuật toán đếm tham chiếu xem xét rằng mỗi object đều đang có ít nhất 1 tham chiếu đến object đó nên thuật toán sẽ bỏ qua mà không dọn dẹp.
+
+```javascript
+function f() {
+  var o1 = {};
+  var o2 = {};
+  o1.p = o2; // o1 tham chiếu đến o2
+  o2.p = o1; // o2 tham chiếu đến o1\.
+  // 2 thanh niên này tạo thành 1 vòng tròn tham chiếu.
+}
+
+f();
+```
+
+![](https://cdn-images-1.medium.com/max/1000/1*GF3p99CQPZkX3UkgyVKSHw.png)
+
+## Thuật toán Đánh dấu và dọn dẹp (Mark-and-sweep)
+
+Để xác định xem object có còn cần thiết không thì thuật toán này thử xem object đó có thể truy cập tới hay không.
+
+Thuật toán **Mark-and-sweep** có 3 bước:
+
+1.  **Roots**: Nhìn chung, _roots_ là những biến toàn cục (global) được tham chiếu đến trong code. Với Javascript, một biến toàn cục có vai trò như 1 _root_ chính là object **window**. Trong Node.js thì nó gọi là **global**. Danh sách hoàn chỉnh các _roots_ được xây dựng bởi GC.
+2.  Thuật toán sẽ điều tra tất cả các _roots_ và con cháu (children) của nó rồi đánh dấu chúng là đang hoạt động (active) (nghĩa là, chúng không phải rác). Thứ gì mà không phải con cháu của root, root không truy xuất đến được thì đều bị coi là _rác_.
+3.  Cuối cùng, GC sẽ giải phóng các vùng nhớ không được đánh dấu _active_ và trả bộ nhớ lại cho hệ điều hành.
+
+![](https://cdn-images-1.medium.com/max/1000/1*WVtok3BV0NgU95mpxk9CNg.gif)
+
+Thuật toán này tốt hơn thuật toán trước vì "đối tượng không có tham chiếu" dẫn tới trường hợp đối tượng không thể truy cập, ở hướng ngược lại thì nó giải quyết được vấn đề của tham chiếu vòng tròn.
+
+Năm 2012, tất cả trình duyệt hiện đại đều tích hợp sẵn bộ GC Mark-and-sweep. Những cải tiến dành cho bộ Javascript GC (như GC Thế hệ (Generational)/ Gia tăng (Incremental)/ Đồng thời (Concurrent)/ Song song (Parallel)) trong những năm gần đây đều là những nâng cấp của thuật toán Mark-and-sweep, nhưng không phải là cải tiến thuật toán GC, cũng không phải quyết định xem 1 object có thể truy cập được hay là không.
+
+[Trong bài viết này](https://en.wikipedia.org/wiki/Tracing_garbage_collection), bạn có thể tìm hiểu chi tiết hơn về quá trình truy tìm rác, nó cũng bao gồm luôn cả thuật toán Mark-and-sweep và cách tối ưu hóa của nó.
+
+## Tham chiếu vòng tròn chỉ là muỗi
+
+Trong ví dụ đầu tiên, sau khi hàm được trả về, 2 object đều không được tham chiếu đến bởi một object có thể truy cập được từ đối tượng toàn cục. Một lẽ dĩ nhiên, thì chúng sẽ bị GC đánh dấu và dọn sạch sẽ.
+
+![](https://cdn-images-1.medium.com/max/1000/1*FbbOG9mcqWZtNajjDO6SaA.png)
+
+Mặc dù giữa 2 object đều có tham chiếu lẫn nhau nhưng chúng không thể truy cập được từ _root_
+
+## Hành vi phản trực quan của GC
+
+Mặc dù GC rất tiện lợi nhưng chúng cũng đi kèm với những khuyết điểm. Một trong số đó là sự _không xác định được_. Nói cách khác, GC là không thể đoán trước được. Ta không thể biết rõ khi nào thì GC được thực thi. Có nghĩa là trong một vài trường hợp chương trình sử dụng nhiều bộ nhớ hơn số lượng mà chúng cần. Trong trường hợp khác, những thời điểm tạm dừng ngắn hạn (short-pauses) có thể đáng được chú ý trong một số ứng dụng đặc biệt nhạy cảm.
+Mặc dù _không xác định được_ nghĩa là không biết khi nào GC sẽ chạy, đa số GC đều dùng chung một mô hình thu thập trong quá trình cấp phát. Nếu như cấp phát không chạy, hầu như GC cũng không chạy. Cần cân nhắc trường hợp sau:
+
+1.  Cấp phát một số lược bộ nhớ lớn.
+2.  Đa số các phần tử này (hoặc toàn bộ) đều được đánh dấu là không thể truy cập (Giả sử chúng ta vô hiệu hóa một tham chiếu đang trỏ đến bộ nhớ cache mà chúng ta không cần nữa.)
+3.  Không có cấp phát nào được thực thi nữa.
+
+Trong trường hợp này, đa số các GC sẽ không chạy bất kỳ một thu gom nào. Nói cách khác, mặc dù có những tham chiếu không thể truy cập được đang tồn tại nhưng chúng lại không được GC "để mắt" đến. Đây không phải là một loại rò rỉ nghiêm trọng nhưng dĩ nhiên nó vẫn sử dụng bộ nhớ nhiều hơn bình thường.
+
+# Rò rỉ bộ nhớ là gì ?
+
+Nếu bạn đọc hết những phần ở trên thì cũng dễ hiểu thôi, rò rỉ bộ nhớ là những vùng nhớ được cấp phát và sử dụng trong chương trình nhưng sau đó, khi không còn dùng nữa, chúng vẫn không được giải phóng và trả về cho hệ điều hành hoặc là kho chứa bộ nhớ.
+
+![](https://cdn-images-1.medium.com/max/1000/1*0B-dAUOH7NrcCDP6GhKHQw.jpeg)
+
+Các ngôn ngữ lập trình có nhiều cách khác nhau để quản lý bộ nhớ. Tuy nhiên, một vùng nhớ cụ thể được dùng hay không thực sự là [vấn đề khó đoán](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_Management#Release_when_the_memory_is_not_needed_anymore). Nói cách khác, chỉ có developer mới biết khi nào thì một vùng nhớ nên được giải phóng và trả lại cho hệ điều hành.
+
+Những ngôn ngữ lập trình cung cấp các tính năng giúp developer làm việc này. Trong khi một số ngôn ngữ khác muốn developer hiểu tường tận về việc khi nào thì 1 vùng nhớ không được sử dụng nữa. Wikipedia có bài viết hay về việc quản lý bộ nhớ [tự động](https://en.wikipedia.org/wiki/Garbage_collection_%28computer_science%29) và [bằng tay](https://en.wikipedia.org/wiki/Manual_memory_management), bạn có thể xem qua.
+
+## 4 loại rò rỉ phổ biến trong Javascript
+
+### 1\. Biến toàn cục
+
+Javascript xử lý những biến không được khai báo một cách khá thú vị: khi một biến không được khai báo được tham chiếu đến thì một biến mới sẽ được tạo ra trong object toàn cục (global). Trên trình duyệt thì tên của nó là **window**, nghĩa là đoạn này
+
+```javascript
+function foo(arg) {
+  bar = 'some text';
+}
+```
+
+...tương đương với
+
+```javascript
+function foo(arg) {
+  window.bar = 'some text';
+}
+```
+
+Giả sử mục đích của bar chỉ để tham chiếu đến 1 biến trong hàm foo thì một biến toàn cục dư thừa lúc này đã được tạo ra bởi vì ta định nghĩa bar mà không dùng var. Ở ví dụ trên, nó không gây ra nhiều tổn hại, nhưng dĩ nhiên bạn có thể tưởng tượng ra bối cảnh đáng lo ngại hơn nhiều. Ví dụ như gán 1 object phức tạp trong bar chẳng hạn.
+
+Thỉnh thoảng bạn cũng có thể vô tình tạo biến toàn cục bằng this:
+
+```javascript
+function foo() {
+  this.var1 = 'potential accidental global';
+}
+// trong hàm foo() ở đây thì "this" đang trỏ tới biến toàn cục
+foo();
+```
+
+Bạn có thể tránh trường hợp đáng tiếc này bằng cách thêm dòng use strict vào đầu file Javascript, nó sẽ, nói nôm na, là bật chế độ "nghiêm túc" lên khi phân tích cú pháp (parse) code JS và sẽ ngăn chặn trường hợp vô tình tạo biến toàn cục.
+
+Những biến toàn cục ngoài dự tính như trên rõ ràng là 1 vấn đề, tuy nhiên, thường thì code của bạn sẽ bị "nhiễm độc" bởi những biến toàn cục tường minh mà những biến đó lại không thể thu thập bởi GC. Đặc biệt chú ý đến các biến toàn cục thường được dùng để lưu trữ tạm thời và xử lý 1 số lượng lớn thông tin. Sử dụng biến toàn cục để lưu trữ dữ liệu nếu bạn **phải** làm thế, nhưng nhớ kỹ là gán nó bằng null hoặc gán lại 1 giá trị khác khi đã xong việc với nó.
+
+### 2\. Timers hoặc callbacks bị bỏ quên
+
+Lần này ta lấy setInterval làm ví dụ vì nó thường được dùng trong JS.
+
+Những thư viện có dùng callback cung cấp observer và các công cụ tương tự thường đảm bảo tham chiếu đến callback sẽ không thể truy cập được một khi instance của nó không thể truy cập được. Ví dụ dưới đây không phải hiếm:
+
+```javascript
+var serverData = loadData();
+setInterval(function () {
+  var renderer = document.getElementById('renderer');
+  if (renderer) {
+    renderer.innerHTML = JSON.stringify(serverData);
+  }
+}, 5000); // hàm sẽ được thực thi sau mỗi 5 giây.
+```
+
+Đoạn code trên cho thấy hậu quả của việc sử dụng timer có tham chiếu đến node hay dữ liệu cũ, không còn dùng nữa.
+
+Object renderer có thể được thay thế hoặc gỡ bỏ ở đâu đó trong quá trình thực thi, điều này làm cho hàm callback trong setInterval trở nên thừa thãi. Nếu điều này xảy ra, dù cho callback hay những thứ bên trong có đủ điều kiện để được dọn dẹp thì trước hết cái interval đó phải dừng lại trước đã (bỏi vì nó vẫn đang hoạt động mà). Dĩ nhiên nếu như serverData đang chứa hay đang xử lý cả 1 đống dữ liệu thì cũng không thể bị thu dọn được.
+
+Khi sử dụng observer, bạn cần đảm bảo phải có một câu lệnh tường minh để gỡ bỏ chúng mỗi khi xong việc (Dù là observer đó không cần dùng nữa hay object không thể truy cập được).
+
+May mắn thay, đa số các trình duyệt hiện đại đều làm giúp bạn việc đó rồi: chúng sẽ tự động thu thập các observer mỗi khi object trong đó trở nên không thể truy cập được kể cả nếu như bạn quên gỡ các listener. Trước đây, một số trình duyệt không làm được điều này (IE6 chẳng hạn).
+
+Nhưng cách tốt nhất vẫn là gỡ bỏ observer khi đã xong việc với nó. Bạn xem ví dụ dưới đây:
+
+```javascript
+var element = document.getElementById('launch-button');
+var counter = 0;
+function onClick(event) {
+  counter++;
+  element.innerHtml = 'text ' + counter;
+}
+element.addEventListener('click', onClick);
+// Do stuff
+element.removeEventListener('click', onClick);
+element.parentNode.removeChild(element);
+// Giờ thì "element" đã được đưa ra khỏi phạm vi thực thi,
+// Cả "element" và "onClick" sẽ được dọn dẹp kể cả trên các trình duyệt cũ
+```
+
+Bạn không càn phải gọi hàm removeEventListener trước khi làm cho node không thể truy cập được vì các trình duyệt hiện đại hỗ trợ GC có thể tự động xác định và xử lý chúng một cách thích hợp.
+
+Nếu bạn dùng jQuery APIs (có nhiều thư viện và frameworks khác cũng hỗ trợ), bạn cũng có thể gỡ bỏ các listener trước khi node bị đưa vào "dĩ vãng" và không dùng nữa. Những thư viện cũng đảm bảo không có rò rỉ bộ nhớ kể cả khi ứng dụng của bạn chạy trên những trình duyệt cũ.
+
+### 3\. [Closures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures)
+
+Một phần quan trọng của Javascript chính là closure: một hàm con có thể truy xuất đến biến của hàm bên ngoài nó. Trong quá tình triển khai chi tiết môi trường thực thi (runtime) của JS thì có thể xảy ra tình trạng rò rỉ bộ nhớ với closure như sau:
+
+```javascript
+var theThing = null;
+var replaceThing = function () {
+  var originalThing = theThing;
+  var unused = function () {
+    if (originalThing)
+      // một tham chiếu đến 'originalThing'
+      console.log('hi');
+  };
+  theThing = {
+    longStr: new Array(1000000).join('*'),
+    someMethod: function () {
+      console.log('message');
+    },
+  };
+};
+setInterval(replaceThing, 1000);
+```
+
+Một khi replaceThing được gọi, theThing sẽ trở thành một object mới chứa 1 mảng rất lớn và 1 closure someMethod. Tuy nhiên, originalThing được tham chiếu bởi 1 closure mà nó lại nằm trong biến unused (chính là biến theThing từ lời gọi đến replaceThing trước đó). Nhớ rằng ở đây một khi **phạm vi (scope) của closure được tạo ra cho closure trong cùng parent scope thì scope đó được dùng chung**.
+
+Trong trường hợp này, scope tạo ra cho closure someMethod được chia sẻ với unused. unused có tham chiếu đến originalThing. Mặc dù unused không bao giờ được dùng, someMehod có thể được sử dụng thông qua theThing bên ngoài scope của replaceThing (ví dụ: ở 1 nơi toàn cục nào đó). Và khi someMethod chia sẻ closure với unused, tham chiếu đến originalThing trong unused ép nó phải ở trong trạng thái hoạt động (toàn bộ scope chia sẻ giữa 2 closure). Điều này ngăn chặn GC hoạt động.
+
+Trong ví dụ trên, scope được tạo ra cho closure someMethod được chia sẻ với unused, trong khi unused tham chiếu tới originalThing. someMethod có thể được gọi thông qua theThing bên ngoài scope của replaceThing, mặc dù sự thật là unused không bao giờ được sử dụng. Rõ ràng unused tham chiếu đến originalThing yêu cầu nó phải giữ trạng thái đang hoạt động bởi vì someMethod chia sẻ closure scope với unused.
+
+Tất cả những điều này có thể làm bộ nhớ bị rò rỉ đáng kể. Bạn có thể thấy biểu đồ sử dụng bộ nhớ dâng lên cao ngất khi đoạn code trên bị lặp đi lặp lại. Kích thước của nó không bị giảm đi khi GC hoạt động. Một danh sách liên kết các closure được tạo ra (root của nó là theThing) và mỗi closure scope lại chưa một tham chiếu gián tiếp tới mảng khổng lồ.
+
+Vấn đề này được tìm thấy bởi Meteor team và họ có [1 bài viết cụ thể mô tả về nó ở đây](https://blog.meteor.com/an-interesting-kind-of-javascript-memory-leak-8b47d2e7f156).
+
+### 4\. Tham chiếu ngoài DOM
+
+Có những trường hợp mà developer lưu trữ DOM node bên trong cấu trúc dữ liệu. Giả sử bạn muốn cập nhật một cách nhanh chóng dữ liệu của nhiều row trong 1 table. Nếu bạn lưu tham chiếu đến mỗi DOM row trong 1 dictionary hay mảng, sẽ có 2 tham chiếu đến cùng 1 phần tử DOM: 1 là từ cây DOME, và 1 là từ dictionary. Nếu bạn chọn lựa xóa bỏ những row này, bạn cũng phải nhớ làm cho 2 tham chiếu trên không thể truy cập được.
+
+```javascript
+var elements = {
+  button: document.getElementById('button'),
+  image: document.getElementById('image'),
+};
+function doStuff() {
+  elements.image.src = 'http://example.com/image_name.png';
+}
+function removeImage() {
+  // Cái ảnh là 1 node con trực tiếp của body
+  document.body.removeChild(document.getElementById('image'));
+  // Ở thời điểm này ta vẫn có 1 tham chiếu đến #button trong
+  // biến toàn cục "element". Nói cách khác, "button" vẫn còn nằm
+  // trong bộ nhớ và GC không thể dọn dẹp nó được.
+}
+```
+
+Cần phải xem xét kỹ lưỡng khi tham chiếu đến node con hay node lá bên trong cây DOME. Nếu bạn giữ tham chiếu đến 1 table cell (thẻ `<td>`) trong code và chọn xóa table khỏi DOM tuy nhiên vẫn giữ tham chiếu đến cell đó, bạn có thể sẽ phải đối mặt với 1 vụ rò rỉ lớn. Bạn nghĩ rằng GC sẽ giải phóng tất cả mọi thứ ngoại trừ cell đó. Tuy nhiên, điều này không dễ dàng như vậy. Bởi vì cell là 1 node con của table và những node con thì có tham chiếu đến parent của chúng, vì thế 1 tham chiếu đến 1 cell có thể giữ cả 1 table lớn trong bộ nhớ.

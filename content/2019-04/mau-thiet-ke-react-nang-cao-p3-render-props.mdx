@@ -1,0 +1,112 @@
+---
+title: 'Mẫu thiết kế React nâng cao P3: Render Props'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - design patterns
+categories: []
+sourceUrl: 'https://itnext.io/using-advanced-design-patterns-to-create-flexible-and-reusable-react-components-part-3-render-d7517dfe72bc'
+coverImage: 'https://cdn-images-1.medium.com/max/1600/1*ji5DgEliT0219-opdiE5dw.png'
+date: 2019-04-25 13:45:00
+slug: /mau-thiet-ke-react-nang-cao-p3-render-props
+---
+
+In this Part, we will discuss a design pattern that can address all of the problems that we have identified up to this point. It is called: render props.
+
+This design pattern can be a bit of a head scratcher at first (remember the function we had to place inside the context consumer in Part 2?) and in order to truly grasp how it exactly works, we need a in-depth understanding of the top level React API and how the JSX code we write is converted to javascript. So let’s use a very simple example and walk through what is going on under the hood.
+
+### JSX
+
+JSX is a syntax extension to JavaScript designed by Facebook’s engineers. We use it with React to describe what the UI should look like (a bit like a template language), but it comes with the full power of JavaScript. Whenever you write any components in JSX, Babel compiles it down to a React.createElement() call.
+
+![](https://cdn-images-1.medium.com/max/1600/1*o0vuU7Dzb5aaz7m3p9-Y5A.png)
+
+Let’s look at a very simple example:
+
+![](https://cdn-images-1.medium.com/max/1600/1*1KwKntECiGRJU5sxnL7LYA.png)
+
+The two examples above yield identical results, the parent component is simply converted to a React.createElement() call, the type is our ‘Parent’ component, there are no props and there are no children.
+
+![](https://cdn-images-1.medium.com/max/1600/1*MZqaPGcEykaEhvp8X1TrlA.png)
+
+When we add a child component, notice how it is itself converted to a React.createElement() call and it is this format that creates our React component tree.
+
+![](https://cdn-images-1.medium.com/max/1600/1*ZuKIoHa_UECNwLVdSVgYMA.png)
+
+The key thing to understand here is that Babel compiles down any props added as a single props javascript object; because it is pure javascript we can pass anything we want, such as functions.
+
+![](https://cdn-images-1.medium.com/max/1600/1*pxbMxCmpRYI-pN0Xul3JjQ.png)
+
+In the above example, instead of passing down the ‘string’, we’ve passed down a function that returns the ‘string’. So, when that function is called we can get the exact same result.
+
+![](https://cdn-images-1.medium.com/max/1600/1*PQgX1RJVXBUHWPYqbAMAXg.png)
+
+So what exactly is going on in the above examples? In the initial example, we just pass down the string, place it in a ‘div’ and it is rendered. In the next example however, we are passing it as a function and placing it in a ‘div’ but this time calling the function allowing us to achieve the exact same result.
+
+### Render Props
+
+Why is this important? Well, traditionally we have **rendered the children components** that we place inside of our parent component.
+
+![](https://cdn-images-1.medium.com/max/1600/1*W4X307RXCRX-M92h2XFeyA.png)
+
+This is the key thing to understand, instead of designing our components to render a child, there is nothing stopping us from **rendering the props** instead while achieving the exact same result:
+
+![](https://cdn-images-1.medium.com/max/1600/1*mugiWhmq3woQb4oYMp509A.png)
+
+So, in this design pattern we **render props** not the children. We can take this a step further too. What else can we do with functions? We can pass arguments when we call them:
+
+![](https://cdn-images-1.medium.com/max/1600/1*yhv4JdMJMlGdenfchcYe2A.png)
+
+Let’s take a moment to digest what’s just happened here. We’ve passed in a function like before but instead of always returning ‘string’ it returns the argument we pass in when it is called!
+
+Wait a second, wasn’t this a problem we encountered in Part 1? To resolve it we had to clone the element, loop through each one and then pass down any desired props.
+
+Using this design pattern we are able to pass props down to child components, Boom!
+
+We can name the props anything we want. So instead of using ‘example’, let’s use something more appropriate:
+
+![](https://cdn-images-1.medium.com/max/1600/1*Dm4kxErU2ytof6UYUMIL7A.png)
+
+If you have used react router before, this may look very familiar. When you need to pass down props to a route you need to use a render function.
+
+![](https://cdn-images-1.medium.com/max/1600/1*He7Q_dBroJoyZJykddFUIw.png)
+
+This is **render props.** Instead of rendering the component directly, we are able to call `render` and pass in any arguments we want.
+
+Let’s swing back to our Stepper component and see how we can utilize this design pattern (I’ve removed all the context boilerplate and added state back to the stepper component).
+
+![](https://cdn-images-1.medium.com/max/1600/1*l2Aca-G6z5SVExCUc5ThRA.png)
+
+This time instead of adding `{this.props.children}` we instead add `{this.props.render(stage,HandleClick)}`. We no longer need to add any children to the stepper component, all we need to do is return the same markup in the render prop.
+
+![](https://cdn-images-1.medium.com/max/1600/1*4e8wL_DEKLswiKya4st1Rw.png)
+
+What does this achieve? Well, every component in the tree now has access to all the props. It essentially gives us the same exposure to the props as the context API, we don’t have to manually pass the props down to each child and we have the flexibility to move things around. This simple adjustment to component design addresses all of the problems we’ve previously mentioned.
+
+![](https://cdn-images-1.medium.com/max/1600/1*ji5DgEliT0219-opdiE5dw.png)
+
+There is one small tradeoff using this design pattern though. The code is slightly less readable than before. Remember that strange function we saw earlier in this series, we needed to add a function inside the Context.consumer component.
+
+![](https://cdn-images-1.medium.com/max/1600/1*vl1h9TNE5VRFo_q3NrM_zQ.png)
+
+This looks very readable to me; let’s think about what is going on. Instead of adding a render function, we are simply adding the same function as a child instead.
+
+Let’s try doing this with our example component we used earlier:
+
+![](https://cdn-images-1.medium.com/max/1600/1*Qg0GYaUlIrS5Zs6k__DHgw.png)
+
+On the left hand side, we are adding the function to the render prop like before. When this is compiled by Babel, the function is added into the the second argument: the props. On the right hand side, we added it as a child and when that is compiled it is added to the third argument: children.
+
+![](https://cdn-images-1.medium.com/max/1600/1*o0vuU7Dzb5aaz7m3p9-Y5A.png)
+
+How do we access the children when creating our components?
+
+**_props.children_**
+
+![](https://cdn-images-1.medium.com/max/1600/1*WWg_57uJXAc5ImvgoY_idw.png)
+
+In a similar fashion to calling the render prop, as the child is a function we can call `props.children` instead and pass in our required arguments, giving us the same outcome as before with an enhanced level of readability.
+
+![](https://cdn-images-1.medium.com/max/1600/1*Wafoqv6u2sdiGmpkOy4FhQ.png)
+
+So there you have it, we have designed a component that is highly flexible and extremely readable. Users can have the autonomy to rearrange the child components without worrying if it will have access to the props they need. Ultimately, it is reusable. We can place this directly in any other application without any prior setup and it will work perfectly.

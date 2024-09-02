@@ -1,0 +1,133 @@
+---
+title: Functional Programming - Phần 1 - Con đường sáng
+author: Hung Tan Nguyen
+tags:
+  - functional programming
+categories: []
+sourceUrl: 'https://kipalog.com/posts/Functional-Programming---Phan-1---Con-duong-sang'
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*KPy3bUBCUFy6zqNFZys9lQ.png'
+date: 2018-06-12 15:35:00
+slug: /functional-programming-phan-1-con-duong-sang
+---
+
+Lúc bấy giờ, Tin giới Tây phương xuất hiện 2 lão quái Nguyên Anh hậu kỳ đỉnh phong, chỉ thiếu nửa bước cảm ngộ ý cảnh là đột phá tới cảnh giới Hóa Thần. Một người là Đồ Linh tôn giả - tức Alan Turing, nổi danh với pháp môn Turing Machine. Người kia là Khâu Kỳ thượng tiên, Alonzo Church, tung hoành tam giới bằng đạo thuật Lambda Calculus (1).
+
+Turing Machine của Alan Turing và Lambda Calculus của Alonzo Church thực ra là hai cách tiếp cận nguyên lý xử lý tính toán trong computer, thường được giới chuyên môn gọi chung là Luận đề Church - Turing ([The Church-Turing Thesis](https://plato.stanford.edu/entries/church-turing/)).
+
+Turing Machine đặt cơ sở trên việc nắm giữ state machine và trạng thái tiến trình, còn ý tưởng Lambda Calculus được xây dựng trên các tính chất của hàm toán học. Lấy tu vi của bổn tiên hiện giờ thì chưa lĩnh hội được mấy thứ cao siêu như vậy, nên không dám lạm bàn ở đây. Chỉ biết rằng, 2 thuật pháp kể trên là khởi nguồn của 2 trường phái tu luyện mạnh nhất trong tin giới hiện nay: Object Oriented Programming và Functional Programming.
+
+Có khá nhiều cơ chế lập trình - Programming Paradigm. OOP và Functional Programming chỉ là 2 trong số đó. Trong cuốn "[Programming Paradigms for Dummies: What Every Programmer Should Know](https://drive.google.com/file/d/1sNAojaDlY4Q9LAMad_2aJLIUBt06ru7U/view)", tác giả Peter Van Roy đưa ra mô hình tổng hợp quan hệ giữa các cơ chế lập trình như thế này:
+
+![](https://i.imgur.com/1yDCYYq.png)
+
+Trong lịch sử công nghệ, có vẻ OOP chiếm ưu thế hơn so với Functional Programming. Bạn cứ thử nhìn xung quanh mình là biết, từ thời tập tành code đã thấy thiên địa tràn ngập quy tắc OOP rồi. Các job description, các buổi interview đều nhắc đến OOP như pháp thuật căn bản. Thảo luận kỹ thuật hầu hết xoay quanh mấy khái niệm Class, Object, Inheritance, rồi cao hơn thì SOLID, Polymorphism, Encapsulation...
+
+Nhưng, trên thế giới, từ thời [Lisp](http://lisp-lang.org/) đến [FP](https://en.wikipedia.org/wiki/FP_%28programming_language%29), rồi [Haskell](https://www.haskell.org/), [Elixir](https://elixir-lang.org/), chưa bao giờ thiếu vắng những tu tin giả đi theo con đường Functional Programming. Nhất là khoảng sau 2010, không rõ vì sao người ta bắt đầu phàn nàn nhiều hơn về OOP, trích dẫn nhiều hơn luận điểm banana/gorilla của Joe Armstrong (2), theo đó, chủ đề "Functional Programming" bắt đầu nóng dần trở lại.
+
+Tôi biết đến Functional Programming vào khoảng 2015 qua một talk show trên YouTube của "[chú Bob](https://en.wikipedia.org/wiki/Robert_C._Martin)", nhưng không hiểu lắm nên cũng không chú ý.
+
+Phải sang 2016, tôi mới chính thức tìm hiểu sâu về Functional Programming sau khi đọc 2 loạt bài viết "[Composing Software](https://medium.com/javascript-scene/composing-software-an-introduction-27b72500d6ea)" của [Eric Elliott](https://medium.com/@_ericelliott) và "[So You Want to be a Functional Programmer](https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536)" của [Charles Scalfani](https://medium.com/@cscalfani) trên Medium.
+
+Eric Elliott lần lượt giải thích từng concepts của Functional Programming một cách tường tận, dễ hiểu. Còn Charles Scalfani đúng là fan cuồng Functional Programming. Anh trình bày nó dưới dạng một hệ thống triết lý, thế giới quan đặc sắc. Thậm chí, Scalfani còn đề cao Functional Programming như nấc thang tiến hóa trong lịch sử lập trình. Lối viết của anh gây ấn tượng cực mạnh.
+
+![](https://i.imgur.com/e3zKVPq.png)
+
+Trước đó, Scalfani còn có bài "[Goodbye, Object Oriented Programming](https://medium.com/@cscalfani/goodbye-object-oriented-programming-a59cda4c0e53)" gây tranh luận sôi nổi.
+
+Nhưng bạn đọc nên lưu ý, Functional Programming không bài xích OOP. Chúng chỉ là những con đường tu luyện khác nhau, cùng hướng về Đại Đạo. Trong khi viết code, ta hoàn toàn có thể phối hợp nhiều cơ chế lập trình khác nhau, miễn sao đạt đến kết quả Đúng - Nhanh - Ổn - Đẹp.
+
+ReactJS là một ví dụ tiêu biểu, có thể coi nó như 7 phần Functional Programming + 3 phần OOP. Về điểm này, [Anjana Vakil](https://twitter.com/anjanavakil) có một bài thuyết trình rất hay ở GOTO 2017.
+
+<YouTube id="Pg3UeB-5FdA" />
+
+Dù sao, từ đó đến nay, khuynh hướng tư duy Functional Programming vẫn từng bước lan rộng, ảnh hưởng đến thiết kế của rất nhiều chương trình hiện đại. Chỉ cần để ý một chút, chúng ta có thể nhận ra các đặc tính nổi bật của Functional Programming xuất hiện trong hầu hết frameworks và các bản cập nhật ngôn ngữ mới. Thậm chí, nếu xét kỹ, những khái niệm thoạt nhìn có vẻ không liên quan như WebComponent, Serverless, Microservice... cũng ẩn hiện tư tưởng Functional Programming. Và tôi gần như không còn đụng tới class, new, this nữa.
+
+![](https://i.imgur.com/LuyuYCU.jpg)
+
+### What's Functional Programming?
+
+Vậy rốt cuộc Functional Programming là cái gì? Nếu google bạn sẽ tìm thấy hàng tá cách giải thích khác nhau. Còn tôi chủ chương nên định nghĩa ngắn gọn thế này:
+
+_Functional Programming là phương pháp lập trình lấy function làm đơn vị thao tác cơ bản._
+
+Đúng vậy. Functional Programming xét về lý tưởng thì chỉ có function, function và function. Không lệnh gán (assignment statements), không cần tới các biến (variables), không lưu giữ trạng thái toàn cục (global state). Trong Functional Programming, chúng ta điều khiển dòng chảy chương trình bằng cách phối hợp các functions lại với nhau. Chúng ta tung hứng các functions qua lại, nhận vào function, nhả ra function, lồng ghép, xâu chuỗi, biến hóa chúng theo mọi cách có thể nghĩ ra.
+
+Đó gọi là không gian "[first-class functions](https://en.wikipedia.org/wiki/First-class_function)", nơi lập trình viên đối xử với functions như "first-class citizens". Ở đâu functions được coi trọng như vậy, ở đó ta có thể lập trình theo cơ chế Functional Programming. JavaScript, Python, Golang, ngay cả PHP chính là như vậy. Java tính từ v8.0 ra mắt năm 2017 cũng là như vậy. Dù không hoàn hảo như Haskell, F#, etc - những tu chân giới vốn được sinh ra cho Functional Programming - nhưng ta vẫn có thể tu luyện Functional Programming được...
+
+Chỉ có điều phải vận dụng khác một chút, linh hoạt hơn một chút. Đó là lý do tại sao trong các chương trình JavaScript, Python, dù viết theo phong cách Functional Programming nhưng vẫn phải dùng đến các biến, lệnh gán để thao tác.
+
+Các tu tin giả tầng thấp muốn bắt đầu con đường Functional Programming cần phải nắm bắt những khái niệm cơ bản như Immutability, Purity, Higher-order functions, Currying function, Function Composition... Sau khi thăng cấp cảnh giới cao hơn thì có thể tìm hiểu Monad, Functor, Setoid, Idempotent, Lens... và nhiều nữa.
+
+Nào, bây giờ hãy bắt đầu hành trình...
+
+### Immutability
+
+Immutability nghĩa là tính bất biến.
+
+Nguyên tắc thứ nhất trong Functional Programming là: cái nào đã khai báo một lần thì mãi mãi như vậy, không bao giờ thay đổi nữa. Các biến hoặc đối tượng trong kịch bản Functional Programming nếu có thì phải immutable.
+
+Code thế này không phải là Functional Programming vì x và y bị thay đổi.
+
+```javascript
+var x = 5;
+var y = 2;
+while (x < 10) {
+  y += x;
+  x++;
+}
+```
+
+Mutable là điều tối kỵ trong Functional Programming. Cần phải hạn chế đến mức thấp nhất. Các mẫu coding convention và best practices thông dụng hiện nay đều khuyến khích sử dụng const để khai báo, bỏ hẳn var , và dùng let đúng liều lượng.
+
+Đối với Object, ta nên dùng Object.freeze để lock toàn bộ thuộc tính. Cũng có thể dùng Object.defineProperty, Object.defineProperties để lock một số thuộc tính quan trọng. Các giải pháp này đều chỉ hỗ trợ 1 cấp thuộc tính. Phải chủ động code thêm nếu muốn áp dụng lên các thuộc tính con.
+
+Nếu dự án đủ phức tạp, hãy cân nhắc sử dụng các thư viện chuyên dụng như [Immutable.js](https://facebook.github.io/immutable-js/), [Baobap](https://github.com/Yomguithereal/baobab)...
+
+### Purity
+
+Purity là tính thuần khiết, thuần túy, sự trong sạch, không bị pha tạp.
+
+Đây là nguyên tắc thứ hai trong Functional Programming: tất cả các hàm đều phải là pure function, không có hiệu ứng phụ (side effect), không được tác động lên bất cứ giá trị nào bên ngoài nó, cũng nói không với chỉnh sửa tham số input.
+
+Hàm dưới đây không phải pure function vì nó chỉnh sửa DOM element bên ngoài và thay đổi giá trị chứa trong localStorage.
+
+```javascript
+const updateView = (html) => {
+  let $view = document.getElementById('panel');
+  $view.innerHTML = html;
+  localStorage.setItem('panelCache', html);
+  return $view;
+};
+```
+
+Đặc điểm quan trọng nữa của pure function là với mỗi tập giá trị đầu vào nhất định, luôn có 1 và chỉ 1 kết quả trả về tương ứng. Đây là tính chất của hàm số toán học.
+
+Hàm dưới đây không phải pure function vì trả về kết quả khác nhau cho cùng đầu vào:
+
+```javascript
+const getDuration = (timestamp) => {
+  return Date.now() - timestamp;
+};
+```
+
+Pure function trong Functional Programming thường ngắn gọn, đơn giản và chỉ xử lý duy nhất 1 vấn đề logic.
+
+Đây là 1 pure function kinh điển:
+
+```javascript
+const add = (a, b) => {
+  return a + b;
+};
+```
+
+Dù bạn có gọi hàng triệu lần thì add(3, 2) vẫn luôn trả về 5.
+
+Viết unit test cho pure function là nhiệm vụ dễ chịu như dạo chơi cùng một thiếu nữ ngây thơ trong trắng vậy!
+
+Immutability và Purity là 2 đặc trưng cơ bản nhất của Functional Programming, cho phép phân biệt với các cơ chế lập trình khác. Tu tin giả tu luyện theo con đường này nhất định phải giữ tâm niệm "immutable" và "pure" trong từng sát na.
+
+### Chú thích
+
+1, Chữ Tàu ghi Alan Turing là 艾伦图灵 - Ngải Luân Đồ Linh, Alonzo Church là 阿隆佐邱奇 - A Long Tá Khâu Kỳ.
+
+2, "You wanted a banana but you got a gorilla holding the banana".

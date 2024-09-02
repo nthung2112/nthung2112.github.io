@@ -1,0 +1,763 @@
+---
+title: Các kỹ thuật SEO tối thiểu mà developer cần nắm vững trong lập trình web
+author: Hung Tan Nguyen
+date: 2017-10-01 15:28:15
+sourceUrl: http://qiita.com/rorensu2236/items/a2cd209af4dda59557a5
+tags: [seo]
+slug: /cac-ky-thuat-seo-toi-thieu-ma-developer-can-nam-vung-trong-lap-trinh-web
+---
+
+Trong khi đang làm việc tại công ty Basic (1 công ty của Nhật hoạt động trong lĩnh vực Web & Media Marketing, vận hành 2 website [ferret](https://ferret-plus.com) và [ferretOne](https://ferret-one.com)), tôi được giao nhiệm vụ tối ưu hoá công cụ tìm kiếm cho website [phocase](https://phocase.jp) (1 website bán phụ kiện điện thoại), để hoàn thành công việc này tôi đã phải tìm hiểu và học thêm các kiến thức, tiện đây xin được tổng hợp lại và chia sẻ với các bạn những điều cần nhớ về SEO với vai trò là 1 kỹ sư.
+
+**TLDR**; Bài viết này dành cho nhiều đối tượng nên tương đối dài, hãy chọn lọc các kiến thức cần thiết cho mình thôi nhé :v
+
+### ★ Bạn có thể nhận được gì khi đọc bài viết này ?
+
+- Sự tương tác giữa các Marketer và Director trở nên dễ dàng hơn
+- Nhận biết các đoạn code mà vô tình làm giảm thứ hạng của website trên bộ máy tìm kiếm
+- Đề xuất các giải pháp SEO có thể thực hiện được ở phía Developer
+- Nắm bắt được bức tranh/bối cảnh SEO năm 2017
+
+## Nắm bắt chính xác tài liệu được Google chính thức công khai
+
+Có thể tìm kiếm rất nhiều thông tin trên các trang web, nhưng tối thiểu thì hãy thực hiện những chính sách được Google đưa ra về rule của 1 website.
+
+[Search Engine Optimization Starter Guide](https://static.googleusercontent.com/media/www.google.com/en//webmasters/docs/search-engine-optimization-starter-guide.pdf)
+
+Ngoài ra bạn cũng có thể tìm hiểu thêm các thông tin tại website chính thức của Google: [Official news on crawling and indexing sites for the Google index](https://webmasters.googleblog.com)
+
+### ★ Kiểm tra lại các biện pháp SEO trước đó để nắm được các thông tin hữu ích
+
+Hãy tìm kiếm trong **Search Console Help** các từ khoá liên quan tới các công việc đã thực hiện từ trước, rất có thể bạn sẽ phát hiện ra những kỹ thuật bị bỏ sót mà mình không hề nghĩ tới.
+
+Chẳng hạn nếu như bạn có sử dụng thẻ alt với ảnh trên website, thì tôi khuyên bạn nên thử tìm kiếm trong **Search Console Help** các ảnh đã được đánh tag trước đó.
+Việc nhồi nhét quá nhiều keyword trong thẻ alt có thể khiến search engineer đưa vào danh sách spam, đây cũng có thể là cách để bạn phòng tránh việc đó.
+[Search Console Help](http://support.google.com/webmasters/)
+
+# Chính sách của Google đối với Mobile Site
+
+## Mobile First Index (MFI)
+
+Ngày 5/11/2016, Google chính thức công bố chính sách của mình đối với Mobile site: [Mobile-first Indexing](https://webmasters.googleblog.com/2016/11/mobile-first-indexing.html)
+
+Về cơ bản, cho tới thời điểm hiện tại ngoài rank được đánh cho các website hướng PC Desktop, Google còn bổ sung thêm rank cho các website chú trọng nội dung và thiết kế tới SP (Smart phone)
+
+Ngày 5/4/2017, Tại hội nghị [Next10x Conference](https://www.stonetemple.com/next10x-conference/), Các kỹ sư của Google đã chính thức công bố mục tiêu áp dụng vào trong năm nay, tuy nhiên chưa công bố chính thức khoảng thời gian.
+
+- Trước khi áp dụng MFI (Hiện tại)
+
+  - PC Search: Hiển thị theo trình tự của rank cho nội dung PC site
+  - SP Search: Hiển thị theo trình tự của rank cho nội dung PC site
+
+- Sau khi áp dụng MFI (Chưa xác định thời gian)
+
+  - PC Search: Hiển thị theo trình tự chú trọng vào rank cho nội dung SP site (Không có nghĩa là không tính đến rank của PC site)
+  - SP Search: Hiển thị theo trình tự của rank cho nội dung SP site
+
+### ★ Các site có khả năng chịu ảnh hưởng
+
+- Có sự khác biện lớn giữa phiên bản **PC và SP**
+- Còn nhiều thông tin tồn tại trên phiên bản cho PC nhưng lại ko có trên phiên bản SP
+- Đã hỗ trợ và có chiến lược SEO cho PC site nhưng lại chưa có cho SP site
+- Ngoài header vs footer ra, các nội dung chính là khác nhau
+- Cấu trúc HTML khác nhau
+- Tốc độ hiển thị cho SP site quá chậm
+
+## Mobile Friendly
+
+Ngày 21/4/2015, Google công bố : thứ tự xuất hiện trên kết quả tìm kiếm có liên quan tới UI, UX trong trường hợp truy cập trang web trên Smart Phone Device
+[Rolling out the mobile-friendly update](https://webmasters.googleblog.com/2015/04/rolling-out-mobile-friendly-update.html)
+
+> Chỉ ảnh hưởng tới thứ tự xuất hiện kết quả tìm kiếm trên Mobile Device
+> Ảnh hưởng trong phạm vi toàn bộ các ngôn ngữ trên thế giới
+> Áp dụng cho các page riêng rẽ, chứ không phải toàn bộ trang web
+
+Nếu như website đó không được coi là Mobile Friendly sẽ có thứ tự thấp và không được ưu tiên xuất hiện trên kết quả tìm kiếm. Điều này có tác động trực tiếp tới doanh thu của các website thương mại điện tử (EC site)
+
+Sử dụng website sau, có thể kiểm tra tính thân thiện với thiết bị mobile của 1 trang web
+[Mobile Friendly Check](https://www.google.com/webmasters/tools/mobile-friendly/)
+
+### ★ Các hạng mục cần kiểm tra
+
+- Font size có thích hợp (>= 16px) không?
+- Có sử dụng thẻ meta và chỉ định viewport cho mobile không?
+- Khoảng cách của các liên kết có bị quá hẹp không? (phòng ngừa lỗi)
+- Nội dung trang web có bị tràn ra ngoài màn hình không?
+- Website có được hiển thị trong vòng 3s không? (Nếu việc hiển thị tốn quá > 3s, thì 40% người dùng sẽ thoát trang web đó)
+
+Đối với các website không thoả mãn tối thiểu các điều kiện trên sẽ có thể có có thứ hạng thấp trong kết quả tìm kiếm.
+
+### ★ Mobile Friendly Support & Yêu cầu craw lại website
+
+Bằng cách sử dụng **GoogleSearchConsole**, bạn có thể nắm rõ được chi tiết các thành phần trên website mình không thoả mãn các hạng mục kiểm tra phía trên.
+[Google Webmaster Home](https://www.google.com/webmasters/tools/home)
+
+Sau khi giải quyết các vấn đề trên, hãy gửi yêu cầu cho Google crawl lại các URL đó.
+Chi tiết các bạn có thể tham khảo link sau về việc [Yêu cầu Google crawl lại các URL](https://support.google.com/webmasters/answer/6065812?hl=vi)
+
+### ★ Các hạng mục để đánh giá về UX
+
+- First view của trang web sẽ được hiển thị trong vòng 1 giây (Google recommended)
+- Chuẩn bị riêng biệt kích thước hình ảnh với PC Site, để giảm dung lượng của một trang web
+- Sử dụng công cụ YUI Compressor và JSMin để rút ngắn đoạn code dài như thư viện
+- Thiết lập các nội dung có thể tab được lớn hơn 48px
+
+Để xác nhận tốc độ hiển thị của web site, bạn có thể dụng công cụ: [PageSpeed Insights](https://developers.google.com/speed/pagespeed/insights/)
+
+### ★ Chuyển tiếp quảng cáo
+
+Đối với các quảng cáo chuyển tiếp thì đến khi hiển thị target page, thì hiển thị quảng cáo với link [**Skip this page**] giống như ảnh bên dưới, từ tháng 11 năm 2016 sẽ vi phạm điều luật của Google.
+
+![](https://viblo.asia/uploads/87d34608-62a4-4e35-a038-f2b0e1c33321.png)
+
+Quote: [https://london3.jp/2014/12/skip/](https://london3.jp/2014/12/skip/)
+
+### ★ Các tác động dẫn tới việc giảm thứ hạng rank
+
+- Nội dung chính nằm trong Popup (kể cả Modal)
+- Trước khi dẫn tới main content (nội dung chính) của website thì hiển thị quảng cáo giống trong ảnh trên
+- First view có chưa quảng cáo với kích thước lớn, nếu không scroll thì không thấy được nội dung chính
+
+### ★ Các tác động không ảnh hưởng tới thứ hạng rank
+
+- Pop-up cấp quyền sử dụng Cookie
+- Các hiển thị như xác minh độ tuổi với cơ sở dựa vào pháp luật
+- Các page mà chỉ một bộ phận cụ thể người dùng được hiển thị, chẳng hạn như một trang đăng nhập.
+- Banner quảng cáo Pop-up mà không chiếm nhiều diện tích màn hình
+
+Hơn nữa, trong cuộc đối thoại giữa Google với người sử dụng có câu hỏi:
+
+> Về nội dung Pop-up (Quảng cáo) thì, liệu có khả năng nội dung ẩn bên trong nó lại được Googlebot ưu tiên ko ?
+
+Về phía Google đã trả lời là:「Chính xác là có khả năng đó」, như vậy thì việc hiển thị quảng cáo dù là = Pop-up hay Modal cũng là không nên.
+
+# Cài đặt XML Sitemap & Đăng ký RSS Feed
+
+Công việc này đã được Google hướng dẫn rất chi tiết tại link sau:
+[Best practices for XML sitemaps & RSS/Atom feeds](https://webmasters.googleblog.com/2014/10/best-practices-for-xml-sitemaps-rssatom.html)
+
+## RSS, Atom Register và PubSubHubbub(PuSH)
+
+Được sử dụng như Sitemap, có format tương tự RSS và Atom trong RSS Reader.。
+
+### ★ Lợi ích khi đăng ký Feed
+
+- Chỉ URL được cập nhật gần đây nhất được đăng ký.
+- Tần suất Crawl cao hơn Sitemap thông thường
+
+Việc thông báo cho Google các Page được create/update gần đây nhất là một phương pháp sử dụng Feed có tần suất Crawl cao hơn một cách hiệu quả.
+
+### ★ Thực hiện index theo thời gian thực dựa vào PubSubHubbub (PuSH)
+
+Một cách để thực hiện index realtime khác đó là: Sử dụng phương thức PubSubHubbub (hay còn gọi là PuSH) giúp thông báo tới Google các thay đổi tại thời điểm mà các trang được update.
+
+[Danh sách các repository thực hiện việc implement **PuSH** được viết trên nhiều ngôn ngữ lập trình](https://github.com/pubsubhubbub)
+
+Trường hợp code bằng PHP, có thể sử dụng file được Download từ thư viện sau đây:
+pubsubhubbub-php-master/library/publisher.php
+
+```php
+require_once './publisher.php' ;
+$publisher = new Publisher('http://pubsubhubbub.appspot.com/');
+$publisher->publish_update('http://example.com/article/1');
+```
+
+## Đăng ký Sitemap
+
+### ★ HTML Sitemap
+
+- Sitemap cho người sử dụng truy cập trang web
+- Thường xuyên quản lý để tránh các liên kết lỗi
+- Việc phân loại sẵn các Category giúp cải thiện khả năng sử dụng
+
+### ★ XML Sitemap
+
+Việc tạo sẵn một Sitemap có định dạng XML chính là công cụ đắc lực, trợ giúp Search Engine index website của bạn
+Dưới đây là các loại Sitemap:
+
+| Loại File XML | Vai trò                                           |
+| ------------- | ------------------------------------------------- |
+| sitemap.xml   | Mô tả cấu trúc website, bao gồm cả mobile sitemap |
+| movie.xml     | Hiển thị các nội dung video trong tìm kiếm        |
+| image.xml     | Hiển thị các nội dung ảnh trong tìm kiếm          |
+| news.xml      | Khai báo các tệp tin được gửi tới Google News     |
+
+- Với mỗi file XML được cài đặt chính xác, góp phần xúc tiến việc index website của bạn
+- Tuy nhiên nếu crawler không visit, chúng ta cần thực hiện cải thiện lại Sitemap đã tạo trước đó
+- Trên SP site việc giới hạn quyền truy cập webiste mobile trên device = .htaccess có thể khiến Search Engine Bot không vô được, vì vậy hãy cho phép Googlebot-Mobile có quyền truy cập.
+
+Trong thực tế, đối với việc create/submit Sitemap chúng ta có thể tham khảo thêm tại link [Build and submit a sitemap](https://support.google.com/webmasters/answer/183668?hl=vi) , có hướng dẫn chi tiết các loại tool giúp tạo và test sitemap, rất tiện lợi.
+
+### ★ Video, Image Sitemap
+
+Việc Crawler thu thập thông tin tìm kiếm liên quan tới Video và Ảnh là tương đối khó khăn, do đó chúng ta cần sử dụng Sitemap chuyên dụng có chứa thông tin cho Video và Image.
+Về cách create thì bạn có thể tạo file XML chỉ chứa các video và ảnh mới tạo hoặc bổ sung chúng vào 1 file XML đã tồn tại đều ok, tuy nhiên hãy thiết lập một sitemap chứa nhiều thông tin.
+[Sitemap Protocol](https://www.sitemaps.org/index.html) : Video extension, Title, Duration, Description
+
+Hơn nữa, bằng cách sử dụng Video Sitemap, khi tiến hành tìm kiếm Video lẫn Image trong Search Engine, Video có thể được tìm thấy trong kết quả.
+Ví dụ file movie.xml như sau:
+
+```
+xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
+```
+
+Khi vận hành 1 EC site (Website thương mại điện tử) sử dụng Image Sitemap, doanh nghiệp có thể thu hút và tiếp cận được đối tượng người dùng tìm kiếm sản phẩm muốn mua bằng ảnh trên máy tìm kiếm.
+
+# Những điều cần lưu ý khi sử dụng tag HTML
+
+## 【Title】
+
+Trong SEO, thẻ **Title** là một trong số những thẻ tag có tầm ảnh hưởng nhất, Trong 1 page chỉ được có 1 thẻ **title** trong **head** tag.
+index.html
+
+```
+<head>
+    <title>Page title</title>
+</head>
+```
+
+- Nếu trong thẻ title có từ khóa tìm kiếm của user sẽ được bôi đậm trên kết quả tìm kiếm
+- Mỗi Page nên có 1 thẻ title với nội dung khác nhau
+- Trên kết quả tìm kiếm của Search Engine sẽ chỉ hiển thị tối đa ~32 ký tự trong nội dung của thẻ **title**
+- Nếu trong thẻ **title** có chứa các từ khóa không cần thiết sẽ làm giảm trọng số của từ khóa mong muốn được tìm kiếm
+- Nên lựa chọn nội dung của thẻ **title** sao cho dựa vào đó có thể đoán được phần nào nội dung của web page
+
+Cần lưu ý rằng trên Search Engine sẽ chỉ hiển thị khoảng **32** ký tự cho tiêu đề (title) của 1 website, và thậm chí là **24** ký tự khi người dùng tìm kiếm trên thiết bị di dộng.
+Nếu đặt tiêu đề cho page không liên quan tới nội dung của page sẽ làm giảm lượng người dùng truy cập, dẫn tới rank website bị giảm. Cho dù người dùng có truy cập vào nhưng do nội dung chính và tiêu đề không giống nhau, họ sẽ mau chóng rời đi -> tỷ lệ bounce rate sẽ ngày càng tăng.
+
+## 【Description】
+
+Trước tiên khi thiết lập Description, nội dung hiển thị trên search engine sẽ thay đổi tại đây:
+
+![](https://viblo.asia/uploads/fe0e1e65-10cb-4092-a44f-1298ae8fda93.png)
+
+Việc thêm mô tả cho nội dung mà người dùng mong muốn tìm kiếm, góp phần làm tăng tỷ lệ **click rate** trên search result.
+Tuy nhiên nếu xét về mức độ ảnh hưởng về ranking trong thứ hạng xuất hiện trên Search Engine thì có vẻ là không lớn lắm.
+
+Hơn nữa ở thời điểm hiện tại dù không có mô tả rõ ràng cho page thì Google cũng hiện thị Description mà nó tự động tạo ra cho web page.
+
+Dựa vào các mô tả mà Google tự động sinh ra cho trang web, với các trường hợp đưa ra Description phán đoán chính xác thông tin trên website:
+
+- Khuyến khích để Google tự động tạo **description** cho web page
+- Các page khác nhau phải có nội dung khác nhau
+- Nội dung **description** cần nhất quán với **title** tag
+- Trên search engine chỉ hiển thị khoảng **124** ký tự cho phần **description**
+- Khi tìm kiếm bằng thiết bị di động thì chỉ hiển thị khoảng **80** ký tự cho phần **description**
+- Không bắt buộc văn phong phải chính xác tuy nhiên nội dung của tag phải rõ ràng, chuẩn xác.
+
+Bạn có thể sử dụng tool sau để đánh giá **description** trên 1 web page: [http://seolaboratory.jp/description/](http://seolaboratory.jp/description/)
+
+## 【h1】
+
+Do việc lạm dụng thẻ **h1** quá nhiều dẫn tới Google đã hạ chỉ số đánh giá của nó, tuy nhiên do vẫn còn xuất hiện trên kết quả tìm kiếm, nên đối với SEO vẫn còn khá quan trọng.
+
+- Mỗi page chỉ nên có 1 thẻ h1
+- Mặc dù Google có công bố chính thức rằng có thể thiết lập nhiều thẻ **h1**, tuy nhiên nếu làm vậy sẽ gây khó khăn cho việc nhận biết chủ đề của nội dung web page
+- Có thể thiết thể ảnh bên trong thẻ tag **h1**
+
+/iphone6/?color="white"
+
+```
+<h1>
+  <img src="/images/iphone6_white.jpg" alt="Danh sách bao da cho điện thoại iPhone 6 được nữ giới ưa chuộm" />
+</h1>
+```
+
+Với cách đặt ảnh như trên thì nó cũng được nhận diện như 1 phần của **h1** tag, do đó hãy mô tả chính xác ảnh bằng cách thêm nội dung vào thuộc tính _alt_ (văn bản thay thế).
+
+### ★ Keyword truyền tải bởi TDH (Title Description H1)
+
+Nếu bạn đặt từ khóa mình muốn SEO trong tất cả các thẻ TDH（Title 　 Description 　 H1）sẽ là cách đầu tiên giúp Google nhận biết chính xác từ khóa cần SEO.
+Do đó, cần xem xét 3 thẻ trên có chứa từ khóa mình cần lên top không?
+
+## Lưu ý với thẻ【img】và thuộc tính 【alt】
+
+Bằng cách sử dụng thuộc tính _alt_ mô tả nội dung trong ảnh và video, thì người khiếm thị (Sử dụng tính năng đọc văn bản) hoặc người dùng có tốc độ mạng internet chậm cũng có thể dễ dàng nhận được thông tin về website của bạn, điều này được Google đánh giá rất cao.
+
+Tham khảo source code bên dưới về **Google Search Console**
+Nguồn: [https://support.google.com/webmasters/answer/114016?hl=vi](https://support.google.com/webmasters/answer/114016?hl=vi)
+
+- Cách sử dụng không tốt thẻ **img** với thuộc tính alt
+
+```html
+<img src="puppy.jpg" alt="" />
+
+<img
+  src="puppy.jpg"
+  alt="puppy dog baby 
+dog pup pups puppies doggies pups litter puppies dog retriever 
+ labrador wolfhound setter pointer puppy jack russell terrier 
+puppies dog food cheap dogfood puppy food"
+/>
+```
+
+Việc nhồi nhét quá nhiều từ khóa vào thuộc tính _alt_ dẫn tới việc bị google nhận diện thành Spam content.
+
+- Cách sử dụng tối ưu thẻ **img** với thuộc tínhalt
+
+```html
+<img src="puppy.jpg" alt="puppy" />
+
+<img src="puppy.jpg" alt="Dalmatian puppy playing fetch" />
+```
+
+Nếu có thể thì tốt nhất hãy mô tả bằng câu văn thay vì chỉ sử dụng 1 từ khóa cho các **img** tag.
+
+### ★ Các hạng mục khác được khuyến khi khi sử dụng thẻ 【img】 (Không bắt buộc)
+
+- Thống nhất file name và nội dung thuộc tính alt
+- Có thể thiết lập nội dung trong alt mà không có khoảng trắng
+- Cố gắng thiết lập mô tả cho ảnh sao cho gần với nội dung trong bức ảnh đó nhất có thể
+- Các ảnh tương tự nhau thì nên để trong cùng 1 thư mục host
+- Nếu một ảnh giống nhau được sử dụng ở nhiều nơi, thì hãy mô tả thật chi tiết ảnh đó trên website của mình, khi đó Google sẽ nhận diện ảnh của site bạn là original image, và hiển thị trên search result !
+
+### ★ Khả năng index và thu thập dữ liệu ở cùng thời điểm
+
+【Khả năng thu thập dữ liệu】
+Để crawler của GoogleBot dễ dàng thu thập dữ liệu, chúng ta cần
+
+- Cấu trúc, sử dụng thẻ HTML phải đúng chuẩn
+- Với các page có nội dung liên quan cần có liên kết tới nhau, để đảm bảo khả năng crawler trải dài trên toàn bộ website
+
+【Khả năng index - đánh chỉ mục tìm kiếm】
+Nếu đã chuẩn bị sẵn các thuộc tính alt cho ảnh, âm thanh, video trên website của mình thì khi GoogleBot crawl sẽ index được chính xác nội dung của chúng.
+
+## 【a】tag
+
+Hãy thiết lập chuẩn xác anchor link (text), việc này sẽ giúp truyền tải thông tin tới Google dễ dàng hơn.
+
+### Các implement có thể ảnh hưởng tới khả năng crawler
+
+- Sử dụng javascript để di chuyển tới link cần vô (Google có khả năng nhận biết điều đó)
+- Tìm kiếm bên trong website bằng cách gửi form
+- Link content sử dụng FLASH
+
+## 【rel="next" or "prev"】
+
+Khi thiết lập Pagination cho website cần chỉ định thuộc tính rel với giá trị _next_ hoặc _prev_
+
+### ★ rel=”prev/next” được xếp hạng ưu tiên hơn rel=”canonical”
+
+Ví dụ vể rel="canonical" cho mọi người dễ hiểu
+
+```html
+<link rel="canonical" href="http://example.com/wordpress/seo-plugin/" />
+```
+
+Cho dù bạn có để link trên các page 2, 3, 4 về page 1 bằng thuộc tính canonical, thì next và prev vẫn được đánh giá ưu tiên hơn canonical, do đó với các URL không có parameter giống nhau như bên dưới sẽ không được tính là next và prev.
+
+- Ví dụ chưa tối ưu
+
+```
+http://example.com/iphone7?page=1
+http://example.com/iphone7?color=red&page=2
+http://example.com/iphone7?page=3
+http://example.com/iphone7?page=4
+```
+
+- Ví dụ tối ưu: được tính là next và prev
+
+```
+// page=
+http://example.com/iphone7?color=red&page=1
+http://example.com/iphone7?color=red&page=2
+http://example.com/iphone7?color=red&page=3
+http://example.com/iphone7?color=red&page=4
+
+// viết tắt p=
+http://example.com/foo.html
+http://example.com/foo.html?p=2
+http://example.com/foo.html?p=3
+
+// Sử dụng URL path thay thế cho param page
+http://example.com/foo/1/
+http://example.com/foo/2/
+http://example.com/foo/3/
+```
+
+### ★ Các điểm cần lưu ý
+
+- 1 page chỉ được phép có 1 next và 1 prev
+- Absolute path thì ngon hơn Relative path URL (Không bắt buộc)
+- Trường hợp hiển thị kết quả tìm kiếm của 1 page có sử dụng điều kiện filter, thì ở trong trang điều kiện đó cũng cần bổ sung thuốc tính next và prev
+- Nếu bạn không muốn hiển thị một page trên kết quả tìm kiếm, hãy học cách sử dụng canonical
+
+## 【rel="nofollow"】
+
+Với các target link có gắn thuộc tính rel="nofollow" sẽ không được search engine visit. Thuộc tính này xuất hiện ở thẻ meta và thẻ a.
+Hơn nữa, khi GoogleBot visit target link, nó cũng tính toán độ tin cậy của các target link trên website và đánh giá thứ hạng site đó.
+
+### ★ Khuyến khích sử dụng "nofollow" với link trỏ tới các website sau
+
+- Các bảng tin và ô comment có thể được người dùng nhập
+- Liên kết tới bookmark site
+- Liên kết tới ranking site
+- Liên kết khi nhận được đánh giá bằng tiền
+- powerd by... link
+
+### ★ Các liên kết có thể gây ảnh hướng xấu tới website cần lưu ý
+
+- Các link mà người dùng không nhìn thấy, bị ẩn đi cũng như không click được
+- Liên kết qua lại bằng các trang web hỗ trợ liên kết lẫn nhau
+- Các liên kết đến các trang web được Google xác định là có mã nguồn độc hại
+
+## Sử dụng【robots.txt】để không bị crawl thừa
+
+Nếu không muốn search engin crawl trong những trường hợp dưới đây, hãy thiết lập file **robot.txt**
+
+- Các web page có chất lượng thấp, các web page không muốn xuất hiện trên kết quả tìm kiếm
+
+File **robots.txt** được đặt ở thư mục gốc (root directory) của website, Các Bot search engine sẽ tự động đọc và lấy ra.
+
+Ví dụ về nội dung file **robots.txt**
+
+```
+User-Agent: *
+Disallow: /*/matome/
+Disallow: /ajax/*.json
+Disallow: /image/
+Disallow: /search
+```
+
+Hơn nữa Google cũng hỗ trợ tool kiểm tra file **robots.txt** : [Google robots.txt Tester](https://support.google.com/webmasters/answer/6062598?hl=vi)
+
+## 【rel="noindex"】
+
+Hãy sử dụng nó khi bạn có chủ ý muốn 1 page nào đó trên website của mình không xuất hiện trên kết quả tìm kiếm của Google.
+
+### ★ Điểm khác biệt với robots.txt
+
+Sử dụng **robots.txt** đồng nghĩa với việc không cho Bot Search Enginer thu thập dữ liệu cũng như xếp hạng page đó.
+
+Trong khi sử dụng **noindex** thì sau một thời điểm nào đó khi link tới website của bạn được share nhiều trên mạng xã hội, thì SEO rank vẫn còn và link tới web page đó vẫn được xếp hạng.
+
+### ★ Mục đích chính của việc sử dụng "noindex”
+
+- Với các page chất lượng thấp, nếu có gắn thuộc tính **noindex** sẽ ko bị xếp hạng thấp website
+- Support các page chưa được setting trong **robots.txt** cho tới thời điểm hiện tại
+- 404 Page (Thiết lập ở các page trả về status lỗi 404)
+
+_Cách thức setting:_
+
+```
+<meta name=”robots” content=”noindex”>
+```
+
+### ★ Cách kiểm tra tình trạng index của một website
+
+Có thể dùng [Google Search Console - Index Status](https://www.google.com/webmasters/tools/index-status)
+![image](https://qiita-image-store.s3.amazonaws.com/0/69647/8c1cc73b-969a-00c3-6712-ebc76333e717.png)
+
+## Hiển thị Rich snippets
+
+**Rich Snippets** là đoạn thông tin đặc biệt dùng để hiển thị các thông tin thêm có trong những bài viết đặc biệt (bài đánh giá, sản phẩm, ứng dụng, công thức nấu ăn, địa chỉ công ty..v.v..) trên các máy tìm kiếm (Google, Yahoo, Bing) nhằm cung cấp thêm những thông tin giá trị đến người tìm kiếm giúp họ xác định kết quả tìm kiếm mà họ đang cần. Nhìn vào kết quả tìm kiếm sau, ta thấy có một điều rất đặc biệt: Xuất hiện ảnh thumbnail trong kết quả :v
+
+![](https://viblo.asia/uploads/bdc6e3b1-aaf9-411e-a032-31cc42214397.jpg)
+
+**Rich Snippets** có 10 loại phổ biến sau:
+
+- Author
+- Breadcrumbs
+- Event
+- Organizations
+- People
+- Products
+- Recipes
+- Review
+- Software Application
+- Facebook Share
+
+Việc sử dụng các markup bằng cấu trúc được công bố trên **schema.org** sẽ làm tăng khả năng hiển thị **rich snippet** trên kết quả tìm kiếm của google.
+Hiện tại thì **rich snippet** không ảnh hưởng tới rank của 1 website, tuy nhiên có thể ảnh hưởng tới thứ hạng trong kết quả tìm kiếm: [Google Webmaster Central office-hours hangout](https://www.youtube.com/watch?v=QWL864VlW7I&feature=youtu.be)
+
+Ví dụ về 1 page có hiển thị **snippets**
+
+```html
+<section itemscope itemtype="http://schema.org/Game">
+  <h1>Monster Hunter Game Series</h1>
+  <span itemprop="name">Monster Hunter Double Cross</span>
+  <p itemprop="description">Latest Monhan Series with 6 large main Monsters</p>
+  <div itemprop="author" itemscope itemtype="http://schema.org/Corporation">
+    <p itemprop="name">CONAMI</p>
+    <p itemprop="email">example@conamikan.jp</p>
+  </div>
+</section>
+```
+
+# Những lưu ý về URL (Đường dẫn)
+
+## 【Soft 404】
+
+Tình trang một page có status=200 nhưng nội dung page đó lại cho biết URL này không tồn tại được gọi là **soft 404**
+
+Chi tiết thêm về lỗi này bạn có thể tham khảo tại đây: [https://support.google.com/webmasters/answer/181708?hl=vi](https://support.google.com/webmasters/answer/181708?hl=vi)
+
+Sử dụng Google Search Console, để dễ dàng confirm lại các page dính lỗi **soft 404**
+![](https://viblo.asia/uploads/3b7f2325-7f12-4bb5-92eb-ee7f346daa95.png)
+
+Gần đây Google Bot có khả năng phân biệt được lỗi **soft 404**, nên sẽ ko có hình phạt nào được áp dụng với site dính lỗi này.
+
+- Trả về status code = 404 khi có lỗi trong CakePHP
+
+```
+throw new NotFoundException();
+```
+
+Ngoài ra, bạn có thể tìm hiểu thêm về lỗi **soft 404** ở đây: [https://www.suzukikenichi.com/blog/does-google-penalize-your-site-for-having-soft-404/](https://www.suzukikenichi.com/blog/does-google-penalize-your-site-for-having-soft-404/)
+
+## Chuẩn hóa URL
+
+Việc hiển thị 1 web page có nội dung giống nhau nhưng với nhiều URL khác nhau trên trình duyệt xảy ra khá phổ biến. Tuy nhiên, nếu việc này xảy ra với Google search engine thì có thể website của bạn sẽ bị áp dụng các hình phạt làm giảm thứ hạng tìm kiếm. Chính vì lẽ đó chúng ta cần chuẩn hóa lại URL.
+
+### ★ Các lợi ích có được khi quy chuẩn hóa đường dẫn
+
+Giả sử: Việc url một website có chứa www và ko chưa www được coi là các page khác nhau
+Vấn đề: Lúc này việc đánh giá rank cho website bị phân tán giữa các link có và ko có www
+Hướng giải quyết: Có thể chuyển hướng (301 redirect) các page có www sang page ko có www
+
+### ★ 301 Redirect
+
+- Wiki: [List of HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)
+- Khi thay đổi tên miền/url, hãy sử dụng chuyển hướng 301 sang đường dẫn mới
+- Từ sau khi thiết lập 301 Redirect, có thể mất tới một tháng đẻ Bot Search crawl lại website
+
+### ★ Ví dụ sử dụng 301 Redirect
+
+- Sử dụng 301 Redirect trong việc có và không có **www** trên URL
+- Loại bỏ việc thêm **index.html** vào sau URL
+- Trường hợp **Pagination**　/search/?page=1 và /search/ hiển thị nội dung giống nhau
+- Trường hợp có và ko có dấu slash (/) sau URL. Ex: /search/ và /search
+
+Lưu ý khi code: tùy vào chức năng của trình duyệt web, nếu thực hiện điều hướng 301 từ 1 URL tới 1 URL nhất định thì việc di chuyển page này sẽ được lưu vào cache cho tới khi trình duyệt xóa nó đi.
+
+## 【Canonical】
+
+Cùng một nội dung tương tự nhau (Có thể là 1 bài viết được chia làm nhiều phần), thì không chỉ người dùng mà Google Bot cũng muốn biết bài viết nào là bài viết gốc, câu trả lời cho vấn đề này chính là thuộc tính **rel="canonical"**.
+
+Mặt khác chắc hẳn bạn cũng gặp phải trường hợp Single Page và Search Page có chứa 1 lượng lớn nội dung trùng lặp. Nhờ việc thiết lập **canonical** cho 1 page, mà ta có thể ngăn ngừa được việc Google đánh tụt thứ hạng tìm kiếm từ nội dung bị trùng lặp
+
+- Ví dụ khi website có 2 phiên bản cho Desktop và Mobile:
+
+```html
+<head>
+  ...
+  <link rel="canonical" href="http://www.example.com/" />
+  ...
+</head>
+```
+
+Ngoài **canonical**, còn có thể sử dụng đồng thời với **alternate** được giải thích chi tiết bên dưới.
+
+### ★ Ví dụ về sử dụng Canonical
+
+- Trên kết quả tìm kiếm xuất hiện nhiều page có content giống nhau
+- Mobile page và Desktop page có nội dung tương tự nhau
+- Thiết lập URL để Google Analytics tiến hành đo lường các thông số
+- Khi công khai cùng 1 nội dung trên nhiều website
+- Trường hợp không sử dụng 301 redirect
+- Trường hợp sử dụng mirror site để giảm tải cho web/detect DDOS. (Tuyên nhiên việc này ko được khuyến khích sử dụng vì dễ bị nhận diện là spam)
+
+## 【Alternate】
+
+Thẻ **alternate** được khuyến khích sử dụng khi bạn có :
+
+- Một phiên bản website được phiên dịch hoàn toàn sang một ngôn ngữ khác
+- 2 trang với cấu trúc, nội dung tương tự nhau và chỉ có một vài điểm nhấn khác biệt về ngôn ngữ trong nội dung
+
+**Ví dụ:**
+
+- Website example.com
+
+```html
+<head>
+  ...
+  <link rel="alternate" href="http://example.com/" />
+  ...
+</head>
+```
+
+- Khi sử dụng **alternate**, chúng ta thông báo cho Bot biết website cho smart phone là sp.example.com.
+- Khi sử dụng **canonical**, chúng ta thông báo cho Bot biết phiên bản website chính thức của hệ thống là example.com
+- Website sp.example.com
+
+```html
+<head>
+  ...
+  <link rel="canonical" href="http://sp.example.com/" />
+  ...
+</head>
+```
+
+**canonical** dùng để thông báo với Search Engine đâu là page gốc (original page). Có thể ví như quan hệ n:1
+**alternate** trở thành quan hệ 1:1 khi cùng tham chiếu tới **canonical** và **alternate**
+
+Thuộc tính **canonical** và **alternate** trên website [https://ferret-plus.com/1426](https://ferret-plus.com/1426) đã giúp Bot Search Engine biết được phiên bản nào là website dành cho thiết bị di động.
+
+## Cloaking
+
+Cloaking là sự che đậy hay che dấu một cái gì đó. Trong kỹ thuật SEO thì cloaking ám chỉ hành động của webmaster che dấu bot của search engine như Google crawl các nội dung mà người dùng nhìn thấy, đồng thời đề xuất cho các cậu Bot nhìn thấy các nội dung được Onpage optimize tốt nhằm mục đích đạt được các vị trí cao trên Search Engine.
+
+- Việc tồn tại các thông tin trên website mà hiển thị giữa GoogleBot và người sử dụng khác biệt nhau sẽ ảnh hưởng tới thứ hạng hiển thị của website trên kết quả tìm kiếm. (Website có hành vi này sẽ bị google áp dụng các hình phạt)
+- Website khi truy cập = PC hiện ra thông báo「Hãy truy cập bằng smart phone」, dù cho khi User-Agent là smart phone truy cập có hiển thị chính xác đi chăng nữa cũng rất có thể bị Google hiểu là Cloaking ???
+- Website ở tình trạng bị hack cũng có thể bị đưa vào trạng thái Cloaking, hãy thường xuyên quan sát log để tìm ra các hành động khả nghi và tiến hành deploy lại nếu cần.
+
+## Đánh giá độ ổn định của URL
+
+Các bộ máy tìm kiếm có tiêu chí để xếp hạng URL là: **URL đã cung cấp thông tin cho người sử dụng trong một thời gian dài bao lâu?**.
+Do đó khi bạn thay đổi URL, sử dụng 301 Redirect thì cũng ko có gì đảm bảo là toàn bộ ranking của URL trên site cũ sẽ được chuyển hết sang URL site mới.
+
+### ★ Các hạng mục cần kiểm tra khi thiết kế URL
+
+- Có chứa ext của file như **.php** hay không ? Việc này sẽ gây ảnh hưởng nếu chuyển framework ví dụ từ CakePHP sang Rails chẳng hạn.
+- Có thể dùng dấu **-** hoặc **\_** trong URL, tuy nhiên Google khuyến khích sử dụng dấu **-** để phân tách từ khóa
+- Toàn bộ ký tự trong URL phải được viết thường
+- URL dài cũng không vấn đề (Sẽ giải thích sau)
+- URL không nên chia quá nhiều cấp, nằm sâu trong nhiều directory
+- Chứa từ khóa thì càng tốt (Có thể chứa tiếng Nhật)
+- URL không die cho dù sau này có áp dùng nhiều thay đổi SEO đi chăng nữa
+- Không sinh ra duplicated content
+
+### ★ Đảm bảo việc thiết kế URL không sinh ra nội dung trùng lặp
+
+Web Page bên dưới sinh ra nội dung trùng lặp, dó đó kiểu thiết kế URL này không được khuyến khích
+Ví dụ：Anime Home Page
+
+- Hero list page
+- All characters list page
+
+Khi đó giả sử ta có nhân vật tên là "yamada", khi đó nội dung 2 trang sau là giống nhau và đều mô tả về "yamada"
+
+- heros/yamada.html
+- characters/yamada.html
+
+Cùng 1 nội dung nhưng lại khác URL là một thiết kế tồi và bị xếp vào duplicated content.
+
+## URL dài cũng không vấn đề
+
+Theo Google công bố thì độ dài của URL có thể ngắn hoặc dài tùy ý
+
+> Độ dài của URL thì không ảnh hưởng tới ranking
+> Tuy nhiên cần đủ để nhận diện được URL
+
+Mặc dù không ảnh hưởng tới SEO, tuy nhiên trình duyệt IE chỉ support URL có độ dài tối đa 2083 ký tự, nên hãy setting URL length `<= 2083`
+
+### ★ Các khuyến khích về URL
+
+- Vì URL là thứ hiển thị trên kết quả search, nên hãy chọn các từ đơn trong URL có liên quan tới nội dung bài viết
+- Khi URL có chứa từ ngữ trùng với từ khóa mà user search thì sẽ được bôi đậm trên kết quả
+- Search engine sử dụng dấu "**-**" để tách từ, nên URL cũng nên sử dụng dấu "**-**" để ngăn cách các từ khóa trong nó.
+
+Mặt khác việc sử dụng quá nhiều GET parameter như ?color=2 trong URL có thể khiến URL khó nhớ, dễ nhầm lẫn, và khó chia sẻ. Dẫn tới việc truy cập phải URL không chính xác nếu không đủ parameter.
+
+## Cấu trúc liên kết cần được chú trọng hơn cấu trúc thư mục
+
+Chúng ta có 2 đường dẫn sau:
+
+[https://viblo.asia/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html](https://viblo.asia/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html)
+[https://viblo.asia/seo/seo-onpage/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html](https://viblo.asia/seo/seo-onpage/cau-truc-duong-dan-nao-tot-cho-seo-file-name-hay-thu-muc.html)
+
+Như bạn đã biết, hai đường dẫn trên đều là 2 đường dẫn tối ưu cho SEO. Đường dẫn thứ nhất là đường dẫn kiểu file name và đường dẫn thứ hai là đường dẫn theo kiểu thư mục. Câu hỏi đặt ra ở đây là đường dẫn nào tốt hơn?
+
+### ★ Nếu cấu trúc thư mục quá sâu có thể khiến Bot ko crawl được
+
+Tham khảo link : [https://support.google.com/webmasters/answer/156184?hl=vi](https://support.google.com/webmasters/answer/156184?hl=vi)
+Google Bot sẽ crawl theo thứ tự từ nông tới sâu, dó đó URL ở các cấp sâu mà không được liên kết tới bởi page nào trong site có thể rơi vào tình trạng được crawl chậm và không được đánh index.
+Với tư cách là developer, bạn đừng quên tạo các link trong site internal liên kết tới các page quan trọng của site.
+
+Lưu ý: Việc tạo cấu trúc thư mục đơn giản chỉ giúp cho Google Bot crawl dễ dàng hơn chứ không ảnh hưởng tới thứ hạng trên Search Result.
+
+### ★ Cấu trúc liên kết ảnh hưởng tới SEO
+
+Cấu trúc liên kết được tóm gọn trong câu sau: "Khi bạn click vào liên kết bao nhiêu lần cũng vẫn access được page đó".
+
+Cấu trúc link nếu vượt quá 5 cấp có thể khiến Google index chậm. Về cơ bản chỉ nên setting dưới 4 cấp đổ lại.
+
+Tham khảo: [http://s-supporter.hatenablog.jp/entry/seo-difference-of-the-hierarchy#](http://s-supporter.hatenablog.jp/entry/seo-difference-of-the-hierarchy#)ディレクトリ階層とリンク階層の違い
+
+## Lưu ý khi thêm Parameter vào URL
+
+Theo kỹ sư John Muelle từ Google thì việc thêm params vào URL của các dynamic page để dễ dàng thay đổi nội dung được khuyến khích.
+
+> Just wanted to add that from Google's point of view, the clean, parameterized URL is generally preferred to any unnecessary URL-rewriting. If you want a nice-looking URL-line in search, use breadcrumb markup instead.
+
+Tuy nhiên trên kết quả search thì với những page động sử dụng params để thay đổi nội dung cần thiết lập thêm **Canonical** để tránh xảy ra hiện tượng duplicated content.
+
+## Dùng GET params sẽ làm giảm index
+
+Việc sử dụng quá nhiều GET params có thể làm khả năng index giảm đi, do đó cần tránh thêm quá nhiều param là URL quá dài, hoặc thực hiển chuyển đổi url động sang url tĩnh với param ngắn hơn.
+
+### ★ Chuyển đối URL tĩnh
+
+Việc chuyển đổi URL động sang tĩnh có thể hiểu đơn giản như sau: loại bỏ bớt GET params, chuyển nó vào path của URL
+
+**Ví dụ:**
+Ta có 1 URL khá dài với 3 GET params
+
+```
+https://phocase.jp/iphone7/?color=3&material=3&category=cute
+```
+
+Ta sẽ đưa category vào path của URL, lúc này số lượng params chỉ còn là 2
+
+```
+https://phocase.jp/iphone7/cute/?color=3&material=3
+```
+
+### ★ Các điểm cần lưu ý khi chuyển đổi sang URL tĩnh
+
+- Loại bỏ các params không cần thiết
+- Không quản lý param theo session ID
+- Thực hiển chuyển đổi các params có thẻ đưa vào URL path
+- Không nên đưa quá nhiều param vào URL path dẫn tới URL quá dài, giảm khả năng index cũng như crawl
+- URL càng có ý nghĩa càng tốt
+
+### ★ Các thức đơn giản để thực chuyển đổi tĩnh
+
+Để chuyển đổi sang URL tĩnh có thể implement lại routing của system, tuy nhiên cách đơn giản nhất là thiết lập lại file .htaccess
+
+```
+RewriteEngine On
+
+RewriteRule http://phocase.jp/([0-9]+)/$　http://phocase.jp/?color=$1 [L,NC]
+```
+
+[How To Create Temporary and Permanent Redirects with Apache and Nginx](https://www.digitalocean.com/community/tutorials/how-to-create-temporary-and-permanent-redirects-with-apache-and-nginx)
+
+# Các điểm cần lưu ý với Site content
+
+## Site có số lượng index lớn
+
+Theo nguồn tin chính thức từ Google thì việc 1 website có quá nhiều page không được chú trọng vào nội dung sẽ được coi là 1 website vô nghĩa, chỉ nên tập trung vào 1 số lượng page có nội dung được chú trọng thay vì tạo ra hàng loạt các page có nội dung nghèo nàn.
+
+### ★ Site ranking
+
+- Thông tin chỉ được tồn tại/sở hữu duy nhất bởi website
+- Có chứ nhiều nội dung dễ hiểu như ảnh và video
+- Mô tả thông tin chi tiết, rõ ràng và dễ hiểu
+
+Khi implement các page động thì số lượng page được index sẽ tăng lên, do đó cần xác định trước số lượng tối đa page sẽ được sinh ra.
+
+### ★ Cách thức đối ứng
+
+- Sử dụng chức năng URL parameter trong Google Search Console
+- Sử dụng noindex content bằng file robots.txt
+  [Japanese search quality guidelines](https://valueagent.co.jp/blog/2959)
+
+## Tồn tại nội dung hữu ích với First View không?
+
+Khi truy cập 1 website mà ko thực hiện scroll xuống dưới, thì phạm vi người dùng quan sát được trên màn hình lúc này được gọi là **First view**
+
+Về cơ bản First view có kích thước khoảng 500×950px thì cần lưu ý những điểm sau:
+
+### ★ Các điểm cần lưu ý
+
+- Không setting external link
+- Setting keyword cho SEO vừa phải
+- Thiết lập alt cho ảnh, và tên file ảnh phải có liên quan tới nội dung bức ảnh
+
+## Các công cụ mà tác giả đang sử dụng
+
+- [https://adwords.google.co.jp/KeywordPlanner](https://adwords.google.co.jp/KeywordPlanner)
+- [http://www.related-keywords.com](http://www.related-keywords.com)
+- [https://www.google.com/intl/ja_jp/analytics](https://www.google.com/intl/ja_jp/analytics)
+- [https://www.similarweb.com](https://www.similarweb.com)

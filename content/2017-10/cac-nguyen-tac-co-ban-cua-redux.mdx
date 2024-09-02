@@ -1,0 +1,136 @@
+---
+title: Các nguyên tắc cơ bản của Redux
+author: Hung Tan Nguyen
+date: 2017-10-10 22:41:15
+sourceUrl: http://niviki.com/2017/07/3-nguyen-tac-cua-redux/
+coverImage: reducer-la-gi.png
+tags: [react, redux]
+slug: /cac-nguyen-tac-co-ban-cua-redux
+---
+
+## Redux là gì và tại sao phải cần nó trong React/React Native
+
+Tóm tắt React:
+
+> Nguyên tắc một app React là dựa vào component. Mỗi component có state và props. Nếu state của một component thay đổi thì nó sẽ được render lại. Props để truyền data từ component cha sang component con
+
+Vấn đề là khi ta muốn truyền props từ **2 component không phải cha-con** thì sẽ xảy ra vấn đề
+
+Ví dụ sau, một app nhỏ chỉ có Main -> Parent -> Child như sau thì truyền props đơn giản
+
+![](https://i2.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-13.59.05.png?resize=424%2C630)
+
+Nhưng với app phức tạp hơn một tý, khi muốn truyền props giữa 2 component không phải cha-con thì rất phức tạp:
+
+![](https://i0.wp.com/niviki.com/wp-content/uploads/2017/07/tai-sao-can-redux.png?resize=800%2C589)
+
+Đó là lý do tại sao nên dùng Redux:
+
+![](redux-article-3-03.svg)
+
+Tóm lại cần một cơ chế để **quản lý state trong React/React Native.**
+
+_Không phải cứ React/React Native là phải dùng Redux. Cũng không phải Redux chỉ được dùng trong React/React Native_
+
+## Ngoài Redux ra thì còn cái nào để quản lý state nữa không?
+
+Thực ra Redux dựa theo ý tưởng của Flux. Ngoài Redux ra bạn có thể dùng:
+
+Mobx ( Cài này phổ biến chỉ sau Redux )
+
+[Jumpsuit](https://github.com/jumpsuit/jumpsuit) ( đặt tên ngáo thật )
+
+Nhưng [lập trình React Native](http://niviki.com/2017/02/tu-mo-react-native-khong-chi-la-hello-world/) thì nên dùng Redux với Mobx.
+
+## 3 Nguyên tắc của Redux
+
+Đáng lẽ ra mình sẽ viết bài “Tại sao cần Redux và cách dùng”. Nhưng để hiểu được tại sao và cách dùng thì nên hiểu nguyên tắc chính của nó, từ đó khi học chúng ta sẽ để ý những nguyên tắc này mà học theo. Nơron thần kinh trong não mới bắt đầu liên kết lại.
+
+Cũng giống như bạn [học lập trình hướng đối tượng](http://niviki.com/khoa-hoc-lap-trinh-huong-doi-tuong-c-co-ban-den-nang-cao/) sẽ có 4 nguyên tắc: trừu tượng, đóng gói, kế thừa, đa hình vậy. Từ đó mới học class , object, properties, method, access modifier, khởi tạo, kế thừa, interface, vv
+
+**Nguyên tắc này từ đâu? **Đương nhiên từ nhóm tạo ra nó rồi, một trong đó là [Dan Abramov](https://github.com/gaearon)
+
+### Nguyên tắc 1: Store (Single Source of Truth)
+
+Chỉ có một cây object trong một ứng dụng, và người ta đặt nó là store.
+Ví dụ mình có viết một ứng dụng tìm việc làm đơn giản:
+
+<YouTube id="9jzEULoVrn4" />
+
+Thì sẽ được một store như sau:
+
+- auth: dùng để quản lý đăng nhập
+- jobs: danh sách job tải từ web service
+- likedJobs: danh sách job đã thích
+
+![3 nguyên tắc redux ](https://i2.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-10.37.33.png?resize=732%2C629)
+
+### Nguyên tắc 2: Action (State is Read-Only)
+
+Không update store trực tiếp được, muốn thay đổi cái store thì phải truyền action vào. Mà action nghe cao siêu vậy thôi, chứ nó [**chỉ là một object trong Javascript**](http://niviki.com/2017/06/hoc-javascript-2-name-value-pair-va-object/). Quy định duy nhất của của object này là **phải có type**. ( type thường là chuỗi string )
+Ví dụ action đăng nhập Facebook thành công:
+
+![](https://i1.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-10.43.23.png?resize=513%2C68)
+Ví dụ action thích một công việc nào đó:
+
+![](https://i0.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-10.44.51.png?resize=407%2C61)
+
+### Nguyên tắc 3: Reducer (Changes are made with Pure Functions)
+
+Sẽ có một cái hàm nhận cái action ở trên, rồi trả về state mới. Mà hàm này phải là **pure function.** Mà pure function là sao?
+
+Cái pure function này viết cả bài cũng được. Nhưng đại ý chính là **pure function không gây side effects** như: thay đổi giá trị tham số, không gọi web service hay database trong hàm này.
+
+![](https://i0.wp.com/niviki.com/wp-content/uploads/2017/07/reducer-la-gi.png?resize=500%2C400)
+
+### Tóm tắt cách hoạt động:
+
+Khi người dùng nhấn like một job  ( nhấn button like )  -> tạo action:
+
+![](https://i0.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-10.44.51.png?resize=407%2C61)
+
+Sau đó **Reducer là một cái hàm**, nó trả về state mới
+
+![reducer là gì](https://i2.wp.com/niviki.com/wp-content/uploads/2017/07/Screen-Shot-2017-07-03-at-13.22.50.png?resize=593%2C381)
+
+Sau đó ở _component_ nào muốn xài thì _liên hệ store_ để truy cập dữ liệu trong store.
+
+### Bức tranh tổng quát của Redux
+
+Hình này mới mô tả một chiều của dữ liệu: giữa action, reducer và store
+
+![](https://i2.wp.com/niviki.com/wp-content/uploads/2017/07/redux-la-gi-2.png?resize=670%2C327)
+
+Đây mới là hình đầy đủ:
+
+![](https://i1.wp.com/niviki.com/wp-content/uploads/2017/07/redux-workflow.png?resize=541%2C295)
+
+## Cách học Redux
+
+Đương nhiên còn có nhiều phần chi tiết bên trong mình chưa đề cập đến như:
+
+- **Action Creator**: dùng để tạo action, thao tác logic. Chúng cũng là những hàm bình thường nhưng sẽ trả về là action thôi chứ không có gì gê gớm.
+- **createStore**: tạo store
+- **applyMiddleware**: thành phần trung gian như lưu store offline ( local storage ), async action như tải data trên web service, vv
+- **connect**, **mapStateToProps**: kết nối store với component, để component có thể xài được state trong store.
+
+### Chia sẻ cách học Redux:
+
+1.  Xem video hướng dẫn từ chính anh tạo ra Redux:
+    [https://egghead.io/courses/getting-started-with-redux](https://egghead.io/courses/getting-started-with-redux)
+2.  Lên youtube xem cách dùng redux trong một ứng dụng React/React Native để hiểu được những phần còn thiếu ở trên cũng như cách tổ chức code trong ứng dụng.
+3.  [Đọc document của Redux](http://niviki.com/2017/06/doc-document-di/) từ đầu đến cuối, trong này có hướng dẫn code app To Do List:
+    [http://redux.js.org/docs/introduction/](http://redux.js.org/docs/introduction/)
+4.  Muốn master thì viết lại các hàm, các middleware như connect, applyMiddleware. Mà muốn làm được thì cũng phải master React tại phải dùng Higher-Order Components
+
+### Một số resources hay
+
+[The Complete React Native and Redux Course](https://www.udemy.com/the-complete-react-native-and-redux-course/learn/v4/overview)
+
+[Advanced React and Redux](https://www.udemy.com/react-redux-tutorial/)
+
+Hình chôm từ:
+
+[https://www.udemy.com/full-stack-universal-react-with-redux-express-and-mongodb/](https://www.udemy.com/full-stack-universal-react-with-redux-express-and-mongodb/)
+
+[https://www.theodo.fr/blog/2016/03/getting-started-with-react-redux-and-immutable-a-test-driven-tutorial-part-2/](https://www.theodo.fr/blog/2016/03/getting-started-with-react-redux-and-immutable-a-test-driven-tutorial-part-2/)

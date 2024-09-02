@@ -1,0 +1,164 @@
+---
+title: Cách thức hoạt động của Flexbox - Giải thích với ảnh gif đầy màu sắc
+author: Hung Tan Nguyen
+date: 2017-08-31 09:45:26
+coverImage: https://cdn-images-1.medium.com/max/2000/1*zyzR64aw4rDPsoG-ZwZ9rQ.png
+sourceUrl: https://medium.freecodecamp.org/an-animated-guide-to-flexbox-d280cf6afc35
+tags: [css, flexbox]
+slug: /cach-thuc-hoat-dong-cua-flexbox
+---
+
+Flexbox hứa hẹn sẽ giải quyết nhiều vấn đề hiện đang tồn tại trong CSS thuần (ví dụ như căn chỉnh chiều dọc).
+
+Nhưng để có thể làm chủ và sử dụng được flexbox thì lại là việc không hề dễ dàng.
+
+Nguyên tắc cơ bản của Flexbox là làm cho việc dàn trang linh hoạt và trực quan hơn.
+
+Để thực hiện được điều này, các thành phần bao ngoài (containers) được tự quyết định cách phân bố các phần tử con (items) – bao gồm cả kích thước và khoảng cách giữa chúng.
+
+Điều này về nguyên tắc nghe có vẻ tốt. Nhưng chúng ta hãy xem nó có vẻ như trong thực tế.
+
+Trong bài viết này, chúng ta sẽ nghiên cứu 5 thuộc tính nổi trội nhất của Flexbox, khám phá chức năng cũng như cách sử dụng chúng và kết quả đạt được.
+
+### Thuộc tính #1: Display: Flex
+
+Hãy xem ví dụ trang web dưới đây:
+
+![](https://cdn-images-1.medium.com/max/2000/1*ifusEqwI87nBKXgK9oZ_7A.gif)
+
+Có 4 thẻ divs kích cỡ khách nhau được đánh dấu với các màu khác nhau đặt trong thẻ div container màu xám. Mặc định mỗi thẻ div sẽ có thuộc tính là `display: block`. Mỗi ô vuông vì vậy sẽ chiếm hết bề ngang của mỗi dòng.
+
+Để bắt đầu với Flexbox, bạn cần đưa **container** của bạn về dạng của **flex container** như sau:
+
+```css
+#container {
+  display: flex;
+}
+```
+
+![](https://cdn-images-1.medium.com/max/2000/1*L2W-ziqU45a1BNWV79ijDQ.gif)
+
+Chưa có thay đổi gì ngoài việc các thẻ div hiển thị trên cùng một dòng. Tuy nhiên đây lại là một sự thay đổi rất đáng kể. **Chúng ta đặt tên cho vùng xung quanh đó gọi là _flex context_.**
+
+Bây giờ bạn có thể bắt đầu định vị trí cho chúng mà không gặp nhiều khó khăn như khi sử dụng CSS thông thường
+
+### Thuộc tính #2: Flex Direction
+
+Một Flexbox container có hai trục: **một trục chính** và **một trục dọc**, mặc định hiển thị như dưới đây:
+
+![](https://cdn-images-1.medium.com/max/1600/1*_Ruy6jFG7gUpSf76IUcJTQ.png)
+
+**Mặc định, các items được sắp xếp theo hướng của trục chính, từ trái qua phải**. Đây là lí do tại sao các ô vuông hiển thị trên cùng một dòng khi bạn sử dụng `display: flex`.
+
+Tuy nhiên, bạn có thể thay đổi trục chính bằng thuộc tính `Flex-direction`.
+
+```css
+#container {
+  display: flex;
+  flex-direction: column;
+}
+```
+
+![](https://cdn-images-1.medium.com/max/2000/1*4yKnG2-vuPF5XA-BmXADLQ.gif)
+
+Có một sự khác biệt quan trọng tạo ra ở đây: `flex-direction: column` không sắp xếp các ô vuông trên trục dọc (across axis) thay vì trục chính (main axis). **Nó làm trục chính thay đổi, xoay từ ngang thành dọc.**
+
+Bạn có thể sắp xếp flex-direction theo một số cách khác như: _row-reverse_ and _column-reverse._
+
+![](https://cdn-images-1.medium.com/max/2000/1*PBr_ncouIehALaEOWmSbpQ.gif)
+
+### Thuộc tính #3: Justify Content
+
+_Justify-content_ sắp xếp các items theo theo **main axis.**
+
+Chúng ta sẽ nghiên cứu chi tiết hơn về sự khác nhau giữa trục chính và trục dọc. Trước hết, hãy quay lại với flex-direction: row.
+
+```css
+#container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+```
+
+Bạn có năm thuộc tính để sử dụng với _justify-content_:
+
+1.  Flex-start
+2.  Flex-end
+3.  Center
+4.  Space-between
+5.  Space-around
+
+![](https://cdn-images-1.medium.com/max/2000/1*2-6Tw8jqWrMKOfIugKyuDA.gif)
+
+Sự khác nhau giữa space-around và space-between hơi khó để nhận ra. **Với space-between, các ô vuông sẽ được căn cách đều nhau, không bao gồm khoảng cách giữa ô vuông đầu và cuối với container**
+
+Space-around đặt một khoảng cách ở hai bên cạnh mỗi ô vuông — có nghĩa là **khoảng cách giữa ô vuông ngoài cùng phía đầu và cuối với container sẽ bằng một nửa khoảng cách giữa các ô vuông với nhau** (Giả sử mỗi ô vuông đều có một giá trị căn lề bằng nhau và không bị ghi đè, vì vậy khoảng cách giữa 2 ô vuông sẽ gấp đôi).
+
+Chú ý: Hãy nhớ rằng thuộc tính **justify-content hoạt động theo trục chính**, và **flex-direction làm thay đổi trục chính**. Đây là điều quan trọng nhất để bạn chuyển sang phần tiếp theo…
+
+### Thuộc tính #4: Align Items
+
+Nếu như bạn đã nắm được thuộc tính justify-content, align-items sẽ không khó khăn.
+
+Trong khi justify-content hoạt động theo trục chính, **align-items áp dụng đối với trục dọc.**
+
+![](https://cdn-images-1.medium.com/max/1600/1*_Ruy6jFG7gUpSf76IUcJTQ.png)
+
+Hãy thiết lập lại _flex-direction_ thành row, để hai trục hiển thị như hình trên.
+
+Sau đó, bắt đầu đi sâu vào giá trị của align-items.
+
+1.  flex-start
+2.  flex-end
+3.  center
+4.  stretch
+5.  baseline
+
+Ba giá trị đầu tiên chính xác là giống như _justify-content_, vì vậy không có gì quá lạ ở đây.
+
+Tuy nhiên, hai giá trị kế tiếp có một chút khác biệt.
+
+Với giá trị stretch, các items sẽ chiếm toàn bộ trục chính, và baseline, đáy của những tags paragraph sẽ được canh đều.
+
+![](https://cdn-images-1.medium.com/max/2000/1*htfdNmRIIFu_veRaFOj5qA.gif)
+
+(Chú ý với `align-items: stretch`, Tôi đã phải đặt chiều cao của ô vuông là auto. Nếu không, thuộc tính chiều cao sẽ ghi đè lên stretch.)
+
+Với baseline, hãy lưu ý rằng nếu bạn bỏ đi tags paragraph, các ô vuông sẽ được căn lề dưới như hình sau:
+
+![](https://cdn-images-1.medium.com/max/2000/1*6dd9KnKMUN49lFsbHlJi6A.png)
+
+Để minh họa rõ hơn cho trục chính và trục dọc với nó, hãy kết hợp thuộc tính justify-content và align-items và xem sự khác biệt giữa 2 giá trị center của thuộc tính flex-direction:
+
+![](https://cdn-images-1.medium.com/max/2000/1*6mq-Uay7t6NhdF2E41Do0g.gif)
+
+**Với dòng, các ô vuông được thiết lập dọc theo một trục chính ngang. Với cột, chúng xếp dọc theo trục chính thẳng đứng.**
+
+Các ô vuông được căn giữa cả theo trục ngang và dọc trong 2 trường hợp, cả 2 trường hợp đều ko thay đổi!
+
+### Thuộc tính #5: Align Self
+
+_Align-self_ cho phép bạn thao tác thủ công liên kết của một phần tử riêng biệt.
+
+Nó sẽ đè lên thuộc tính _align-items_ của 1 ô vuông. Tất cả thuộc tính đều như nhau, bởi vì mặc định nó là _auto_, nên các ô vuông sẽ theo thuộc tính _align-items_ của container bao nó.
+
+```css
+#container {
+  align-items: flex-start;
+}
+.square#one {
+  align-self: center;
+}
+// Only this square will be centered.
+```
+
+Hãy xem kết quả. Bạn sẽ đặt thuộc tính _align-self_ cho 2 ô vuông, và thuộc tính `align-items: center` và `flex-direction: row` với các ô vuông còn lại.
+
+![](https://cdn-images-1.medium.com/max/2000/1*HIADl1oL6pxXb2dMh_pXSQ.gif)
+
+### Conclusion
+
+Mặc dù chỉ là những tìm hiểu cơ bản về Flexbox, tôi tin những điều này cũng cung cấp cho bạn những kiến thức để dàn trang một cách cơ bản nhất cũng như sắp xếp nội dung chính bài viết của bạn.
+
+Cảm ơn vì đã đọc!

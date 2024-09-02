@@ -1,0 +1,279 @@
+---
+title: 'Mẫu thiết kế React nâng cao P2: Context API'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - design patterns
+categories: []
+sourceUrl: 'https://itnext.io/using-advanced-design-patterns-to-create-flexible-and-reusable-react-components-part-2-react-3c5662b997ab'
+coverImage: 'https://cdn-images-1.medium.com/max/1600/1*qy6OfQ44pgHxXpI2Ir52xQ.png'
+date: 2019-04-24 10:15:00
+slug: /mau-thiet-ke-react-nang-cao-p2-context-api
+---
+
+In the last part of the series, we discussed how to use compound components and static class methods to produce reusable and flexible components. Using the API we created, we are able to dynamically recreate different variations of the component in a very declarative fashion.
+
+`codesandbox: lp6mn91557`
+
+We can easily add as many steps as we want and we can decide if we want the progress panel on the left or the right.
+
+```javascript
+class App extends Component {
+  render() {
+    return (
+      <Stepper stage={1}>
+        <Stepper.Progress>
+          <Stepper.Stage num={1} />
+        </Stepper.Progress>
+        <Stepper.Steps>
+          <Stepper.Step num={1} text={'Stage 1'} />
+        </Stepper.Steps>
+      </Stepper>
+    );
+  }
+}
+export default App;
+```
+
+The reason we are able to this is because we used some React API helper functions to pass the desired props to each child in the tree ; the ‘stage’ and ‘handleClick’ props are accessible to the components that need them.
+
+![](https://cdn-images-1.medium.com/max/1600/1*14Xc1evO1VUe7ZbtaswMWA.png)
+
+There is one major flaw with this technique though. Props are only able to be passed down to their direct children. This makes the API very rigid and the ‘Stepper.Steps’ component has to be a direct child of the ‘Stepper’ component otherwise it will break. This has massive implications in terms of flexibility.
+
+What if we wanted to go a bit crazy and use a bit of flexbox magic to add a title?
+
+```javascript
+class App extends Component {
+  render() {
+    return (
+      <Stepper stage={1}>
+        <Stepper.Progress>
+          <Stepper.Stage num={1} />
+        </Stepper.Progress>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Stepper.Header title="Stepper Heading" />
+          <Stepper.Steps>
+            <Stepper.Step num={1} text={'Stage 1'} />
+          </Stepper.Steps>
+        </div>
+      </Stepper>
+    );
+  }
+}
+```
+
+![](https://cdn-images-1.medium.com/max/1600/1*Qd-eBIPrVF9yUx2SlHMb6g.png)
+
+By adding a simple div we completely break the component. The ‘Stepper.Steps’ component is no longer a direct child of the ‘Stepper’ component and is therefore unable to receive its props. Wouldn’t it be great to have the flexibility to add small adjustments when ever we wanted?
+
+Context to the Rescue!!
+
+### React Context API
+
+React Context has been around a while but React’s engineers made it very clear it was experimental and would likely break in the near future. The great news is that as of React 16.3, this is now stable and can be used throughout your React applications.
+
+So what is this Context we keep hearing about?
+
+I couldn’t come up with a clearer definition than the one in React’s official documentation:
+
+> Context provides a way to pass data through the component tree without having to pass props down manually at every level.
+
+This is exactly what we need to solve our problem! Using Context, we no longer need to loop through and clone each child to pass down required props. Context is designed so that we can share ‘global’ state that can be shared anywhere in the React tree.
+
+![Using Context, all of our components have access to the ‘stage’ and ‘handleClick’ props.](https://cdn-images-1.medium.com/max/1600/1*ceym3XmxMn8phkR5yk5HCg.png)
+
+So, let me guide you through the Context API, and the steps you need to take to get it up and running.
+
+### 1: Create a new context
+
+React now comes with a method called ‘createContext’. All we need to do is simply call this method and assign it to a variable.
+
+```javascript
+export const StepperContext = React.createContext();
+```
+
+The new context we created provides us access to a Provider and Consumer pair. The Provider, believe it or not, provides the ability for us to share state changes throughout our React Tree. The Consumer allows us to subscribe to these state changes anywhere in the tree.
+
+### 2\. Create Context Provider
+
+Our Context we just created has a Static Class method called ‘Provider’ that creates a React component. This component accepts a value property. This is extremely important as it is this property that will represent our global state that we need to pass to components further down in the tree. In our case all we want to share globally is the ‘stage’ prop and ‘handleClick’ method.
+
+By using the props.children technique that we used in the first part of this series, we can dynamically expose any child components to the Provider, regardless of how deep it is in the tree.
+
+```javascript
+class StepperProvider extends Component {
+  state = {
+    stage: 1,
+  };
+  render() {
+    return (
+      <StepperContext.Provider
+        value={{
+          stage: this.state.stage,
+          handleClick: () =>
+            this.setState({
+              stage: this.state.stage + 1,
+            }),
+        }}
+      >
+        {this.props.children}
+      </StepperContext.Provider>
+    );
+  }
+}
+```
+
+### 3\. Wrap our Provider around our Stepper Component
+
+By simply wrapping the ‘StepperProvider’ component around our original ‘Stepper’ component, any child components further down the tree now have exposure to our context.
+
+```javascript
+class App extends Component {
+  render() {
+    return (
+      <StepperProvider>
+        <Stepper stage={1}>
+          <Stepper.Progress>
+            <Stepper.Stage num={1} />
+          </Stepper.Progress>
+          <Stepper.Steps>
+            <Stepper.Step num={1} text={'Stage 1'} />
+          </Stepper.Steps>
+        </Stepper>
+      </StepperProvider>
+    );
+  }
+}
+```
+
+As it stands our Stepper code looks almost identical, however by simply wrapping it in the StepperProvider component all of our child Components will have access to ‘stage’ and ‘handleClick’ without manually drilling them down to each component.
+
+### 4\. Refactor our components
+
+Originally, our state was managed by the Stepper component and we cloned each child element to be able to receive the props required.
+
+```javascript
+class Stepper extends Component {
+  state = {
+    stage: this.props.stage,
+  };
+  static defaultProps = {
+    stage: 1,
+  };
+  static Progress = Progress;
+  static Steps = Steps;
+  static Stage = Stage;
+  static Step = Step;
+  handleClick = () => {
+    this.setState({ stage: this.state.stage + 1 });
+  };
+  render() {
+    const { stage } = this.state;
+    const children = React.Children.map(this.props.children, (child) => {
+      return React.cloneElement(child, {
+        stage,
+        handleClick: this.handleClick,
+      });
+    });
+    return <div style={styles.container}>{children}</div>;
+  }
+}
+```
+
+Almost all of this code is no longer required. We no longer need to create state, and we no longer need to pass down any props. We could do away with this code altogether but it’s a good place to declare our static methods to create a clean, readable API.
+
+```javascript
+class Stepper extends Component {
+  static Progress = Progress;
+  static Steps = Steps;
+  static Stage = Stage;
+  static Step = Step;
+  render() {
+    return <div style={styles.container}>{children}</div>;
+  }
+}
+
+export default Stepper;
+```
+
+### 5\. Subscribe to state changes using a Consumer
+
+I will use the the Stepper.Step component to demonstrate how to wire up the Consumer component. Previously, the Stepper.Step component required its parent to directly pass down the stage prop in order for it to function properly:
+
+```javascript
+export const Step = ({num, text,stage}) => (
+	return stage === num ? <div key={num} style={styles.stageContent}>{text}</div> : null
+)
+```
+
+With our application wired up with Context we no longer need this as a prop. We can use the Consumer to subscribe to it instead:
+
+```javascript
+<Consumer>  {value => /* render something based on the context value */}</Consumer>
+```
+
+The Consumer requires a function as a child and provides this function with our global context value. When the function is complete, it returns a react node.
+
+What on earth does that mean?
+
+It’s a bit of a head scratcher at first but lets take a look at the ‘consumed’ Step component.
+
+```javascript
+export const Step = ({ num, text }) => (
+  <StepperContext.Consumer>
+    {(value) => {
+      const { stage } = value;
+      return stage === num ? (
+        <div key={num} style={styles.stageContent}>
+          {text}
+        </div>
+      ) : null;
+    }}
+  </StepperContext.Consumer>
+);
+```
+
+Instead of adding the ‘Step’ markup directly as a child to the Consumer, we instead add a function. This function provides the values we created from our Provider earlier and we can then use ES6 destructuring to pull off the stage prop. The ‘Step’ component now has access to the stage prop like before but this time it is pulled from the context. from here we are free to do with it as we wish; in this case we use it to determine what React node is returned.
+
+The technique being used here may seem a little strange. It is called _render props_ and the [official react docs explain it here](https://reactjs.org/docs/render-props.html). This is an extremely powerful technique that I’ll be talking about in part 3 of this series.
+
+### 6\. Repeat Stages 4 & 5 for all components that either require props or pass down props
+
+I wont go into step by step detail here but by repeating stages 4 & 5 for the Stepper.Steps, Stepper.Progress and Stepper.Stage components you should end up with your component looking and functioning exactly the same as before.
+
+`codesandbox: yjm2563jz9`
+
+None of our components are now reliant on being direct descendants of others. Boom! We now have much more flexible code and should be able to add the heading we were unable to do earlier!
+
+```javascript
+class App extends Component {
+  render() {
+    return (
+      <Stepper stage={1}>
+        <Stepper.Progress>
+          <Stepper.Stage num={1} />
+        </Stepper.Progress>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Stepper.Header title="Stepper Heading" />
+          <Stepper.Steps>
+            <Stepper.Step num={1} text={'Stage 1'} />
+          </Stepper.Steps>
+        </div>
+      </Stepper>
+    );
+  }
+}
+```
+
+The Stepper.Steps and Stepper.Step are no longer pulling the ‘stage’ prop directly from their parents. They are subscribing to it from context so the extra div in place is not blocking props being passed further down the tree. The App still works!
+
+![](https://cdn-images-1.medium.com/max/1600/1*ceym3XmxMn8phkR5yk5HCg.png)
+
+This now gives us a huge amount of flexibility. We can reuse our component to dynamically create complex variations of our Stepper component without worrying if our Application will break
+
+`codesandbox: lp6mn91557`
+
+Although we can use this component anywhere in our application, it’s still not truly reusable.We still need the boilerplate of context in order for it to work.
+
+In the next part of this series I will discuss how we can use render props to achieve the same goals without having to rely on wiring up context to share state between components in our application.

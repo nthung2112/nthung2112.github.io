@@ -1,0 +1,381 @@
+---
+title: 10 React mini-patterns
+author: Hung Tan Nguyen
+date: 2017-07-16 21:50:48
+sourceUrl: https://hackernoon.com/10-react-mini-patterns-c1da92f068c5
+tags: [react]
+slug: /10-react-mini-patterns
+---
+
+Over the last few years, I’ve worked on a handful of decent-sized React projects, and many, many pint-sized ones. Throughout this magical journey, a number of patterns have come up that I find myself repeating again and again.
+
+Because that’s what patterns are.
+
+These are the sorts of things I would like to have heard about on day one. So if today is your day one with React, you’re in luck.
+
+Or maybe you’re not. There’s only one way to find out…
+
+It’s a long one, but it’s a listicle so you can skip the boring ones (3, 6, 8, 10).
+
+### #1 Sending data down and up
+
+The one thing I’d recommend to everyone new to React is to get your head around the pattern of passing information down (as objects, strings, etc.) and passing methods down to allow child components to pass information back up.
+
+Like sending down a packet of chips and a walkie talkie to miners trapped underground.
+
+How about a picture? The below _thing_ is the simplest form of this pattern.
+
+![](https://cdn-images-1.medium.com/max/2000/1*J5XOQh2WKIl0NFTAMvcVbQ.png)Worth a thousand words?
+
+Parent on the left, child on the right. You can think of the two props that connect these components as allowing information to flow in either direction between the two.
+
+The prop called `items` is passing data down into the child component. The prop called `deleteItem` is giving the child component a way to send some information back up into the parent (“hey, delete this item”).
+
+That’s not really a pattern.
+
+The rest are patterns. I promise.
+
+### #2 Fixing HTML’s inputs
+
+One of the great things about React, and web components in general, is that you get to iron out the kinks if something in html doesn’t work the way you want.
+
+If you think about the different elements that allow for user input (do it), you will soon see that the naming of these elements is nonsensical, bordering on reckless.
+
+If I’m building a site that will have a lot of user inputs, one of the first things I do is fix this.
+
+![](https://cdn-images-1.medium.com/max/1600/1*WTUJjlFOOnetc5NpbykN0w.png)
+
+It’s not purely cosmetic though; there are more improvements to be had:
+
+- Inputs should return a value via an `onChange` method, not a JavaScript `Event` instance, shouldn’t they?
+- You can go a step further and ensure that the data type returned in `onChange` matches the type passed in. If the `typeof props.value` is `number`, then convert `e.target.value` back to a number before sending the data out again.
+- A set of radio buttons is functionally the same thing as a `<select>`, right? It’s messed up to treat them in a completely different manner when the only difference is the UI. Maybe for your app it makes sense to have a single `<PickOneFromMany />` component and pass either `ui="radio"` or `ui="dropDown"`.
+
+The point is not to do it like I do it. The point is to make them your own — you don’t need to keep working with the somewhat ass-about nature of HTML’s user input elements.
+
+### #3 Binding labels to inputs with unique IDs
+
+On the topic of inputs… if you care about your users, you’ll bind your `<label>` elements to your `<input>`s via an `id`/`for` combo.
+
+But you don’t want to think of some clever and unique id for every input you define, who’s got time for that? I don’t know about you but I’ve got goat videos to watch.
+
+(Frequent-flyer tip: if you have a screaming child on your flight, close your eyes and pretend you’re watching a video on YouTube of goats that sound like humans. Annoying becomes hilarious.)
+
+Back to it. You _could_ generate a random ID for each input/label pair, but then your client-rendered HTML won’t match your server-rendered HTML. Checksum error! That’s no good.
+
+So, instead you can create a little module that gives an incrementing ID, and use that in an `Input` component like so:
+
+<Gist id="2cd13f571edda9a884107db3abd8de1b" />
+Obviously it makes more sense when the input _isn’t_ inside the label.
+
+If `getNextId()` simply increments a number every time it’s called, then when rendering on the server, the number would keep going up and up, eventually reaching infinity. So you’ll want to reset the number each time you render the app (for each network request).
+
+You can do this at the entry point to your app, with a simple `resetId()` or whatever name you think is best.
+
+With all that taken into account, your super-fancy module might look something like this:
+
+<iframe
+  width="700"
+  height="250"
+  src="/media/eaec23c7e00590dd1abf4d5f38b1f8c4?postId=c1da92f068c5"
+  data-media-id="eaec23c7e00590dd1abf4d5f38b1f8c4"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+### #4 Controlling CSS with props
+
+When you want to apply different CSS in different instances (e.g. ‘primary’ and ‘secondary’ buttons) you can pass in props to control which CSS to apply.
+
+This seems super simple on the surface, but let me assure you there are a lot of wrong ways to do this (I’ve tried them all!).
+
+There are — I reckon — three distinct ways in which you can control the CSS applied to a component.
+
+#### Using themes
+
+For grouping a number of CSS declarations together, you can use the idea of ‘themes’, for example primary or secondary button:
+
+`<Button theme="secondary">Hello</Button>`
+
+Do your best to only require one theme per component.
+
+#### Using flags
+
+Maybe some of your buttons have rounded corners, but this doesn’t correspond directly with the themes you have defined.
+
+In this case you can either sit your designer down and have _the consistency talk_, or create a boolean prop which might look a little something like this:
+
+`<Button theme="secondary" rounded>Hello</Button>`
+
+Just like HTML’s binary attributes, you don’t need to do `rounded={true}`.
+
+#### Setting values
+
+In some cases you might want to pass in the value of a CSS property directly (in the component you would set it as an inline style).
+
+`<Icon width="25" height="25" type="search" />`
+
+#### An example
+
+Imagine you’re creating a link component. You go through your site’s designs and work out that there are three distinct themes, and that sometimes they have an underline, sometimes they don’t.
+
+![](https://cdn-images-1.medium.com/max/1600/1*Kx1jOQONhFZPnGe72Fd4tQ.png)
+
+Here’s how I would design that component:
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/dfb4c3dc156aa8ed845d9c112c8b1f8f?postId=c1da92f068c5"
+  data-media-id="dfb4c3dc156aa8ed845d9c112c8b1f8f"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+And the CSS…
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/4ded89adeae075da936827ddaf50c3ca?postId=c1da92f068c5"
+  data-media-id="4ded89adeae075da936827ddaf50c3ca"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+You may have noticed the awkward double negative for `link--no-underline`.
+
+Story time: I used to think writing fewer lines of CSS was the goal, but it’s not. I’d rather have some double-negatives and multi-selector rulesets if it means the styles are applied in a nice layered way.
+
+I’m sure I’ve said it before but the hardest thing about scaling a website is the CSS. JavaScript is easy, but with CSS you pay for your sins — once you’ve started a mess, it’s not easy to back out of.
+
+True fact: fighting CSS specificity is the number one cause of death among web developers. If you’re on a big computer, check out the CSS for the little notification icon in medium’s top nav.
+
+If you’re not, or you’re lazy, just guess how many CSS rules are combined to make this round circle with a number in it?
+
+Twenty three rules.
+
+That’s _not_ including the styles inherited from eleven other rules.
+
+The line-height alone is overridden nine times.
+
+![](https://cdn-images-1.medium.com/max/1600/1*lQzlIf8PPqeLUS5VOvTH4Q.png)
+
+If line-height was a cat it would be dead by now.
+
+This cannot be pleasant to maintain.
+
+With React we can do better. We can thoughtfully design which classes are applied to our components. We can remove global resets and move it all inside our `Button.scss`. We can remove all reliance on specificity and ordering of files.
+
+Side note: I dream of a day when we will be able to tell browsers that we don’t want their opinion about style at all. `::user-agent-styles: none-whatsoever;` — make it happen, vendors. [Edit: a clever chap in the comments has pointed out that `all: unset` may cure what ails me.]
+
+### #5 The switching component
+
+A switching component is a component that renders one of many components.
+
+This may be a `<Page>` component that displays one of many pages. Or tabs in a tab set, or different modals in a modal component.
+
+I used to do this with switch statements, then progressed to actually passing in the component I wanted rendered. Then moved on to exporting references to the components from the component itself (as named exports, then as properties on the component).
+
+All terrible ideas.
+
+The potentially-terrible approach that I have settled on is to use an object to map prop values to components.
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/96a9869514dbe2385cc84122fc6cc176?postId=c1da92f068c5"
+  data-media-id="96a9869514dbe2385cc84122fc6cc176"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+The keys of the `PAGES` object can be used in the prop types to catch dev-time errors.
+
+Then of course we would use this like `<Page page="home" />`.
+
+If you replace the keys `home`, `about` and `user` with `/`, `/about`, and `/user`, you’ve got yourself half a router.
+
+(Future post idea: removing `react-router`.)
+
+### #6 Reaching into a component
+
+If you’re looking for an easy way to please your users, add `autofocus` to the input that they are most likely to type into when coming to a page. It really is that easy.
+
+Perhaps you have a sign-in form and — being the UX champ that you are — you want to put that little blinking cursor in the ‘user name’ field.
+
+But oh no, the form shows in a modal when the user clicks ‘sign in’, and the `autofocus` attribute only applies to page load.
+
+Whatever will you do!
+
+You’ll programmatically focus the element, that’s what. Here you may be tempted to give the input an id and type `document.getElementById('user-name-input').focus()`.
+
+This works, but is not The Correct Way. The fewer things you have in your app that rely on two strings matching, the better.
+
+Luckily, there is a very easy way to do this ‘properly’:
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/0891e4dcdf9fb9032c6176b9922e493b?postId=c1da92f068c5"
+  data-media-id="0891e4dcdf9fb9032c6176b9922e493b"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+Boom, an input component with a `focus()` method that focuses the HTML element.
+
+In the parent component, we can get a reference to the Input component and call its `focus()` method.
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/3d30a05ce7156921f13a70f2552c6e84?postId=c1da92f068c5"
+  data-media-id="3d30a05ce7156921f13a70f2552c6e84"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+Note that when you use `ref` on a component, it’s a reference to the component (not the underlying element), so you have access to its methods.
+
+### #7 Almost-components
+
+Let’s say you’re building a component that lets you search for people. As you type, you see a list of names and photos of potential matches. Something like this.
+
+![](https://cdn-images-1.medium.com/max/1600/1*AH_RjXx3xldF651qvef7cQ.png)
+
+(I’m searching for political satirists because I, like _everyone_, am super interested in what other people think about politics.)
+
+When designing this component, you may think to yourself: is each item in that list it’s own `SearchSuggestion` component? It’s really only a few lines of HTML and CSS, so maybe not? But I was once told ‘if in doubt, create another component’.
+
+Oh my, this is quite the dilly of a pickle, isn’t it?
+
+If I was making this, I would not have a separate component. Instead, just a `renderSearchSuggestion` method that returned the appropriate DOM for each entry. I can then generate the results like:
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/75d17b5d12aef07c1ef61a6e328ccdea?postId=c1da92f068c5"
+  data-media-id="75d17b5d12aef07c1ef61a6e328ccdea"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+If things get more complex or you want to use this component elsewhere, you should be able to copy/paste the code out into a new component.
+
+Don’t prematurely componentize. Components aren’t like teaspoons; you _can_ have too many.
+
+What I am not saying: “take something that you think should be a component, and make it part of the parent component.”
+
+What I am saying: “take something that you _don’t_ think should be a component, and make it a bit more like its own component (if it can be).”
+
+### #8 Components for formatting text
+
+When I first started with React I thought of components as big things, a way of grouping structural chunks of DOM. But components work just as well as a way to apply formatting.
+
+Here’s a `<Price>` component that takes a number and returns a pretty string, with or without decimals and a ‘$’ sign.
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/050f630c5f8b4e11d07b0acbfedf3a27?postId=c1da92f068c5"
+  data-media-id="050f630c5f8b4e11d07b0acbfedf3a27"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+As you can see I’m using the powerful `Intl` string formatting library, here’s a [link to their website](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString).
+
+I should point out (before some punk does) that this is not a saving in lines of code. You could just as easily use a function to do this. (Of course components are just functions with different shaped brackets.)
+
+It’s less code, but to my eye, not quite as nice:
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/30c70e652e0713bda8a24e1b279da38d?postId=c1da92f068c5"
+  data-media-id="30c70e652e0713bda8a24e1b279da38d"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+Note that I’m not checking that I got a valid number in any of the above. That’s because …
+
+### #9 The store is the component’s servant
+
+I have probably written this thousands of times:
+
+<pre name="1d90" id="1d90" class="graf graf--pre graf-after--p">
+  if (props.user.signInStatus === SIGN_IN_STATUSES.SIGNED_IN)...
+</pre>
+
+(I’ve been told that I exaggerate, like, a gazillion times.)
+
+Quite recently I have decided that if I’m doing a check like this, I’m doing it wrong. I want to just ask “is the user signed in?”, not “is the sign in status of the user equal to signed in?”
+
+My components have enough going on in their lives, they shouldn’t have to worry their pretty little heads over such matters. Nor should they have to worry that a price isn’t being sent as a number, or a boolean as the word ‘true’.
+
+For you see, if the data in your store is designed to match your components, your components will be much simpler. And I’ve said it before, complexity is where the bugs hide. The less complexity you have in your components, the lower the chance of bugs.
+
+But the complexity has to go _somewhere_, doesn’t it?
+
+My suggestion is this:
+
+1.  Work out the general structure of your components and the data they will require
+2.  Design your store to support those requirements
+3.  Do whatever you need to do to your incoming data to make it fit into the store.
+
+For this last point, I recommend a single module that does all the massaging of incoming data (oh la la). Renaming props, casting strings to numbers, objects into arrays, date strings to date objects, whatever.
+
+Do it all in the one place, and unit test the crap out of it.
+
+If you’re rockin’ a react/redux setup, you might then do something like this in an action creator that fetches search results:
+
+<iframe
+  width="700"
+  height="250"
+  src="https://hackernoon.com/media/8ac21a8aadee41ba449483eeee941b6d?postId=c1da92f068c5"
+  data-media-id="8ac21a8aadee41ba449483eeee941b6d"
+  allowfullscreen=""
+  frameborder="0"
+></iframe>
+
+Your components will thank you for it.
+
+### #10 Importing components without relative paths
+
+Wouldn’t it be sweet if instead of doing this:
+
+<pre name="1347" id="1347" class="graf graf--pre graf-after--p">
+  **import** Button **from** '../../../../Button/Button.jsx'; **import** Icon
+  **from** '../../../../Icon/Icon.jsx'; **import** Footer **from**
+  '../../Footer/Footer.jsx';
+</pre>
+
+You could just do this:
+
+```
+import {Button, Icon, Footer} from 'Components';
+```
+
+Well in _theory_ you can:
+
+- Create a single `index.js` somewhere that exports references each of your components
+- Use Webpack's `resolve.alias` to redirect `Components` to that index file
+
+I hadn’t done this before, and planned to convert one of my existing apps for this post (then lie and tell you I totes do it all the time). But as I wrote the code I came to realise that this is a bad idea, for three reasons:
+
+1.  It [seems to be broken](https://github.com/webpack/webpack/issues/4160#issuecomment-281236136) in Webpack 2.
+2.  It’s an `eslint` error because `Components` won’t be in `node_modules`.
+3.  If you use a good IDE, it will know things about your components. You will get clever warnings about not supplying required props, the ability to `cmd`/`ctrl`+click to open that component’s file. Things of that nature.
+    If you do the above, your IDE will no longer know where to find that component and you’ll lose those smarts.
+
+![](https://cdn-images-1.medium.com/max/1600/1*iYAef1TLM3P9HHCuPHp1QQ.png)Thanks, WebStorm.
+
+Edit: [matthew hsiung](https://medium.com/@hsiungmatt) has a solution for the eslint and WebStorm issues in [this comment](https://medium.com/@hsiungmatt/great-article-917a2f6b718e#.w66jk94ao).
+
+### Wrap up
+
+That’s the lot of them. I’m quite sure I’ll look at this in a year and wince. Perhaps you’ll do it today. Perhaps you’ll share something that has served you well.
+
+Oh and I’ve decided I don’t care if you click the little green heart or not. I WILL NOT BE DEFINED BY AN INTERNET METRIC.

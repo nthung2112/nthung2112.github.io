@@ -1,0 +1,427 @@
+---
+title: Functional Programming - Phần 2 - Nhập đạo
+author: Hung Tan Nguyen
+tags:
+  - functional programming
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*KPy3bUBCUFy6zqNFZys9lQ.png'
+sourceUrl: 'https://kipalog.com/posts/Functional-Programming---Phan-2---Nhap-dao'
+date: 2018-06-16 15:43:00
+slug: /functional-programming-phan-2-nhap-dao
+---
+
+Như vậy, Functional Programming là nghệ thuật lập trình trong đó ta:
+
+- sử dụng functions để điều khiển workflow
+- tuân thủ 2 nguyên tắc immutability và purity
+
+Nói cách khác, chư vị tin hữu muốn tu luyện Functional Programming thì phải giữ đạo tâm trong sáng, ý chí kiên định, hàng ngày chiêm nghiệm, suy diễn, cảm ngộ function, tu vi theo đó sẽ không ngừng thăng tiến.
+
+Nhưng làm thế nào để cảm ngộ "phân sần ý cảnh"? Ta phải nắm bắt, quan sát, tư duy, suy tưởng về function ra sao? Sau đây là những pháp quyết nhập môn.
+
+### Higher-order function
+
+Higher-order function là một khái niệm đến từ Toán học. Bất cứ hàm nào tiếp nhận 1 function như tham số, hoặc trả về 1 function như kết quả, thì đều được coi là higher-order function.
+
+Dưới đây là 1 ví dụ, hàm getItem nhận vào hàm by mô tả điều kiện, lại trả về 1 hàm khác. Nó thừa tiêu chuẩn để gọi là higher-order function.
+
+```javascript
+const getItem = (by) => (arr) => by;
+
+// hoặc phiên bản chi tiết
+const getItem = (by) => {
+  return (arr) => {
+    return by(arr);
+  };
+};
+```
+
+Lập trình phong cách Functional Programming là khiêu vũ với các functions.
+
+Trong Functional Programming, hầu như mọi functions đều là higher-order function, vì chúng đều có thể nhận vào và ném ra các functions.
+
+Nhưng như vậy thì có lợi ích gì? Nó đơn giản cung cấp cho ta một cách khác để lập luận và suy diễn. Chẳng hạn như với hàm getItem trên kia cho phép bạn biến hóa rất nhiều dạng, tùy vào cách bạn thao túng by.
+
+Khi bạn viết getItem, bạn không cần biết sau này sẽ phải kiểm tra điều kiện ra sao, cũng không quan tâm sẽ nhận được đầu vào như thế nào.
+
+Bạn có thể tạo ra hàm tìm số lớn nhất trong 1 mảng toàn số như sau:
+
+```javascript
+// tạo hàm engine lấy max number từ mảng
+const maxNumber = (arr) => {
+  return Math.max(...arr);
+};
+
+// rồi truyền vào getItem để được hàm cần thiết
+const getMaxNumber = getItem(maxNumber);
+
+// thử xem sao
+getMaxNumber([4, 6, 2, 3, 1, 8, 7, 5]);
+// => 8
+```
+
+Thế sao không truyền thẳng cái mảng số kia vào maxNumber cho khỏe? Vì trong thiết kế này ta đang cư xử với maxNumber như plugin. Còn nhiều plugins khác nữa. Ta không gọi trực tiếp plugin mà gọi qua 1 giao diện tổng quát hơn.
+
+Giờ ta lại có dữ liệu 1 nhóm người như sau:
+
+```javascript
+const members = [
+  {
+    name: 'Alice',
+    height: 165,
+  },
+  {
+    name: 'Bob',
+    height: 152,
+  },
+  {
+    name: 'Celina',
+    height: 178,
+  },
+  {
+    name: 'Dan',
+    height: 194,
+  },
+  {
+    name: 'Eric',
+    height: 187,
+  },
+];
+```
+
+Ta muốn tìm người cao nhất trong nhóm thì sao? Hãy thêm 1 plugin khác.
+
+```javascript
+// bạn tạo 1 hàm engine lấy max height từ mảng
+const maxHeight = (people) => {
+  return people.reduce((prev, current) => {
+    return prev.height > current.height ? prev : current;
+  });
+};
+
+// rồi truyền vào getItem để được hàm cần thiết
+const getTallestPerson = getItem(maxHeight);
+
+// thử xem sao
+getTallestPerson(members);
+// => { name: 'Dan', height: 194 }
+```
+
+Ví dụ trên tuy tầm thường, nhưng có thể là gợi ý tốt để bạn dùng higher-order function thiết kế những chương trình linh hoạt, dễ mở rộng.
+
+### Function Composition
+
+Đây là [khái niệm Toán học](https://www.mathsisfun.com/sets/functions-composition.html) mà tiếng Việt ta gọi là "hàm hợp", hay "hàm phức hợp". Mọi thứ trong Functional Programming đều có nguồn gốc Toán học.
+
+Function Composition là sự phối hợp, liên kết nhiều hàm lại với nhau, thành một hàm lớn, nhiều chức năng hơn.
+
+Có 2 kỹ thuật căn bản trong Function Composition là compose và pipe.
+
+#### Compose
+
+Hãy nhớ lại, trong không gian Functional Programming tồn tại vô số pure functions nhỏ gọn, đơn giản. Đúng triết lý "do one thing and do it well" của UNIX.
+
+Vì mỗi hàm chỉ làm 1 việc, khi muốn thực hiện nhiều hành động lên cùng một input, ta chỉ việc kết hợp các hàm cần thiết lại với nhau.
+
+Bây giờ chúng ta hãy tạm ngừng tu luyện, tạm quên tu vi để nhập phàm, quan sát và cảm ngộ nhân sinh.
+
+Lần này, bạn hóa thành con trai thứ 4 trong gia đình một thôn dân sinh sống dưới chân núi Tản Viên bằng nghề bán thịt...
+
+Một hôm bạn xin được khúc cây lớn ở chỗ ông chú làm kiểm lâm kiêm lâm tặc.
+
+![](https://i.imgur.com/OQofkz2.jpg)
+
+Từ khúc gỗ này, bạn muốn làm ra cái thớt cho nhà dùng.
+
+Là tu sĩ mới nhập môn tu luyện Functional Programming, tuy không có tu vi, nhưng bạn vẫn hình dung được sẽ cần đến các pure functions sau:
+
+- cưa(): nhận vào khúc gỗ, trả về từng khoanh tròn
+- sấy(): nhận khoanh gỗ tươi, trả về khoanh gỗ khô
+- bào(): nhận vào khoanh gỗ, trả về khoanh gỗ bằng phẳng
+- khoan(): nhận vào khoanh gỗ, trả về khoanh gỗ có 2 lỗ (để gắn quai treo/móc lên cho gọn)
+- chà(): nhận vào khoanh gỗ, trả về khoanh gỗ trơn láng (dùng giấy nhám, miền ngoài gọi giấy giáp, để đánh cho nhẵn bề mặt)
+- móc(): nhận thớt không quai, trả về thớt có quai
+
+Mỗi hàm chỉ làm đúng 1 việc. Không hơn. Không kém. Khi đi qua chừng đó công đoạn, ta sẽ được sản phẩm mong muốn.
+
+![](https://i.imgur.com/qKYfPYA.jpg)
+
+Dĩ nhiên chúng ta đang muốn khúc gỗ được sửa đổi nên tạm bỏ qua vấn đề immutability.
+
+Đây là phiên bản mô phỏng:
+
+```javascript
+const cưa = (x) => {
+  return `${x} đã cưa`;
+};
+
+const sấy = (x) => {
+  return `${x} đã sấy`;
+};
+
+const bào = (x) => {
+  return `${x} đã bào`;
+};
+
+const khoan = (x) => {
+  return `${x} đã khoan`;
+};
+
+const chà = (x) => {
+  return `${x} đã chà`;
+};
+
+const móc = (x) => {
+  return `${x} đã gắn móc`;
+};
+```
+
+Để tạo ra 1 cái thớt, ở thời viễn cổ xa xưa, các man sĩ thường code thế này:
+
+```javascript
+var thớt = cưa('khúc gỗ');
+thớt = sấy(thớt);
+thớt = bào(thớt);
+thớt = khoan(thớt);
+thớt = chà(thớt);
+thớt = móc(thớt);
+
+console.log(thớt);
+// => khúc gỗ đã cưa đã sấy đã bào đã khoan đã chà đã gắn móc
+```
+
+![](https://i.imgur.com/nBLW7ye.jpg)
+
+5 vạn năm sau, khi đã xuất hiện Toán học, các tộc nhân bộ lạc Giao Chỉ thời đại Hồng Bàng lại thích code như thế này:
+
+```javascript
+var thớt = móc(chà(khoan(bào(sấy(cưa('khúc gỗ'))))));
+console.log(thớt);
+// => khúc gỗ đã cưa đã sấy đã bào đã khoan đã chà đã gắn móc
+```
+
+Đây chính là Toán học cơ bản. Với y = f(g(x)), ta tính g(x) trước, được bao nhiêu truyền vào f() là ra kết quả. Việc tính toán đi từ ngoặc trong cùng ra ngoài, mắt thường nhìn thấy là từ phải sang trái, từ g đến f.
+
+Lại thêm 5 ngàn năm nữa trôi qua. Lúc này đã có ES6\. Một số cường giả Functional Programming sáng tạo ra phương thức compose, như thế này:
+
+```javascript
+const compose = (...fns) => {
+  return fns.reduce((f, g) => (x) => f(g(x)));
+};
+```
+
+Bạn có thể dùng [Babel](https://babeljs.io/repl) dịch sang ES2015 cho dễ hiểu.
+
+Ý tưởng của compose là xếp cuốn chiếu các hàm lại với nhau, theo thứ tự từ trái sang phải để tạo ra một hàm mới, mà khi được thực thi, nó sẽ lần lượt gọi các hàm đã truyền vào trước đó theo thứ tự ngược lại, từ phải sang trái.
+
+Tức là nếu y = compose(f, g), thì y(x) = f(g(x));
+Nó sẽ tính g(x) trước rồi truyền kết quả cho f;
+Giả sử g(x) = z thì y(x) = f(z);
+
+Nếu bạn vẫn thấy mơ hồ thì cứ xem cái này là Đạo. Chỉ có thể cảm ngộ, không thể giảng được bằng lời!
+
+Trở lại với cái thớt. Hàm compose tất nhiên là higher-order function. Ta sẽ thử xem nó làm việc ra sao:
+
+```javascript
+const quăng_cho_tao_cái_thớt = compose(móc, chà, khoan, bào, sấy, cưa);
+console.log(quăng_cho_tao_cái_thớt.toString());
+// => bạn đoán xem log ra thứ gì?
+```
+
+Bây giờ ta có 1 hàm, gọi là quăng_cho_tao_cái_thớt(), kết quả của sự lắp ghép bằng compose tất cả các pure functions ở trên.
+
+Ta biết compose sẽ gọi từ phải sang trái, nên công đoạn nào làm trước thì để bên phải.
+
+Chạy thử 1 phát:
+
+```javascript
+const thớt = quăng_cho_tao_cái_thớt('khúc gỗ');
+console.log(thớt);
+// => khúc gỗ đã cưa đã sấy đã bào đã khoan đã chà đã gắn móc
+```
+
+Vậy là đủ công đoạn, khúc gỗ đã trở thành một cái thớt tốt.
+
+Nhưng chưa hết. Khi bạn treo cái thớt đó ở nhà, nhiều người quen đến chơi thấy đẹp hỏi mua. Nhiều đến mức bạn quyết định kinh doanh thớt.
+
+Làm thớt kinh doanh thì phải gán nhãn, vậy là bạn tạo ra một pure function mới và dùng compose để làm khuôn sản suất loại thớt commercial này.
+
+Dễ ợt, không ảnh hưởng gì đến loại thớt cho nhà dùng.
+
+```javascript
+const nhãn = (x) => {
+  return `${x} đã dán nhãn`;
+};
+
+const làm_thớt_để_bán = compose(nhãn, móc, chà, khoan, bào, sấy, cưa);
+```
+
+Hoặc tận dụng lại khuôn mẫu cũ:
+
+```javascript
+const làm_thớt_để_bán = compose(nhãn, quăng_cho_tao_cái_thớt);
+```
+
+Thử xem sao:
+
+```javascript
+const thớt_bán = làm_thớt_để_bán('khúc gỗ');
+console.log(thớt_bán);
+// => khúc gỗ đã cưa đã sấy đã bào đã khoan đã chà đã móc đã dán nhãn
+```
+
+Để mở rộng thị phần, hướng đến phân khúc giá rẻ, bạn tạo ra dòng sản phẩm thớt tầm trung, dùng chip MediaTek, bỏ qua bước sấy khô và đánh bóng để giảm giá thành. Rất đơn giản:
+
+```javascript
+const làm_thớt_loại_hai = compose(nhãn, móc, khoan, bào, cưa);
+```
+
+Thử xem sao:
+
+```javascript
+const thớt_loại_hai = làm_thớt_loại_hai('khúc gỗ');
+console.log(thớt_loại_hai);
+// => khúc gỗ đã cưa đã bào đã khoan đã móc đã dán nhãn
+```
+
+Lập trình như vậy phải nói là vô cùng tao nhã, lịch thiệp! Đôi khi tôi cảm thấy phong cách lập trình Functional Programming có sự thanh tịnh đầy chất quý tộc, vừa bình dân lại vừa hàn lâm, đẹp đến mức khó hiểu!
+
+Nếu dùng OOP, có thể chúng ta còn đang loay hoay giữa một đống class Máy Cưa, Máy Bào, Máy Khoan... Hoặc 1 class Máy Làm Thớt khổng lồ có đủ methods cưa, bào, khoan... Rồi còn một mớ properties mà ta phải cân nhắc xem cái nào public, cái nào private. Rồi phải tạo instance, thừa kế qua lại mấy vòng may ra mới làm được cái thớt. Muốn thêm dòng sản phẩm lại càng khó khăn. Phải tạo class Thớt*nhà_dùng, extend ra Thớt*để*bán, Thớt*để_bán_loại_2, phiền phức không sao kể xiết!
+
+Functional Programming thì chỉ cần mấy hàm đơn giản, rời rạc, dùng compose lắp ráp lại như lắp ráp dây chuyền công nghệ là chế được các kiểu thớt.
+
+Function Composition tựa như một nhà máy hiện đại, mỗi chi tiết linh kiện được xử lý bằng một robot chuyên trách, kết hợp lại với nhau một cách khoa học để tạo ra sản phẩm hoàn thiện.
+
+#### Pipe
+
+Một biến thể của compose là pipe, vận hành theo chiều ngược lại. Ta có thể implement bằng cách đảo vị trí f và g thế này:
+
+```javascript
+const pipe = (...fns) => {
+  return fns.reduce((f, g) => (x) => g(f(x)));
+};
+```
+
+Hoặc giữ nguyên code của compose nhưng thay reduce bằng reduceRight:
+
+```javascript
+const pipe = (...fns) => {
+  return fns.reduceRight((f, g) => (x) => f(g(x)));
+};
+```
+
+Vì pipe tổ hợp các hàm theo chiều ngược lại so với compose nên ta viết:
+
+```javascript
+const làm_thớt_dỏm = pipe(cưa, bào, nhãn);
+```
+
+Thử xem sao:
+
+```javascript
+const thớt_dỏm = làm_thớt_dỏm('khúc gỗ');
+console.log(thớt_dỏm);
+// => khúc gỗ đã cưa đã bào đã dán nhãn
+```
+
+Dùng pipe có vẻ thuận mắt hơn. Thứ tự các bước cưa, bào... trông khá tự nhiên. Nếu bạn quen với cách suy luận Toán học thì bạn sẽ thích compose. Còn nếu bạn muốn trực quan dễ hiểu thì cứ dùng pipe.
+
+compose và pipe là những thuật pháp nhập môn dễ học, dễ dùng, nhưng không kém uy lực, thư viện Functional Programming nào cũng có. Trong Ramda.js, ngoài [compose](http://ramdajs.com/docs/#compose) và [pipe](http://ramdajs.com/docs/#pipe), các tác giả còn bổ sung thêm pipeK, pipeP, composeK, composeP.
+
+Khi đã thông thạo, bạn hoàn toàn có thể tạo ra compose theo cách của bạn. Ví dụ composeBinary liên kết các hàm từ giữa sang 2 bên thay vì từ đầu này đến đầu kia, composeRandom liên kết các hàm không theo trật tự cố định... Đó là không gian sáng tạo thuộc về riêng bạn.
+
+### Currying function
+
+Thuật ngữ currying và các dạng curry, curried của nó trong khoa học máy tính được [Christopher Strachey](https://en.wikipedia.org/wiki/Christopher_Strachey) đặt ra từ năm 1967 để ghi nhớ công lao của [Haskell Brooks Curry](https://en.wikipedia.org/wiki/Haskell_Curry), một nhà Toán học và Luận lý học người Mỹ.
+
+Currying function là làm cho 1 function trở thành "curried function".
+
+Cái function ban đầu đó hơi ngốc nghếch, nó cần bạn truyền vào N tham số để tính toán, mà nếu thiếu 1 tham số, nó sẽ không chạy.
+
+Ví dụ hàm sum thế này:
+
+```javascript
+const sum = (a, b, c) => {
+  return a + b + c;
+};
+```
+
+sum cần 3 tham số để cộng dồn lại, nếu thiếu, sẽ không tính toán ra được.
+
+```javascript
+// có thể ra sân
+sum(5, 3, 2); // => 10
+sum(4, 4, 2); // => 10
+sum(4, 3, 3); // => 10
+sum(3, 5, 2); // => 10
+
+// nhưng
+sum(4, 5); // => NaN
+```
+
+Đây là thiếu tiền đạo cả đội không chịu ra sân tập! Nhưng cuộc sống đâu phải lúc nào cũng thuận lợi, đầy đủ cho chúng ta? Dù cả mấy tiền đạo đều bị chấn thương, treo giò, trốn tập thì các anh còn lại vẫn phải có trách nhiệm ra sân chứ!
+
+Currying chính là kỹ thuật biến hàm sum ngốc đó trở thành một function vi diệu hơn, nếu bạn gọi nó với 1 tham số, nó sẽ trả về 1 hàm tạm thời, giữ lại tham số đó, chờ khi nào đủ 3 tham số thì mới thực hiện tính toán.
+
+Hình dung bạn tổ chức một buổi party, mời 3 người bạn tham gia. Lúc này đã có mặt 2 người, còn 1 người đến muộn. Bạn quyết định không cần chờ nữa. Bữa tiệc cứ bắt đầu đã, chừng nào người kia đến thì tính tiếp.
+
+Đây là 1 cách implement cho hàm curry:
+
+```javascript
+const curry = (fn) => {
+  let totalArguments = fn.length;
+  let next = (argumentLength, rest) => {
+    if (argumentLength > 0) {
+      return (...args) => {
+        return next(argumentLength - args.length, [...rest, ...args]);
+      };
+    }
+    return fn(...rest);
+  };
+  return next(totalArguments, []);
+};
+```
+
+Và curry tất nhiên cũng là higher-order function.
+
+Thử dùng với sum xem sao:
+
+```javascript
+const curriedSum = curry(sum);
+```
+
+curriedSum bây giờ là phiên bản curried của hàm sum trước đó.
+
+```javascript
+curriedSum(4, 4, 2); // => 10
+curriedSum(4, 3, 3); // => 10
+curriedSum(3, 5, 2); // => 10
+
+// và
+curriedSum(5, 3); // => [Function]
+```
+
+curriedSum(5, 3) là 1 function. Nó đang chờ đợi tham số cuối cùng xuất hiện. Nếu bây giờ ta gọi nó với 1 tham số thì kết quả sẽ được tính toán ra:
+
+```javascript
+curriedSum(5, 3)(2); // => 10
+```
+
+Nếu ta truyền nhiều hơn số lượng tham số còn thiếu thì sao? Ở đây là 1 tham số cuối cùng. Theo cách implement trên thì nó sẽ bỏ qua các tham số dư thừa. Các phiên bản curry của [Ramda.js](http://ramdajs.com/docs/#curry) và [Lodash FP](https://lodash.com/docs/4.17.10#curry) cũng hành xử như vậy.
+
+```javascript
+curriedSum(5, 3)(2, 4, 8); // => 10
+```
+
+Một điểm quan trọng nữa là ta có thể phân tách hàm gốc ra từ 1 đến N phần, với N là số lượng tham số của hàm gốc đó. Chẳng hạn, nếu hàm gốc có 3 tham số, ta có thể chia nó ra 1, 2 hoặc 3 phần. Những cách viết sau là tương đương:
+
+```javascript
+curriedSum(3, 5, 2);
+curriedSum(3, 5)(2);
+curriedSum(3)(5, 2);
+curriedSum(3)(5)(2);
+```
+
+curry, cũng như compose và pipe là những kỹ thuật căn bản, ai cũng phải học, phải biết. Mọi ngôn ngữ được thiết kế với tư tưởng Functional Programming như Haskell, Scalla, Elm... đều có sẵn các hàm này. Chúng rất tinh tế và được dùng ở khắp nơi.
+
+Chỉ cần thành thạo 3 pháp quyết này thì bạn đã được xem như đệ tử Functional Programming chân chính.

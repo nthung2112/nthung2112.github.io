@@ -1,0 +1,448 @@
+---
+title: A Jade Tutorial for Beginners
+author: Hung Tan Nguyen
+date: 2017-08-20 21:57:13
+sourceUrl: https://www.sitepoint.com/jade-tutorial-for-beginners/
+tags: [jade, html]
+slug: /a-jade-tutorial-for-beginners
+---
+
+Jade is an elegant templating engine, primarily used for server-side templating in NodeJS. In plain words, Jade gives you a powerful new way to write markup, with a number of **advantages over plain HTML**.
+
+For example, take a look at this movie card in HTML:
+
+```html
+<div>
+  <h1>Ocean's Eleven</h1>
+  <ul>
+    <li>Comedy</li>
+    <li>Thriller</li>
+  </ul>
+  <p>
+    Danny Ocean and his eleven accomplices plan to rob three Las Vegas casinos
+    simultaneously.
+  </p>
+</div>
+```
+
+This is what the same markup looks like in Jade:
+
+```pug
+div
+  h1 Ocean's Eleven
+  ul
+    li Comedy
+    li Thriller
+  p.
+    Danny Ocean and his eleven accomplices plan to rob
+    three Las Vegas casinos simultaneously.
+```
+
+The Jade version is elegant and concise. But it’s not just about the beautiful syntax. Jade has some really neat features, allowing you to write modular and reusable markup. Before we get into these powerful features, let’s do a quick overview of the basics.
+
+## The Basics
+
+I’m going to highlight three basic features in Jade
+
+- Simple tags
+- Adding attributes to the tags
+- Blocks of text
+
+If you want to try this out as we go along, you can use [CodePen](http://codepen.io/) and choose Jade as your HTML preprocessor or use the [online compiler on the official Jade page](http://jade-lang.com/demo/) to compile your Jade to HTML.
+
+## Simple Tags
+
+As you might have noticed earlier, there are no “closing” tags in Jade. Instead, Jade uses indentation (i.e. white space) to determine how tags are nested.
+
+```pug
+div
+  p Hello!
+  p World!
+```
+
+In the example above, since the paragraph tags are indented, they will end up inside the `div` tag. Simple!
+
+```html
+<div>
+  <p>Hello!</p>
+  <p>World!</p>
+</div>
+```
+
+Jade compiles this accurately by treating the first word on each line as a tag, while subsequent words on that line are treated as text inside the tag.
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/PZLgaN/)
+
+## Attributes
+
+All this is great, but how do we add attributes to our tags? Quite simple really. Let’s go back to our first example and toss in some classes and a poster image.
+
+```pug
+div(class="movie-card", id="oceans-11")
+  h1(class="movie-title") Ocean's 11
+  img(src="/img/oceans-11.png", class="movie-poster")
+  ul(class="genre-list")
+    li Comedy
+    li Thriller
+```
+
+Pretty neat right?
+
+```html
+<div class="movie-card" id="oceans-11">
+  <h1 class="movie-title">Ocean's 11</h1>
+  <img src="/img/oceans-11.png" class="movie-poster" />
+  <ul class="genre-list">
+    <li>Comedy</li>
+    <li>Thriller</li>
+  </ul>
+</div>
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/pgYBZd)
+
+But it doesn’t stop here. Jade provides special shorthand for IDs and classes, further simplifying our markup using a familiar notation:
+
+```pug
+div.movie-card#oceans-11
+  h1.movie-title Ocean's 11
+  img.movie-poster(src="/img/oceans-11.png")
+  ul.genre-list
+    li Comedy
+    li Thriller
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/VeRNEZ)
+
+As you can see, Jade uses the same syntax as that which we’re already familiar with when writing CSS selectors, making it even easier to spot classes.
+
+## Blocks of Text
+
+Let’s say you have a paragraph tag and you want to place a large block of text in it. Jade treats the first word of every line as an HTML tag – so what do you do?
+
+You might have noticed an innocent period in the first code example in this article. Adding a period (full stop) after your tag indicates that everything inside that tag is text and Jade stops treating the first word on each line as an HTML tag.
+
+```
+div
+  p How are you?
+  p.
+    I'm fine thank you.
+    And you? I heard you fell into a lake?
+    That's rather unfortunate. I hate it when my shoes get wet.
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/XXGQxP)
+
+And just to drive home the point, if I were to remove the period after the `p` tag in this example, the compiled HTML would treat the “I” in the word “I’m” as an opening tag (in this case, it would be the `<i>` tag).
+
+## Powerful Features
+
+Now that we’ve covered the basics, let’s take a peek at some powerful features that will make your markup smarter. We’ll look at the following features in remainder of this tutorial:
+
+- Loops
+- JavaScript
+- Interpolation
+- Mixins
+
+## Using JavaScript in Jade
+
+Jade is implemented with JavaScript, so it’s super-easy to use JavaScript in Jade. Here’s an example.
+
+```pug
+- var x = 5;
+div
+  ul
+    - for (var i=1; i<=x; i++) {
+      li Hello
+    - }
+```
+
+What did we just do here?! By starting a line with a hyphen, we indicate to the Jade compiler that we want to start using JavaScript and it just works as we would expect. Here’s what you get when you compile the Jade code above to HTML:
+
+```html
+<div>
+  <ul>
+    <li>Hello</li>
+    <li>Hello</li>
+    <li>Hello</li>
+    <li>Hello</li>
+    <li>Hello</li>
+  </ul>
+</div>
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/eJXoQK)
+
+We use a hyphen when the code doesn’t directly add output. If we want to use JavaScript to output something in Jade, we use `=`. Let’s tweak the code above to show a serial number.
+
+```pug
+- var x = 5;
+div
+  ul
+    - for (var i=1; i<=x; i++) {
+      li= i + ". Hello"
+    - }
+```
+
+And voilà, we now have serial numbers:
+
+```html
+<div>
+  <ul>
+    <li>1\. Hello</li>
+    <li>2\. Hello</li>
+    <li>3\. Hello</li>
+    <li>4\. Hello</li>
+    <li>5\. Hello</li>
+  </ul>
+</div>
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/YwgMdz)
+
+Of course, in this case, an ordered list would be much more appropriate, but you get the point. Now, if you’re worried about XSS and HTML escaping, [read the docs for more info](http://jade-lang.com/reference/code/).
+
+## Loops
+
+Jade provides an excellent looping syntax so that you don’t need to resort to JavaScript. Let’s loop over an array:
+
+```pug
+- var droids = ["R2D2", "C3PO", "BB8"];
+div
+  h1 Famous Droids from Star Wars
+  for name in droids
+    div.card
+      h2= name
+```
+
+And this will compile as follows:
+
+```html
+<div>
+  <h1>Famous Droids from Star Wars</h1>
+  <div class="card">
+    <h2>R2D2</h2>
+  </div>
+  <div class="card">
+    <h2>C3PO</h2>
+  </div>
+  <div class="card">
+    <h2>BB8</h2>
+  </div>
+</div>
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/ZQPNxZ)
+
+You can iterate over objects and use `while` loops too. [Check out the docs for more](http://jade-lang.com/reference/iteration/).
+
+## Interpolation
+
+It can get annoying to mix JavaScript into text like this `p= "Hi there, " + profileName + ". How are you doing?"`. Does Jade have an elegant solution for this? You bet.
+
+```pug
+- var profileName = "Danny Ocean";
+div
+  p Hi there, #{profileName}. How are you doing?
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/LGaorZ)
+
+Isn’t that neat?
+
+## Mixins
+
+Mixins are like functions. They take parameters as input and give markup as output. Mixins are defined using the `mixin` keyword.
+
+```pug
+mixin thumbnail(imageName, caption)
+  div.thumbnail
+    img(src="/img/#{imageName}.jpg")
+    h4.image-caption= caption
+```
+
+Once the mixin is defined, you can call the mixin with the `+` syntax.
+
+```pug
++thumbnail("oceans-eleven", "Danny Ocean makes an elevator pitch.")
++thumbnail("pirates", "Introducing Captain Jack Sparrow!")
+```
+
+Which will output HTML like this:
+
+```html
+<div class="thumbnail">
+  <img src="/img/oceans-eleven.jpg" />
+  <h4 class="image-caption">Danny Ocean makes an elevator pitch.</h4>
+</div>
+<div class="thumbnail">
+  <img src="/img/pirates.jpg" />
+  <h4 class="image-caption">Introducing Captain Jack Sparrow!</h4>
+</div>
+```
+
+## Putting It All Together
+
+Let’s put together everything we’ve learned so far. Say we have a nice array of movies, with each item containing the movie’s title, the cast (a sub-array), the rating, the genre, a link to the IMDB page and the image path for the movie’s poster. The array will look something like this (white space added for readability):
+
+```javascript
+- var movieList = [
+  {
+    title: "Ocean's Eleven",
+    cast: ["Julia Roberts", "George Clooney", "Brad Pitt", "Andy Garcia"],
+    genres: ["Comedy", "Thriller"],
+    posterImage: "/img/oceans-eleven",
+    imdbURL: "http://www.imdb.com/title/tt0240772/",
+    rating: 7
+  }
+  // etc...
+];
+```
+
+We have 10 movies and we want to build nice movie cards for each of them. Initially, we don’t plan to use the IMDB link. If a movie is rated above 5, we give it a thumbs up, otherwise, we give it a thumbs down. We’ll use all the nice features of Jade to write some modular code to do the following:
+
+1.  Create a mixin for a movie card
+    - Iterate through the cast list and display the actors. We’ll do the same with genres.
+    - Check the rating and decide whether to display a thumbs up or a thumbs down.
+2.  Iterate through the movie list and use the mixin to create one card per movie.
+
+So let’s create the mixin first.
+
+```pug
+mixin movie-card(movie)
+  div.movie-card
+    h2.movie-title= movie.title
+    img.movie-poster(src=movie.posterImage)
+    h3 Cast
+    ul.cast
+      each actor in movie.cast
+        li= actor
+    div.rating
+      if movie.rating > 5
+        img(src="img/thumbs-up")
+      else
+        img(src="img/thumbs-down")
+    ul.genre
+      each genre in movie.genres
+        li= genre
+```
+
+There’s a lot going on up there, but I’m sure it looks familiar – we’ve covered all this in this tutorial. Now, we just need to use our mixin in a loop:
+
+```pug
+for movie in movieList
+  +movie-card(movie)
+```
+
+That’s it. Is that elegant or what? Here’s the final code.
+
+```pug
+- var movieList = [
+  {
+    title: "Ocean's Eleven",
+    cast: ["Julia Roberts", "George Clooney", "Brad Pitt", "Andy Garcia"],
+    genres: ["Comedy", "Thriller"],
+    posterImage: "/img/oceans-eleven",
+    imdbURL: "http://www.imdb.com/title/tt0240772/",
+    rating: 9.2
+  },
+  {
+    title: "Pirates of the Caribbean",
+    cast: ["Johnny Depp", "Keira Knightley", "Orlando Bloom"],
+    genres: ["Adventure", "Comedy"],
+    posterImage: "/img/pirates-caribbean",
+    imdbURL: "http://www.imdb.com/title/tt0325980/",
+    rating: 9.7
+  }
+];
+
+mixin movie-card(movie)
+  div.movie-card
+    h2.movie-title= movie.title
+    img.movie-poster(src=movie.posterImage)
+    h3 Cast
+    ul.cast
+    each actor in movie.cast
+      li= actor
+    div.rating
+      if movie.rating > 5
+        img(src="img/thumbs-up")
+      else
+        img(src="img/thumbs-down")
+    ul.genre
+      each genre in movie.genres
+        li= genre
+
+for movie in movieList
+  +movie-card(movie)
+```
+
+And here’s the compiled HTML:
+
+```html
+<div class="movie-card">
+  <h2 class="movie-title">Ocean's Eleven</h2>
+  <img src="/img/oceans-eleven" class="movie-poster" />
+  <h3>Cast</h3>
+  <ul class="cast">
+    <li>Julia Roberts</li>
+    <li>George Clooney</li>
+    <li>Brad Pitt</li>
+    <li>Andy Garcia</li>
+  </ul>
+  <div class="rating">
+    <img src="img/thumbs-up" />
+  </div>
+  <ul class="genre">
+    <li>Comedy</li>
+    <li>Thriller</li>
+  </ul>
+</div>
+<div class="movie-card">
+  <h2 class="movie-title">Pirates of the Carribean</h2>
+  <img src="/img/pirates-caribbean" class="movie-poster" />
+  <h3>Cast</h3>
+  <ul class="cast">
+    <li>Johnny Depp</li>
+    <li>Keira Knightley</li>
+    <li>Orlando Bloom</li>
+  </ul>
+  <div class="rating">
+    <img src="img/thumbs-up" />
+  </div>
+  <ul class="genre">
+    <li>Adventure</li>
+    <li>Comedy</li>
+  </ul>
+</div>
+```
+
+But wait a minute. What if we now want to go to the movie’s IMDB page when we click on a movie’s title? We can add one line: `a(href=movie.imdbURL)` to the mixin.
+
+```pug
+mixin movie-card(movie)
+  div.movie-card
+    a(href=movie.imdbURL)
+      h2.movie-title= movie.title
+    img.movie-poster(src=movie.posterImage)
+    h3 Cast
+    ul.cast
+    each actor in movie.cast
+      li= actor
+    div.rating
+      if movie.rating > 5
+        img(src="img/thumbs-up")
+      else
+        img(src="img/thumbs-down")
+    ul.genre
+      each genre in movie.genres
+        li= genre
+```
+
+[View this example on CodePen](http://codepen.io/SitePoint/pen/Bjbgpv)
+
+## Conclusion
+
+We went from knowing nothing about Jade to building some beautiful modular movie cards. There’s a lot more to Jade, but I’ve glossed over some concepts to keep things simple. So I hope this tutorial piqued your curiosity [to learn more](http://jade-lang.com/reference/).
+
+**Important note: As some of you might already know, [Jade has been renamed to Pug](https://github.com/pugjs/jade/issues/2184) due to a software trademark claim. In the future, articles on Jade will use the new name “Pug” or “PugJS”.**

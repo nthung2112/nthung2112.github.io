@@ -1,0 +1,485 @@
+---
+title: >-
+  Cách Javascript hoạt động P19: Bên trong custom element + thủ thuật xây dựng
+  component tối ưu
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/1000/0*2oRILfJJtmW07mbK'
+date: 2019-01-06 00:03:00
+slug: /cach-javascript-hoat-dong-p19-ben-trong-custom-element-thu-thuat-xay-dung-component-toi-uu
+---
+
+**_Đây là bài cuối cùng trong series rồi (chắc vậy á, lâu nay không thấy họ đăng bài mới). Cảm ơn mọi người đã ủng hộ mình trong suốt thời gian qua. Tuy nhiên nếu SessionStack có bài viết nào mới thì mình sẽ cập nhật thêm._**
+
+- Element: phần tử
+- Custom element: phần tử tùy chọn (tức là những element do người dùng tự tạo ra)
+- Component: thành phần
+
+Chào các bạn đến với bài thứ 19 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+# Khái quát
+
+Trong bài trước chúng ta đã thảo luận về Shadow DOM API và 1 vài ý tưởng vốn là các mảnh ghép của 1 bức tranh lớn hơn: web components. Toàn bộ ý tưởng đằng sau tiêu chuẩn **web components** là có thể mở rộng các tính năng sẵn có của HTML bằng cách tạo ra các element vừa nhỏ gọn, hướng mô đun và có thể tái sử dụng nhiều lần. Đây là 1 tiêu chuẩn tương đối mới trong W3C và đã được chấp nhận bởi đa số các trình duyệt lớn và có thể thấy nó xuất hiện trong nhiều môi trường production... dĩ nhiên là với 1 chút sự giúp đỡ từ các thư viện polyfill mà chúng ta sẽ nói sau.
+\*\_Polyfill là để chỉ việc biến đổi, thay thế hoặc chỉnh sửa các tính năng mới của ngôn ngữ JS, HTML, CSS sao cho nó có thể hoạt động được trên các trình duyệt cũ như IE
+
+Như các bạn đã biết, trình duyệt cung cấp cho chúng ta 1 số ít các công cụ quan trọng để xây dựng website và các webapp. Ta đang nói về HTML, CSS & Javascript. Bạn dùng HTML để kiến trúc nên app của bạn, CSS để trang điểm và làm cho nó đẹp hơn rồi dùng Javascript thực hiện các hành động khác. Tuy nhiên, trước khi **web components** được giới thiệu thì không có cách nào dễ dàng để liên kết các hành vi của Javascript đến với kiến trúc của HTML.
+
+Trong bài viết này, chúng ta sẽ tìm hiểu về nền tảng của web component: **custom element**. Nói ngắn gọn, API custom element cho phép bạn tạo ra các custom HTML element với logic Javascript và CSS style tích hợp sẵn. Rất nhiều người cảm thấy bối rối nhầm lẫn custom element với Shadow DOM. Nhưng chúng là 2 ý tưởng hoàn toàn khác nhau và chúng thực sử bổ khuyết cho nhau thay vì thay thế lẫn nhau.
+
+Một vài framework và library như Angular, React... cố giải quyết cùng 1 vấn đề bằng cách giới thiệu ý tưởng riêng của họ. Bạn có thể so sánh custom element với Angular directive hoặc React component. Tuy nhiên, custom element gần gũi với trình duyệt mà không yêu cầu gì hơn ngoài bản gốc của Javascript, HTML, CSS. Dĩ nhiên, điều này không có nghĩa rằng nó là bản thay thế cho các Javascript framework điển hình. Các framework hiện đại cho phép chúng ta thực hiện nhiều thứ hơn là chỉ giả lập hành vi của custom element. Vì thế mà chúng có thể cùng hoạt động bên cạnh nhau.
+
+# API
+
+Trước khi chúng ta đào sâu hơn thì hãy cùng duyệt qua những gì mà API cung cấp. Object global customElements sẵn có cho ta vài phương thức:
+
+- define(tagName, constructor, options): Định nghĩa custom element mới. Nó nhận vào 3 đối số: 1 thẻ tên hợp lệ cho custom element, định nghĩa lớp cho custom element và 1 object options. Hiện tại thì chỉ có 1 option được hỗ trợ là extends, mang giá trị là 1 string chỉ định tên của element có sẵn để mở rộng. Thường được dùng để tạo ra các tùy biến của element sẵn có.
+- get(tagName): Trả về constructor của 1 custom element nếu như element được định nghĩa và ngược lại thì trả về undefined. Nó nhận vào 1 đối số duy nhất: thẻ tên hợp lệ của custom element.
+- whenDefined(tagName): Trả về 1 promise và được resolve khi custom element được định nghĩa. Nếu như element đã được định nghĩa rồi thì nó sẽ resolve ngay lập tức. Promise bị reject nếu như thẻ tên không phải là tên hợp lệ của custom element. Nó nhận vào 1 đối số: thẻ tên hợp lệ của 1 custom element.
+
+# Cách tạo custom element
+
+Tạo ra custom element rất đơn giản. Bạn chỉ cần làm 2 việc: định nghĩa 1 lớp cho element và cho nó extends từ lớp HTMLElement, việc thứ 2 là đăng ký tên cho element đó:
+
+```javascript
+class MyCustomElement extends HTMLElement {
+  constructor() {
+    super();
+    // …
+  }
+
+  // …
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+```
+
+Hoặc nếu muốn thì bạn có thể sử dụng anonymous class (lớp vô danh) trong trường hợp bạn muốn code gọn gàng hơn 1 chút:
+
+```javascript
+customElements.define(
+  'my-custom-element',
+  class extends HTMLElement {
+    constructor() {
+      super();
+      // …
+    }
+
+    // …
+  }
+);
+```
+
+Như các bạn đã thấy, custom element được đăng ký bằng phương thức customElements.define(...)
+
+# Custom element giải quyết vấn đề gì ?
+
+Vậy chứ vấn đề ở đây là gì? **Div soups** chẳng hạn. Thế div soups là cái nồi gì? Thì rõ theo nghĩa đen thì nó là cái nồi súp thẻ div. Trong các ứng dụng webapp hiện đại thì đây là kiểu kiến trúc rất phổ biến khi ta có rất nhiều các thẻ div lồng nhau như thế này đây:
+
+```html
+<div class="top-container">
+  <div class="middle-container">
+    <div class="inside-container">
+      <div class="inside-inside-container">
+        <div class="are-we-really-doing-this">
+          <div class="mariana-trench">…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Kiểu kiến trúc như thế này thường được dùng vì nó bảo trình duyệt phải render những gì mà developer muốn. Nhưng nó lại làm cho code HTML khó đọc và rất khó bảo trì. Ví dụ chúng ta có 1 component trông như thế này:
+![](https://cdn-images-1.medium.com/max/1000/0*v56OyrPtg_cZzzaZ)
+
+Vậy thì theo cách cũ, HTML sẽ như thế này:
+
+```html
+<div class="primary-toolbar toolbar">
+  <div class="toolbar">
+    <div class="toolbar-button">
+      <div class="toolbar-button-outer-box">
+        <div class="toolbar-button-inner-box">
+          <div class="icon">
+            <div class="icon-undo">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar-button">
+      <div class="toolbar-button-outer-box">
+        <div class="toolbar-button-inner-box">
+          <div class="icon">
+            <div class="icon-redo">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar-button">
+      <div class="toolbar-button-outer-box">
+        <div class="toolbar-button-inner-box">
+          <div class="icon">
+            <div class="icon-print">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar-toggle-button toolbar-button">
+      <div class="toolbar-button-outer-box">
+        <div class="toolbar-button-inner-box">
+          <div class="icon">
+            <div class="icon-paint-format">&nbsp;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Tuy nhiên, tưởng tượng rằng chúng ta có thể làm như thế này:
+
+```html
+<primary-toolbar>
+  <toolbar-group>
+    <toolbar-button class="icon-undo"></toolbar-button>
+    <toolbar-button class="icon-redo"></toolbar-button>
+    <toolbar-button class="icon-print"></toolbar-button>
+    <toolbar-toggle-button class="icon-paint-format"></toolbar-toggle-button>
+  </toolbar-group>
+</primary-toolbar>
+```
+
+Rõ ràng ví dụ thứ 2 nhìn sạch sẽ và gọn hơn nhiều. Dễ bảo trì, dễ đọc cho cả trình duyệt và developer. Đơn giản hơn nhiều.
+
+Vấn đề tiếp theo là khả năng tái sử dụng. Công việc của developer chúng ta đòi hỏi không chỉ viết code hoạt động được mà còn phải bảo trì được. Và 1 điều làm cho code dễ bảo trì là nó có thể dễ dàng tái sử dụng 1 phần nào đó của code thay vì phải viết đi viết lại nhiều lần.
+
+Dưới đây là 1 ví dụ đơn giản nhưng bạn sẽ hiểu ý tưởng của nó. Giả sử ta có element sau:
+
+```html
+<div class="my-custom-element">
+  <input type="text" class="email" />
+  <button class="submit"></button>
+</div>
+```
+
+Nếu chúng ta cần sử dụng nó ở nơi nào khác thì ta sẽ phải viết lại đoạn HTML trên nhiều lần. Giả sử như ta cần thay đổi 1 phần nào đó và áp dụng cho mọi element. Ta sẽ phải đi tìm tất cả mọi nơi có đoạn code đó và chỉnh sửa chính xác cùng 1 thay đổi y chang nhau rất nhiều lần, bùm.....
+
+Vậy thì không tốt hơn nếu ta chỉ cần như vậy thôi sao:
+
+```html
+<my-custom-element></my-custom-element>
+```
+
+Nhưng webapp hiện đại không chỉ có HTML tĩnh. Bạn cần tương tác với nó nữa. Và đây là lúc ta cần Javascript. Thường thì bạn sẽ tạo ra 1 vài element, ghép chúng vào bất kỳ event listener nào mà bạn muốn để cho nó có thể tương tác phản hồi khi có input từ người dùng. Bất kể là click, kéo-thả, hover, nhấn bàn phím, vân vân
+
+```javascript
+var myDiv = document.querySelector('.my-custom-element');
+
+myDiv.addEventListener('click', (_) => {
+  myDiv.innerHTML = '<b> I have been clicked </b>';
+});
+<div class="my-custom-element">I have not been clicked yet.</div>;
+```
+
+Với API custom element, toàn bộ phần logic này có thể được đóng gói vào bên trong chính element đó. Xem ví dụ bên dưới
+
+```javascript
+class MyCustomElement extends HTMLElement {
+  constructor() {
+    super();
+
+    var self = this;
+
+    self.addEventListener('click', (_) => {
+      self.innerHTML = '<b> I have been clicked </b>';
+    });
+  }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+<my-custom-element>I have not been clicked yet</my-custom-element>;
+```
+
+Mới đầu nhìn vào thì có vẻ như giải pháp custom element này đòi hỏi nhiều Javascript. Tuy nhiên trong các ứng dụng thực tế thì bạn sẽ hiếm khi gặp phải trường hợp mà bạn tạo ra 1 element mà không phải tái sử dụng nó. Một diều điển hình nữa trong các webapp hiện đại là đa số các element đều được tạo ra bằng code trong quá trình hoạt động (dynamic). Vì thế bạn cần phải xử lý các trường hợp riêng biệt khi element được thêm vào bằng Javascript hoặc nó được định nghĩa trước kia trong kiến trúc HTML. Bạn sẽ có toàn bộ những tính năng ấy nếu dùng custom element.
+
+Tóm lại, custom element làm code bạn dễ hiểu, dễ bảo trì hơn, chia nhỏ nó thành các module khép kín nhỏ hơn, có thể tái sử dụng.
+
+# Các yêu cầu
+
+Trước khi bạn bắt đầu tạo custom element của chính mình, bạn nên biết rằng có 1 số quy tắc đặc biệt mà ta phải tuân theo:
+
+- Tên **phải** chứa dấu gạch ngang (-). Bằng cách này bộ parser của HTML mới hiểu được element nào là do người dùng tạo ra và element nào là sẵn có. Nó cũng đảm bảo rằng không có xung đột khi đặt tên với các element sẵn có (bất kể bây giờ hay trong tương lai, khi một element mới được thêm vào). Ví dụ, `<my-custom-element>` là 1 tên hợp lệ trong khi `<myCustomElement>` và `<my_custom_element>` thì không.
+- Không được đăng ký cùng 1 thẻ tên nhiều hơn 1 lần. Điều này sẽ làm cho trình duyệt bắn ra 1 biệt lệ DOMException. Bạn không thể ghi đè các custom element.
+- Custom element không thể tự đóng thẻ. Bộ parser HTML chỉ cho phép 1 nhóm các element sẵn có có thể tự đóng thẻ của nó (ví dụ: `<img>`, `<link>`, `<br>`).
+
+# Các khả năng
+
+Vậy thì bạn thực sự có thể làm được gì với custom element? Và câu trả lời là: rất nhiều thứ.
+
+Một trong số những tính năng tốt nhất là định nghĩa class của element thực sự liên kết đến chính DOM element của nó. Điều này có nghĩa bạn có thể dùng trực tiếp this với event listener, truy cập vào các property của nó, truy cập các node con và vân vân.
+
+```javascript
+class MyCustomElement extends HTMLElement {
+  // ...
+
+  constructor() {
+    super();
+
+    this.addEventListener('mouseover', (_) => {
+      console.log('I have been hovered');
+    });
+  }
+
+  // ...
+}
+```
+
+Dĩ nhiên là nó cho bạn khả năng để ghi đè lại node con của 1 element với nội dung mới. Và cũng dĩ nhiên là điều này không nên làm, bởi vì nó sẽ dẫn đến nhiều vấn đề không mong muốn. Rõ ràng nếu như bạn có 1 custom element đang hoạt động và đột nhiên phát hiện ra phần markup của element của mình bị thay đổi thì sẽ bối rối lắm.
+
+Có 1 vài vị trí đặc biệt mà bạn có thể định nghĩa để thực thi code tại các thời điểm cụ thể trong vòng đời của element.
+
+- constructor: constructor được gọi 1 lần khi element được tạo ra hoặc nâng cấp (chúng ta sẽ nói về nó sau). Đa số nó được dùng để khởi tạo state (trạng thái), gắn kết các event listener, tạo shadow DOM, vân vân. Lưu ý bạn hầu như cần phải gọi super() trong constructor.
+- connectedCallback: phương thức connectedCallback được gọi mỗi lần element được thêm vào DOM. Nó có thể được dùng (khuyến nghị nên dùng) để delay (hoãn lại) vài việc cho đến khi element thực sự được gắn vào trang (chẳng hạn như lấy tài nguyên từ server).
+- disconnectedCallback: tương tự như connectedCallback thì disconnectedCallback được gọi khi 1 element bị lấy ra khỏi DOM. Thường là để giải phóng tài nguyên. Lưu ý rằng disconnectedCallback không bao giờ được gọi nếu như user đóng tab. Hãy cẩn thận với những thứ mà bạn khởi tạo lúc đầu.
+- attributeChangedCallback: phương thức này được gọi khi 1 attribute của element được thêm vào, gỡ ra, cập nhật hoặc thay thế. Nó cũng được gọi khi element được tạo ra bởi parser. Tuy nhiên, lưu ý rằng nó chỉ áp dụng cho các attribute nằm trong danh sách an toàn (whitelist) của property observedAttributes
+- addoptedCallback: phương thức này được gọi khi document.adoptNote(...) được gọi để đưa đó sang 1 document khác.
+
+Lưu ý rằng tất cả các callbacks ở trên đều là **đồng bộ**. Ví dụ, connectedCallback được gọi ngay lập tức sau khi element được thêm vào DOM và trong lúc đó không có gì xảy ra.
+
+# Phản chiếu property
+
+Các element HTML sẵn có cung cấp 1 khả năng rất tiện dụng: phản chiếu property. Nghĩa là các giá trị của 1 vài property được phản chiếu trực tiếp về DOM dưới dạng attribute. Một ví dụ điển hình là property id.
+
+```javascript
+myDiv.id = 'new-id';
+```
+
+Cũng sẽ cập nhật DOM thành:
+
+```html
+<div id="new-id">...</div>
+```
+
+Và nó cũng áp dụng theo hướng ngược lại nữa. Phần này cực kỳ tiện lợi bởi vì nó cho phép bạn cấu hình các element khai báo.
+
+Custom element không có tính năng như thế này nhưng có 1 cách để bạn tự triển khai. Ta có thể có được tính năng tương tự khi định nghĩa các getter & setter cho các property.
+
+```javascript
+class MyCustomElement extends HTMLElement {
+  // ...
+
+  get myProperty() {
+    return this.hasAttribute('my-property');
+  }
+
+  set myProperty(newValue) {
+    if (newValue) {
+      this.setAttribute('my-property', newValue);
+    } else {
+      this.removeAttribute('my-property');
+    }
+  }
+
+  // ...
+}
+```
+
+# Mở rộng element
+
+API custom element cho phép bạn không chỉ tạo ra các element HTML mà còn có thể mở rộng element sẵn có. Phương pháp này hoạt động cực tốt cho cả element sẵn có và custom element. Bạn chỉ cần mở rộng định nghĩa class của nó là được.
+
+```javascript
+class MyAwesomeButton extends MyButton {
+  // ...
+}
+
+customElements.define('my-awesome-button', MyAwesomeButton);
+```
+
+Hoặc trong trường hợp của element có sẵn, ta cần thêm 1 param thứ 3 vào hàm customElements.define(...) - một object với property extends và giá trị là thẻ tên của element đang được mở rộng. Bằng cách này trình duyệt biết được chính xác thì element nào đang được mở rộng bởi vì có rất nhiều element sẵn có cùng chia sẻ giao diện DOM. Nếu không chỉ định element nào mà mình muốn mở rộng, trình duyệt sẽ không biết được chức năng nào đang được mở rộng.
+
+```javascript
+class MyButton extends HTMLButtonElement {
+  // ...
+}
+
+customElements.define('my-button', MyButton, { extends: 'button' });
+```
+
+Một element gốc mở rộng (extended native element) còn được gọi là element được tùy biến (customized built-in element).
+
+Nguyên tắc vàng cho bạn đó là luôn luôn mở rộng các element đang tồn tại sẵn. Và làm việc này một cách dần dần. Nó cho phép bạn giữ lại tất cả các tính năng trước đó (property, attribute, các hàm).
+
+Chú ý rằng element được tùy biến chỉ được hỗ trợ từ Chrome 67 trở lên. Nó sẽ được triển khai cho các trình duyệt khác ngoại trừ Safari.
+
+# Nâng cấp element
+
+Như đã nói ở trên, chúng ta sử dụng phương thức customElements.define(...) để đăng ký 1 custom element. Nhưng nó không có nghĩa rằng đó là việc đầu tiên bạn phải làm. Đăng ký custom element có thể được hoãn lại sau này. Kể cả sau khi chính element đó được thêm vào DOM. Quá trình này được gọi là nâng cấp element. Để giúp bạn biết được thực sự khi nào thì element được định nghĩa thì trình duyệt có cung cấp phương thức customElements.whenDefine(...). Bạn truyền thẻ tên của element vào, nó trả về 1 promise và sẽ được resolve khi element đăng ký xong.
+
+```javascript
+customElements.whenDefined('my-custom-element').then((_) => {
+  console.log('My custom element is defined');
+});
+```
+
+Ví dụ, khi bạn muốn delay 1 vài thứ cho đến khi tất cả các element con được định nghĩa xong, cực kỳ có ích khi mà bạn có các custom element lồng nhau. Thỉnh thoảng element cha sẽ dựa vào sự triển khai của các element con. Trong trường hợp này bạn cần đảm bảo rằng các element con được định nghĩa trước element cha.
+
+# Shadow DOM
+
+Như đã nói, custom element và shadow DOM đi đôi với nhau. Custom element được dùng để đóng gói logic Javascript vào bên trong 1 element trong khi shadow DOM được dùng để tạo ra 1 môi trường khép kín cho phần DOM không bị ảnh hưởng bởi các yếu tố bên ngoài. Mình đề nghị bạn nên đọc lại [bài viết trước](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-17---ben-trong-Shadow-DOM---xay-dung-component-khep-kin) để hiểu thêm về shadow DOM và các ý tưởng của nó.
+
+Để sử dụng shadow DOM cho custom element, bạn chỉ cần đơn giản gọi this.attachShadow
+
+```javascript
+class MyCustomElement extends HTMLElement {
+  // ...
+
+  constructor() {
+    super();
+
+    let shadowRoot = this.attachShadow({mode: 'open'});
+    let elementContent = document.createElement('div');
+    shadowRoot.appendChild(elementContent);
+  }
+
+  // ...
+});
+```
+
+# Template
+
+Chúng ta đã tìm hiểu sơ về template trong [bài viết trước về shadow DOM](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-17---ben-trong-Shadow-DOM---xay-dung-component-khep-kin) và chúng xứng đáng có 1 bài viết riêng. Ở đây chúng ta sẽ đưa ra 1 ví dụ đơn giản làm thế nào để bạn có thể kết hợp các template vào quá trình tạo ra custom element. Sử dụng thẻ `<template>` bạn có thể khai báo thẻ của 1 mảnh DOM, một thứ được parse nhưng không được render trên trang.
+
+```javascript
+<template id="my-custom-element-template">
+  <div class="my-custom-element">
+    <input type="text" class="email" />
+    <button class="submit"></button>
+  </div>
+</template>let myCustomElementTemplate = document.querySelector('#my-custom-element-template');
+
+class MyCustomElement extends HTMLElement {
+  // ...
+
+  constructor() {
+    super();
+
+    let shadowRoot = this.attachShadow({mode: 'open'});
+    shadowRoot.appendChild(myCustomElementTemplate.content.cloneNode(true));
+  }
+
+  // ...
+});
+```
+
+Giờ đây chúng ta có thể kết hợp custom element với shadow DOM và template, ta có được 1 element khép kín trong phạm vi của chính nó và có kiến trúc HTML riêng biệt cũng như Javascript logic
+
+# Styling
+
+Chúng ta đã đi qua phần của HTML & Javascript, giờ là về CSS. Rõ ràng thì ta cần 1 cách để chỉnh style cho các element. Chúng ta có thể thêm CSS stylesheet vào bên trong shadow DOM nhưng bạn sẽ thắc mắc là làm thế nào ta có thể chỉnh style của element từ bên ngoài với vai trò là 1 user của element đó. Và câu trả lời lại đơn giản: bạn cứ style nó giống như cách bạn làm với các element gốc.
+
+```javascript
+my-custom-element {
+  border-radius: 5px;
+  width: 30%;
+  height: 50%;
+  // ...
+}
+```
+
+Lưu ý rằng style định nghĩa từ bên ngoài có độ ưu tiên cao hơn và nó sẽ ghi đè style định nghĩa từ element.
+
+Bạn cũng biết có 1 số trường hợp khi trang được load nhưng nội dung trên trang vẫn ở dạng HTML thô và chưa được style (flash of unstyled content - FOUC). Bạn có thể ngăn chặn tình huống này bằng cách định nghĩa style cho các undefined component và sử dụng một số cách transition khi chúng được định nghĩa xong. Để làm như vậy ta cần dùng selector :defined
+
+```javascript
+my-button:not(:defined) {
+  height: 20px;
+  width: 50px;
+  opacity: 0;
+}
+```
+
+# Element không tồn tại (unknown) và custom element chưa định nghĩa (undefined)
+
+Tiêu chuẩn HTML rất linh động và cho phép khai báo bất kỳ thẻ nào ta muốn. Nếu trình duyệt không thể nhận ra thẻ đó thì nó sẽ được parse dưới dạng HTMLUnknownElement.
+
+```javascript
+var element = document.createElement('thisElementIsUnknown');
+
+if (element instanceof HTMLUnknownElement) {
+  console.log('The selected element is unknown');
+}
+```
+
+Tuy nhiên, điều này lại không áp dụng với custom element. Bạn có nhớ khi chúng ta bàn về việc có 1 số quy tắc đặt tên để định nghĩa custom element? Lý do là nếu như trình duyệt nhận ra tên **hợp lệ** cho 1 custom element thì nó sẽ parse nó dưới dạng HTMLElement và trình duyệt cân nhắc để trở thành custom element chưa định nghĩa.
+
+```javascript
+var element = document.createElement('this-element-is-undefined');
+
+if (element instanceof HTMLElement) {
+  console.log('The selected element is undefined but not unknown');
+}
+```
+
+Mặc dù không có sự khác biệt nào có thể nhìn bằng mắt thường giữa HTMLElement và HTMLUnknownElement nhưng cũng có vài thứ mà ta cần phải nhớ. Parser sẽ đối xử với chúng khác nhau. Nếu một element có cái tên hợp lệ (theo kiểu custom element như đã nói ở trên) thì sẽ được kiểm tra xem nó có phần triển khai nào cho custom element không. Nó sẽ được đối xử như 1 div bình thường cho tới khi phần triển khai đó được định nghĩa. Ngược lại element chưa định nghĩa thì không triển khai bất kỳ phương thức hay property nào.
+
+# Hỗ trợ từ trình duyệt
+
+Phiên bản đầu tiên của custom element được giới thiệu trong Chrome 36+. Cái gọi là API v0 của custom element mà giờ đây đã không dùng nữa và cân nhắc rằng đó là những yếu kém mặc dù vẫn đang tồn tại. Nếu bạn muốn tìm hiểu về v0 thì có thể đọc [bài viết ở đây](https://www.html5rocks.com/en/tutorials/webcomponents/customelements/). API v1 của custom element xuất hiện kể từ Chrome 54 và Safari 10.1 (chỉ có 1 phần). Microsoft Edge thì đang trong giai đoạn thử mẫu và Mozilla đã có từ v50 những không được kích hoạt sẵn và cần người dùng tự kích hoạt nó. Hiện tại chỉ có các trình duyệt webkit mới hỗ trợ hoàn toàn. Tuy nhiên như đã nhắc ở trên, có các polyfill tồn tại cho phép bạn dùng custom element trên tất cả các trình duyệt, kể cả IE11.
+
+# Kiểm tra tính khả dụng
+
+Để đảm bảo trình duyệt có hỗ trợ custom element bạn có thể làm là thực hiện 1 bài kiểm tra nhỏ để xem property customElements có tồn tại trong object window hay không:
+
+```javascript
+const supportsCustomElements = 'customElements' in window;
+
+if (supportsCustomElements) {
+  // Bạn có thể dùng API Custom elements ở đây
+}
+```
+
+Hoặc nếu ta dùng thư viện polifyll:
+
+```javascript
+function loadScript(src) {
+  return new Promise(function (resolve, reject) {
+    const script = document.createElement('script');
+
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+
+    document.head.appendChild(script);
+  });
+}
+
+// Chạy lazy load cho polyfill nếu cần thiết
+if (supportsCustomElements) {
+  // Trình duyệt hỗ trợ sẵn cho custom element. Bạn có thể dùng bình thường.
+} else {
+  loadScript('path/to/custom-elements.min.js').then((_) => {
+    // Polyfill cho custom element đã được kích hoạt. Bạn có thể dùng bình thường.
+  });
+}
+```
+
+Vậy nói gọn gọn lại, 1 phần của tiêu chuẩn web component là custom element cho bạn các khả năng sau:
+
+- Liên kết Javascript và CSS với HTML element
+- Cho phép bạn mở rộng các element HTML sẵn có (cả element gốc và custom element)
+- Không cần thư viện hay framework ngoài. Bạn chỉ cần Javascript, HTML và CSS gốc và có thể cần thêm thư viện polyfill để hỗ trợ trình duyệt cũ.
+- Nó được xây dựng để hoạt động trơn tru, mượt mà với các tính năng khác của web component (shadow DOM, template, slots, vân vân)
+- Liên kết chặt chẽ với công cụ dev của trình duyệt.
+- Tận dụng các tính năng tiếp cận sẵn có.
+
+Custom element không khác với những thứ chúng ta đã dùng bấy lâu nay. Nó chỉ là 1 cách khác để làm cho mọi việc dễ dàng hơn khi phát triển webapp. Nó mở ra cánh cổng đến với việc xây dựng những app phức tạp với tốc độ nhanh. Tuy nhiên càng phức tạp thì càng có nhiều khả năng có lỗi mà khó tìm hiểu hoặc tái lập. Vì thế khi debug ta cần nhiều ngữ cảnh và công cụ như SessionStack để hỗ trợ.
+
+SessionStack tích hợp vào trong webapp và bắt đầu thu thập các thông tin như sự kiện người dùng, dữ liệu mạng, biệt lệ, thông báo debug, thay đổi trên DOM, vân vân, và gửi chúng về server của họ.
+
+Sau đó, dữ liệu thu được sẽ được xử lý để tạo ra đoạn video trải nghiệm để bạn có thể xem user đã tương tác như thế nào với sản phẩm của bạn. Bên cạnh những thông tin kỹ thuật mà SessionStack đã cung cấp thì nó còn cho phép bạn khả năng để tái hiện lại các vấn đề mà bạn không bao giờ biết được khi debug trước đây.
+
+Để đảm bảo cho SessionStack luôn luôn thực hiện được các phiên làm việc hoàn hảo đến từng pixel thì team của họ đã bám sát lấy những công nghệ, framework và tiêu chuẩn web tiên tiến cũng như mới nhất.

@@ -1,0 +1,360 @@
+---
+title: 'Gooact: React trong 160 dòng code JavaScript'
+author: Hung Tan Nguyen
+tags:
+  - react
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*cnggTsL9_grhuEo_5bry0A.png'
+sourceUrl: >-
+  https://medium.com/@sweetpalma/gooact-react-in-160-lines-of-javascript-44e0742ad60f
+date: 2018-05-26 15:13:00
+slug: /gooact-react-trong-160-dong-code-javascript
+---
+
+## Làm thế nào để xây dựng React cho riêng mình chỉ trong vài phút.
+
+### **Giới thiệu**
+
+[**React**](https://reactjs.org) là một thư viện tuyệt vời - nhiều nhà phát triển ngay lập tức đã yêu thích nó vì tính đơn giản, hiệu suất và cách khai báo làm việc. Nhưng cá nhân tôi có một lý do cụ thể khiến nó trở nên đặc biệt đối với tôi - và đó là cách nó hoạt động bên dưới. Tôi tìm thấy những ý tưởng đứng đằng sau React đơn giản nhưng kỳ lạ thú vị - và tôi tin rằng sự hiểu biết nguyên tắc cốt lõi của nó sẽ giúp bạn viết mã nhanh hơn và an toàn hơn.
+
+Trong bài viết này, tôi sẽ chỉ cho cho bạn cách viết một bản sao của React đầy đủ chức năng, bao gồm Component API và tự triển khai Virtual DOM. Nó được chia thành bốn phần - mỗi phần là một chủ đề chính:
+
+- **Elements**: Trong phần này chúng ta sẽ tìm hiểu cách các khối JSX được xử lý thành phiên bản nhẹ của DOM được gọi là VDOM như thế nào.
+- **Rendering**: Trong phần này tôi sẽ hướng dẫn bạn cách chuyển đổi VDOM thành DOM thông thường.
+- **Patching**: Trong phần này tôi sẽ trình bày lý do tại sao thuộc tính "key" quan trọng như thế và cách sử dụng VDOM để nối lại với DOM hiện tại một cách hiệu quả.
+- **Components:** Phần cuối cùng sẽ cho bạn biết về các thành phần React và quy trình tạo, vòng đời và dựng hình của chúng.
+
+Mỗi phần sẽ kết thúc bằng một ví dụ có link **CodePen** trực tiếp, vì vậy bạn có thể ngay lập tức kiểm tra tất cả các tiến trình chúng ta đã thực hiện. Bắt đầu nào.
+
+### **Elements**
+
+![](https://cdn-images-1.medium.com/max/1600/1*KQcMpRQeOW0sdc0wYrwSrw.png)
+
+[**Element**](https://reactjs.org/blog/2015/12/18/react-components-elements-and-instances.html#elements-describe-the-tree) là một đối tượng trọng lượng nhẹ của một DOM thực tế. Nó chứa tất cả thông tin quan trọng - như node type, attributes và danh sách children —  vì vậy nó có thể dễ dàng rendered trong tương lai. Thành phần giống như cây của các elements được gọi là VDOM - một ví dụ được hiển thị bên dưới:
+
+```javascript
+{
+    "type": "ul",
+    "props": {
+        "className": "some-list"
+    },
+    "children": [
+        {
+            "type": "li",
+            "props": {
+                "className": "some-list__item"
+            },
+            "children": [
+                "One"
+            ]
+        },
+        {
+            "type": "li",
+            "props": {
+                "className": "some-list__item"
+            },
+            "children": [
+                "Two"
+            ]
+        }
+    ]
+}
+```
+
+Thay vì viết object quái dị đó mọi lúc, hầu hết các nhà phát triển React đều sử dụng cú pháp JSX, trông giống như một sự kết hợp gọn gàng giữa mã JavaScript và các thẻ HTML:
+
+```html
+/** @jsx createElement */ const list =
+<ul className="some-list">
+  <li className="some-list__item">One</li>
+  <li className="some-list__item">Two</li>
+</ul>
+;
+```
+
+In order to get executed it needs to be transpiled into regular function calls — notice that pragma comment which defines what function must be used:
+Để được thực hiện, nó cần phải được chuyển thành các gọi hàm thông thường - chú ý comment pragma là phải luôn sử dụng:
+
+```javascript
+const list = createElement(
+  'ul',
+  { className: 'some-list' },
+  createElement('li', { className: 'some-list__item' }, 'One'),
+  createElement('li', { className: 'some-list__item' }, 'Two')
+);
+```
+
+Cuối cùng, function mong muốn được gọi - và nó được cho là trả về cấu trúc VDOM được mô tả ở trên. Việc triển khai của chúng tôi sẽ ngắn gọn - nhưng mặc dù có vẻ nguyên thủy, nó phục vụ mục đích cần một cách hoàn hảo:
+
+```javascript
+const createElement = (type, props, ...children) => {
+  props = props != null ? props : {};
+  return { type, props, children };
+};
+```
+
+CodePen đầu tiên có sẵn [**ở đây**](https://codepen.io/SweetPalma/pen/gzpZNv?editors=0010)— nó chứa phương pháp được mô tả ở trên với một vài cây VDOM do nó tạo ra.
+
+### Rendering
+
+![](https://cdn-images-1.medium.com/max/1600/1*Wc-kOHkiu41Rc69-cG9KhA.png)
+
+[**Rendering**](https://reactjs.org/docs/rendering-elements.html) là một quá trình biến VDOM thành DOM hiển thị. Nói chung, nó là một thuật toán khá đơn giản mà đi qua cây VDOM và tạo ra phần tử DOM tương ứng cho mỗi node:
+
+```javascript
+const render = (vdom, parent = null) => {
+  if (parent) parent.textContent = '';
+  const mount = parent ? (el) => parent.appendChild(el) : (el) => el;
+  if (typeof vdom == 'string' || typeof vdom == 'number') {
+    return mount(document.createTextNode(vdom));
+  } else if (typeof vdom == 'boolean' || vdom === null) {
+    return mount(document.createTextNode(''));
+  } else if (typeof vdom == 'object' && typeof vdom.type == 'function') {
+    return mount(Component.render(vdom));
+  } else if (typeof vdom == 'object' && typeof vdom.type == 'string') {
+    const dom = document.createElement(vdom.type);
+    for (const child of [].concat(...vdom.children)) // flatten
+      dom.appendChild(render(child));
+    for (const prop in vdom.props) setAttribute(dom, prop, vdom.props[prop]);
+    return mount(dom);
+  } else {
+    throw new Error(`Invalid VDOM: ${vdom}.`);
+  }
+};
+
+const setAttribute = (dom, key, value) => {
+  if (typeof value == 'function' && key.startsWith('on')) {
+    const eventType = key.slice(2).toLowerCase();
+    dom.__gooactHandlers = dom.__gooactHandlers || {};
+    dom.removeEventListener(eventType, dom.__gooactHandlers[eventType]);
+    dom.__gooactHandlers[eventType] = value;
+    dom.addEventListener(eventType, dom.__gooactHandlers[eventType]);
+  } else if (key == 'checked' || key == 'value' || key == 'id') {
+    dom[key] = value;
+  } else if (key == 'key') {
+    dom.__gooactKey = value;
+  } else if (typeof value != 'object' && typeof value != 'function') {
+    dom.setAttribute(key, value);
+  }
+};
+```
+
+Code ở trên có vẻ trông đáng sợ, nhưng hãy làm cho mọi thứ trở nên ít phức tạp hơn bằng cách tách nó thành các phần nhỏ hơn:
+
+- **Custom Attribute Setter**: Các thuộc tính được chuyển đến VDOM không phải lúc nào cũng hợp lệ về DOM - những thứ như trình xử lý sự kiện, key định danh và các giá trị phải được xử lý riêng lẻ.
+- **Primitive VDOM rendering:** Primitives — như strings, numbers, booleans và nulls — được chuyển thành các node văn bản thuần túy.
+- **Complex VDOM rendering:** Nodes với tag string được biến thành các phần tử DOM với hiển thị children theo đệ quy.
+- **Component VDOM rendering**: Nodes với tag function tag được xử lý riêng — không chú ý nhiều đến phần đó, chúng ta sẽ thực hiện nó sau.
+
+CodePen thứ hai có sẵn [**ở đây**](https://codepen.io/SweetPalma/pen/ZoGwWY?editors=0010)— nó thể hiện thuật toán render trong hành động.
+
+### Patching
+
+![](https://cdn-images-1.medium.com/max/1600/1*2IcfCputh--ch7rTVLCmcw.png)
+
+[**Patching**](https://reactjs.org/docs/reconciliation.html) là một quá trình hòa hợp DOM hiện có với cây VDOM mới được xây dựng.
+
+Hãy tưởng tượng bạn có một số VDOM lồng nhau sâu và cập nhật thường xuyên. Khi một cái gì đó thay đổi, ngay cả phần nhỏ nhất - mà phải được hiển thị. Triển khai native sẽ yêu cầu render toàn bộ mỗi lần cập nhật như vậy.
+
+- Xóa các nút DOM hiện có.
+- Re-render mọi thứ.
+
+Đó là lý do thực tế — xây dựng DOM và vẽ lại nó là một hoạt động khá tốn kém. Nhưng chúng ta có thể tối ưu hóa điều này bằng cách viết thuật toán và sẽ yêu cầu ít sửa đổi DOM:
+
+- Xây dựng một VDOM mới.
+- Đệ quy so sánh nó với DOM hiện có.
+- Tìm các nút đã được thêm, xóa hoặc thay đổi theo bất kỳ cách nào.
+- Patch(Vá) chúng lại.
+
+Nhưng sau đó một vấn đề khác nổi lên — độ phức tạp tính toán. So sánh hai cây có độ phức tạp O(n³) — ví dụ: nếu bạn định patch một ngìn elements — nó sẽ yêu cầu _một tỷ_ so sánh. Điều đó là quá nhìu. Thay vào đó, chúng ta sẽ triển khai một thuật toán độ phức tạp O(n) với hai giả định sau:
+
+- Hai elements của các loại khác nhau sẽ tạo ra những cây khác nhau.
+- Nhà phát triển có thể gợi ý các phần tử con nào có thể không đổi qua các lần render khác nhau với prop "key".
+
+Trong thực tế, các giả định này có giá trị đối với hầu hết các trường hợp sử dụng thực tế. Bây giờ chúng tôi đã sẵn sàng cho một phần code khác:
+
+```javascript
+const patch = (dom, vdom, parent = dom.parentNode) => {
+  const replace = parent
+    ? (el) => parent.replaceChild(el, dom) && el
+    : (el) => el;
+  if (typeof vdom == 'object' && typeof vdom.type == 'function') {
+    return Component.patch(dom, vdom, parent);
+  } else if (typeof vdom != 'object' && dom instanceof Text) {
+    return dom.textContent != vdom ? replace(render(vdom)) : dom;
+  } else if (typeof vdom == 'object' && dom instanceof Text) {
+    return replace(render(vdom));
+  } else if (
+    typeof vdom == 'object' &&
+    dom.nodeName != vdom.type.toUpperCase()
+  ) {
+    return replace(render(vdom));
+  } else if (
+    typeof vdom == 'object' &&
+    dom.nodeName == vdom.type.toUpperCase()
+  ) {
+    const pool = {};
+    const active = document.activeElement;
+    for (const index in Array.from(dom.childNodes)) {
+      const child = dom.childNodes[index];
+      const key = child.__gooactKey || index;
+      pool[key] = child;
+    }
+    const vchildren = [].concat(...vdom.children); // flatten
+    for (const index in vchildren) {
+      const child = vchildren[index];
+      const key = (child.props && child.props.key) || index;
+      dom.appendChild(pool[key] ? patch(pool[key], child) : render(child));
+      delete pool[key];
+    }
+    for (const key in pool) {
+      if (pool[key].__gooactInstance)
+        pool[key].__gooactInstance.componentWillUnmount();
+      pool[key].remove();
+    }
+    for (const attr of dom.attributes) dom.removeAttribute(attr.name);
+    for (const prop in vdom.props) setAttribute(dom, prop, vdom.props[prop]);
+    active.focus();
+    return dom;
+  }
+};
+```
+
+Hãy điều tra tất cả các kết hợp có thể:
+
+- **Primitive VDOM + Text DOM:** So sánh giá trị VDOM với nội dung DOM và thực hiện full render nếu chúng khác nhau.
+- **Primitive VDOM + Element DOM :** Full render.
+- **Complex VDOM + Text DOM :** Full render.
+- **Complex VDOM + Element DOM of different type :** Full render.
+- **Complex VDOM + Element DOM of same type :** Sự kết hợp thú vị nhất, nơi diễn ra sự hòa hợp của children, xem chi tiết bên dưới.
+- **Component VDOM + any kind of DOM:** Cũng giống như trong phần trước, được xử lý riêng và sẽ được triển khai sau.
+
+Như bạn có thể thấy, các nút text và phức tạp nói chung không tương thích và yêu cầu full render — may mắn thay đó là một sự thay đổi hiếm hoi. Nhưng những gì về sự hòa hợp của children đệ quy - nó thực hiện như sau:
+
+- Current active element is memoized — reconciliation may break focus sometimes.
+- DOM children are moved into temporary pool under their respective keys — index is used as a key by default.
+- VDOM children are paired to the pool DOM nodes by key and recursively patched — or rendered from scratch if pair is not found.
+- DOM nodes that left unpaired are removed from document.
+- New attributes are applied to final parent DOM.
+- Focus is returned back to previously active element.
+
+CodePen thứ ba có sẵn [**ở đây**](https://codepen.io/SweetPalma/pen/rvOWxa?editors=0010) — bao gồm ví dụ nhỏ về list patching.
+
+### Components
+
+![](https://cdn-images-1.medium.com/max/1600/1*wOrDURrPrNvH3eKeaQuyQQ.png)
+
+[**Component**](https://reactjs.org/docs/react-component.html) về mặt khái niệm tương tự như hàm JavaScript — nó có đầu vào tùy ý được gọi là "props" và trả về tập các elements mô tả những gì sẽ xuất hiện trên màn hình. Nó có thể được định nghĩa là một stateless function hoặc derived class với trạng thái bên trong của riêng và tập các phương thức và các lifecycle hooks. Tôi sẽ ngắn gọn về lý thuyết - tốt hơn hãy xem code:
+
+```javascript
+class Component {
+  constructor(props) {
+    this.props = props || {};
+    this.state = null;
+  }
+
+  static render(vdom, parent = null) {
+    const props = Object.assign({}, vdom.props, { children: vdom.children });
+    if (Component.isPrototypeOf(vdom.type)) {
+      const instance = new vdom.type(props);
+      instance.componentWillMount();
+      instance.base = render(instance.render(), parent);
+      instance.base.__gooactInstance = instance;
+      instance.base.__gooactKey = vdom.props.key;
+      instance.componentDidMount();
+      return instance.base;
+    } else {
+      return render(vdom.type(props), parent);
+    }
+  }
+
+  static patch(dom, vdom, parent = dom.parentNode) {
+    const props = Object.assign({}, vdom.props, { children: vdom.children });
+    if (dom.__gooactInstance && dom.__gooactInstance.constructor == vdom.type) {
+      dom.__gooactInstance.componentWillReceiveProps(props);
+      dom.__gooactInstance.props = props;
+      return patch(dom, dom.__gooactInstance.render());
+    } else if (Component.isPrototypeOf(vdom.type)) {
+      const ndom = Component.render(vdom);
+      return parent ? parent.replaceChild(ndom, dom) && ndom : ndom;
+    } else if (!Component.isPrototypeOf(vdom.type)) {
+      return patch(dom, vdom.type(props));
+    }
+  }
+
+  setState(nextState) {
+    if (this.base && this.shouldComponentUpdate(this.props, nextState)) {
+      const prevState = this.state;
+      this.componentWillUpdate(this.props, nextState);
+      this.state = nextState;
+      patch(this.base, this.render());
+      this.componentDidUpdate(this.props, prevState);
+    } else {
+      this.state = nextState;
+    }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps != this.props || nextState != this.state;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    return undefined;
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    return undefined;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    return undefined;
+  }
+
+  componentWillMount() {
+    return undefined;
+  }
+
+  componentDidMount() {
+    return undefined;
+  }
+
+  componentWillUnmount() {
+    return undefined;
+  }
+}
+```
+
+Các static methods được gọi internally:
+
+- **Render**: Performs initial rendering. Stateless components are called as a regular function — result is displayed immediately. Class components are instantiated and attached to the DOM — and only then are rendered.
+- **Patching:** Performs further update. Sometimes DOM node already has a component instance attached to it — pass new properties to it and patch differences. Perform full render otherwise.
+
+Các Instance methods có nghĩa là có thể bị ghi đè hoặc được gọi trong các derived classes do người dùng định nghĩa:
+
+- **Constructor:** Handles properties and defines initial state, storing them within itself.
+- **State modifier:** Handles new state, fires all required lifecycle hooks and initiates patch cycle.
+- **Lifecycle hooks:** Set of methods that are fired throughout component life — on mount, during updates and just before it gets removed.
+
+Lưu ý rằng phương thức render bị thiếu — nó được định nghĩa trong các child classes. CodePen cuối cùng có [**ở đây**](https://codepen.io/SweetPalma/pen/gzavjB?editors=0010) — với tất cả các code chúng tôi đã thực hiện cho đến đây cùng với một ví dụ to-do đơn giản.
+
+### Kết luận
+
+Đó là tất cả của tôi — chúng ta có một bản sao React đầy đủ chức năng ngay bây giờ. Tôi sẽ gọi nó là Gooact — đó sẽ là một món quà nhỏ cho người bạn tốt của tôi. Chúng ta hãy xem xét kỹ hơn các kết quả:
+
+- Gooact có thể xây dựng và patch hiệu quả các cây DOM phức tạp bằng cách sử dụng VDOM làm tham chiếu.
+- Gooact hỗ trợ cả hai functional và class components — cùng với việc xử lý chính xác internal state và hooks lifecycle hoàn chỉnh.
+- Gooact dùng transpiled code cung cấp bởi Babel.
+- Gooact vừa đủ trong 160 dòng code JavaScript chưa nén.
+
+Mục đích chính của bài viết này là để chứng minh các nguyên tắc cốt lõi của cấu trúc bên trong React mà không cần phải đi sâu vào các API phụ trợ - đó là lý do tại sao chúng bị thiếu một số thứ sau trong Gooact:
+
+- Gooact không hỗ trợ những thứ như fragments, portals, contexts, references và một số thứ khác đã được giới thiệu trong các phiên bản mới hơn.
+- Gooact không triển khai React Fiber do sự phức tạp của nó — nhưng tôi có thể viết một bài về nó trong tương lai.
+- Gooact không theo dõi các key trùng lặp và đôi khi có thể gây ra lỗi.
+- Gooact thiếu hỗ trợ callbacks thêm cho một số methods.
+
+Như bạn có thể thấy, đó là một lĩnh vực tuyệt vời cho các tính năng và cải tiến mới - repository có sẵn [**ở đây**](https://github.com/sweetpalma/gooact), do đó, vì vậy đừng ngần ngại fork và thử nghiệm. Bạn thậm chí có thể cài đặt nó bằng cách sử dụng NPM!
+
+Tôi muốn cảm ơn toàn bộ [**React Team**](https://github.com/facebook/react/blob/master/AUTHORS) đã tạo một thư viện tuyệt vời, làm cho cuộc sống của hàng nghìn nhà phát triển trở nên dễ dàng hơn. Đặc biệt cảm ơn đến [**Preact**](https://github.com/developit/preact) tác giả chính là [**Jason Miller**](https://twitter.com/_developit) — bài viết này đã được lấy cảm hứng từ cách tối giản nó được thực hiện.
+
+![](https://cdn-images-1.medium.com/max/1600/1*Ok_UbUJOtYxN08pFNHMwMQ.png)

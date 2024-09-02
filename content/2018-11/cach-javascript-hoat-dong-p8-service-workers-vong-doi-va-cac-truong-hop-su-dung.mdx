@@ -1,0 +1,267 @@
+---
+title: >-
+  Cách Javascript hoạt động P8: Service Workers, vòng đời và các trường hợp sử
+  dụng
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-service-workers-their-life-cycle-and-use-cases-52b19ad98b58
+coverImage: 'https://cdn-images-1.medium.com/max/1000/1*oOcY2Gn-LVt1h-e9xOv5oA.jpeg'
+date: 2018-11-24 22:04:00
+slug: /cach-javascript-hoat-dong-p8-service-workers-vong-doi-va-cac-truong-hop-su-dung
+---
+
+Bạn có lẽ đã biết rằng [Progressive Web Apps](https://developers.google.com/web/progressive-web-apps/) chỉ có thể phổ biến hơn khi chúng hướng tới trải nghiệm người dùng (UX) mượt mà hơn, giống như là tạo 1 native app hơn là một trải nghiệm mang phong cách trình duyệt.
+
+Một trong số những yêu cầu khi xây dựng PWA là làm nó cực kỳ đáng tin cậy ở khoản loading: nó có thể chạy kể cả trong tình trạng internet không ổn định hoặc rớt mạng.
+
+Trong bài này, chúng ta sẽ đào sâu vào Service Workers: cách chúng hoạt động và chúng ta nên quan tâm đến đâu. Cuối bài, team tác giả có một số lợi ích độc đáo của Service Workers mà chúng ta nên dùng đồng thời chia sẻ kinh nghiệm của họ tại [SessionStack](https://www.sessionstack.com/).
+
+# Khái quát
+
+Nếu bạn muốn hiểu rõ mọi thứ về Service Workers, bạn cần phải bắt đầu với bài viết trước về [Web Workers](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-7---Thanh-phan-cua-WebWorker---5-truong-hop-su-dung).
+
+Về cơ bản, Service Worker chỉ là 1 loại của Web Worker và cụ thể hơn là nó giống như 1 [Shared Worker](https://developer.mozilla.org/en-US/docs/Web/API/SharedWorker):
+
+- Service Worker chạy trong global context của chính nó
+- Nó không thể gắn kết với 1 trang cụ thể
+- Không thể truy cập vào DOM
+
+Một trong những lý do tại sao Service Worker API rất tuyệt vời là chúng cho phép webapp hỗ trợ trải nghiệm khi offline, cho phép developer hoàn toàn điều khiển luồng sử dụng.
+
+# Vòng đời của Service Worker
+
+Vòng đời của một service worker là hoàn toàn tách biệt với web page. Nó bao gồm các giai đoạn sau:
+
+- Tải về (Download)
+- Cài đặt (Installation)
+- Kích hoạt (Activation)
+
+## Download
+
+Đây là khi trình duyệt tải file .js chứa Service Worker
+
+## Cài đặt
+
+Để cài đặt một Service Worker cho webapp của bạn thì bạn cần phải đăng ký nó trước trong code Javascript. Khi Service Worker đã đăng ký xong, nó sẽ nhắc nhở tình duyệt khởi động một bước cài đặt chạy nền Service Worker.
+
+Bằng cách đăng ký Service Worker, bạn đã thông báo cho trình duyệt file Javascript của worker nằm ở đâu. Cùng xem ví dụ bên dưới:
+
+```javascript
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').then(
+      function (registration) {
+        // Đăng ký thành công
+        console.log('ServiceWorker registration successful');
+      },
+      function (err) {
+        // Đăng ký thất bại
+        console.log('ServiceWorker registration failed: ', err);
+      }
+    );
+  });
+}
+```
+
+Code sẽ kiểm tra nếu môi trường hiện tại có support Service Worker hay không. Nếu như có thì file /sw.js sẽ được đăng ký.
+
+Bạn có thể gọi phương thức register() mỗi khi một trang load lên mà không phải lo lắng gì, trình duyệt sẽ sẽ tự kiểm tra nếu service worker đã được đăng ký hay chưa và tự xử lý một cách phù hợp.
+
+Một điểm quan trọng ở phương thức register() là vị trí của file service worker. Trong trường hợp này bạn có thể thấy rằng file service worker đang ở root của domain. Nghĩa là phạm vi (scope) của service worker sẽ bao hàm toàn bộ origin. Nói cách khác, service worker này sẽ nhận các sự kiện fetch (mà chúng ta sẽ thảo luận sau) cho mọi thứ trên domain này. Nếu ta đăng ký file service worker ở /example/sw.js thì service worker chỉ có thể thấy các sự kiện fetch cho trang có URL bắt đầu với /example/ (ví dụ: /example/page/1, /example/page/2)
+
+Trong giai đoạn cài đặt, tốt nhất ta nên load và cache những tài nguyên dạng tĩnh (static asset). Một khi các tài nguyên đã được cache thành công thì quá trình cài đặt Service Worker cũng hoàn thành. Nếu không (load fail), Service Worker sẽ thử lại (retry). Một khi đã thành công, bạn sẽ biết các static asset đang nằm trong cache.
+
+Bạn sẽ tự hỏi nếu như quá tình đăng ký diễn ra sau sự kiện load thì được không. Điều này không bắt buộc, nhưng đó là cách tốt nhất và được đề nghị làm theo.
+
+Tại sao? Giả sử một user lần đầu tiên ghé thăm webapp của bạn. Không có service worker nào cả và trình duyệt không có cách nào để biết trước có hay không một service worker cần được cài đặt. Nếu như Service Worker đã được cài đặt, trình duyệt sẽ dành ra 1 lượng CPU và bộ nhớ cho tiến trình đó, ngược lại thì trình duyệt sẽ dành toàn bộ cho quá trình render web page.
+
+Điểm mấu chốt là nếu bạn chỉ cài đặt Service Worker trên trang của bạn thì bạn đang mạo hiểm về độ delay của quá trình loading & render chứ không phải đang làm cho trang có thể sẵn sàng cho người dùng một cách nhanh nhất có thể.
+
+Lưu ý rằng điều này chỉ quan trọng cho lần đầu tiên ghé thăm trang. Những lần ghé thăm sau thì không bị ảnh hưởng với quá trình cài đặt Service Worker. Một khi Service Worker đã được kích hoạt trong lần đầu ghé thăm trang, nó có thể xử lý các sự kiện loading/caching cho những lần ghé thăm kế tiếp. Điều này rất có ý nghĩa bởi vì nó cần phải sẵn sàng để xử lý trường hợp kết nối mạng bị hạn chế.
+
+## Kích hoạt
+
+Sau khi Service Worker cài đặt, bước tiếp theo là kích hoạt nó. Bước này là cơ hội tuyệt vời để quản lý cache trước đó.
+
+Một khi đã kích hoạt, Service Worker sẽ bắt đầu kiểm soát toàn trang nằm trong phạm vi của nó. Một sự thật rất thú vị: page nào đăng ký Service Worker lần đầu tiên sẽ không bị điều khiển cho đến khi nó load lại. Một khi Service Worker kiểm soát, nó sẽ có những trạng thái sau:
+
+- Nó sẽ xử lý các sự kiện fetch & message diễn ra khi một request mạng hoặc message được tạo ra từ page.
+- Nó sẽ bị hủy bỏ để giải phóng bộ nhớ.
+
+Dưới đây là vòng đời của nó:
+
+![](https://cdn-images-1.medium.com/max/1000/1*mVOrpKC9pFTMg4EXPozoog.png)
+
+# Xử lý quá trình cài đặt bên trong Service Worker
+
+Sau khi page xoay vòng quá trình đăng ký, ta cùng tìm hiểu điều gì diễn ra bên trong script của Service Worker, code này xử lý sự kiện cài đặt bằng cách thêm một event listener vào instance của Service Worker.
+
+Đây là những bước cần thiết khi xử lý sự kiện cài đặt
+
+- Mở cache
+- Cache các file
+- Xác nhận tất cả các asset cần thiết đều đã được cache.
+
+Dưới đây là quá trình cài đặt đơn giản bên trong Service Worker:
+
+```javascript
+var CACHE_NAME = 'my-web-app-cache';
+var urlsToCache = [
+  '/',
+  '/styles/main.css',
+  '/scripts/app.js',
+  '/scripts/lib.js',
+];
+
+self.addEventListener('install', function (event) {
+  // event.waitUntil nhận một promise để biết quá trình
+  // cài đặt mất bao lâu và có thành công hay không.
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function (cache) {
+      console.log('Opened cache');
+      return cache.addAll(urlsToCache);
+    })
+  );
+});
+```
+
+Nếu tất cả các file đều đã được lưu cache thành công thì service worker sẽ được cài đặt. Nếu một file nào đó không download được thì bước cài đặt sẽ bị fail. Vì thế hãy cẩn thận với những file bạn truyền vào.
+
+Xử lý sự kiện cài đặt hoàn toàn không bắt buộc và bạn có thể bỏ qua, trong trường hợp đó bạn không cần phải thực hiện thêm bước nào nữa.
+
+# Cache request trong quá trình thực thi (runtime)
+
+Phần này thực sự thú vị một cách xuất sắc. Đây là nơi bạn sẽ biết làm thế nào để can thiệp request và trả về cache đã được tạo (và tạo mới).
+
+Sau khi Service Worker cài đặt xong và user điều hướng đến page khác hoặc refresh lại page hiện tại, Service Worker sẽ nhận được sự kiện fetch. Đây là một ví dụ thể hiện làm thế nào để trả về những asset đã cache hoặc thực hiện một request mới và cache kết quả:
+
+```javascript
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    // Phương thức này xem xét request và tìm xem có
+    // kết quả nào đã được cache từ tất cả các cache
+    // mà Service Worker đã tạo.
+    caches.match(event.request).then(function (response) {
+      // Nếu tìm thấy cache thì trả về response.
+      if (response) {
+        return response;
+      }
+
+      // Nhân bản request. Một request là 1 stream và chỉ có thể sử dụng 1 lần.
+      // Bởi vì chúng ta đang xài 1 cái cho cache và 1 cái cho trình duyệt để fetch,
+      // nến ta cần phải nhân bản request.
+      var fetchRequest = event.request.clone();
+
+      // Cache không tìm thấy nên ta cần thực hiện fetch
+      // để tạo request tới mạng và trả về dữ liệu nếu tìm thấy
+      // thứ gì đó.
+      return fetch(fetchRequest).then(function (response) {
+        // Kiểm tra nếu ta nhận được response hợp lệ.
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
+
+        // Nhân bản response bởi vì nó cũng không phải là 1 stream.
+        // Bởi vì chúng ta muốn trình duyệt sử dụng response cũng như
+        // cache sử dụng response, ta cần nhân bản nó thành 2 stream.
+        var responseToCache = response.clone();
+
+        caches.open(CACHE_NAME).then(function (cache) {
+          // Thêm request vào cache phục vụ sau này
+          cache.put(event.request, responseToCache);
+        });
+
+        return response;
+      });
+    })
+  );
+});
+```
+
+Tóm gọn lại thì đây là những điều đã diễn ra:
+
+- event.respondWith() sẽ xác định làm thế nào chúng ta phản hồi với sự kiện fetch. Ta truyền một promise từ caches.match(), hàm đang kiểm tra request và tìm kiếm nếu có bất kỳ kết quả đã được cache sẵn nào từ những cache đã được tạo trước đó.
+- Nếu có cache, response được lấy ra.
+- Ngược lại, fetch được thực thi.
+- Kiểm tra nếu trạng thái là 200\. Chúng ta sẽ kiểm tra kiểu response là cơ bản, nghĩa là nó sẽ chỉ ra request từ origin của chúng ta. Request đến các asset của bên thứ 3 không thể cache được trong trường hợp này.
+- Response được thêm vào cache.
+
+Request và response phải được nhân bản (clone) vì chúng là [stream](https://streams.spec.whatwg.org/). Thân (body) của một stream chỉ có thể sử dụng 1 lần. Và khi ta cần dùng nó, ta phải nhân bản nó bởi vì trình duyệt cũng cần sử dụng nó nữa.
+
+# Cập nhật Service Worker
+
+Khi một user ghé thăm webapp của bạn, trình duyệt sẽ thử download lại file .js chứa code Service Worker. Tác vụ này sẽ được chạy nền.
+
+Nếu có một chút khác biệt dù chỉ một byte giữa file Service Worker mới download về và file cũ thì trình duyệt cũng sẽ giả định rằng có sự thay đổi và Service Worker mới phải khởi tạo lại.
+
+Service Worker mới sẽ bắt đầu khởi tạo và cài đặt. Tuy nhiên vào thời điểm này, Service Worker cũ vẫn đang kiểm soát page trên webapp của bạn, nghĩa là Service Worker mới sẽ nằm trong trạng thái chờ đợi.
+
+Một khi trang đang mở được đóng lại, Service Worker cũ sẽ bị hủy bởi trình duyệt và Service Worker mới cài đặt sẽ chiếm quyền kiểm soát toàn bộ. Đây là khi sự kiện kích hoạt của nó được kích hoạt.
+
+Tại sao lại cần phải làm tất cả điều này? Là để tránh vấn đề khi có 2 phiên bản webapp chạy đồng thời trong các tab khác nhau. Việc này diễn ra một cách rất phổ biến và có thể tạo ra những lỗi tồi tệ (ví dụ: bạn có schema khác nhau trong khi lưu trữ dữ liệu local trên trình duyệt).
+
+# Xóa dữ liệu trong cache
+
+Bước phổ biến nhất trong callback kích hoạt là quản lý cache. Bạn sẽ cần phải làm điều này ngay bởi vì nếu bạn dọn dẹp cache cũ trong bước cài đặt, Service Worker cũ sẽ dừng lại một cách đột ngột và không thể phân phối các file từ cache đó nữa.
+
+Dưới đây là ví dụ cách bạn có thể xóa vài file không nằm trong danh sách an toàn trong cache (trong trương hợp này là có chữ page-1 và page-2 trong tên của nó)
+
+```javascript
+self.addEventListener('activate', function (event) {
+  var cacheWhitelist = ['page-1', 'page-2'];
+
+  event.waitUntil(
+    // Lấy tất cả key từ cache.
+    caches.keys().then(function (cacheNames) {
+      return Promise.all(
+        // Lặp qua mảng các file.
+        cacheNames.map(function (cacheName) {
+          // Nếu file trong cache không nằm trong danh sách an toàn
+          // thì nó sẽ bị xóa.
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+```
+
+# Yêu cầu HTTPS
+
+Khi xây dựng webapp, bạn có thể sử dụng Service Worker qua localhost nhưng một khi đã deploy nó lên production, bạn cần chuẩn bị HTTPS (và đó cũng là lý do cuối cùng bạn cần đến HTTPS).
+
+Sử dụng Service Worker, bạn có thể chiếm quyền kết nối và ngụy tạo response. Nếu không dùng HTTPS, webapp của bạn trở thành đối tượng của cách tấn công [kẻ-trung-gian](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) (man-in-the-middle).
+
+Để an toàn hơn, bạn cần phải đăng ký Service Worker với page được phân phối qua HTTPS để bạn biết được Service Worker nào trình duyệt nhận về mà không bị thay đổi khi lưu thông qua mạng.
+
+# Các trình duyệt hỗ trợ
+
+Sự hỗ trợ cho Service Worker ngày càng được cải thiện:
+
+![](https://cdn-images-1.medium.com/max/1000/1*6o2TRDmrJlS97vh1wEjLYw.png)
+
+Bạn có thể theo dõi tiến độ cho tất cả các trình duyệt tại đây: [https://jakearchibald.github.io/isserviceworkerready/](https://jakearchibald.github.io/isserviceworkerready/)
+
+# Service Workers mở ra chân trời mới
+
+Một số tính năng độc đáo mà Service Worker cung cấp:
+
+- **Push notifications **: cho phép user tham gia vào lắng nghe cập nhật theo thời gian
+- **Đồng bộ dưới nền (background sync)**: cho phép bạn tạm hoãn các hành động cho tới khi user có kết nối ổn định. Bằng cách này bạn có thể đảm bảo rằng bất kỳ thứ gì mà user cần gửi thì chắc chắn nó sẽ được gửi đi.
+- **Đồng bộ định kỳ (periodic sync - tương lai)**: API cung cấp khả năng quản lý đồng bộ dưới nền theo chu kỳ.
+- **Ranh giới ảo (Geofencing - tương lai)**: bạn có thể định nghĩa params, còn gọi là những geofence bao quanh một khu vực. Webapp sẽ nhận thông báo khi có một thiết bị vượt qua geofence, điều này cho phép bạn cung cấp trả nghiệm có ích dựa trên vị trí địa lý của user.
+
+Mỗi mục này sẽ được thảo luận chi tiết hơn trong các bài viết khác.
+
+Team tác giả đang nỗ lực không ngừng để mang lại trải nghiệm UX mượt mà nhất có thể cho SessionStack, tối ưu hóa thời gian tải trang và thời gian phản hồi.
+
+Khi bạn replay lại 1 session của user trên [SessionStack](https://www.sessionstack.com/) (hoặc xem nó trong thời gian thực), phần SessionStack front-end sẽ không ngừng lấy dữ liệu từ server về để tạo ra một trải nghiệm liền mạch như lưu trong buffer. Một khi bạn đã tích hợp thư viện của SessionStack vào trong webapp, nó sẽ bắt đầu thu thập dữ liệu liên tục về thay đổi trên DOM, tương tác người dùng, request mạng, biệt lệ không được xử lý và thông báo lỗi.
+
+Khi một phiên làm việc được replay hoặc stream theo thời gian thực thì SessionStack phục vụ tất cả dữ liệu cho phép bạn thấy mọi thứ về trải nghiệm người dùng ở góc độ trình duyệt của user (cả về mặt kỹ thuật lẫn hình ảnh). Những công việc này cần phải được thực hiện cực nhanh để không làm cho user phải chờ đợi.
+
+Bởi vì dữ liệu được front-end kéo về nên đây là một sàn diễn tuyệt vời cho Service Worker có thể "tỏa sáng" mà xử lý những trường hợp như reload player và stream mọi thứ thêm vài lần nữa. Xử lý kết nối mạng bị chậm cũng cực kỳ quan trọng.

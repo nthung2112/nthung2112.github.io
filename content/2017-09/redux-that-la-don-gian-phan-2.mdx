@@ -1,0 +1,173 @@
+---
+title: Redux thật là đơn giản (Phần 2)
+author: Hung Tan Nguyen
+date: 2017-09-22 14:13:23
+sourceUrl: https://medium.com/innovatube/redux-v%E1%BB%9Bi-react-native-63ea25062084
+tags: [javascript, react, redux]
+slug: /redux-that-la-don-gian-phan-2
+---
+
+### Redux với React Native
+
+![](https://cdn-images-1.medium.com/max/1600/1*49G6uGo35MbTX5n7or6zuA.jpeg)
+
+> Bài trước [**_Nguyên Lý của Redux_**](https://medium.com/innovatube/redux-th%E1%BA%ADt-l%C3%A0-%C4%91%C6%A1n-gi%E1%BA%A3n-ph%E1%BA%A7n-1-76a3fa2c31ab)
+> các bạn đã nắm được cơ bản phần lý thuyết về Redux và dùng cho việc gì, sau đây
+> chúng ta sẽ đi vào áp dụng nó với **React** hoặc React Native, ở đây mình chọn
+> **React Native** vì nó vẫn đang còn khá HOT :D (Thực ra React hay React Native
+> thì đều dùng Redux là y hệt nhau)
+
+Đầu tiên các bạn vào link:[https://facebook.github.io/react-native/docs/getting-started.html](https://facebook.github.io/react-native/docs/getting-started.html) để làm theo và tạo 1 project với React Native.
+
+_Lưu ý: Máy phải được cài sẵn_ **_yarn (_**[https://yarnpkg.com/en/](https://yarnpkg.com/en/)) hoặc dùng npm sau khi đã cài **node**, vì nếu cài yarn thì nó sẽ đồng thời cài node luôn cho bạn.
+
+#### Phần 1: Tạo giao diện màn hình với React Native
+
+Sau khi install xong, tạo thêm thư mục src -> file Main.js như sau:
+
+![](https://cdn-images-1.medium.com/max/1600/1*NFjZttazBbGCbcf2lfsUEQ.png)
+
+Ở đây mình sẽ minh họa tạo chức năng hết sức đơn giản là **Bấm — Tăng — Giảm 1 số** dùng React Native + Redux có màn hình hiển thị lên như sau:
+
+![](https://cdn-images-1.medium.com/max/1600/1*UbvASuQS5ASxh8reRU6C8g.png)
+
+Main.js
+
+<Gist id="5e0e74a531f6637ba4c7e1c89f53e27f" />
+
+Trong thư mục components ta tạo thêm 1 component có tên **Button**.js, thực tế bạn không cần phải viết hẳn 1 component chỉ render mỗi cái Button như này, do mình muốn tách nhỏ component nên tạm lấy ví dụ viết 1 component con riêng ra. (trong component này mình có dùng react-native-elements cài đặt nó qua yarn bằng lệnh sau:yarn add react-native-elements
+
+<Gist id="f5b5be1a8b2b691132fd379acef13b3a" />
+
+Component để hiển thị text number:
+
+<Gist id="54801151c4a99c165358812cfe539e12" />
+
+Okay tới đây coi như xong giao diện, như vậy bạn đã có 1 app counter khá đơn giản :D và hoàn toàn có thể làm dùng React Native đơn giản hơn nhiều, nhưng để hiểu về Redux thì chúng ta nên bắt đầu từ việc đơn giản đã.
+
+#### Phần 2: Cài đặt Redux
+
+**Step1:** **install Redux, React-Redux dependencies**
+
+yarn add redux react-redux
+
+**Step 2:** **Tạo cấu trúc thư mục project như hình:**
+
+![](https://cdn-images-1.medium.com/max/1600/1*zGivefFkBikPcUMfF6Tizg.png)
+
+3 nhân tố của Redux là **actions**, **reducers** và **store** tương ứng với 3 thư mục trong project.
+
+#### **actions:**
+
+- index.js chứa các action (nó sẽ export ra cho các class có thể gọi tới các function bên trong nó)
+
+<Gist id="377b80d980e269af5dc4fdbd7f463076" />
+
+- types.js định nghĩa các hằng số về kiểu của actions:
+
+<Gist id="518d34a4f221f88f471fc6ea1827a97f" />
+
+#### reducers:
+
+- Tạo 1 reducer **_counterReducer_**: làm nhiệm vụ update state counter mỗi khi có action click
+
+<Gist id="f17d4c184b9c5e997218bdcd6548b5d0" />
+
+- Tiếp theo tạo file index.js, file này có nhiệm vụ **combine** các **reducers** con thành 1 **reducer** duy nhất để đưa vào store
+
+<Gist id="1cec9897584824c616ff473d75b6628a" />
+
+#### Store:
+
+tạo 1 file index.js trong thư mục store. (Mình có config thêm redux-devtools-extension để tiện debug và xem store khi redux hoạt động trên extention của chrome).
+
+<Gist id="8133759e2d6ffb405a51d23f90c3b49d" />
+
+**Step 3: connect React component với store của Redux**
+
+Việc cần làm là làm sao để kết nối toàn bộ components của app với **store** của Redux.
+
+Thư viện **react-redux** đã cung cấp 1 thằng có tên **Provider** để làm cầu nối cho React và Redux, chúng ta chỉ việc bọc nó bao ngoài root component của React và truyền 1 tham số duy nhất là **store** vào (store đã được tạo ở thư mục store và được import vào file này).
+
+<Gist id="11800a8f9c828bf7353fc89cfabea70e" />
+
+**Step 4: Gọi 1 action từ 1 component và map data từ store ra View**
+
+Quay lại bài trước như đã biết thì flow của redux:
+
+> action → reducer → store → View
+
+3 bước đã thực hiện xong ở trên, việc còn lại là store và View tương tác như nào, câu hỏi đặt ra là :
+
+- Phát đi 1 action từ component → store như thế nào?
+- Cập nhật data thay đổi từ store → View ra sao?
+
+Nhiệm vụ quan trọng này được thực hiện bởi hàm **_connect()_** trong react-redux.
+
+![](https://cdn-images-1.medium.com/max/1600/1*Oc-Ee1lE8mFETwl4tvzoVg.png)
+
+Hàm connect() có 2 tham số:
+
+- mapDispatchToProps(dispatch) nhiệm vụ map hàm dispatch() của store trở thành 1 thuộc tính của props của component đó, cụ thể ở code bên dưới thì actions chính là 1 props của component đó và giờ muốn phát đi 1 action ta chỉ việc gọi this.props.actions.tên*action*
+
+<Gist id="22c3b3169bc5ce92d86e17e4e5967d23" />
+
+- mapStateToProps(state) nhiệm vụ hết sức đơn giản giống như cái tên của nó, biến các state từ store thành props của component và sau đó show ra View
+
+<Gist id="e953692d8b678ba28ed01d21f8bebadd" />
+
+Để đơn giản và ngắn gọn hơn ta sẽ bỏ đi hàm mapDispatchToProps(dispatch) và thay bằng việc truyền trực tiếp actions vào hàm connect() cuối cùng sẽ là:
+
+connnect(mapStateToProps, actions)(COMPONENT)
+
+Quay trở lại code React Native ở trên, ở phần View ta có:
+
+**main.js**
+
+<Gist id="6bf68818ccb0c4f270a80b5534eb6a74" />
+
+Giải thích:
+
+- Actions được import từ thư mục actions → được truyền vào là tham số thứ 2 của hàm connect()
+- Mỗi khi button đc bấm thì ta gọi tới hàm handle tương ứng để xử lý actions, nhớ rằng đã thực hiện connnect(null, actions) ở trên thì bây giờ các actions export ra từ file index trong thư mực actions trở thành các thuộc tính của props trong component Main.js → khi gọi tới action thì ta chỉ việc gọi this.props.action*name_tương*ứng\_
+
+Tiếp theo là hiển thị ra **View** ở component **_child.js_**
+
+<Gist id="e594ff32394bdcaada46513ab6476ae1" />
+
+Ở file này ta vừa gán thuộc tính _counter : state.counter_ lúc này counter cũng trở thành 1 props của component Child → gọi show ra View ta chỉ cần gọi như thông thường `<Text>{this.props.counter}</Text>`
+
+Như vậy là 1 app **counter** đơn giản bằng React Native và Redux đã thực hiện xong tóm lại flow như sau:
+
+> 1\. View gồm 2 button **_Increase_** và **_Decrease_** và 1 component hiển thị number
+
+> 2\. Khi Button được click → dispatch() tới 1 **_action creator_** có tên counterIncrease()
+
+> 3\. counterIncrease() sẽ tạo ra 1 **Object** (Trong redux action phải là 1 plain object có thuộc tính là type và payload, type là bắt buộc) ở đây chỉ có 1 thuộc tính `{type:"INCREASE"}` sau đó nó truyền tới `counterReducer()` để xử lý.
+
+> 4\. `counterReducer(state, action) => kiểm tra xem action có kiểu type = "increase" trả ra 1 state mới là: `state + 1` (state của redux là immutable)
+
+> 5 ở component View(**Child**) hiển thị number ta sẽ dùng hàm mapStateToProps(state) đẻ nhận state là counter rồi update vào View.
+
+![](https://cdn-images-1.medium.com/max/1600/1*T7GbIXCBQIoayv2A6EUs7Q.png)
+
+→ App đã chạy ngon lành :D
+
+Giả sử bây giờ yêu cầu bài toán có thay đổi chút như sau:
+
+- Nếu click vào **_nút tăng hoặc giảm mà sau 1s_** con số mới thay đổi.
+- Nâng cao hơn chút là **_nếu click vào button increase number thì number chạy từ 0 cho tới 1 con số bất kỳ trong khoảng 1s rồi dừng lại._**
+
+Bình thường ở bài toán trên ta bấm nút thì ngay lập tức action đáp trả kết quả, nhưng trong thực tế có nhiều bài toán ko lập tức có thay đổi luôn điển hình như call api tới server để fetch data, thì phải mất 1 lúc kết quả mới được trả về. Hay như bài toán bấm nút thì sau 1s mới thay đổi → thì những điều này người ta gọi đó là side-effect .
+
+Như đã biết thì Redux yêu cầu 1 object được trả ra phải là Plain object: `{type: ACTION_TYPE, payload:params}` và reducer phải là pure function,hay nói cách khác là hoàn toàn ko có side-effect.
+
+Okay có lẽ bài thứ 2 về redux đến đây là dài rồi :))
+
+Mình sẽ giải quyết vấn đề side-effect ở bài sau dùng Redux-middleware
+
+Hẹn gặp lại các bạn về bài cuối của Redux.
+
+> **Source code ví dụ trên:** check out branch lesson_2
+
+[https://github.com/tridungbk2010/react-native-class](https://github.com/tridungbk2010/react-native-class)

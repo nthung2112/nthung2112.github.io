@@ -1,0 +1,279 @@
+---
+title: Memory Leaks trong Javascript
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/1600/0*zrLTiLtPpTx3nb9-.jpg'
+sourceUrl: >-
+  https://auth0.com/blog/2016/01/26/four-types-of-leaks-in-your-javascript-code-and-how-to-get-rid-of-them
+date: 2018-07-24 11:41:00
+slug: /memory-leaks-trong-javascript
+---
+
+## Giới thiệu
+
+Memory leaks là vấn đề mà mọi deveploper đều sẽ gặp phải khi code. Memory leaks sẽ dấn đến việc ứng dụng sẽ chạy chậm hơn, crashes, hay có thể ảnh hưởng đến các ứng dụng khác. Vậy memory leaks là gì?
+
+Memory leaks có thể được định nghĩa là một bộ nhớ (memory) không được sử dụng trong ứng dụng nữa nhưng vì một lý do nào đó mà nó chưa được giải phóng và trả về hệ điều hành hoặc một cái pool chứa các bộ nhớ (memory) chưa sử dụng. Các ngôn ngữ lập trình khác nhau sẽ có các cách khác nhau để quản lý bộ nhớ. Những cách quản lý bộ nhớ này sẽ giúp giảm thiểu khả năng bị memory leaks của chương trình. Tuy nhiên, việc xác định một vùng bộ nhớ có còn được sử dụng hay không lại là một vấn đề khó có thể xác định. Chỉ có developer mới có khả năng quyết định xem là vùng nhớ này nên được giải phóng hay không. Một số ngôn ngữ (như javascript) cung cấp tính năng tự động giải phóng bộ nhớ cho developer, một số khác thì developer cần phải tự mình giải phóng bộ nhớ khi không sử dụng đến nó nữa.
+
+#### Quản lý bộ nhớ trong JS
+
+Javascript là một trong những ngôn ngữ có _garbage collection_. Những ngôn ngữ lập trình như Javascript thế này sẽ thay developer quản lý bộ nhớ bằng cách kiểm tra định kỳ các vùng nhớ được cấp phát trước đó có có thể được "với tới" bởi các phần khác trong ứng dụng. Có thể nói cách khác là những ngôn ngữ như Javascript sẽ giúp biến vấn đề từ _"những vùng nhớ nào vẫn còn cần trong ứng dụng"_ thành _"những vùng nhớ nào có thể được ứng dụng access đến"_. Sự khác biệt của 2 vấn đề là không nhiều nhưng lại rất quan trọng: chỉ developer mới có thể biết được là vùng nhớ nào còn cần để chạy tuy nhiên, việc xác định xem một vùng nhớ có thể vươn tới không trong ứng dụng thì có thể làm tự động bởi thuật toán.
+
+## Memory leaks trong JS
+
+Lý do chính của memory leaks trong các ngôn ngữ có garbage collection là các reference không mong muốn vào bộ nhớ (unwanted references), tức là một vùng nhớ được trỏ đến mà lại không được sử dụng trong ứng dụng. Để có thể hiểu rõ hơn về nó, trước hết ta cần tìm hiểu các hoạt động của garbage collector, cách nó xác định một vùng nhớ có thể được "với tới" (reach) bởi ứng dụng.
+
+#### Mark and sweep
+
+Hầu hết các garbage collector đều sử dụng thuật toán `mark-and-sweep` để thực hiện việc giải phóng bộ nhớ. Thuật toán này bao gồm các bước sau:
+
+1.  Đầu tiên, garbage collector sẽ xây dựng một danh sách các `roots`. `Roots` thực chất là các biến toàn cục mà có reference được lưu trong code. Trong Javascript, `window` chính là một biến toàn cục như vậy. `Window` sẽ luôn hiện hữu trong chương trình nên garbage collector có thể coi nó và tất cả các con của nó luôn hiện hữu.
+2.  Tất cả `roots` và con của chúng sẽ được đánh dẫu là đang hoạt động. Tất cả những vùng nhớ mà có thể được vươn tới từ `roots` thì đều được coi là đang hoạt động và không đánh dấu là rác (garbage).
+3.  Tất cả các vùng nhớ mà không được đánh dẫu là rác (garbage) thì bây giớ đều sẽ được coi là rác. Bây giờ thì các collector có thể giải phóng các vùng nhớ này.
+
+Mặc dù thuật toán này được tối ưu bởi các GC (garbage collector) hiện đại tuy nhiên cơ chế của nó vẫn không đổi: những vùng nhớ vươn tói được thì được coi là đang hoạt động, những vùng nhớ khác sẽ được coi là rác.
+
+Những tham chiếu không mong muốn (Unwanted references) là những tham chiếu đến các vùng bộ nhớ mà developer biết là nó không được cần đến nữa nhưng vì lý do nào đó mà nó vẫn được giữ lại trong hệ thống. Trong JS, những tham chiếu không mong muốn này là các biến (variables) được giữ đâu đó trong code mà nó sẽ không được sử dụng đến nữa nhưng lại trỏ đến một vùng nhớ mà cần được giải phóng.
+
+Để hiểu được memory leaks trong JS, ta cần biết được là khi nào thì một tham chiếu bị lãng quên.
+
+## 3 loại memory leaks trong JS
+
+### 1: Biến toàn cục
+
+Javascript có một cơ chế là đặt biến mà không cần khai báo. Ví dụ:
+
+```javascript
+a = 'value';
+console.log(a); //"a"
+```
+
+Khi một biến được khai báo như trên thì JS sẽ tự động gán nó vào `global` object (`window` trên browser). Nếu như biến này chỉ hoạt động trên phạm vi toàn cục (global scope) thì cũng không có sự khác biệt cho lắm. Tuy nhiên, nếu nó được định nghĩa trong một hàm thì đó lại là chuyện khác. Ví dụ:
+
+```javascript
+function foo() {
+  bar = 'đây là biến toàn cục ẩn';
+}
+```
+
+Đoạn code trên sẽ tương đương với đoạn code sau trên browser:
+
+```javascript
+function foo() {
+  window.bar = 'đây là biến toàn cục';
+}
+```
+
+Nếu khai báo `bar` trong phạm vi của hàm `foo` mà lại không sử dụng `var` để khai báo thì biến `bar` sẽ được tạo với phạm vi toàn cục, và đây là một ví dụ điển hình về memory leaks.
+
+Một cách khác mà có thể vô tình tạo ra biến toàn cục đó là thông qua `this`:
+
+```javascript
+function foo() {
+  this.variable = 'có thể là biến toàn cục';
+}
+
+foo();
+```
+
+Vì `this` trong hàm sẽ trỏ đến biến root toàn cục (`window`) nếu hàm đó được gọi trực tiếp không thông qua object nào khác nên ở ví dụ trên, biến `variable` sẽ được gắn vào phạm vi toàn cục.
+
+Một cách để giảm thiểu những lỗi trên đó là thêm `"use strict;"` vào dòng đầu tiên của file JS. Nó sẽ giúp ngăn chặn việc khai báo biến toàn cục như trên.
+
+**Chú ý khi làm việc với biến toàn cục**
+
+Biến toàn cục không bao giờ được giải phóng bộ nhớ tự động theo thuật toán `mark-and-sweep` ở trên. Vì thế, biến toàn cục chỉ nên được sử dụng để lưu tạm dữ liệu để xử lý. Nếu cần lưu một lượng lớn dữ liệu vào biến toàn cục thì cần đảm bạo là nó sẽ bị gán về null hoặc gán lại dữ liệu khi mà bạn đã sử dụng xong nó.
+
+### 2: Callback và timer bị lãng quên
+
+Sau đây là một ví dụ dẫn đến memory leak khi sử dụng `setInterval`:
+
+```javascript
+var data = getData();
+setInterval(function(){
+  var node = document.getElementById("Node");
+  if(node){
+	node.innerHTML = JSON.stringify(someResource));
+  }
+}, 1000);
+```
+
+Đây là một ví dụ về một timer bị treo. Timẻ bị treo tức là khi timer tham chiếu đến các node hoặc dữ liệu mà không còn được sử dụng nữa. Ở ví dụ trên, nếu như `node` bị xóa ở một lúc nào đấy thì toàn bộ đoạn code xử lý trong hàm callback của interval sẽ không cần đến nữa. Tuy nhiên, vì interval vẫn còn hoạt động nên các vùng nhớ được sử dụng trong hàm callback của interval cũng không được giải phóng (muốn giải phóng cần dừng interval lại). Tiếp đó, các object từ bên ngoài mà được hàm callback của interval tham chiếu đến cũng không thể được giải phóng vì vẫn có thể vươn tới được thông qua hàm callback kia. Theo ví dụ trên thì đó là `data`.
+
+Một trường hợp có thể dẫn đến leaks đó là do các observers object (DOM và event listener của chúng). Điều này chỉ ảnh hưởng đến các trình duyệt cũ (vd: IE6) vì các trình duyệt mới sẽ tự động làm điều này cho chúng ta. Đây là một bug của GC của IE6 và dẫn đến việc tham chiếu quay vòng.
+
+### 3: Tham chiếu tới các DOM đã bị xóa
+
+Có những lúc bạn muốn lưu các DOM vào một số cấu trúc dữ liệu như mảng hoặc object trong JS code để làm một loạt các tác vụ nào đấy. Ví dụ bạn muốn update dữ liệu của một vài element nào đấy thì việc lưu các element này vào một mảng là hoàn toàn hợp lý. Khi điều này xảy ra thì sẽ có 2 tham chiếu đên DOM element này: một là từ DOM tree, hai là từ đối tượng mảng của JS. Nếu bạn muốn xóa các element này thì bạn cần phải xóa toàn bộ các tham chiếu tới chúng để có thể giải phóng bộ nhớ.
+
+Ví dụ:
+
+```javascript
+var elements = {
+  button: document.getElementById('button'),
+  image: document.getElementById('image'),
+  text: document.getElementById('text'),
+};
+
+function doStuff() {
+  image.src = 'http://some.url/image';
+  button.click();
+  console.log(text.innerHTML);
+}
+
+function removeButton() {
+  // button là con của body.
+  document.body.removeChild(document.getElementById('button'));
+
+  // Ở đây thì button vẫn được tham chiểu đến bởi elements. Nói cách khác là
+  // nó vẫn nằm trong bộ nhớ và không thể được giải phóng.
+}
+```
+
+Còn một vấn đề quan trọng nữa là khi tham chiếu đến một node lá hoặc một inner node của DOM tree, ví dụ như một ô trong bảng (`<td>` của `<table>`). Nếu bạn tham chiếu đến `<td>` này trong JS code thì khi bạn xóa `<table>` chứa node này thì GC sẽ không giải phóng được cả table chứ không phải là chỉ mỗi `<td>` node không được giải phóng. Vì node con còn tham chiếu đến node cha nên nó sẽ được GC coi là vẫn được tham chiếu và bỏ qua nó. Vì thế nên cẩn thận khi tham chiếu đến các DOM.
+
+### 4: Closures
+
+Closures có nghĩa đơn giản là hàm nằm trong phạm vi của một hàm khác có thể tham chiếu tới các biến của hàm bao nó. Vì sao `Closures` có thể gây ra leak, hãy xem ví dụ sau:
+
+```javascript
+var theThing = null;
+var replaceThing = function () {
+  var originalThing = theThing;
+  var unused = function () {
+    if (originalThing) console.log('hi');
+  };
+  theThing = {
+    longStr: new Array(1000000).join('*'),
+    someMethod: function () {
+      console.log(someMessage);
+    },
+  };
+};
+setInterval(replaceThing, 1000);
+```
+
+Ví dụ này cho ta thấy mỗi khi `replaceThing` được gọi, `theThing` sẽ tạo ra một object mới chứa một mảng và một closures (`someMethod`). Cùng lúc đó, biến `unused` cũng lưu một closures tham chiếu đên `originalThing` (là object `theThing` được tạo ra từ việc gọi `replaceThing` ở bước trước đó). Một điều quan trọng nữa là khi một scope được tạo ra cho các closures mà có cùng scope cha, chúng sẽ cùng chia sẻ scope đó. Trong ví dụ này thì `someMethod` và `unused` đều chia sẻ cùng một scope. Mặc dù `unused` không được gọi đến nhưng vì nó có tham chiếu đến `originalThing` nên nó sẽ được GC coi là vẫn đang hoạt động. Khi đoạn code này chạy thì bộ nhớ của chương trình sẽ tăng đều đặn và có thể nhìn thấy ngay được. Về bản chất, một linked-list của closures được tạo (với root là `theThing`) khi đoạn code trên được chạy và đó là lý do bộ nhớ bị tăng dần theo thời gian.
+
+## Garbage Collectors (bộ dọn rác)
+
+Mặc dù GCs giúp chúng ta không phải quản lý bộ nhớ bằng tay nữa, tuy nhiên ta cũng sẽ phải đánh đổi lại một vài thứ. Một trong số đó là việc các GCs hoạt động theo một cách khó đoán biết. Thông thường rất khó có thể chắc chắn rằng một hoạt động thu thập các vùng nhớ không được sử dụng được thực thi hay không. Điều này cũng có nghĩa là trong một số trường hợp, số lượng vùng nhớ của một chương trình nhiều hơn số bộ nhớ mà chương trình đó cần. Trong một số trường hợp khác, ứng dụng sẽ bị ảnh hưởng bởi một khoảng thời gian nhỏ chương trình bị delay để thực hiện công việc thu thập bộ nhớ. Hiện nay, hầu hết GC đều hoạt động theo cách là chỉ thực hiện việc thu thập bộ nhớ khi cấp phát bộ nhớ cho chương trình. Nếu không cần cấp phát bộ nhớ, GCs sẽ không hoạt động. Chúng ta sẽ xem xét các tình huống sau:
+
+1.  Chương trình đã cấp phát một số lượng nhỏ bộ nhớ.
+2.  Sau đó, hầu hết (hoặc toàn bộ) các phần tử được đánh dấu là không thể vươn tới nữa.
+3.  Chương trình không thực hiện việc cấp phát bộ nhớ nữa.
+
+Trong tình huống này, hầu như tất cả các GC sẽ không thực hiện việc thu thập bộ nhớ nữa. Nói cách khác, mặc dù có những phần tử không thể vươn tới được nữa trong chương trình, chúng sẽ không được thu hồi lại bộ nhớ. Đây không hẳn là leaks, tuy nhiên nó vẫn dẫn đến việc chương trình ngốn bộ nhớ.
+
+## Chrome Memory Profiling Tools
+
+`Chrome` cung cấp một tập các công cụ để kiểm tra tình trạng sử dụng bộ nhớ của code JS. Có 2 view quan trọng liên quan đến bộ nhớ đó là: _timeline_ và _profiles_.
+
+#### Timeline View
+
+`Timeline View` có thể giúp ta biết được mô hình sử dụng bộ nhớ của chương trình. Từ đây ta có thể nhìn được việc rò rỉ bộ nhớ, việc bộ nhớ sử dụng tăng liên tục theo thời gian mà không giảm xuống sau mỗi lần GC được chạy. Ví dụ:
+
+![timeline](https://cdn.auth0.com/blog/jsleaks/timeline.png)
+
+Ta có thể thấy được việc bộ nhớ rò rỉ được thể hiện thông qua việc JS heap tăng dần theo thời gian. Mặc dù sau khi được thu thập với một số lượng lớn tại đoạn cuối thì chương trình vẫn sử dụng số lượng bộ nhớ nhiều hơn so với lúc bắt đầu. Số lượng Node cũng cao hơn. Đây là dấu hiệu của việc các node DOM bị rò rỉ đâu đó trong code.o
+
+#### Profiles view
+
+![profiles](https://cdn.auth0.com/blog/jsleaks/profiles.png)
+
+Đây là công cụ sẽ luôn gắn bó với bạn khi phải điều tra về rò rỉ bộ nhớ. `Profiles view` cho phép bạn lấy ảnh chụp (snapshot) về việc sử dụng bộ nhớ của một chương trình Javascript. Nó cũng cho phép bạn ghi lại những lần cấp phát bộ nhớ theo thời gian. Mỗi một loại kết quả sẽ có các danh sách liệt kê khác nhau được đưa ra, tuy nhiên những thứ mà bạn cần quan tâm đó là danh sách tổng hợp (summary list) và danh sách so sánh (comparision list).
+
+`Summary View` sẽ cho ta thấy được tổng quan về các loại objects được khởi tạo và cấp phát cùng với các kích thước tổng hợp (aggregated size): kich thước nông (Shallow size) là tổng kích thước của tất cả các object của một loại cụ thể nào đó và kích thước giữ lại (retained size) bao gồm `shallow size` và kích thước của các object được lưu lại bởi object này. Nó cũng cho ta một thông tin về khoảng cách giữa một object với root.
+
+`Comparision View` cũng cung cấp cùng một thông tin như `summary view` nhưng nó cho phép ta so sánh giữa các snapshot khác nhau.
+
+## Ví dụ: Tìm kiếm rò rỉ dữ liệu trong Chrome
+
+Có 2 kiểu rò rỉ dữ liệu chủ yếu là: rỏ rỉ dẫn đến việc bộ nhớ bị tăng một cách đều đặn theo thời gian và rò rỉ chỉ xảy ra một lần duy nhất và không gây ra việc bộ nhớ bị tăng trong tương lai nữa. Việc tìm rò rỉ dữ liệu mà bộ nhớ bị tăng dần theo thời gian khá là đơn giản và rõ ràng (sử dụng `timeline view`). Tuy nhiên thì đây lại là rò rỉ gây ra nhiều rắc rối nhất: nếu bộ nhớ cứ tăng dần theo thời gian, nó sẽ khiến trình duyệt chạy chậm dận và cuối cùng sẽ dẫn đến việc script bị ngừng chạy. Rò rỉ mà không dẫn đến việc bộ nhớ bị tăng theo thời gian có thể dễ dàng được tìm ra khi bộ nhớ lớn đến một mức độ nào đó. Thông thường những rò rỉ kiểu này không được chú ý quả nhiều. Nói theo một cách khác, những rò rỉ nhỏ mà chỉ xảy ra một lần thường được coi là một vấn đề để tối ưu code. Tuy nhiên, những rò rỉ mà làm bộ nhớ tăng dần theo thời gian thì được coi là bug và nó cần được fix.
+
+Ở đây ta sẽ sử dụng một ví dụ từ [Chrome](https://developer.chrome.com/devtools/docs/demos/memory/example1). Toàn bộ đoạn code như sau:
+
+```javascript
+var x = [];
+
+function createSomeNodes() {
+  var div,
+    i = 100,
+    frag = document.createDocumentFragment();
+  for (; i > 0; i--) {
+    div = document.createElement('div');
+    div.appendChild(
+      document.createTextNode(i + ' - ' + new Date().toTimeString())
+    );
+    frag.appendChild(div);
+  }
+  document.getElementById('nodes').appendChild(frag);
+}
+function grow() {
+  x.push(new Array(1000000).join('x'));
+  createSomeNodes();
+  setTimeout(grow, 1000);
+}
+```
+
+Khi `grow` được gọi, nó sẽ bắt đầu tạo một `div` và gán nó vào DOM. Nó cũng sẽ khởi tạo một mảng lớn (1 triệu phần tử) và gán nó vào một mảng được tham chiếu bỏi một biến toàn cục (`x`). Việc này sẽ dẫn đến việc bộ nhớ bị tăng đều đặn và có thể nhận biết được với `Timeline view`.
+
+#### Phát hiện việc bộ nhớ bị tăng đều đặn trong Chrome
+
+Ta sẽ bắt đầu với [ví dụ sau của chrome](https://developer.chrome.com/devtools/docs/demos/memory/example1). Sau khi click vào ví dụ của Chrome, mở Dev Tools, click vào tab `timeline`, tích chọn `memory` và click vào nút `record`. Tiếp đó quay lại trang ví dụ và click vào `The Button` để bắt đầu việc rò rỉ bộ nhớ. Sau một khoảng thời gian thì dừng lại việc record và xem kết quả:
+
+![example-timeline](https://cdn.auth0.com/blog/jsleaks/example-timeline.png)
+
+**Note**: Ví dụ này sẽ khiến bộ nhớ bị tăng mỗi giây. Sau khi dừng việc record thì các bạn có thể đặt breakpoint vào `grow` để dừng việc thực thi script.
+
+Có 2 dấu hiệu lớn trong bức ảnh trên cho thấy việc rò rỉ bộ nhớ: biểu đồ cho `nodes` (đường kẻ màu xanh lá) và biểu đồ cho JS heap (đường kẻ màu xanh đậm). Số lượng node luôn luôn tăng và không bao giờ giảm. Đây là dấu hiệu cảnh báo lớn.
+
+JS heap cũng tăng dần theo thời gian tuy nhiên điều này khó nhìn ra hơn do hiệu ứng từ GC. Các bạn có thể thấy là bộ nhớ tăng sau lại giảm một cách liên tục. Điểm quan trọng cần chú ý ỏ đây là sau mỗi lần bộ nhớ được giảm thì kích thước của JS heap vẫn lớn hơn so với lần giảm trước đấy. Nói cách khác, mặc dù GC đã thành công thu thập được rất nhiều bộ nhớ, một vài trong số đó bị rò rỉ.
+
+Bây giờ ta đã chắc chắn chương trình của mình bị rò rỉ bộ nhớ, ta cần phải tìm ra nguyên nhân của nó.
+
+#### Tạo 2 snapshot
+
+Để tìm ra nguyên nhân rò rỉ, ta sẽ sử dụng đến công cụ `profiles` của Chrome. Cụ thể hơn, ta sẽ sử dụng tính năng `Take Heap Snapshot`.
+
+Đầu tiên, reload lại trang và tạo một snapshot ngay sau khi load xong trang. Ta sẽ sử dụng snapshot này làm cơ sở. Sau đó, click vào `The Button` một lần nũa, chờ khoảng một vài giây, tạo một snapshot khác. Sau đó tạo breakpoint để dừng việc rò rỉ bộ nhớ lại.
+
+Có 2 cách mà ta có thể sử dụng để kiểm tra sự khác nhau giữa 2 snapshot. Thứ nhất là sử dụng chức năng `Summary` rồi bắt đầu từ phía bên phải chọn `Objects allocated between Snapshot 1 and Snapshot 2`. Hoặc chọn `Comparision` thay cho `Summary`. Trong cả 2 trường hợp, ta sẽ thấy một danh sách các object được khởi tạo giữa 2 snapshot.
+
+![example-snapshots](https://cdn.auth0.com/blog/jsleaks/example-snapshots-1.png)
+
+Trong trường hợp này thì việc tìm ra leaks rất đơn giản. Hãy xem `Size Delta` của `(string)`. 8MB với 58 object mới. Điều này rất đáng nghi ngờ: object mới được tạo nhưng không được giải phóng và 8MB bị chiếm mất.
+
+Nếu ta mở danh sách khởi tạo của `(string)` ta sẽ thấy có một vài object lớn được khởi tạo bên cạnh các object nhỏ. Nếu ta chọn một trong số các object lớn này thì ta sẽ thấy một vài điểm thú vị trong mục `retainers`:
+
+![example-snapshots](https://cdn.auth0.com/blog/jsleaks/example-snapshots-2.png)
+
+Ta thấy rằng object được chọn là một phần tử của mảng. Tiếp đó ta biết được mảng này được tham chiếu bởi biến `x` nằm ở trong `window`. Điều này cho ta thấy được toàn bộ con đường từ object lớn của chúng ta liên kết thế nào với root (`window`). Ta đã tìm được một nguyên nhân dẫn đến rò rỉ và nơi nó được tham chiếu.
+
+Vi dụ này khá đơn giản: object lớn được khỏi tạo thế này không thường xuyên xuất hiện trong chương trinh. Tuy nhiên trong chương trình này cũng có xuất hiện việc rò rỉ DOM có kích cỡ nhỏ hơn. Những node này có thể tìm thấy đươc thông qua snapshot tuy nhiên đối với những site lớn, mọi chuyện sẽ trở nên rắc rối hơn nhiều. Các phiên bản Chrome hiên tại có cung cấp một tính năng đó là: `Record Heap Allocations`
+
+#### Record Heap Allocations
+
+Ta se bắt đầu với viêc để cho đoạn script tiếp tục được chạy và quay lại tab `Profiles` của Chrome Dev Tools. Ấn nút `Record Heap Allocations`. Khi mà tool đang chạy, các bạn sẽ thấy một vài vạch xanh trên biểu đồ ở phía trên đầu. Nó thể hiện việc khởi tạo object khi chạy chương trình.
+
+![example-recordedallocs-overview](https://cdn.auth0.com/blog/jsleaks/example-recordedallocs-overview.png)
+
+Ta có thể thấy được tính năng của công cụ này: chọn một khoảng thời gian để xem object nào được khởi tạo trong khoảng thời gian này. Ta đặt khoảng thời gian này gần các vạch xanh đậm nhất có thể. Chỉ có 3 hàm khởi tạo được show trong danh sách: một trong số đó liên quan đến rò rỉ do `(string)` ở phía trên, tiếp theo là liên quan đến việc khởi tạo DOM và cái cuối cùng là khởi tạo `Text`.
+
+Chon một trong những hàm khởi tạo của `HTMLDivElement` trong danh sách và chọn `Allocation stack`.
+
+![example-recordedallocs-selected](https://cdn.auth0.com/blog/jsleaks/example-recordedallocs-selected.png)
+
+Từ ảnh trên ta thấy được là phần tử được khởi tạo bởi `grow` -\> `createSomeNodes`. Nếu ta để ý kỹ mỗi vạch trên biểu đồ, ta sẽ thấy là hàm khởi tạo `HTMLDivElement` được gọi nhiều lần. Nếu ta quay trở lại với snapshot `comparision view`, ta sẽ thấy là nó chỉ khởi tạo object mà không xóa chúng đi. Nói cách khác là nó luôn khởi tạo object mà không cho phép GC thu thập một vài trong số chúng. Giờ khi ta đã biết objects bị rò rỉ ở đâu (`createSomeNodes`), ta có thể quay trở lại code để sửa lại nó.
+
+#### Các tính năng hữu ích khác
+
+Thay vì sử dụng `Summary view`, ta có thể sử dụng `Allocation view`:
+
+![example-recordedallocs-list](https://cdn.auth0.com/blog/jsleaks/example-recordedallocs-list.png)
+
+Giao diện này cho ta thấy một danh sách các hàm và bộ nhớ khởi tạo liên quan đến chúng. Ta có thể thấy ngay là `grow` và `createSomeNodes` là nổi bật hơn cả. Khi chọn `grow` ta sẽ thấy đối tượng khởi tạo liên quan được gọi đến. Ta có thể để ý thấy `(string)` `HTMLDivElement` và `Text` là những hàm khởi tạo của các đối tượng bị rò rỉ.
+
+**Note**: để sử dụng được tính năng này, vào `Dev Tools` -\> Settings và enable `record heap allocation stack traces` trước khi record.

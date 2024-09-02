@@ -1,0 +1,382 @@
+---
+title: So sánh Redux và React Context
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - redux
+categories: []
+coverImage: >-
+  https://www.ibrahima-ndaw.com/static/7b6ecb152f2345e33a0ae286a3c41280/31987/cover-2.png
+sourceUrl: >-
+  https://www.ibrahima-ndaw.com/blog/redux-vs-react-context-which-one-should-you-choose/
+date: '2019-12-16T04:30:00.000Z'
+slug: /so-sanh-redux-va-react-context
+---
+
+React context has been there for a while. With the coming of React hooks, it's now much better. It has so many advantages, including the fact that the context API doesn't require any third-party libraries. We can use it in React apps to manage our state like redux.
+
+In this article, we're going to manage our state with React context, to see by ourselves if it's better than redux regarding state's management.
+
+**Note**: This article covers only the context API. We're going to build the same project with React context.
+
+## Prerequisites
+
+To be able to follow along, you have to know at least the basics to advance features of React and particularly React hooks. A good grasp of redux can also help.
+
+## Setting Up the Project
+
+If you're good to go, we can now create a new React app by running:
+
+```javascript
+npx create-react-app react-context-hooks-example
+```
+
+Then, we have to create some files.
+
+- Add a _containers_ folder in the _src_, then create _Articles.js_ file.
+
+```javascript
+import React, { useState } from 'react';
+import Article from '../components/Article/Article';
+
+const Articles = () => {
+  const [articles, setArticles] = useState([
+    { id: 1, title: 'post 1', body: 'Quisque cursus, metus vitae pharetra' },
+    { id: 2, title: 'post 2', body: 'Quisque cursus, metus vitae pharetra' },
+  ]);
+
+  return (
+    <div>
+      {articles.map((article) => (
+        <Article key={article.id} article={article} />
+      ))}
+    </div>
+  );
+};
+
+export default Articles;
+```
+
+- Add a _components_ folder in the _src_, then create _AddArticle/AddArticle.js_ and _Article/Article.js_.
+- In the _Article.js_
+
+```javascript
+import React from 'react';
+import './Article.css';
+
+const article = ({ article }) => (
+  <div className="article">
+    {' '}
+    <h1>{article.title}</h1> <p>{article.body}</p>{' '}
+  </div>
+);
+
+export default article;
+```
+
+- In the _AddArticle.js_
+
+```javascript
+import React, { useState } from 'react';
+import './AddArticle.css';
+
+const AddArticle = () => {
+  const [article, setArticle] = useState();
+
+  const handleArticleData = (e) => {
+    setArticle({
+      ...article,
+      [e.target.id]: e.target.value,
+    });
+  };
+  const addNewArticle = (e) => {
+    e.preventDefault();
+    // The logic will come later
+  };
+
+  return (
+    <form onSubmit={addNewArticle} className="add-article">
+      <input
+        type="text"
+        id="title"
+        placeholder="Title"
+        onChange={handleArticleData}
+      />
+      <input
+        type="text"
+        id="body"
+        placeholder="Body"
+        onChange={handleArticleData}
+      />
+      <button>Add article</button>
+    </form>
+  );
+};
+export default AddArticle;
+```
+
+- In the _App.js_
+
+```javascript
+import React, { Fragment } from 'react';
+import Articles from './containers/Articles';
+import AddArticle from './components/AddArticle/AddArticle';
+
+function App() {
+  return (
+    <Fragment>
+      <AddArticle />
+      <Articles />
+    </Fragment>
+  );
+}
+export default App;
+```
+
+_So, if you've done with all the instructions above, we can move on and start implementing the context API._
+
+## Create a context
+
+A context helps us to handle state without passing down props on every component. Only the needed component will consume the context. To implement it, we need to create (it's optional) a new folder named _context_ in our project, and add this code below to _aricleContext.js_.
+
+- In _context/aricleContext.js_
+
+```javascript
+import React, { createContext, useState } from 'react';
+
+export const ArticleContext = createContext();
+const ArticleProvider = ({ children }) => {
+  const [articles, setArticles] = useState([
+    { id: 1, title: 'post 1', body: 'Quisque cursus, metus vitae pharetra' },
+    { id: 2, title: 'post 2', body: 'Quisque cursus, metus vitae pharetra' },
+  ]);
+
+  const saveArticle = (article) => {
+    const newArticle = {
+      id: Math.random(), // not really unique but it's just an example
+      title: article.title,
+      body: article.body,
+    };
+    setArticles([...articles, newArticle]);
+  };
+
+  return (
+    <ArticleContext.Provider value={{ articles, saveArticle }}>
+      {children}
+    </ArticleContext.Provider>
+  );
+};
+
+export default ArticleProvider;
+```
+
+The React library gives us access to a method called _createContext_. We can use it to as you might guess create a context. Here, we pass nothing to our context _ArticleContext_, but you can pass as argument object, array, string, etc. Then we define a function which will help us distribute the data through the _Provider_. We give to our _Provider_ two values: the list of articles and the method to add an article. By the way, _articles:articles_ and _saveArticle:saveArticle_ is the same as _articles_ and _saveArticle_ it's just a convenient syntax in case it confuses you.
+
+Now we've a context, however, we need to provide the context in order to consume it. To do that, we need to wrap our higher component with _ArticleProvider_ and _App.js_ might be the perfect one. So, let's add it to _App.js_.
+
+## Provide the context
+
+- In _App.js_
+
+```javascript
+import React from 'react';
+
+import ArticleProvider from './context/articleContext';
+import Articles from './containers/Articles';
+import AddArticle from './components/AddArticle/AddArticle';
+
+function App() {
+  return (
+    <ArticleProvider>
+      <AddArticle />
+      <Articles />
+    </ArticleProvider>
+  );
+}
+export default App;
+```
+
+As you see here, we first import our context provider _ArticleProvider_ and wrap components which need to consume the context. Now what about consuming the context? and how we can do that. You might be surprised how easy it is to consume the context with hooks. So, let's do that.
+
+## Consume the context
+
+We're going to consume the context in two components: _Articles.js_ and _AddArticle.js_.
+
+- In _Articles.js_
+
+```javascript
+import React, { useContext } from "react"
+import { ArticleContext } from "../context/articleContext"
+import Article from "../components/Article/Article"
+
+const Articles = () => {
+ const { articles } = useContext(ArticleContext)  return (
+    <div>
+      {articles.map(article => (
+        <Article key={article.id} article={article} />
+      ))}
+    </div>
+  )
+}
+
+export default Articles
+```
+
+With React hooks, we've now access to the _useContext_ hook. And as you might guess, it will help us consume the context. By passing our context _ArticleContext_ as argument to _useContext_, it gives us access to our state holden in _articleContext.js_. Here, we just need _articles_. Therefore, we pull it out and map through our articles and show them. Now, let's move on to _AddArticle.js_.
+
+- In _AddArticle.js_
+
+```javascript
+import React, { useState, useContext } from "react"import "./AddArticle.css"
+import { ArticleContext } from "../../context/articleContext"
+
+const AddArticle = () => {
+ const { saveArticle } = useContext(ArticleContext)
+ const [article, setArticle] = useState()
+
+  const handleArticleData = e => {
+    setArticle({
+      ...article,
+      [e.target.id]: e.target.value,
+    })
+  }
+
+  const addNewArticle = e => {
+    e.preventDefault()
+    saveArticle(article)
+  }
+
+  return (
+    <form onSubmit={addNewArticle} className="add-article">
+      <input
+        type="text"
+        id="title"
+        placeholder="Title"
+        onChange={handleArticleData}
+      />
+      <input
+        type="text"
+        id="body"
+        placeholder="Body"
+        onChange={handleArticleData}
+      />
+      <button>Add article</button>
+    </form>
+  )
+}
+export default AddArticle
+```
+
+As the previous case, here again we use _useContext_ to pull out _saveArticle_ from our context. With that, we can now safely add a new article through the React Context.
+
+We now manage our whole application's state through the React Context. However, we can still improve it through another hook named _useReducer_.
+
+## Enhance the context with useReducer
+
+The _useReducer_ hook is an alternative to _useState_. It's mostly use for the more complex state. _useReducer_ accepts a reducer function with the initial state of our React app, and returns the current state, then dispatches a function.
+
+This will be much more clear, when we start implementing it. Now, we've to create a new file _reducer.js_ in our context folder and add this code block below.
+
+- In _reducer.js_
+
+```javascript
+export const reducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_ARTICLE':
+      return [
+        ...state,
+        {
+          id: Math.random(), // not really unique but it's just an example
+          title: action.article.title,
+          body: action.article.body,
+        },
+      ];
+    default:
+      return state;
+  }
+};
+```
+
+As you can see, the function _reducer_ receives two parameters: _state_ and _action_. Then, we check if the type of action is equal to _ADD_ARTICLE_ (you can create a constant or file to avoid mistyping), if it's the case add a new article to our state. This syntax might be familiar if you've used redux. Now, the logic to add a new article is handled by the reducer. We've not done yet, let's add it to our context file.
+
+```javascript
+import React, { createContext, useReducer } from 'react';
+import { reducer } from './reducer';
+
+export const ArticleContext = createContext();
+
+const ArticleProvider = ({ children }) => {
+  const [articles, dispatch] = useReducer(reducer, [
+    { id: 1, title: 'post 1', body: 'Quisque cursus, metus vitae pharetra' },
+    { id: 2, title: 'post 2', body: 'Quisque cursus, metus vitae pharetra' },
+  ]);
+
+  return (
+    <ArticleContext.Provider value={{ articles, dispatch }}>
+      {children}
+    </ArticleContext.Provider>
+  );
+};
+
+export default ArticleProvider;
+```
+
+Here, we start by importing the _useReducer_ hook and our function _reducer_. As i mention earlier, _useReducer_ takes a function. Therefore, we've to pass our reducer function to it and as second argument the initial state of our application. Now _useReducer_ gives us access to our _articles_ and a _dispatch_ function (you can name it whatever you like). And we can now, update our provider with these new values given by _useReducer_.
+
+You can already see that our context file is now much cleaner. By renaming the function which add a new article to _dispatch_, we've now to update a little bit our _AddArticle.js_ file.
+
+- In _AddArticle.js_
+
+```javascript
+import React, { useState, useContext } from 'react';
+import './AddArticle.css';
+import { ArticleContext } from '../../context/articleContext';
+
+const AddArticle = () => {
+  const { dispatch } = useContext(ArticleContext);
+  const [article, setArticle] = useState();
+
+  const handleArticleData = (e) => {
+    setArticle({
+      ...article,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const addNewArticle = (e) => {
+    e.preventDefault();
+    dispatch({ type: 'ADD_ARTICLE', article });
+  };
+
+  return (
+    <form onSubmit={addNewArticle} className="add-article">
+      <input
+        type="text"
+        id="title"
+        placeholder="Title"
+        onChange={handleArticleData}
+      />
+      <input
+        type="text"
+        id="body"
+        placeholder="Body"
+        onChange={handleArticleData}
+      />
+      <button>Add article</button>
+    </form>
+  );
+};
+export default AddArticle;
+```
+
+Now, instead of pulling out _saveArticle_, now we get the _dispatch_ function. It expects a type of action _ADD_ARTICLE_ and a value _article_ which will be the new article. With that, our project is now managed through the context API and React Hooks.
+
+## Redux VS the React Context: Who wins?
+
+You can now clearly see the difference between Redux and React Context through their implementations on our project. However, Redux is far from dead or be killed by React Context. Redux is such boilerplate and require a bunch of libraries. But it remains a great solution towards props drilling.
+
+The context Api with hooks is much more easier to implement and will not increase your bundle size.
+
+However who wins? in my opinion, for a low-frequency updates like locale, theme changes, user authentication, etc. the React Context is perfectly fine. But with a more complex state which has a high-frequency updates, the React Context won't be a good solution. Because, the React Context will triggers a re-render on each update, and optimizing it manually can be really tough. And there, a solution like Redux is much easier to implement.
+
+You can find the finished project [here](https://github.com/ibrahima92/react-context-hooks-example)

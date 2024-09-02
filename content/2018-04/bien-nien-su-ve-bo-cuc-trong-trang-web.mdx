@@ -1,0 +1,71 @@
+---
+title: Biên niên sử về bố cục trong trang web
+author: Hung Tan Nguyen
+tags:
+  - css
+categories: []
+coverImage: 'https://i.ytimg.com/vi/R6CerSgbC_w/maxresdefault.jpg'
+sourceUrl: 'http://namluu.com/frontend/bien-nien-su-ve-bo-cuc-trong-trang-web/'
+date: 2018-04-25 17:57:00
+slug: /bien-nien-su-ve-bo-cuc-trong-trang-web
+---
+
+## Giới thiệu
+
+Bài viết bàn về công nghệ các lập trình viên web áp dụng để thiết kế bố cục trong trang web (website layout) - qua các thời kỳ: table, float, block-inline, flexbox, JS, Twitter Bootstrap và grid.
+
+## Thời trước 2010
+
+Đây là thời kỳ tối cổ với công nghệ website, người ta hầu như ít đầu tư giao diện web, việc dựng bố cục, xương sườn cho trang web sử dụng thẻ HTML `<table>` là chính.
+
+![](http://namluu.com/wp-content/uploads/2018/01/yyou-1.jpg)
+![](http://namluu.com/wp-content/uploads/2018/01/yyou-2.jpg)
+
+Layout Table rất đơn giản, với 1 table 3 rows, 1 row làm header, 1 row làm content, cái cuối làm footer.
+**Nhược điểm** của layout table là: rất khó khăn khi tái cấu trúc lại bố cục, khó khăn khi thiết kế vì table mục đích chính là biểu diễn dữ liệu. Các cột có chiều rộng cố định không linh hoạt, nan giải khi xử lý trên nhiều kích thước màn hình.
+Năm 2012, khi mới ra trường, công việc đầu tiên của tôi là đập bỏ và thay thế các layout dạng table. Tới nay thì không còn ai nghĩ tới việc việc thiết kế layout bằng table nữa.
+Tuy nhiên còn rất nhiều tài liệu trong các trường đại học chưa được cập nhật nên đừng ngạc nhiên khi bạn được dạy thiết kế layout bằng thẻ table nhé.
+
+## Từ 2012 - Float lật đổ Table
+
+Khi layout table quá bất cập thì giải pháp thay thế tuyệt vời nhất trong giai đoạn này là dùng các thẻ HTML `<div>` kết hợp với CSS property: Float.
+Các khối [block](https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block/) sẽ được tách ra và "trôi" qua trái, phải, tùy theo ý muốn của lập trình viên.
+
+![](http://namluu.com/wp-content/uploads/2018/01/stopdesign-float.jpg)
+
+**Ưu điểm**: code sạch sẽ hơn khi dùng table, dễ thay đổi chỉnh sửa, linh hoạt trên nhiều kích thước màn hình.
+**Khuyết điểm**: dễ bị "vỡ trang", nếu lập trình viên chưa làm chủ được float, chưa biết cách sử dụng các tuyệt chiêu như: clear, overflow... Lạm dụng float trên các bố cục phức tạp.
+
+## 2013 - thời của các CSS Frameworks
+
+Vào giai đoạn này, các CSS Frameworks như [Bootstrap](https://getbootstrap.com/), [Foundation](https://foundation.zurb.com/),...
+Các thư viện này hỗ trợ rất đắc lực cho các lập trình viên, dễ sử dụng, dễ thiết kế bố cục, chỉ cần gắn các class phù hợp. Bên cạnh đó chúng còn liên tục cập nhật và cải tiến không ngừng.
+Phải nói trong thời gian đó, các CSS Frameworks nhất là Bootstrap, trở thành 1 xu hướng tới mức khi đi phỏng vấn code web, chắc ăn thế nào họ cũng hỏi bạn vài câu.
+Để dùng tốt Bootstrap, bạn phải học các khái niệm như Grid View System, học thuộc các class thông dụng , tận dụng tối đa các chức năng có sẵn, người giỏi nhất lúc này là người code CSS, style ít nhất.
+Hạn chế của các CSS Framework này là quá kềnh càng nếu ta không tận dụng hết chức năng (có thể khắc phục bằng bản tùy chỉnh).
+Nâng cấp phiên bản cần sửa đổi lại tên các class (v2 xài span1 - span12, v3 xài col-, v4 xài col- ).
+
+![](http://namluu.com/wp-content/uploads/2018/01/frontend-development-frameworks.jpg)
+
+> Ngày nay các CSS Frameworks như Bootstrap đã phát triển hơn khái niệm CSS rất nhiều, ta nên gọi nó với tên **front-end component library**, vì nó còn tích hợp nhiều thư viện JavaScript bên trong. [Số lượng các front-end libraries ngày nay](https://usablica.github.io/front-end-frameworks/compare.html?v=2.0)
+
+## 2015 - CSS3 và Flexbox
+
+CSS3 đã hỗ trợ một công nghệ thiết kế layout mới, hiện đại hơn Float đó chính là Flexbox. Đúng như tên gọi flexible (linh hoạt), nó thực sự rất mạnh.
+
+- Flexbox sẽ giúp bạn điều khiển được không những chiều ngang (horizontal) mà còn chiều dọc (vertical) điều mà CSS thường với position rất cứng nhắc.
+- Flexbox có thể điều khiển được các phần tử bên trong, giúp bạn dễ dàng biểu diễn nội dung và bố cục trên các thiết bị di động.
+
+![](http://namluu.com/wp-content/uploads/2018/01/fl.jpg)
+
+**Khuyết điểm**: flexbox mạnh và mới nên bạn phải bỏ nhiều công sức để học và làm chủ được nó, khó hơn so với dùng float và Bootstrap. [Không khuyến khích dùng flexbox](https://jakearchibald.com/2014/dont-use-flexbox-for-page-layout/) để làm bố cục toàn trang trừ trường hợp đặc biệt, chỉ dùng để bố cục các thành phần bên trong. Lý do vì flexbox phụ thuộc vào nội dung bên trong nó, nên khi bài viết dài ngắn có thể làm "biến dạng" bố cục website của bạn, chưa kể tình huống khi web load chưa kịp.
+
+> Kết hợp khôn ngoan là dùng grid system để làm bố cục bên ngoài, những phần bố cục cần sự linh hoạt thì dùng flexbox. Bootstrap 4 đã tích hợp flexbox vào grid view của mình, chứng tỏ sức mạnh của flexbox và không thể bàn cãi, đồng thời cho thấy cái tiện lợi khi dùng Bootstrap.
+
+## 2017 - CSS Grid
+
+Grid và 1 thuộc tính CSS rất mới, ra đời 3-2017. Tuy nhiên nó đã và đang được giới công nghệ web đặc biệt quan tâm vì những tính năng ưu việt.
+Nếu như Flexbox phân bố các phần tử theo 1 chiều duy nhất thì Grid cho phép bạn điểu khiển phần tử theo 2 chiều - ngang và dọc.
+Vì đây là 1 công nghệ mới, nên các [tài liệu chất lượng](https://medium.com/tag/grid-layout) về nó hầu hết là bằng tiếng anh, sắp tới mình sẽ có bài viết về công nghệ này, mới các bạn theo dõi.
+
+![](https://cdn-images-1.medium.com/max/800/1*phV0oLsKV_qVjFVv5lY1vw.png)

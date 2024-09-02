@@ -1,0 +1,184 @@
+---
+title: >-
+  Cách Javascript hoạt động P10: Quan sát thay đổi trên DOM bằng
+  MutationObserver
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-tracking-changes-in-the-dom-using-mutationobserver-86adc7446401
+date: 2018-11-25 15:24:00
+slug: /cach-javascript-hoat-dong-p10-quan-sat-thay-doi-tren-dom-bang-mutationobserver
+---
+
+Chào các bạn đến với bài thứ 10 trong series đục khoét và khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+![](https://cdn-images-1.medium.com/max/1000/0*mPXf5zRCdEQ42Hn0.)
+
+Webapp càng ngày càng nặng hơn ở phía client bởi vì nhiều lý do đại loại như UI phải "phì nhiêu" để chứa đựng những thứ logic phức tạp bên trong bao gồm cả tính toán theo thời gian thực (real-time), và nhiều nhiều thứ khác nữa.
+
+Sự phức tạp gia tăng làm cho chúng ta khó nắm bắt chính xác trạng thái của UI tại mỗi thời điểm trong vòng đời của webapp.
+
+Điều này càng khó hơn nữa nếu chúng ta xây dựng một vài thứ chẳng hạn như library hay framework mà cần phải phản ứng cũng như xử lý những hành động dựa trên DOM.
+
+# Khái quát
+
+[MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) (tạm dịch: Người quan sát sự biến đổi) là một WebAPI được các trình duyệt hiện đại cung cấp để phát hiện các thay đổi trên DOM. Với API này một người có thể listen các node mới được thêm vào hoặc gỡ ra, thuộc tính thay đổi hoặc những thay đổi về nội dung văn bản trong một text node.
+
+Tại sao phải cần làm thế?
+
+Có một số ít trường hợp trong đó MutationObserver API thực sự hữu ích. Ví dụ:
+
+- Bạn muốn thông báo cho người dùng webapp rằng một vài sự thay đổi đã xảy ra trên trang mà người đó đang sử dụng.
+- Bạn đang làm việc với 1 Javascript framework sang chảnh mới, nó cần load rất nhiều JS module một cách tự động dựa trên sự thay đổi của DOM.
+- Bạn đang làm việc với bộ soạn thảo WYSIWYG và thử triển khai tính năng undo/redo. Bằng cách tận dụng MutationObserver API, bất kỳ lúc nào bạn cũng có thể biết phần nào đã thay đổi và dễ dàng undo chúng.
+
+![](https://cdn-images-1.medium.com/max/1000/1*48tGIboHxgLeKEjMTGkUGg.png)
+
+Trên đây chỉ là 1 số ví dụ về lợi ích của MutationObserver.
+
+# Cách sử dụng MutationObserver
+
+Triển khai MutationObserver khá dễ dàng. Bạn cần tạo 1 instance MutationObserver bằng cách truyền cho nó 1 hàm và hàm này được gọi mỗi khi 1 sự thay đổi xảy ra. Đối số đầu tiên của hàm là 1 tập hợp tất cả các sự thay đổi xảy ra trên 1 khối duy nhất. Mỗi sự thay đổi cung cấp thông tin về loại của nó cũng như thay đổi nào đã xảy ra.
+
+```javascript
+var mutationObserver = new MutationObserver(function (mutations) {
+  mutations.forEach(function (mutation) {
+    console.log(mutation);
+  });
+});
+```
+
+Object tạo ra có 3 phương thức:
+
+- **observe**: bắt đầu lắng nghe sự thay đổi. Nó nhận 2 đối số: DOM node mà bạn muốn quan sát và một object chưa các thiết lập.
+- **disconnect**: dừng quá trình lắng nghe thay đổi.
+- **takeRecords**: trả về khối thay đổi cuối cùng trước khi callback được kích hoạt.
+
+Đoạn code sau thể hiện quá trình quan sát (observing) diễn ra:
+
+```javascript
+// Bắt đầu lắng nghe thay đổi trong root HTML của trang.
+mutationObserver.observe(document.documentElement, {
+  attributes: true,
+  characterData: true,
+  childList: true,
+  subtree: true,
+  attributeOldValue: true,
+  characterDataOldValue: true,
+});
+```
+
+Giờ giả sử ta có 1 div cực kỳ đơn giản trong DOM:
+
+```javascript
+<div id="sample-div" class="test">
+  {' '}
+  Simple div{' '}
+</div>
+```
+
+Sử dụng jQuery, bạn có thể xóa thuộc tính class từ div đó:
+
+```javascript
+$('#sample-div').removeAttr('class');
+```
+
+Khi đã bắt đầu quan sát, sau khi gọi hàm mutationObserver.observe(...) ta có thể xem thông tin log được in ra trong console của [MutationRecord](https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord).
+
+![](https://cdn-images-1.medium.com/max/1000/1*UxkSstuyCvmKkBTnjbezNw.png)
+
+Đây là sự biến đổi tạo ra bởi ta đã xóa thuộc tính class.
+
+Cuối cùng, để dừng sự quan sát DOM sau khi đã xong việc, ta làm như sau:
+
+```javascript
+// Dừng MutationObserver, không lắng nghe thay đổi nữa.
+mutationObserver.disconnect();
+```
+
+Ngày nay MutationObserver được hỗ trợ khá tốt:
+
+![](https://cdn-images-1.medium.com/max/1000/0*nlOmrsfy-Y1XoR8B.)
+
+# Giải pháp thay thế
+
+Tuy nhiên, MutationObserver cũng chỉ mới xuất hiện chưa lâu. Vậy thì trước khi có nó, các developer dùng cái gì?
+
+Dưới đây là 1 vài lựa chọn:
+
+- **Polling**
+- **MutationEvents**
+- **CSS animations**
+
+## Polling
+
+Giải pháp đơn giản nhất và kém tinh tế nhất là polling (bỏ phiếu bình chọn). Sử dụng WebAPI setInterval bạn có thể thiết lập 1 tác vụ kiểm tra sự thay đổi theo chu kỳ nhất định. Dĩ nhiên thì cách này làm giảm hiệu năng của webapp 1 cách đáng sợ.
+
+## MutationEvents
+
+[MutationEvents API](https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Mutation_events) được giới thiệu vào năm 2000\. Mặc dù nó có ích, các sự kiện thay đổi (mutation events) được bắn ra mỗi khi có 1 sự thay đổi bất kỳ trên DOM và một lần nữa làm ảnh hưởng đến hiệu năng. Ngày nay thì MutationEvents API đã bị hủy bỏ và những trình duyệt hiện đại sẽ sớm ngừng hỗ trợ nó.
+
+Danh mục trình duyệt hỗ trợ cho MutationEvents:
+
+![](https://cdn-images-1.medium.com/max/1000/0*l-QdpBfjwNfPDTyh.)
+
+## CSS animations
+
+Một giải pháp thay thế hơi kỳ cục đó là dựa trên [CSS Animations](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations/Using_CSS_animations). Nghe có vẻ bối rối nhỉ. Về cơ bản thì ý tưởng của nó là tạo ra 1 animation có thể được trigger khi có một element được thêm vào DOM. Khoảnh khắc animation bắt đầu, sự kiện animationstart sẽ được bắn ra: nếu bạn đã gắn 1 event handler vào sự kiện đó thì bạn sẽ biết 1 cách chính xác khi nào element được thêm vào DOM. Thời gian thực hiện của animation phải cực nhỏ để cho nó dường như vô hình trước con mắt user.
+
+Đầu tiên ta cần một element cha, bên trong nó ta sẽ listen sự kiện chèn node:
+
+```javascript
+<div id=”container-element”></div>
+```
+
+Để có thể xử lý khi có node chèn vào, ta cần thiết lập một chuỗi các [keyframe](https://www.w3schools.com/cssref/css3_pr_animation-keyframes.asp) animation khởi động khi node được thêm vào:
+
+```javascript
+@keyframes nodeInserted {
+ from { opacity: 0.99; }
+ to { opacity: 1; }
+}
+```
+
+Với keyframe được tạo ra đó, animation cần phải được áp dụng vào các element mà ta muốn lắng nghe. Lưu ý là thời gian duration rất nhỏ, mục đích là để kéo dãn dấu vết của animation trên trình duyệt:
+
+```javascript
+#container-element * {
+ animation-duration: 0.001s;
+ animation-name: nodeInserted;
+}
+```
+
+Bước thiết lập này sẽ thêm animation vào tất cả các node con của container-element. Khi animation kết thúc (sau 0.001s như trên), sự kiện chèn node sẽ được bắn ra.
+
+Ta cần một hàm event listener Javascript. Trong hàm đó ta phải gọi event.animationName để đảm bảo đó chính là animation mà ta cần.
+
+```javascript
+var insertionListener = function (event) {
+  // Đảm bảo đây là animation mà ta cần xử lý.
+  if (event.animationName === 'nodeInserted') {
+    console.log('Node has been inserted: ' + event.target);
+  }
+};
+```
+
+Giờ thì thêm event listener vào node cha:
+
+```javascript
+document.addEventListener(“animationstart”, insertionListener, false); // standard + firefox
+document.addEventListener(“MSAnimationStart”, insertionListener, false); // IE
+document.addEventListener(“webkitAnimationStart”, insertionListener, false); // Chrome + Safari
+```
+
+Trình duyệt hỗ trợ CSS animation:
+
+![](https://cdn-images-1.medium.com/max/1000/0*W4wHvVAeUmc45vA2.)
+
+MutationObserver cung cấp một số tính năng nâng cao hơn tất cả 3 giải pháp trên. Về bản chất, nó bao phủ toàn bộ mỗi thay đổi có thể diễn ra trên DOM và nó được tối ưu hóa khi bắn ra các thay đổi trong 1 chuỗi hàng loạt. Trên hết MutationObserver được hỗ trợ bởi tất cả các trình duyệt hiện đại đi kèm với 1 số polyfills để dùng MutationEvents
+
+MutationObserver chiếm giữ một vị trí trung tâm trong thư viện của [SessionStack](https://www.sessionstack.com/?utm_source=medium&utm_medium=blog&utm_content=mutation-observer-post).
+
+Khi bạn đã tích hợp thư viện của SessionStack vào webapp, nó bắt đầu thu thập các thông tin chẳng hạn như thay đổi trên DOM, request mạng, biệt lệ, thông báo debug, vân vân, và gửi chúng về server. SessionStack dùng chính những dữ liệu này để tái tạo lại mọi thứ đã xảy ra với user của bạn và hiển thị các vấn đề của sản phẩm trong cùng 1 tình huống mà nó diễn ra với user. Khá nhiều người nghĩ rằng SessionStack ghi lại video, nhưng không phải vậy. Ghi video rất tốn kém, mặt khác lượng dữ liệu thu thập được lại rất nhẹ và không ảnh hưởng đến UX cũng như hiệu năng của webapp của bạn.

@@ -1,0 +1,146 @@
+---
+title: 'Cách Javascript hoạt động P1: Khái quát về engine, runtime và callstack'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+sourceUrl: >-
+  https://blog.sessionstack.com/how-does-javascript-actually-work-part-1-b0bacc073cf
+date: 2018-11-13 22:50:00
+slug: /cach-javascript-hoat-dong-p1-khai-quat-ve-engine-runtime-va-callstack
+---
+
+Javascript càng ngày càng phổ biến, có nhiều nhóm các lập trình viên đã và đang nâng cấp cũng như hỗ trợ JS ở nhiều mức độ khác nhau: từ frontend đến backend, hybrid app, thiết bị nhúng và còn nhiều nữa.
+
+Bài viết này mở đầu cho 1 series hướng tới mục đích đào sâu (aka _Đục Khoét_) vào trong Javascript và cách mà nó hoạt động như thế nào: Bằng cách hiểu rõ các thành phần của JS và cách mà chúng tương tác với nhau thì bạn có thể viết code tốt hơn và _ngon_ hơn. Bên cạnh đó team SessionStack cũng chia sẻ một vài bí kíp trong khi xây dựng SessionStack - 1 ứng dụng Javascript nhẹ nhưng có chất lượng cao và mạnh mẽ.
+
+Như ta thấy trong [GitHut stats](https://githut.info/), Javascript đang là top đứng đầu trong các repo đang hoạt động (Active Repositories) và tổng số push (Total Pushes) ở GitHub. Và nó cũng không bị tụt lùi quá nhiều ở những hạng mục khác.
+
+![](https://cdn-images-1.medium.com/max/1000/1*Zf4reZZJ9DCKsXf5CSXghg.png)
+
+([Xem cập nhật mới nhất về GitHut stat](https://madnight.github.io/githut/)).
+
+Nếu dự án phụ thuộc quá lớn vào Javascript thì có nghĩa rằng các lập trình viên phải tận dụng tối đa khả năng mà ngôn ngữ này cũng như hệ sinh thái (ecosystem) của nó cung cấp và thấu hiểu một cách triệt để về bản chất của nó để có thể xây dựng được những công trình vi diệu.
+
+Và một cách hiển nhiên là có rất nhiều lập trình viên đang sử dụng Javascript hằng ngày nhưng lại không có kiến thức hoặc không biết gì về những thứ đang thực sự diễn ra bên trong JS.
+
+# Tổng quan
+
+Hầu như mọi người ai cũng từng nghe qua bộ engine V8 và đa số mọi người biết rằng JS là một ngôn ngữ đơn luồng (single-thread) hoặc là nó sử dụng hàng đợi các callback (callback queue - không biết dịch sao cho đúng
+![](https://assets-cdn.github.com/images/icons/emoji/unicode/1f613.png)
+)
+
+Trong bài này, chúng ta sẽ đi lần lượt một cách chi tiết qua các khái niệm cơ bản và giải thích cụ thể Javascript chạy như thế nào. Bằng cách đó, chúng ta có thể viết code được tốt hơn, xây dựng app có khả năng xử lý API một cách mượt mà, không bị block lẫn nhau (non-blocking apps).
+
+Nếu bạn là người mới học Javascript thì bài viết này sẽ giúp bạn hiểu tại sao Javascript lại "quái dị" khi so sánh với các ngôn ngữ khác.
+
+Và nếu bạn là một dev có kinh nghiệm với JS thì hi vọng bài viết này sẽ giúp ích cho bạn hiểu thêm về cách hoạt động của JS Runtime - thứ mà bạn đang sử dụng mỗi ngày.
+
+# JavaScript Engine
+
+_Engine: Cỗ máy - mình sẽ không dịch từ mà để nguyên gốc tiếng Anh_
+
+Một ví dụ điển hình của JS Engine chính là bộ Google V8\. Bộ engine V8 này được sử dụng trong Google Chrome và Node.js. Dưới đây là một mô hình đơn giản nhất của nó:
+![](https://cdn-images-1.medium.com/max/1000/1*OnH_DlbNAPvB9KLxUCyMsA.png)
+
+Engine gồm 2 thành phần chính:
+
+- Vùng nhớ heap (memory heap): khu vực cấp phát bộ nhớ
+- Ngăn xếp (call stack): đây là nơi chứa các khung stack khi bạn thực thi code.
+
+# Runtime (Môi trường thực thi)
+
+Có những API trong trình duyệt đang được sử dụng bởi đa số JS developer hiện nay (ví dụ: setTimeout). Những API này lại không được cung cấp bởi các Engine.
+
+Vậy thì chúng từ đâu tới ?
+
+Sự thật có đôi chút phức tạp một tí.
+
+![](https://cdn-images-1.medium.com/max/1600/1*4lHHyfEhVB0LnQ3HlhSs8g.png)
+
+Chúng ta có JS Engine nhưng thực ra còn nhiều thứ hơn thế. Các browser thường cung cấp một hệ thống _Web APIs_ bao gồm nhiều thành phần như DOM, AJAX, setTimeout, vân vân và mây mây.
+
+Và rồi cả những thứ nổi tiếng như event loop và callback queue nữa.
+
+# Ngăn xếp (Call Stack)
+
+Javascript là ngôn ngữ lập trình đơn luồng (single-threaded), nghĩa là nó chỉ có 1 cái call stack. Vì thế nó chỉ có thể làm 1 công việc tại 1 thời điểm nhất định.
+
+Call Stack là một cấu trúc dữ liệu mà về cơ bản thì nó ghi nhớ vị trí của chúng ta trong chương trình đang chạy. Nếu như chúng ta thực thi một hàm (function) thì khi đó ta sẽ đặt hàm đấy vào vị trí trên cùng của ngăn xếp (stack), sau khi xử lý xong và return từ hàm đó, vị trí trên cùng sẽ bị đẩy ra khỏi stack. Đó là cách hoạt động của Call Stack.
+
+Để dễ hiểu hơn thì mời bạn xem ví dụ bên dưới:
+
+```javascript
+function multiply(x, y) {
+  return x * y;
+}
+function printSquare(x) {
+  var s = multiply(x, x);
+  console.log(s);
+}
+printSquare(5);
+```
+
+Khi engine bắt đầu thực thi code, Call Stack còn đang rỗng. Ngay sau đó, từng bước thực hiện sẽ giống như hình bên dưới:
+
+![](https://cdn-images-1.medium.com/max/1600/1*Yp1KOt_UJ47HChmS9y7KXw.png)
+
+Mỗi bản ghi trong Call Stack được gọi là khung của ngăn xếp (Stack Frame).
+
+Và đây cũng là cách chính xác mà stack traces được xây dựng và in ra mỗi khi có xử lý biệt lệ (exception handling). Về cơ bản thì nó chính là trạng thái của Call Stack ngay tại thời điểm có biệt lệ xảy ra. Hãy nhìn vào đoạn code bên dưới:
+
+```javascript
+function foo() {
+  throw new Error('SessionStack will help you resolve crashes :)');
+}
+function bar() {
+  foo();
+}
+function start() {
+  bar();
+}
+start();
+```
+
+Nếu như chạy đoạn code đó trên Chrome console (giả sử toàn bộ code nằm trong 1 file foo.js), thì chúng ta sẽ có stack trace như sau:
+
+![](https://cdn-images-1.medium.com/max/1600/1*T-W_ihvl-9rG4dn18kP3Qw.png)
+
+Thổi tung ngăn xếp (**Blowing the stack**)  - Trường hợp này xảy ra khi chương trình thực thi đạt tới kích thước giới hạn tối đa của Call Stack. Và để có thể có được tình huống này một cách dễ dàng nhất, chỉ cần _vô tình_ gọi đệ quy một cách không cẩn thận là được à:
+
+```javascript
+function foo() {
+  foo();
+}
+foo();
+```
+
+Khi engine bắt đầu thực thi code, nó gọi hàm foo đầu tiên. Hàm này lại gọi đệ quy chính bản thân nó để rồi rơi vào 1 vòng lặp vô hạn không có điều kiện dừng. Mỗi khi gọi hàm thì 1 bản ghi sẽ được đẩy vào Call Stack, và cứ thế, cứ thể đẩy vào làm cho tràn ngăn xếp (aka stackoverflow). Giống như hình bên dưới:
+
+![](https://cdn-images-1.medium.com/max/1600/1*AycFMDy9tlDmNoc5LXd9-g.png)
+
+Tại 1 thời điểm cụ thể nào đó khi số lần gọi hàm đạt tới ngưỡng giới hạn của Call Stack (call stack size) thì trình duyệt sẽ quyết định "giải cứu" bằng cách bắn ra 1 lỗi trông như thế này đây:
+
+![](https://cdn-images-1.medium.com/max/1600/1*e0nEd59RPKz9coyY8FX-uw.png)
+
+Chạy code đơn tiến trình có thể khá là dễ dàng bởi vì chúng ta không phải mất công đối phó với những tình huống phức tạp thường gặp trong môi trường đa tiến trình (chẳng hạn như deadlocks).
+
+Tuy nhiên đơn tiến trình cũng có những giới hạn của nó. Bởi vì Javascript chỉ có 1 Call Stack, điều gì sẽ xảy ra khi có vài xử lý chậm chạp?
+
+# Xử lý đồng thời (Concurrency) & Vòng lặp sự kiện (Event Loop)
+
+Điều gì sẽ xảy ra nếu như bạn có 1 hàm xử lý đang ở trong Call Stack nhưng hàm đó lại tốn kha khá thời gian để chạy? Ví dụ như bạn muốn thực hiện một vài thuật toán chuyển đổi hình ảnh phức tạp bằng Javascript ngay trên trình duyệt.
+
+Thế thì có vấn đề gì nào? Vấn đề ở đây là trong khi Call Stack đang bận tối tăm mặt mũi để xử lý thì trình duyệt lại rảnh không, ngồi chơi xơi nước vì không có gì để làm, đúng hơn là không thể làm gì được - trình duyệt đã bị block. Có nghĩa là trình duyệt không thể render, nó cũng không chạy được các câu lệnh khác, tóm lại là bị mắc kẹt. Điều này gây ảnh hưởng lớn đến sự mượt mà của UI trên app.
+
+Đó cũng không phải vấn đề duy nhất đâu. Một khi trình duyệt bắt đầu xử lý quá nhiều thứ trong Call Stack, nó sẽ bị "đơ", không thể tương tác được trong 1 khoảng thời gian dài. Đa số trình duyệt sẽ bắn ra lỗi, hỏi bạn xem có muốn hủy trang đang chạy không. Đại loại là giống như hình dưới:
+
+[![](https://cdn-images-1.medium.com/max/1600/1*WlMXK3rs_scqKTRV41au7g.jpeg)](https://cdn-images-1.medium.com/max/1600/1*WlMXK3rs_scqKTRV41au7g.jpeg) <a></a>
+
+Rõ ràng điều này không phải là 1 trải nghiệm người dùng (User experience) tối ưu phải không nào?
+
+Vậy thì làm thế nào để xử lý code vừa nhiều vừa nặng mà lại không làm UI bị kẹt cũng như trình duyệt bị đơ? Giải pháp đó là sử dụng callback bất đồng bộ (**asynchronous callbacks**).
+
+Điều này sẽ được giải thích kỹ hơn trong Phần 2 của series: **Bên trong engine V8 & 5 mẹo để tối ưu hóa code**. Các bạn đón xem nhé.
+
+PS: Trong các bài sau mình sẽ trình bày chi tiết và kỹ hơn về cách hoạt động của Event Loop.

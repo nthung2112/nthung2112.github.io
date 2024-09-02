@@ -1,0 +1,306 @@
+---
+title: Trở thành Functional Programmer - Phần 4
+author: Hung Tan Nguyen
+date: 2017-08-23 23:26:54
+sourceUrl: https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-4-18fbe3ea9e49#.31qt9bfj5
+coverImage: https://viblo.asia/uploads/e85b8079-5076-40ca-af63-f1a136d06516.png
+tags:
+slug: /tro-thanh-functional-programmer-phan-4
+---
+
+Những bước đầu tiên của việc hiểu rõ các concepts trong lập trình hàm (Functional Programming - FP) là những bước quan trọng nhất, và đôi khi là những bước khó khăn nhất. Nhưng với cách tiếp cận đúng đắn, mọi thứ sẽ trở nên dễ hiểu hơn rất nhiều. Và đây là series được tạo ra nhằm mục đích giúp các bạn dễ thở hơn trong quá trình tiếp cận với FP.
+
+## Concept 7 : Currying
+
+![](https://viblo.asia/uploads/75b303cf-5fdd-4e50-bfc9-a3a847bbff55.png)
+
+Tiếp tục câu chuyện ở cuối [Phần 3](https://viblo.asia/ta.duy.anh/posts/JdAGJgkgRgk) , lý do khiến chúng ta gặp phải vấn đề trong việc kết hợp hai hàm `mul5` và `add` là bởi vì hàm `mult5` có 1 tham số, trong khi hàm `add` lại có 2.
+
+Chúng ta có thể giải quyết vấn đề này bằng cách giới hạn lại mỗi hàm chỉ lấy một tham số.
+
+Nghe có vẻ hơi kỳ kỳ, nhưng tin tôi đi, ý tưởng này không tệ một chút nào đâu.
+
+Chúng ta sẽ chỉ đơn giản là viết một hàm `add` vẫn có hai tham số, nhưng có khả năng nhận giá trị cho **một** tham số trong một thời điểm. Và hàm hỗ trợ khả năng này được biết đến với cái tên là _Curried Function_.
+
+> Một Curried Fuction là một hàm chỉ nhận một tham số trong một thời điểm.
+
+Điều này sẽ cho phép chúng ta gán giá trị tham số đầu tiên của hàm `add` _trước khi_ kết hợp với hàm `mult5`. Và sau đó khi hàm `mult5AfterAdd10` được gọi, hàm `add` sẽ nhận giá trị tham số thứ hai.
+
+Trong Javascript, chúng ta có thể đạt được điều này bằng cách viết lại hàm `add` như sau:
+
+```
+var add = x => y => x + y
+
+```
+
+Phiên bản này của hàm `add` sẽ nhận hai tham số gồm `x` và `y`, nhưng _một tham số (x) sẽ được set khi gọi hàm lần đầu tiên_ và _tham số còn lại (y) sẽ được set khi gọi hàm lần thứ 2_.
+
+Cụ thể hơn, đầu tiên, hàm `add` sẽ nhận giá trị cho tham số `x`, và trả về một **hàm** mới với một tham số có tên là `y`, với giá trị kết quả trả về là **tổng của hai tham số x và y**.
+
+Và bây giờ chúng ta có thể sử dụng phiên bản trên của hàm `add` để tạo ra hàm `mult5AfterAdd10` như mong muốn :
+
+```
+var compose = (f, g) => x => f(g(x));
+var mult5AfterAdd10 = compose(mult5, add(10));
+
+```
+
+Hàm `compose` sẽ nhận 2 tham số là `f` và `g`, và trả về một hàm nhận 1 tham số `x`, mà khi được gọi sẽ thực hiện lần lượt 2 hàm `g` và `f` lên với tham số nhận được (gọi hàm `g(x)`, kết quả nhận được truyền vào hàm `f`, tương đương với việc gọi `f(g(x))`).
+
+Vậy chính xác ta đã làm gì? Theo lý thuyết thì ta đã tạo ra một phiên bản `curried function` của hàm `add` truyền thống. Việc này làm hàm `add` trở nên linh động hơn, bởi vì 2 tham số có thể được set ở 2 thời điểm khác nhau. Tham số đầu tiên, 10 được truyền vào để _tạo ra hàm mult5AfterAdd10_, và tham số thứ 2 được truyền vào khi _thực hiện hàm mul5AfterAdd10 với một tham số bất kỳ_.
+
+Đến đây, bạn có thể nghĩ rằng làm thế nào để viết lại hàm `add` theo phong cách trên bằng ngôn ngữ Elm. Tôi xin giải đáp luôn là bạn không cần phải làm thế đâu. Trong Elm và các ngôn ngữ FP khác, **tất cả các hàm đều là curried function**.
+
+Vậy là hàm `add` trong Elm vẫn giữ nguyên cách khai báo :
+
+```
+add x y =
+    x + y
+
+```
+
+Và đây là cách mà hàm `mult5AfterAdd10` _nên_ được viết:
+
+```
+mult5AfterAdd10 =
+    (mult5 << add 10)
+
+```
+
+Về mặt cú pháp, có thể nói rằng Elm đã đánh bại hoàn toàn Javascript cũng như các ngôn ngữ Imperative khác bởi vì nó đã được tối ưu cho những concept cơ bản của FP như là **Currying** hay **Composition**.
+
+## Currying và Tái cấu trúc code
+
+![](https://viblo.asia/uploads/02af022c-a568-4f90-9cbe-3b8f2354afa1.png)
+
+Ngoài khả năng dùng để tạo ra các hàm hợp như đã mô tả ở trên, Currying còn rất hữu ích khi chúng ta thực hiện tái cấu trúc code. Đó là khi ta muốn tạo một hàm tổng với rất nhiều tham số, và sau đó sử dụng nó để tạo ra các hàm cụ thể phù hợp với từng ngữ cảnh sử dụng, mà yêu cầu ít tham số hơn.
+
+Lấy ví dụ, khi chúng ta có 2 hàm sau đây dùng để thêm 1 hoặc 2 dấu ngoặc nhọn vào trước và sau 1 String:
+
+```
+bracket str =
+    "{" ++ str ++ "}"
+doubleBracket str =
+    "{{" ++ str ++ "}}"
+
+```
+
+Và đây là một số ngữ cảnh chúng ta sẽ sử dụng 2 hàm đó :
+
+```
+bracketedJoe =
+    bracket "Joe"
+doubleBracketedJoe =
+    doubleBracket "Joe"
+
+```
+
+Chúng ta có thể tổng quát hóa 2 hàm `bracket` và `doubleBracket` thành 1 hàm như sau :
+
+```
+generalBracket prefix str suffix =
+    prefix ++ str ++ suffix
+
+```
+
+Nhưng như vậy thì mỗi khi sử dụng hàm `generalBracket`, chúng ta sẽ phải truyền thêm giá trị dấu đóng/mở ngoặc :
+
+```
+bracketedJoe =
+    generalBracket "{" "Joe" "}"
+doubleBracketedJoe =
+    generalBracket "{{" "Joe" "}}"
+
+```
+
+Cái chúng ta **thực sự muốn** là tập hợp các lợi ích của cả 2 cách: sử dụng đơn giản (truyền mỗi String vào hàm), nhưng không được lặp code.
+
+Nếu chúng ta sắp xếp lại thứ tự các tham số của hàm `generateBracket`, chúng ta có thể tạo ra 2 hàm `bracket` và `doubleBracket` vì hàm `generateBracket` vốn đã hỗ trợ **Currying** rồi:
+
+```
+generalBracket prefix suffix str =
+    prefix ++ str ++ suffix
+bracket =
+    generalBracket "{" "}"
+doubleBracket =
+    generalBracket "{{" "}}"
+
+```
+
+Để ý rằng bằng việc đưa các tham số có vẻ như sẽ được set cố định trước lên đầu tiên, trong ví dụ này là `prefix` và `suffix`, và đưa các tham số sẽ được set sau cùng vào phía sau, chúng ta có thể tạo ra các phiên bản cụ thể và phù hợp với nhu cầu sử dụng từ hàm `generalBracket`.
+
+> Thứ tự các tham số là rất quan trọng trong việc tận dụng khả năng Currying.
+
+Đồng thời, ta cũng có thể nhận thấy là các hàm `bracket` và `doubleBracket` đều được viết dưới dạng `Point-free Notation`, cụ thể trong trường hợp này tham số `str` được loại bỏ. Cả 2 hàm `bracket` và `doubleBracket` đều là những hàm đang chờ đợi tham số cuối cùng.
+
+Và giờ chúng ta có thể sử dụng 2 hàm đó như trước khi tái cấu trúc code :
+
+```
+bracketedJoe =
+    bracket "Joe"
+doubleBracketedJoe =
+    doubleBracket "Joe"
+
+```
+
+Nhưng lần này chúng ta đã sử dụng một hàm tổng quát hỗ trợ Currying có tên `generalBracket`.
+
+## Một số hàm functional cơ bản
+
+![](https://viblo.asia/uploads/a46820f6-9392-4205-9ad8-47a1b3830305.png)
+
+Giờ chúng ta sẽ đến với 3 hàm cơ bản thường được sử dụng trong Functional Programming.
+
+Nhưng trước tiên, tôi muốn mời bạn xem đoạn code sau trong Javascript:
+
+```
+for (var i = 0; i < something.length; ++i) {
+    // do stuff
+}
+
+```
+
+Có một vấn đề khá điển hình với đoạn code trên. Mặc dù không phải là bug, nhưng đoạn code trên sẽ được chúng ta viết hoặc copy paste mỗi lần muốn sử dụng vòng lặp (boilerplate code - code khuôn mẫu), nên sẽ khiến việc viết đọc code trở nên mệt mỏi dần theo thời gian.
+
+Nếu làm việc với các ngôn ngữ Imperative như là Java, C#, Javascript, PHP, Python,... bạn sẽ dễ dàng nhận thấy mình phải liên tục viết đi viết lại các dòng code tương tự như trên nhiều hơn bất cứ thứ gì khác.
+
+Và đó chính là vấn đề mà tôi muốn nói đến.
+
+Vì vậy tiếp theo đây chúng ta sẽ bàn về việc khử các đoạn code nhàm chán đó. Hãy đưa chúng và một hàm (hoặc một vài hàm) và ta sẽ _không bao giờ_ phải viết một vòng lặp _for_ một lần nào nữa. Thực tế thì điều đó khá là bất khả thi, nếu như chúng ta không biết đến FP.
+
+Trước hết, hãy bắt đầu bằng việc thay đổi một mảng có tên là `things`:
+
+```
+var things = [1, 2, 3, 4];
+for (var i = 0; i < things.length; ++i) {
+    things[i] = things[i] * 10; // MUTATION ALERT !!!!
+}
+console.log(things); // [10, 20, 30, 40]
+
+```
+
+Bạn có nhận thấy điều gì ở đây ko? Đó chính là **Mutability - biến things đã bị thay đổi giá trị**
+
+Chúng ta sẽ thử lại, lần này sẽ không thay đổi giá trị biến _things_ nữa:
+
+```
+var things = [1, 2, 3, 4];
+var newThings = [];
+for (var i = 0; i < things.length; ++i) {
+    newThings[i] = things[i] * 10;
+}
+console.log(newThings); // [10, 20, 30, 40]
+
+```
+
+Lần này thì chúng ta không thay đổi giá trị của biến _things_, nhưng về mặt kỹ thuật thì chúng ta _vẫn thay đổi giá trị của biến newThings_, nhưng chúng ta sẽ bỏ qua và chấp nhận điều đó, vì hiện tại ta vẫn đang sử dụng Javascript. Khi chuyển sang các ngôn ngữ FP, bạn sẽ không thay đổi biến được nữa đâu.
+
+Mục đích mà tôi muốn nói ở đây là giải thích rõ ràng hơn cách hoạt động của những hàm cơ bản trong FP (map, reduce, filter,... ), cũng như tác dụng của chúng trong việc giảm bớt những phiền phức không đáng có trong code của mình. Do đó code JS có thể không mô tả đúng hoàn toàn cách các hàm đó thực hiện, nhưng về concept thì các bạn cứ yên tâm mà theo dõi nhé.
+
+Giờ với đoạn code ở trên (không thay đổi biến `things`), chúng ta sẽ đưa nó vào một hàm cơ bản đầu tiên có tên là `map`, với nhiện vụ là ánh xạ (map) từng giá trị của mảng cũ đến một mảng mới, thông qua một hàm biến đổi `f`:
+
+```
+var map = (f, array) => {
+    var newArray = [];
+    for (var i = 0; i < array.length; ++i) {
+        newArray[i] = f(array[i]);
+    }
+    return newArray;
+};
+
+```
+
+Ta có thể thấy hàm map ngoài tham số là một mảng cần biến đổi, sẽ nhận thêm một tham số là `f`, đại diện cho việc mà chúng ta muốn xử lý với từng phần tử trong mảng cũ trước khi đưa vào mảng mới. (VD : nhân đôi từng phần tử thì hàm `f` sẽ là `var f = x => x *2`, hoặc cộng mỗi phần tử thêm 1 thì hàm `f` sẽ là `var f = x => x+1`, ...)
+
+Và với code ban đầu, chúng ta có thể viết lại bằng cách sử dụng hàm `map` như sau :
+
+```
+var things = [1, 2, 3, 4];
+var newThings = map(v => v * 10, things);
+
+```
+
+Bạn có thể thấy là chúng ta đã không còn sử dụng vòng lặp `for` nữa, đồng thời code cũng trở nên dễ hiểu hơn (chúng ta có thể hiểu đoạn code trên là tạo ra một `newThings` là một mảng gồm các phần tử như mảng `things`, nhưng mỗi phần tử có giá trị _được nhân lên 10 lần_).
+
+Về mặt kỹ thuật thì vẫn có vòng lặp `for` ở trong hàm `map`. Nhưng ít ra thì chúng ta sẽ không phải copy paste hoặc gõ lại cái đoạn code mẫu đó thêm một lần nữa.
+
+Giờ thì chúng ta sẽ viết thêm một hàm có `filter` để lọc các phần tử của một mảng theo điều kiện bất kỳ:
+
+```
+var filter = (pred, array) => {
+    var newArray = [];
+for (var i = 0; i < array.length; ++i) {
+        if (pred(array[i]))
+            newArray[newArray.length] = array[i];
+    }
+    return newArray;
+};
+
+```
+
+Lưu ý hàm dùng để xác định có lấy phần tử đó hay không được truyền thông qua biến `pred`, chỉ trả về giá trị `Boolean` thôi nhé. Hàm này sẽ trả về TRUE khi chúng ta muốn giữ lại phần tử, và FALSE nếu chúng ta muốn loại nó ra.
+
+Và đây là cách sử dụng hàm `filter` để lấy ra các phần tử là số lẻ trong một mảng :
+
+```
+var isOdd = x => x % 2 !== 0;
+var numbers = [1, 2, 3, 4, 5];
+var oddNumbers = filter(isOdd, numbers);
+console.log(oddNumbers); // [1, 3, 5]
+
+```
+
+Sử dụng hàm `filter` vừa viết ở trên sẽ đơn giản và dễ dàng hơn rất nhiều với việc phải đóng mở vòng `for`, set các biến lưu giá trị,... những công việc nhàm chán lại hay sai.
+
+Hàm thường xuyên được sử dụng trong FP tôi muốn giới thiệu cuối cùng có tên là `reduce`. Về cơ bản, nó được dùng với giá trị đầu vào là một danh sách, và kết quả trả ra là một giá trị đơn lẻ (nên mới được gọi là reduce - rút gọn), nhưng thực tế thì có rất nhiều cách để áp dụng.
+
+Hàm `reduce` thường được biết đến với cái tên là `fold` trong FP:
+
+```
+var reduce = (f, start, array) => {
+    var acc = start;
+    for (var i = 0; i < array.length; ++i)
+        acc = f(array[i], acc); // f() takes 2 parameters
+    return acc;
+});
+
+```
+
+Hàm `reduce` sẽ gồm 3 tham số, bao gồm một hàm `f` dùng để thực hiện rút gọn (reduce), một giá trị khởi đầu `start` và một mảng để thao tác `array`.
+
+Để ý rằng hàm dùng cho việc rút gọn là `f` sẽ nhận 2 tham số, một là giá trị hiện tại của mảng `array`, một là giá trị tích lũy `acc` đang được tính toán và thay đổi khi duyệt qua từng phần tử trong mảng. Giá trị `acc` ở bước cuối cùng sẽ được trả về và cũng là kết quả của hàm `reduce`.
+
+Ví dụ dưới đây sẽ giúp chúng ta hiểu rõ hơn cách hoạt động của hàm này :
+
+```
+var add = (x, y) => x + y;
+var values = [1, 2, 3, 4, 5];
+var sumOfValues = reduce(add, 0, values);
+console.log(sumOfValues); // 15
+
+```
+
+Hàm `add` sẽ nhận vào 2 tham số và trả về tổng của chúng. Hàm `reduce` của chúng ta chấp nhận các hàm cho việc rút gọn với 2 tham số, nên trong trường hợp này hàm `add` là hoàn toàn hợp lý.
+
+Chúng ta bắt đầu với giá trị `start` là 0 và truyền vào một mảng `values`, do đó kết quả nhận lại của hàm `reduce` sẽ là tổng các phần tử trong mảng `values`. Trong hàm `reduce`, giá trị tổng các phần tử sẽ được tích lũy, cộng dồn sau mỗi lần duyệt từng phần tử của mảng.
+
+- Bắt đầu `acc = start = 0`, giá trị đầu tiên của mảng là `1`, lần thực hiện đầu tiên của hàm `add` sẽ là `add(1,0)` và `acc` mang giá trị 1
+- giá trị thứ 2 của mảng là `2`, `acc = 1`, hàm `add` lúc này sẽ được gọi với giá trị `add(2, 1)`,và `acc = 3`
+
+Tiếp tục như vậy đến cuối cùng, giá trị `acc = 15` sau lần duyệt phần tử cuối cùng (5) của mảng value và được trả về bởi hàm `reduce`.
+
+Có thể thấy rằng, mỗi hàm `map, filter, reduce` sẽ cho phép chúng ta thực hiện các biến đổi thông thường với một mảng mà không phải viết những đoạn code sử dụng vòng lặp dài dòng và khó hiểu nữa.
+
+Nhưng trong FP, khi mà chúng ta chỉ có đệ quy, còn vòng lặp thì không tồn tại, thì các hàm duyệt và biến đổi mảng ở trên sẽ trở nên cực kì hữu ích và cần thiết.
+
+## Đầu của tôi!!!!
+
+![](https://viblo.asia/uploads/3cb3a723-1140-4d4c-abc8-9da098acc7d6.png)
+
+Hôm nay đến đây thôi là đủ.
+
+Trong các phần sau của bài viết này, tôi sẽ nói về các vấn đề như là _Referential Integrity, Execution Order, Types và một vài thứ nữa_
+
+Nếu bạn muốn tham gia vào cộng đồng các nhà phát triển web muốn học và giúp đỡ lẫn nhau về FP trong Elm, mời các bạn tham gia Group Facebook sau: [Learn Elm Programming](https://www.facebook.com/groups/learnelm/)
+
+Và đây là Twitter của tác giả : [@cscalfani](https://twitter.com/cscalfani)

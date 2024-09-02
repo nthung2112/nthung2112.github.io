@@ -1,0 +1,1109 @@
+---
+title: JavaScript Design Patterns
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - design patterns
+categories: []
+coverImage: 'https://miro.medium.com/max/772/1*WGaKti_VLbb4_bBZQkm_sA.jpeg'
+sourceUrl: 'https://able.bio/drenther/javascript-design-patterns--89mv2af'
+date: '2019-10-08T04:15:00.000Z'
+slug: /javascript-design-patterns
+---
+
+In this article, we are going to talk about design patterns that can be and should be used to write better maintainable JavaScript code. I assume you have a basic understanding of JavaScript and concepts like classes (classes in JavaScript can be tricky), objects, prototypal inheritance, closures, etc.
+
+This article is a long read as a whole because of the nature of the subject matter so I have tried to keep the sections self-contained. So, you as a reader can pick and choose specific parts (or in this case specific patterns) and ignore the ones you are not interested in or are well versed with. Now, let’s get started.
+
+> Source code for the examples of all the design patterns explained here is available on **[GitHub](https://github.com/drenther/js-design-patterns)**
+
+## Introduction
+
+We write code to solve problems. Problems that usually have many similarities and when trying to solve them, we notice several common patterns. This is where design patterns come in.
+
+> A **_design pattern_** is a term used in software engineering for a general reusable solution to a commonly occurring problem in software design.
+
+The underlying concept of design patterns has been around in the software engineering industry since the very beginning, but they weren't really so formalized. [Design Patterns: Elements Of Reusable Object-Oriented Software](https://en.wikipedia.org/wiki/Design_Patterns) written by Erich Gamma, Richard Helm, Ralph Johnson and John Vlissides — the famous Gang of Four (GoF) was instrumental in pushing the formalized concept of design patterns in software engineering. Now, design patterns are an essential part of software development and have been so for a long time.
+
+There were 23 design patterns introduced in the original book.
+
+**Creational Patterns**
+
+![](https://miro.medium.com/max/672/1*wPH4aXJ_Arv4jnliLUySyQ.png)
+
+**Structural Patterns**
+
+![](https://miro.medium.com/max/682/1*pD3iU_fQx56oDlIMMBnbNw.png)
+
+**Behavioural Patterns**
+
+![](https://miro.medium.com/max/673/1*weYSJ2_ZxVY8yZ8reEGq6g.png)
+
+Design Patterns are beneficial for various reasons. They are proven solutions that the industry veterans have tried and tested. They are solid approaches that solve issues in a widely accepted way and reflect the experience and insights of the industry-leading developers that helped define them. Patterns also make your code more reusable and readable while speeding up the development process vastly.
+
+Design patterns are by no means finished solutions. They only provide us with approaches or schemes to solve a problem.
+
+> _**Note:** In this article, we will mainly talk about design patterns from an object-oriented point of view and in the context of their usability in modern JavaScript. That is why many classic patterns from GoF may be omitted and some modern patterns from sources like_ [**Addy Osmani’s Learn JavaScript Design Patterns**](https://addyosmani.com/resources/essentialjsdesignpatterns/book/) _will be included. The examples are kept simple for easier understanding and are hence not the most optimized implementation of their respective design patterns._
+
+## Categories of Design Patterns
+
+Design Patterns are usually categorized into three major groups.
+
+### Creational Design Patterns
+
+As the name suggests, these patterns are for handling object creational mechanisms. A Creational Pattern basically solves a problem by controlling the creation process of an object.
+
+We will discuss the following patterns in details — **Constructor Pattern, Factory Pattern, Prototype Pattern** and **Singleton Pattern.**
+
+### Structural Design Patterns
+
+These patterns are concerned with class and object composition. They help structure or restructure one or more parts without affecting the entire system. In other words, they help obtain new functionalities without tampering with the existing ones.
+
+We will discuss the following patterns in details — **Adapter Pattern, Composite Pattern, Decorator Pattern, Facade Pattern, Flyweight Pattern** and **Proxy Pattern.**
+
+### Behavioural Design Patterns
+
+These patterns are concerned with improving communication between dissimilar objects.
+
+We will discuss the following patterns in details — **Chain of Responsibility Pattern, Command Pattern, Iterator Pattern, Mediator Pattern, Observer Pattern, State Pattern, Strategy Pattern** and **Template Pattern.**
+
+## Creational Patterns
+
+### Constructor Pattern
+
+This is a class-based creational design pattern. Constructors are special functions that can be used to instantiate new objects with methods and properties defined by that function.
+
+It is not one of the classic design patterns. In fact, it is more of a basic language construct than a pattern in most object-oriented languages. But in JavaScript, objects can be created on the fly without any constructor functions or “class” definition. Therefore, I think it is important to lay down the foundation for other patterns to come with this simple one.
+
+Constructor pattern is one of the most commonly used patterns in JavaScript for creating new objects of a given kind.
+
+In this example, we define a _Hero_ class with attributes like _name_ and _specialAbility_ and method like _getDetails_. Then, we instantiate an object _IronMan_ by invoking the constructor method with the _new_ keyword passing in the values for the respective attributes as arguments.
+
+```javascript
+// traditional Function-based syntax
+function Hero(name, specialAbility) {
+  // setting property values
+  this.name = name;
+  this.specialAbility = specialAbility;
+
+  // declaring a method on the object
+  this.getDetails = function () {
+    return this.name + ' can ' + this.specialAbility;
+  };
+}
+
+// ES6 Class syntax
+class Hero {
+  constructor(name, specialAbility) {
+    // setting property values
+    this._name = name;
+    this._specialAbility = specialAbility;
+
+    // declaring a method on the object
+    this.getDetails = function () {
+      return `${this._name} can ${this._specialAbility}`;
+    };
+  }
+}
+
+// creating new instances of Hero
+const IronMan = new Hero('Iron Man', 'fly');
+
+console.log(IronMan.getDetails()); // Iron Man can fly
+```
+
+### Factory Pattern
+
+Factory Pattern is another class-based creational pattern. In this, we provide a generic interface that delegates the responsibility of object instantiation to its subclasses.
+
+This pattern is frequently used when we need to manage or manipulate collections of objects that are different yet have many similar characteristics.
+
+In this example, we create a factory class named _BallFactory_ that has a method that takes in parameters and depending on the parameters it delegates the object instantiation responsibility to the respective class. If the type parameter is *"football"* or *"soccer"* object instantiation is handled by _Football_ class but if it is _"basketball"_ object instantiation is handled by _Basketball_ class.
+
+```javascript
+class BallFactory {
+  constructor() {
+    this.createBall = function (type) {
+      let ball;
+      if (type === 'football' || type === 'soccer') ball = new Football();
+      else if (type === 'basketball') ball = new Basketball();
+      ball.roll = function () {
+        return `The ${this._type} is rolling.`;
+      };
+
+      return ball;
+    };
+  }
+}
+
+class Football {
+  constructor() {
+    this._type = 'football';
+    this.kick = function () {
+      return 'You kicked the football.';
+    };
+  }
+}
+
+class Basketball {
+  constructor() {
+    this._type = 'basketball';
+    this.bounce = function () {
+      return 'You bounced the basketball.';
+    };
+  }
+}
+
+// creating objects
+const factory = new BallFactory();
+
+const myFootball = factory.createBall('football');
+const myBasketball = factory.createBall('basketball');
+
+console.log(myFootball.roll()); // The football is rolling.
+console.log(myBasketball.roll()); // The basketball is rolling.
+console.log(myFootball.kick()); // You kicked the football.
+console.log(myBasketball.bounce()); // You bounced the basketball.
+```
+
+### Prototype Pattern
+
+This pattern is an object-based creational design pattern. In this, we use a sort of a “skeleton” of an existing object to create or instantiate new objects.
+
+This pattern is specifically important and beneficial to JavaScript because it utilizes prototypal inheritance instead of a classic object-oriented inheritance. Hence, it plays to JavaScript’s strength and has native support.
+
+In this example, we have a _car_ object that we use as the prototype to create another object _myCar_ with JavaScript’s _Object.create_ feature and define an extra property _owner_ on the new object.
+
+```javascript
+// using Object.create as was recommended by ES5 standard
+const car = {
+  noOfWheels: 4,
+  start() {
+    return 'started';
+  },
+  stop() {
+    return 'stopped';
+  },
+};
+
+// Object.create(proto[, propertiesObject])
+
+const myCar = Object.create(car, { owner: { value: 'John' } });
+
+console.log(myCar.__proto__ === car); // true
+```
+
+### Singleton Pattern
+
+Singleton is a special creational design pattern where only one instance of a class can exist. It works like this — if no instance of the singleton class exists then a new instance is created and returned but if an instance already exists then the reference to the existing instance is returned.
+
+A perfect real-life example would be that of _mongoose_ (the famous Node.js ODM library for MongoDB). It utilizes the singleton pattern.
+
+In this example, we have a _Database_ class that is a Singleton. First, we create an object _mongo_ by using the _new_ operator to invoke the _Database_ class constructor. This time an object is instantiated because none already exists. The second time, when we create the _mysql_ object, no new object is instantiated but instead the reference to the object that was instantiated earlier i.e. the _mongo_ object is returned.
+
+```javascript
+class Database {
+  constructor(data) {
+    if (Database.exists) {
+      return Database.instance;
+    }
+    this._data = data;
+    Database.instance = this;
+    Database.exists = true;
+    return this;
+  }
+
+  getData() {
+    return this._data;
+  }
+
+  setData(data) {
+    this._data = data;
+  }
+}
+
+// usage
+const mongo = new Database('mongo');
+console.log(mongo.getData()); // mongo
+
+const mysql = new Database('mysql');
+console.log(mysql.getData()); // mongo
+```
+
+## Structural Patterns
+
+### Adapter Pattern
+
+This is a structural pattern where the interface of one class is translated into another. This pattern lets classes work together that could not otherwise because of incompatible interfaces.
+
+This pattern is often used to create wrappers for new refactored APIs so that other existing old APIs can still work with them. This is usually done when new implementations or code refactoring (done for reasons like performance gains) result in a different public API while the other parts of the system are still using the old API and hence needs to be adapted to work together.
+
+In this example, we have an old API i.e. _OldCalculator_ class and a new API i.e. _NewCalculator_ class. The _OldCalculator_ class provides an _operation_ method for both addition and subtraction while the _NewCalculator_ provides separate methods for addition and subtraction. The Adapter class _CalcAdapter_ wraps the _NewCalculator_ to add the _operation_ method to the public facing API while using its own addition and subtraction implementation under the hood.
+
+```javascript
+// old interface
+class OldCalculator {
+  constructor() {
+    this.operations = function (term1, term2, operation) {
+      switch (operation) {
+        case 'add':
+          return term1 + term2;
+        case 'sub':
+          return term1 - term2;
+        default:
+          return NaN;
+      }
+    };
+  }
+}
+
+// new interface
+class NewCalculator {
+  constructor() {
+    this.add = function (term1, term2) {
+      return term1 + term2;
+    };
+    this.sub = function (term1, term2) {
+      return term1 - term2;
+    };
+  }
+}
+
+// Adapter Class
+class CalcAdapter {
+  constructor() {
+    const newCalc = new NewCalculator();
+
+    this.operations = function (term1, term2, operation) {
+      switch (operation) {
+        case 'add':
+          // using the new implementation under the hood
+          return newCalc.add(term1, term2);
+        case 'sub':
+          return newCalc.sub(term1, term2);
+        default:
+          return NaN;
+      }
+    };
+  }
+}
+
+// usage
+const oldCalc = new OldCalculator();
+console.log(oldCalc.operations(10, 5, 'add')); // 15
+
+const newCalc = new NewCalculator();
+console.log(newCalc.add(10, 5)); // 15
+
+const adaptedCalc = new CalcAdapter();
+console.log(adaptedCalc.operations(10, 5, 'add')); // 15;
+```
+
+### Composite Pattern
+
+This is a structural design pattern that composes objects into tree-like structures to represent whole-part hierarchies. In this pattern, each node in the tree-like structure can be either an individual object or a composed collection of objects. Regardless, each node is treated uniformly.
+
+![](https://miro.medium.com/max/373/1*yAkeYCKDaRQtMRAV2Kx5sA.png)
+
+It is a bit complex to visualize this pattern. The easiest way to think about this is with the example of a multi-level menu. Each node can be a distinct option or it can be a menu itself which has multiple options as its child. A node component with children is a composite component while a node component without any child is a leaf component.
+
+In this example, we create a base class of _Component_ that implements the common functionalities needed and abstracts the other methods needed. The base class also has a static method that utilizes recursion to traverse a composite tree structure made with its subclasses. Then we create two subclasses extending the base class — _Leaf_ that does not have any children and _Composite_ that can have children and hence have methods handling adding, searching and removing child functionalities. The two subclasses are used to create a composite structure i.e. a tree in this case.
+
+```javascript
+class Component {
+  constructor(name) {
+    this._name = name;
+  }
+
+  getNodeName() {
+    return this._name;
+  }
+
+  // abstract methods that need to be overridden
+  getType() {}
+
+  addChild(component) {}
+
+  removeChildByName(componentName) {}
+
+  removeChildByIndex(index) {}
+
+  getChildByName(componentName) {}
+
+  getChildByIndex(index) {}
+
+  noOfChildren() {}
+
+  static logTreeStructure(root) {
+    let treeStructure = '';
+    function traverse(node, indent = 0) {
+      treeStructure += `${'--'.repeat(indent)}${node.getNodeName()}\n`;
+      indent++;
+      for (let i = 0, length = node.noOfChildren(); i < length; i++) {
+        traverse(node.getChildByIndex(i), indent);
+      }
+    }
+
+    traverse(root);
+    return treeStructure;
+  }
+}
+
+class Leaf extends Component {
+  constructor(name) {
+    super(name);
+    this._type = 'Leaf Node';
+  }
+
+  getType() {
+    return this._type;
+  }
+
+  noOfChildren() {
+    return 0;
+  }
+}
+
+class Composite extends Component {
+  constructor(name) {
+    super(name);
+    this._type = 'Composite Node';
+    this._children = [];
+  }
+
+  getType() {
+    return this._type;
+  }
+
+  addChild(component) {
+    this._children = [...this._children, component];
+  }
+
+  removeChildByName(componentName) {
+    this._children = [...this._children].filter(
+      (component) => component.getNodeName() !== componentName
+    );
+  }
+
+  removeChildByIndex(index) {
+    this._children = [
+      ...this._children.slice(0, index),
+      ...this._children.slice(index + 1),
+    ];
+  }
+
+  getChildByName(componentName) {
+    return this._children.find((component) => component.name === componentName);
+  }
+
+  getChildByIndex(index) {
+    return this._children[index];
+  }
+
+  noOfChildren() {
+    return this._children.length;
+  }
+}
+
+// usage
+const tree = new Composite('root');
+tree.addChild(new Leaf('left'));
+const right = new Composite('right');
+tree.addChild(right);
+right.addChild(new Leaf('right-left'));
+const rightMid = new Composite('right-middle');
+right.addChild(rightMid);
+right.addChild(new Leaf('right-right'));
+rightMid.addChild(new Leaf('left-end'));
+rightMid.addChild(new Leaf('right-end'));
+
+// log
+console.log(Component.logTreeStructure(tree));
+/*
+root
+--left
+--right
+----right-left
+----right-middle
+------left-end
+------right-end
+----right-right
+*/
+```
+
+### Decorator Pattern
+
+This is also a structural design pattern that focuses on the ability to add behaviour or functionalities to existing classes dynamically. It is another viable alternative to sub-classing.
+
+The decorator type behaviour is very easy to implement in JavaScript because JavaScript allows us to add methods and properties to object dynamically. The simplest approach would be to just add a property to an object but it will not be efficiently reusable.
+
+In fact, there is a proposal to add decorators to the JavaScript language. Take a look at [**Addy Osmani’s post**](https://medium.com/google-developers/exploring-es7-decorators-76ecb65fb841) about decorators in JavaScript.
+
+If you want to read about the proposal itself — it’s available [**here**](https://tc39.github.io/proposal-decorators/).
+
+In this example, we create a _Book_ class. We further create two decorator functions that accept a book object and returns a "decorated" _book_ object — _giftWrap_ that adds one new attribute and one new function and _hardbindBook_ that adds one new attribute and edits the value of one existing attribute.
+
+```javascript
+class Book {
+  constructor(title, author, price) {
+    this._title = title;
+    this._author = author;
+    this.price = price;
+  }
+
+  getDetails() {
+    return `${this._title} by ${this._author}`;
+  }
+}
+
+// decorator 1
+function giftWrap(book) {
+  book.isGiftWrapped = true;
+  book.unwrap = function () {
+    return `Unwrapped ${book.getDetails()}`;
+  };
+
+  return book;
+}
+
+// decorator 2
+function hardbindBook(book) {
+  book.isHardbound = true;
+  book.price += 5;
+  return book;
+}
+
+// usage
+const alchemist = giftWrap(new Book('The Alchemist', 'Paulo Coelho', 10));
+
+console.log(alchemist.isGiftWrapped); // true
+console.log(alchemist.unwrap()); // 'Unwrapped The Alchemist by Paulo Coelho'
+
+const inferno = hardbindBook(new Book('Inferno', 'Dan Brown', 15));
+
+console.log(inferno.isHardbound); // true
+console.log(inferno.price); // 20
+```
+
+### Facade Pattern
+
+This is a structural design pattern that is widely used in the JavaScript libraries. It is used to provide a unified and simpler public facing interface for ease of use that shields away from the complexities of its consisting subsystems or subclasses.
+
+The use of this pattern is very common in libraries like jQuery.
+
+In this example, we create a public facing API with the class _ComplaintRegistry_. It exposes only one method to be used by the client i.e. _registerComplaint_. It internally handles instantiating required objects of either _ProductComplaint_ or _ServiceComplaint_ based on the type argument. It also handles all the other complex functionalities like generating a unique ID, storing the complaint in memory, etc. But, all these complexities are hidden away using the Facade pattern.
+
+```javascript
+let currentId = 0;
+
+class ComplaintRegistry {
+  registerComplaint(customer, type, details) {
+    const id = ComplaintRegistry._uniqueIdGenerator();
+    let registry;
+    if (type === 'service') {
+      registry = new ServiceComplaints();
+    } else {
+      registry = new ProductComplaints();
+    }
+    return registry.addComplaint({ id, customer, details });
+  }
+
+  static _uniqueIdGenerator() {
+    return ++currentId;
+  }
+}
+
+class Complaints {
+  constructor() {
+    this.complaints = [];
+  }
+
+  addComplaint(complaint) {
+    this.complaints.push(complaint);
+    return this.replyMessage(complaint);
+  }
+
+  getComplaint(id) {
+    return this.complaints.find((complaint) => complaint.id === id);
+  }
+
+  replyMessage(complaint) {}
+}
+
+class ProductComplaints extends Complaints {
+  constructor() {
+    super();
+    if (ProductComplaints.exists) {
+      return ProductComplaints.instance;
+    }
+    ProductComplaints.instance = this;
+    ProductComplaints.exists = true;
+    return this;
+  }
+
+  replyMessage({ id, customer, details }) {
+    return `Complaint No. ${id} reported by ${customer} regarding ${details} have been filed with the Products Complaint Department. Replacement/Repairment of the product as per terms and conditions will be carried out soon.`;
+  }
+}
+
+class ServiceComplaints extends Complaints {
+  constructor() {
+    super();
+    if (ServiceComplaints.exists) {
+      return ServiceComplaints.instance;
+    }
+    ServiceComplaints.instance = this;
+    ServiceComplaints.exists = true;
+    return this;
+  }
+
+  replyMessage({ id, customer, details }) {
+    return `Complaint No. ${id} reported by ${customer} regarding ${details} have been filed with the Service Complaint Department. The issue will be resolved or the purchase will be refunded as per terms and conditions.`;
+  }
+}
+
+// usage
+const registry = new ComplaintRegistry();
+
+const reportService = registry.registerComplaint(
+  'Martha',
+  'service',
+  'availability'
+);
+// 'Complaint No. 1 reported by Martha regarding availability have been filed with the Service Complaint Department. The issue will be resolved or the purchase will be refunded as per terms and conditions.'
+
+const reportProduct = registry.registerComplaint(
+  'Jane',
+  'product',
+  'faded color'
+);
+// 'Complaint No. 2 reported by Jane regarding faded color have been filed with the Products Complaint Department. Replacement/Repairment of the product as per terms and conditions will be carried out soon.'
+```
+
+### Flyweight Pattern
+
+This is a structural design pattern focused on efficient data sharing through fine-grained objects. It is used for efficiency and memory conservation purposes.
+
+This pattern can be used for any kind of caching purposes. In fact, modern browsers use a variant of flyweight pattern to prevent loading same images twice.
+
+In this example, we create a fine-grained flyweight class _Icecream_ for sharing data regarding ice-cream flavours and a factory class _IcecreamFactory_ to create those flyweight objects. For memory conservation, the objects are recycled if the same object is instantiated twice. This is a simple example of flyweight implementation.
+
+```javascript
+// flyweight class
+class Icecream {
+  constructor(flavour, price) {
+    this.flavour = flavour;
+    this.price = price;
+  }
+}
+
+// factory for flyweight objects
+class IcecreamFactory {
+  constructor() {
+    this._icecreams = [];
+  }
+
+  createIcecream(flavour, price) {
+    let icecream = this.getIcecream(flavour);
+    if (icecream) {
+      return icecream;
+    } else {
+      const newIcecream = new Icecream(flavour, price);
+      this._icecreams.push(newIcecream);
+      return newIcecream;
+    }
+  }
+
+  getIcecream(flavour) {
+    return this._icecreams.find((icecream) => icecream.flavour === flavour);
+  }
+}
+
+// usage
+const factory = new IcecreamFactory();
+
+const chocoVanilla = factory.createIcecream('chocolate and vanilla', 15);
+const vanillaChoco = factory.createIcecream('chocolate and vanilla', 15);
+
+// reference to the same object
+console.log(chocoVanilla === vanillaChoco); // true
+```
+
+### Proxy Pattern
+
+This is a structural design pattern that behaves exactly as its name suggests. It acts as a surrogate or placeholder for another object to control access to it.
+
+It is usually used in situations where a target object is under constraints and may not be able to handle all its responsibility efficiently. A proxy, in this case, usually provides the same interface to the client and adds a level of indirection to support controlled access to the target object to avoid undue pressure on it.
+
+The proxy pattern can be very useful when working with network request heavy applications to avoid unnecessary or redundant network requests.
+
+In this example, we will use two new ES6 features [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy) and [Reflect](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect). A Proxy object is used to define custom behaviour for fundamental operations of a JavaScript object (remember, function and arrays are also object in JavaScript). It is a constructor method that can be used to create a _Proxy_ object. It accepts a _target_ object that is to be proxied and a _handler_ object that will define the necessary customization. The handler object allows defining some trap functions like _get_, _set_, _has_, _apply_, etc. that are used to add custom behaviour attached to their usage. _Reflect_, on the other hand, is a built-in object that provides similar methods that are supported by the handler object of Proxy as static methods on itself. It is not a constructor, it's static methods are used for interceptable JavaScript operations.
+
+Now, we create a function that can be thought of as a network request. We named it as *networkFetch*. It accepts a URL and responds accordingly. We want to implement a proxy where we only get the response from the network if it is not available in our cache otherwise we just return a response from the cache. The _cache_ global variable will store our cached responses. We create a proxy named _proxiedNetworkFetch_ with our original _networkFetch_ as the _target_ and use apply method in our _handler_ object to proxy the function invocation. The apply method gets passed on the _target_ object itself, this value as *thisArg* and the arguments passed to it in an array-like structure _args_. We check if the passed url argument is in the cache, if it exists in the cache we return the response from there, never invoking the original target function. If it does not, then we use the _Reflect.apply_ method to invoke the _target_ function with _thisArg_ (although it's not of any significance in our case here) and the arguments it was passed.
+
+```javascript
+// Target
+function networkFetch(url) {
+  return `${url} - Response from network`;
+}
+
+// Proxy
+// ES6 Proxy API = new Proxy(target, handler);
+const cache = [];
+const proxiedNetworkFetch = new Proxy(networkFetch, {
+  apply(target, thisArg, args) {
+    const urlParam = args[0];
+    if (cache.includes(urlParam)) {
+      return `${urlParam} - Response from cache`;
+    } else {
+      cache.push(urlParam);
+      return Reflect.apply(target, thisArg, args);
+    }
+  },
+});
+
+// usage
+console.log(proxiedNetworkFetch('dogPic.jpg')); // 'dogPic.jpg - Response from network'
+console.log(proxiedNetworkFetch('dogPic.jpg')); // 'dogPic.jpg - Response from cache'
+```
+
+## Behavioural Pattern
+
+### Chain of Responsibility Pattern
+
+This is a behavioural design pattern that provides a chain of loosely coupled objects. Each of these objects can choose to act on or handle the request of the client.
+
+A good example of the chain of responsibility pattern is the event bubbling in DOM in which an event propagates through a series of nested DOM elements, one of which may have an “event listener” attached to listen and act on the event.
+
+In this example, we create a class _CumulativeSum_ which can be instantiated with an optional _initialValue_. It has a method _add_ that adds the passed value to the _sum_ attribute of the object and returns the _object_ itself to allow chaining of _add_ method calls.
+
+This is a common pattern that can be seen in jQuery as well where almost any method call on a jQuery object returns a jQuery object so that method calls can be chained together.
+
+```javascript
+class CumulativeSum {
+  constructor(intialValue = 0) {
+    this.sum = intialValue;
+  }
+
+  add(value) {
+    this.sum += value;
+    return this;
+  }
+}
+
+// usage
+const sum1 = new CumulativeSum();
+console.log(sum1.add(10).add(2).add(50).sum); // 62
+
+const sum2 = new CumulativeSum(10);
+console.log(sum2.add(10).add(20).add(5).sum); // 45
+```
+
+### Command Pattern
+
+This is a behavioural design pattern that aims to encapsulate actions or operations as objects. This pattern allows loose coupling of systems and classes by separating the objects that request an operation or invoke a method from the ones that execute or process the actual implementation.
+
+The clipboard interaction API resembles the command pattern somewhat. If you are a Redux user, you have already come across the Command pattern. The actions, that allow the awesome time-travel debugging feature, are nothing but encapsulated operations that can be tracked to redo or undo operations. Hence, time-travelling made possible.
+
+In this example, we have a class _SpecialMath_ that has multiple methods and a _Command_ class that encapsulates commands that are to be executed on its subject i.e. an object of the _SpecialMath_ class. The _Command_ class also keeps track of all the commands executed which can be used to extend its functionality to include undo and redo type operations.
+
+```javascript
+class SpecialMath {
+  constructor(num) {
+    this._num = num;
+  }
+
+  square() {
+    return this._num ** 2;
+  }
+
+  cube() {
+    return this._num ** 3;
+  }
+
+  squareRoot() {
+    return Math.sqrt(this._num);
+  }
+}
+
+class Command {
+  constructor(subject) {
+    this._subject = subject;
+    this.commandsExecuted = [];
+  }
+  execute(command) {
+    this.commandsExecuted.push(command);
+    return this._subject[command]();
+  }
+}
+
+// usage
+const x = new Command(new SpecialMath(5));
+x.execute('square');
+x.execute('cube');
+
+console.log(x.commandsExecuted); // ['square', 'cube']
+```
+
+### Iterator Pattern
+
+It is a behavioural design pattern that provides a way to access the elements of an aggregate object sequentially without exposing its underlying representation.
+
+Iterators have a special kind of behaviour where we step through an ordered set of values one at a time by calling _next()_ until we reach the end. The introduction of Iterator and Generators in ES6 made the implementation of iterator pattern extremely straightforward.
+
+We have two examples below, first one _IteratorClass_ uses Iterator spec while the other one _iteratorUsingGenerator_ uses Generator functions.
+
+The *Symbol.iterator* ( *Symbol* - a new kind of primitive data type) is used to specify the default iterator for an object. It is must be defined for a collection to be able to use *for...of* looping construct. In the first example, we define the constructor to store some collection of data and then define _Symbol.iterator_ which returns an object with _next_ method for iteration.
+
+For the second case, we define a generator function passing it an array of data and return its elements iteratively using _next_ and _yield_. A generator function is a special type of function that works as a factory for iterators and can explicitly maintain its own internal state and yield values iteratively. It can pause and resume its own execution cycle.
+
+```javascript
+// using Iterator
+class IteratorClass {
+  constructor(data) {
+    this.index = 0;
+    this.data = data;
+  }
+
+  [Symbol.iterator]() {
+    return {
+      next: () => {
+        if (this.index < this.data.length) {
+          return { value: this.data[this.index++], done: false };
+        } else {
+          this.index = 0; // to reset iteration status
+          return { done: true };
+        }
+      },
+    };
+  }
+}
+
+// using Generator
+function* iteratorUsingGenerator(collection) {
+  var nextIndex = 0;
+
+  while (nextIndex < collection.length) {
+    yield collection[nextIndex++];
+  }
+}
+
+// usage
+const gen = iteratorUsingGenerator(['Hi', 'Hello', 'Bye']);
+
+console.log(gen.next().value); // 'Hi'
+console.log(gen.next().value); // 'Hello'
+console.log(gen.next().value); // 'Bye'
+```
+
+### Mediator Pattern
+
+It is a behavioural design pattern that encapsulates how a set of object interact with each other. It provides the central authority over a group of objects by promoting loose coupling by keeping objects from referring to each other explicitly.
+
+In this example, we have _TrafficTower_ as Mediator that controls the way _Airplane_ objects interact with each other. All the _Airplane_ objects register themselves with a _TrafficTower_ object and it is the mediator class object that handles how an _Airplane_ object receives coordinates data of all the other _Airplane_ objects.
+
+```javascript
+class TrafficTower {
+  constructor() {
+    this._airplanes = [];
+  }
+
+  register(airplane) {
+    this._airplanes.push(airplane);
+    airplane.register(this);
+  }
+
+  requestCoordinates(airplane) {
+    return this._airplanes
+      .filter((plane) => airplane !== plane)
+      .map((plane) => plane.coordinates);
+  }
+}
+
+class Airplane {
+  constructor(coordinates) {
+    this.coordinates = coordinates;
+    this.trafficTower = null;
+  }
+
+  register(trafficTower) {
+    this.trafficTower = trafficTower;
+  }
+
+  requestCoordinates() {
+    if (this.trafficTower) return this.trafficTower.requestCoordinates(this);
+    return null;
+  }
+}
+
+// usage
+const tower = new TrafficTower();
+
+const airplanes = [new Airplane(10), new Airplane(20), new Airplane(30)];
+airplanes.forEach((airplane) => {
+  tower.register(airplane);
+});
+
+console.log(airplanes.map((airplane) => airplane.requestCoordinates()));
+// [[20, 30], [10, 30], [10, 20]]
+```
+
+### Observer Pattern
+
+It is a crucial behavioural design pattern that defines one-to-many dependencies between objects so that when one object (publisher) changes its state, all the other dependent objects (subscribers) are notified and updated automatically. This is also called PubSub (Publisher/Subscribers) or Event Dispatcher/Listeners Pattern. The Publisher is sometimes called Subject and the Subscribers are sometimes called Observers.
+
+Chances are you are already somewhat familiar with this pattern if you have used addEventListener or jQuery’s on to write event handling code. It has its influences in Reactive Programming (think RxJS) as well.
+
+In the example, we create a simple _Subject_ class that has methods to add and remove objects of _Observer_ class from subscriber collection. Also, a _fire_ method to propagate any changes in the _Subject_ class object to the subscribed Observers. The _Observer_ class, on the other hand, has its internal state and a method to update its internal state based on the change propagated from the _Subject_ it has subscribed to.
+
+```javascript
+class Subject {
+  constructor() {
+    this._observers = [];
+  }
+
+  subscribe(observer) {
+    this._observers.push(observer);
+  }
+
+  unsubscribe(observer) {
+    this._observers = this._observers.filter((obs) => observer !== obs);
+  }
+
+  fire(change) {
+    this._observers.forEach((observer) => {
+      observer.update(change);
+    });
+  }
+}
+
+class Observer {
+  constructor(state) {
+    this.state = state;
+    this.initialState = state;
+  }
+
+  update(change) {
+    let state = this.state;
+    switch (change) {
+      case 'INC':
+        this.state = ++state;
+        break;
+      case 'DEC':
+        this.state = --state;
+        break;
+      default:
+        this.state = this.initialState;
+    }
+  }
+}
+
+// usage
+const sub = new Subject();
+
+const obs1 = new Observer(1);
+const obs2 = new Observer(19);
+
+sub.subscribe(obs1);
+sub.subscribe(obs2);
+
+sub.fire('INC');
+
+console.log(obs1.state); // 2
+console.log(obs2.state); // 20
+```
+
+### State Pattern
+
+It is a behavioural design pattern that allows an object to alter its behaviour based on changes to its internal state. The object returned by a State pattern class seems to change its class. It provides state-specific logic to a limited set of objects in which each object type represents a particular state.
+
+We will take a simple example of a traffic light to understand this pattern. The _TrafficLight_ class changes the object it returns based on its internal state which is an object of _Red_, _Yellow_ or _Green_ class.
+
+```javascript
+class TrafficLight {
+  constructor() {
+    this.states = [new GreenLight(), new RedLight(), new YellowLight()];
+    this.current = this.states[0];
+  }
+
+  change() {
+    const totalStates = this.states.length;
+    let currentIndex = this.states.findIndex((light) => light === this.current);
+    if (currentIndex + 1 < totalStates)
+      this.current = this.states[currentIndex + 1];
+    else this.current = this.states[0];
+  }
+
+  sign() {
+    return this.current.sign();
+  }
+}
+
+class Light {
+  constructor(light) {
+    this.light = light;
+  }
+}
+
+class RedLight extends Light {
+  constructor() {
+    super('red');
+  }
+
+  sign() {
+    return 'STOP';
+  }
+}
+
+class YellowLight extends Light {
+  constructor() {
+    super('yellow');
+  }
+
+  sign() {
+    return 'STEADY';
+  }
+}
+
+class GreenLight extends Light {
+  constructor() {
+    super('green');
+  }
+
+  sign() {
+    return 'GO';
+  }
+}
+
+// usage
+const trafficLight = new TrafficLight();
+
+console.log(trafficLight.sign()); // 'GO'
+trafficLight.change();
+
+console.log(trafficLight.sign()); // 'STOP'
+trafficLight.change();
+
+console.log(trafficLight.sign()); // 'STEADY'
+trafficLight.change();
+
+console.log(trafficLight.sign()); // 'GO'
+trafficLight.change();
+
+console.log(trafficLight.sign()); // 'STOP'
+```
+
+### Strategy Pattern
+
+It is a behavioural design pattern that allows encapsulation of alternative algorithms for a particular task. It defines a family of algorithms and encapsulates them in such a way that they are interchangeable at runtime without client interference or knowledge.
+
+In the example below, we create a class _Commute_ for encapsulating all the possible strategies for commuting to work. Then, we define three strategies namely _Bus_, _PersonalCar_ and _Taxi_. Using this pattern we can swap the implementation to use for the _travel_ method of the _Commute_ object at runtime.
+
+```javascript
+// encapsulation
+class Commute {
+  travel(transport) {
+    return transport.travelTime();
+  }
+}
+
+class Vehicle {
+  travelTime() {
+    return this._timeTaken;
+  }
+}
+
+// strategy 1
+class Bus extends Vehicle {
+  constructor() {
+    super();
+    this._timeTaken = 10;
+  }
+}
+
+// strategy 2
+class Taxi extends Vehicle {
+  constructor() {
+    super();
+    this._timeTaken = 5;
+  }
+}
+
+// strategy 3
+class PersonalCar extends Vehicle {
+  constructor() {
+    super();
+    this._timeTaken = 3;
+  }
+}
+
+// usage
+const commute = new Commute();
+
+console.log(commute.travel(new Taxi())); // 5
+console.log(commute.travel(new Bus())); // 10
+```
+
+### Template Pattern
+
+This is a behavioural design pattern is based on defining the skeleton of the algorithm or implementation of an operation, but deferring some steps to subclasses. It lets subclasses redefine certain steps of an algorithm without changing the algorithm’s outward structure.
+
+In this example, we have a Template class _Employee_ that implements _work_ method partially. It is for the subclasses to implement responsibilities method to make it work as a whole. We then create two subclasses _Developer_ and _Tester_ that extend the Template class and implement the required method to fill the implementation gap.
+
+```javascript
+class Employee {
+  constructor(name, salary) {
+    this._name = name;
+    this._salary = salary;
+  }
+
+  work() {
+    return `${this._name} handles ${
+      this.responsibilities() /* gap to be filled by subclass */
+    }`;
+  }
+
+  getPaid() {
+    return `${this._name} got paid ${this._salary}`;
+  }
+}
+
+class Developer extends Employee {
+  constructor(name, salary) {
+    super(name, salary);
+  }
+
+  // details handled by subclass
+  responsibilities() {
+    return 'application development';
+  }
+}
+
+class Tester extends Employee {
+  constructor(name, salary) {
+    super(name, salary);
+  }
+
+  // details handled by subclass
+  responsibilities() {
+    return 'testing';
+  }
+}
+
+// usage
+const dev = new Developer('Nathan', 100000);
+console.log(dev.getPaid()); // 'Nathan got paid 100000'
+console.log(dev.work()); // 'Nathan handles application development'
+
+const tester = new Tester('Brian', 90000);
+console.log(tester.getPaid()); // 'Brian got paid 90000'
+console.log(tester.work()); // 'Brian handles testing'
+```
+
+## Conclusion
+
+Design patterns are crucial to software engineering and can be very helpful in solving common problems. But, this is a very vast subject and it is simply not possible to include everything about them in a short blog post. Therefore, I made the choice to shortly and concisely talk only about the ones I think can be really handy in writing modern JavaScript. To dive deeper, I suggest you take a look at these books -
+
+1.  **[Design Patterns: Elements Of Reusable Object-Oriented Software](https://en.wikipedia.org/wiki/Design_Patterns) **by *Erich Gamma, Richard Helm, Ralph Johnson and John Vlissides (Gang of Four)*
+2.  [**Learn JavaScript Design Patterns** ](https://addyosmani.com/resources/essentialjsdesignpatterns/book/)by _Addy Osmani_
+3.  **[JavaScript Patterns](https://www.amazon.com/JavaScript-Patterns-Stoyan-Stefanov/dp/0596806752)** by _Stoyan Stefanov_

@@ -1,0 +1,324 @@
+---
+title: Tìm hiểu Higher-Order Function (HOF) và Currying qua một số ví dụ
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - hof
+categories:
+  - javascript
+sourceUrl: >-
+  https://manhdaovan.github.io/programming/vi/2017/10/14/higer-order-function-and-currying/
+coverImage: 'https://i.ytimg.com/vi/dTlpYnmBW9I/maxresdefault.jpg'
+date: 2018-04-03 11:20:00
+slug: /tim-hieu-higher-order-function-hof-va-currying-qua-mot-so-vi-du-3
+---
+
+HOF và Currying là hai kỹ thuật không khó, thậm chí có thể bạn đang dùng nó hàng ngày mà không để ý. Cùng tìm hiểu chúng thông qua một số ví dụ.
+
+### Background
+
+Tôi cho rằng một kỹ sư phần mềm pro không phải là người viết ra những dòng code đánh đố người đọc hay đồng nghiệp, mà là người viết những dòng code mà khi người khác đọc nó liền cảm thấy trong sáng, dễ hiểu, dễ bảo trì.
+
+Cũng như sự tiến hóa của con người, khi mà "ăn no, ăn sạch rồi ăn ngon", thì coding cũng có slogan tương tự: ["chạy được, chạy đúng, sau cùng là chạy nhanh"](http://wiki.c2.com/?MakeItWorkMakeItRightMakeItFast).
+Vậy, sau khi chạy được và chạy đúng rồi, chúng ta nên suy nghĩ xem ngoài việc có thể chạy nhanh hơn ko, thì đoạn code này đã sáng sủa chưa? Nếu bị/được sửa thì có dễ ko?
+
+HOF và Currying là 2 trong số ti tỉ kỹ thuật nhằm giúp chúng ta, những lập trình viên huyền thoại, đạt được tiêu chí trên.
+
+Trước khi đi vào khái niệm cụ thể, chúng ta cùng xem ví dụ dưới đây:
+
+### Ví dụ 1
+
+Nhóc con nhà bạn nhờ bạn tìm những số tự nhiên khác 0 nhỏ hơn 20 và là số lẻ.
+Là một ông bố mẫu mực với niềm kiêu hãnh nhiều năm kinh nghiệm fixed hàng trăm bug nhỏ và ~~tạo ra~~ hàng tá bug to, bạn muốn viết một chương trình hoành tráng để lấy le với con mình. Ok, you win!.
+Dưới đây chắc hẳn là đoạn code đầu tiên xuất hiện trong đầu:
+
+```javascript
+function pickOddNumbers(maximum) {
+  const result = [];
+
+  for (let i = 1; i <= maximum; i += 1) {
+    if (i % 2 === 1) result.push(i);
+  }
+
+  return result;
+}
+
+pickOddNumbers(20);
+```
+
+Nhưng đời không bao giờ là mơ, khi hôm sau nhóc con lại mếu máo: "Cô giáo cho thêm bài: Tìm những số tự nhiên khác 0 nhỏ hơn 20 mà nếu gấp 3 số đó rồi từ đi 2 thì thu được số chẵn.".
+Bố chiều cô luôn. Vậy là bạn lại cho ra phiên bản mới:
+
+```javascript
+function pickSpecialNumbers(maximum) {
+  const result = [];
+
+  for (let i = 1; i <= maximum; i += 1) {
+    if ((i * 3 - 2) % 2 === 0) result.push(i);
+  }
+
+  return result;
+}
+
+pickSpecialNumbers(20);
+```
+
+Đời vẫn ko như mơ khi cô giáo lại cho thêm bài tập: "Tìm những số tự nhiên khác 0 nhỏ hơn 20 mà nếu lấy phần dư số đó cho 9 rồi cộng thêm 2 thì thu số lẻ."
+Ơ cô giáo từ từ, để bố em sửa function bên trên đã :))))
+
+Cứ như vậy, mỗi lần cô giáo cho thêm yêu cầu là bạn lại phải sửa phiên bản cũ hoặc cho ra một bản mới, tuy yêu cầu khác nhau nhưng xử lý cơ bản là giống nhau, chỉ khác ở đoạn xử lý điều kiện cho số được chọn.
+Và bạn chợt nhớ tới HOF, một ứng cử viên sáng giá cho việc làm đoạn code trên sạch hơn, gọn hơn, dễ sửa hơn.
+
+### Định nghĩa HOF
+
+Theo [wikipedia](https://en.wikipedia.org/wiki/Higher-order_function) thì:
+
+```javascript
+A higher-order function (also functional, functional form or functor) is a function that does at least one of the following:
+
+・takes one or more functions as arguments,
+・returns a function as its result.
+```
+
+Vietsub:
+
+```javascript
+HOF là một function mà cho phép thực hiện ít nhất 1 trong 2 khả năng sau:
+・Nhận vào một hoặc nhiều function như là tham số, hoặc/và
+・Trả về kết quả là một function.
+```
+
+_// Bạn có thể thấy có rất nhiều ngôn ngữ hỗ trợ HOF ở link wiki trên. Đến Java còn hỗ trợ nữa là :v_
+
+Trăm nghe không bằng một thấy, trăm thấy không bằng một sờ, và chúng ta lại cùng sờ với ví dụ bên trên.
+Lần này là bản nâng cấp có giá trị về mặt học thuật, vì được áp dụng HOF vào cơ mà :)))
+
+```javascript
+function pickNumbers(maximum, pickingCondition) {
+  const result = [];
+
+  for (let i = 1; i <= maximum; i += 1) {
+    if (pickingCondition(i)) result.push(i);
+  }
+
+  return result;
+}
+
+// Chọn ra những số lẻ
+pickNumbers(20, function (number) {
+  return number % 2 === 1;
+});
+
+// Chọn ra những số mà gấp 3 số đó rồi trừ đi 2 thu số chẵn
+pickNumbers(20, function (number) {
+  return (number * 3 - 2) % 2 === 0;
+});
+```
+
+Với việc đưa HOF vào function bên trên, giờ thì cô giáo thích gì cũng chiều được nhé,
+chỉ cần thay đổi function kiểm tra điều kiện vào thôi, ko cần phải copy thành function mới nữa.
+
+### Định nghĩa Currying
+
+Lại theo [wikipedia](https://en.wikipedia.org/wiki/Currying):
+
+```javascript
+ Currying is the technique of translating the evaluation of a function
+ that takes multiple arguments (or a tuple of arguments)
+ into evaluating a sequence of functions, each with a single argument.
+```
+
+Vietsub:
+
+```javascript
+Currying là kỹ thuật mà cho phép chuyển đổi một function với nhiều tham số
+thành những functions liên tiếp có một tham số.
+// Ví dụ f(a,b,c) có thể được convert thành g(a)h(b, c) hay g(a)h(b)k(c), thậm chí là đổi thứ tự của các function tương ứng...
+```
+
+Vậy dễ dàng nhận thấy Currying là một trường hợp của HOF, vì nó thỏa mãn điều kiện trả về kết quả là một function.
+
+Cụ thể áp dụng cho ví dụ trên, có thể viết thành dạng sau:
+
+```javascript
+function pickNumbers(maximum) {
+  return function (pickingCondition) {
+    const result = [];
+
+    for (let i = 1; i <= maximum; i += 1) {
+      if (pickingCondition(i)) result.push(i);
+    }
+
+    return result;
+  };
+}
+
+// Chọn ra những số lẻ
+pickNumbers(20)(function (number) {
+  return number % 2 === 1;
+});
+
+// Chọn ra những số mà gấp 3 số đó rồi trừ đi 2 thu số chẵn
+pickNumbers(20)(function (number) {
+  return (number * 3 - 2) % 2 === 0;
+});
+```
+
+So sánh ví dụ áp dụng Currying này với ví dụ sử dụng HOF ở trên, rõ ràng là ta chưa thấy sự ưu việt của Currying so với HOF, thậm chí còn thấy hơi rườm rà nữa.
+Tuy nhiên, hãy cùng xem xét ví dụ dưới đây:
+
+### Ví dụ 2
+
+Viết một function lấy ra giá trị của một key của object, được chọn ra từ một mảng các objects với điều kiện. Đơn giản vậy thôi, nên việc cài đặt cũng có vẻ là đơn giản.
+
+Với HOF:
+
+```javascript
+function getValue(objects, key, pickingCondition) {
+  var object = null;
+
+  for (var i = 0; i < objects.length; i++) {
+    if (pickingCondition(objects[i])) {
+      object = objects[i];
+      break;
+    }
+  }
+
+  return object ? object[key] : null;
+}
+```
+
+Mỗi khi gọi function với key khác nhau, hẳn là sẽ phải gọi kiểu như vầy:
+
+```javascript
+var valueByKey1 = getValue(objects, 'key1', pickingCondition);
+var valueByKey2 = getValue(objects, 'key2', pickingCondition);
+```
+
+Nếu như coi key là **biết trước**, chỉ thay đổi objects và pickingCondition, thì việc áp dụng Currying là hợp lý:
+
+```javascript
+function getValue(key) {
+  return function (objects, pickingCondition) {
+    let object = null;
+
+    for (let i = 0; i < objects.length; i++) {
+      if (pickingCondition(objects[i])) {
+        object = objects[i];
+        break;
+      }
+    }
+
+    return object ? object[key] : null;
+  };
+}
+
+// Wrap getValue thành những function ngắn hơn với tên sáng nghĩa:
+var getValueByKey1 = getValue('key1');
+var getValueByKey2 = getValue('key2');
+
+// Sử dụng:
+var valueByKey1 = getValueByKey1(objects, pickingCondition);
+var valueByKey2 = getValueByKey2(objects, pickingCondition);
+```
+
+Khá là gọn gàng.
+
+_// Ngoài lề: Nếu bạn làm việc với ReactJs, hẳn bạn đã biết tới thuật ngữ Higher-Order Component, hay các selectors mà redux-form cung cấp, thì chúng đều áp dụng kỹ thuật Currying này, cũng như HOF._
+
+Dưới đây là một vài ví dụ cho thấy tác dụng tốt của Currying:
+
+### Ví dụ 3
+
+Viết function để kiểm tra độ dài của một xâu s có vượt quá n hay ko.
+
+```javascript
+// Cách 1: Không dùng Currying
+function isLengthOver(s, n) {
+  return s.length > n;
+}
+
+// Cách 2: Có Currying
+function isLengthOver(n) {
+  return function (s) {
+    return s.length > n;
+  };
+}
+```
+
+Giả sử cả 2 cách viết trên được sử dụng cho việc validate của một field trên form, với n = 10 thì có sự khác biệt như sau:
+
+Với cách 1:
+
+```javascript
+<input type="text" validate={(value) => isLengthOver(value, 10)} />
+```
+
+Với cách 2:
+
+```javascript
+<input type="text" validate={isLengthOver(10)} />
+```
+
+Quá khác bọt!
+
+### Ví dụ 4
+
+Viết function hiển thị tên group mà một nhân viên đang làm việc, với:
+
+Input:
+
+- employeeGroupId là id của group mà nhân viên đang làm việc,
+- Mảng chứa toàn bộ groups có trong công ty.
+
+Điều kiện rằng buộc:
+
+- Một group luôn có id khác null,
+- Nếu groupB là group con của groupA, thì groupB sẽ có parentGroupId là id của groupA. Group không là con khi parentGroupId của nó là null,
+- Không có quan hệ vòng tròn. (Kiểu: groupA là con groupB, groupB là con groupC, groupC là con groupA)
+
+Output:
+
+- Full path của group mà nhân viên đang làm việc, phân cách bởi dấu /. Ví dụ Group A / Group B / Group C
+
+Chắc hẳn bạn sẽ nghĩ tới cách dùng vòng lặp, kiểm tra chừng nào còn tìm thấy group có id bằng parentGroupId. Và tôi cũng nghĩ vậy :D
+
+```javascript
+const getGroupFullPathName = (groups, employeeGroupId) => {
+  const groupNames = [];
+
+  let group = groups.find((grp) => grp.id === employeeGroupId);
+  while (group) {
+    groupNames.unshift(group.name);
+    group = groups.find((grp) => grp.id === group.parentGroupId);
+  }
+
+  return groupNames.join('/');
+};
+```
+
+Nhưng đoạn code trên vẫn chưa ngon, do vi phạm rule [Don't make functions within a loop](https://eslint.org/docs/rules/no-loop-func) của ESLint.
+Cụ thể: Mỗi khi vòng while được chạy thì groups.find(grp => grp.id === group.parentGroupId) lại sinh ra một anonymous function, chính là grp => grp.id === group.parentGroupId.
+
+Cách khắc phục là ta viết một currying bên ngoài vòng while là được:
+
+```javascript
+const getGroupFullPathName = (groups, employeeGroupId) => {
+  const groupNames = [];
+  const condition = (parentGroupId) => (group) => group.id === parentGroupId;
+
+  let group = groups.find((grp) => grp.id === employeeGroupId);
+  while (group) {
+    groupNames.unshift(group.name);
+    group = groups.find(condition(group.parentDepartmentId));
+  }
+
+  return groupNames.join('/');
+};
+```
+
+### Kết luận:
+
+Bài quá dài.
+
+_// Nếu mấy ví dụ trên dùng cú pháp của es6 và dùng các api của Array thì sẽ ngắn hơn nhiều, nhưng lại khó nhìn rõ đâu là function được nhận vào/trả ra, nên các bạn chịu khó đọc với cú pháp cơ bản vậy :D_

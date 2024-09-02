@@ -1,0 +1,489 @@
+---
+title: 'Cách Javascript hoạt động P17: Bên trong Shadow DOM + xây dựng component khép kín'
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/800/0*66kSmyuCNeD7Oiaq'
+sourceUrl: >-
+  https://blog.sessionstack.com/how-javascript-works-the-internals-of-shadow-dom-how-to-build-self-contained-components-244331c4de6e
+date: 2019-01-05 23:50:00
+slug: /cach-javascript-hoat-dong-p17-ben-trong-shadow-dom-xay-dung-component-khep-kin
+---
+
+**_Trong bài có nhiều từ mình để nguyên mà không dịch nhé, vì dịch ra thì bay mất nghĩa @_@\_**
+
+- **element**: phần tử
+- **custom element**: phần tử tự tạo
+- **component**: thành phần
+- **custom component**: thành phần tự tạo
+- **markup**: nói chung là ngôn ngữ đánh dấu, hay nói dễ hiểu hơn là code HTML (Hyper Text **Markup** Language)
+
+Chào các bạn đến với bài thứ 17 trong series khám phá Javascript cũng như các thành phần của nó. Trong quá trình xác định và tìm hiểu các thành phần cốt lõi, tác giả cũng chia sẻ một số nguyên tắc mà họ đang dùng để xây dựng SessionStack, một ứng dụng Javascript hướng đến sự mạnh mẽ, hiệu năng cao và ổn định.
+
+# Khái quát
+
+Web Components (Thành phần web) là 1 bộ các công nghệ khác nhau cho phép ta tạo ra những custom element có thể tái sử dụng. Tính năng của chúng được đóng gói tách hoàn toàn khỏi code và bạn có thể dùng nó trong webapp của mình.
+
+Có 4 loại Web Component tiêu chuẩn:
+
+- Shadow DOM (Bóng của DOM)
+- HTML Templates (các mẫu HTML)
+- Custom elements (Các custom element)
+- HTML Imports
+
+Trong bài này ta sẽ tập trung vào **Shadow DOM**
+
+Shadow DOM được thiết kế như 1 công cụ dùng để xây dựng các app dựa trên component. Nó cung cấp các giải pháp cho các vấn đề chung trong ngành phát triển web mà bạn chắc chắn đã gặp qua:
+
+- **Isolated DOM (DOM cô lập)**: 1 DOM của component khép kín (ví dụ: document.querySelector() không trả về các node trong Shadow DOM của component). Điều này cũng làm đơn giản hóa các CSS Selector trong webapp của bạn bởi vì các DOM component đều bị cô lập, nó cho phép bạn khả năng sử dụng chung nhiều id/class mà không lo bị xung đột về cách đặt tên.
+- **Scoped CSS (CSS trong phạm vi)**: CSS định nghĩa bên trong Shadow DOM chỉ có phạm vi trong nó. Các quy tắc về style không lọt ra ngoài và style của trang cũng không can thiệp vào nó.
+- **Composition (kết hợp)**: Thiết kế 1 API khai báo, dựa trên markup cho component của bạn.
+
+# Shadow DOM
+
+Bài viết này giả định rằng bạn đã quen thuộc với các khái niệm và API về DOM. Nếu bạn chưa rõ thì có thể đọc bài viết chi tiết về nó ở đây: [https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model/Introduction)
+
+Shadow DOM cũng chỉ là 1 DOM bình thường, ngoại trừ 2 điều sau:
+
+- Cách tạo ra/sử dụng trong mối quan hệ với toàn bộ trang so với cách mà bạn tạo/sử dụng DOM thường.
+- Cách tương tác của nó trong mối quan hệ với toàn bộ trang
+
+Một cách tổng quát, bạn tạo ra các node DOM và nối (append) chúng dưới dạng children vào element khác. Trong trường hợp của Shadow DOM, bạn tạo ra 1 cây DOM trong phạm vi (scoped DOM) và được kết nối vào element tuy nhiên nó tách biệt với children của chính nó. Cây con trong phạm vi này được gọi là **shadow tree**. Element mà nó nối vào được gọi là **shadow host**. Bất cứ thứ gì bạn thêm vào shadow tree trở thành 1 phần local của element chủ, bao gồm cả `<style>`. Đây là cách mà Shadow DOM có được phạm vi của CSS style.
+
+# Tạo Shadow DOM
+
+Một **shadow root** là 1 phần của document và được nối vào 1 element chủ (host element). Thời điểm bạn nối 1 shadow root chính là lúc element có được shadow DOM của nó. Để tạo shadow DOM cho 1 element, ta gọi element.attachShadow():
+
+```javascript
+var header = document.createElement('header');
+var shadowRoot = header.attachShadow({ mode: 'open' });
+var paragraphElement = document.createElement('p');
+
+paragraphElement.innerText = 'Shadow DOM';
+shadowRoot.appendChild(paragraphElement);
+```
+
+Phần [thông số kỹ thuật](http://w3c.github.io/webcomponents/spec/shadow/#h-methods) này định nghĩa 1 danh sách các element mà shadow tree **không thể** nối vào.
+
+# Tính kết hợp trong Shadow DOM
+
+Tính kết hợp là 1 trong số những tính năng quan trọng nhất của Shadow DOM.
+
+Khi viết code HTML, "kết hợp" là cách mà bạn xây dựng webapp. Bạn kết nối và cài đặt các viên gạch khác nhau (còn gọi là các element) chẳng hạn như `<div>`, `<header>`, `<form>`, vân vân, để xây dựng UI cho webapp. Một số tag thậm chí có thể hoạt động với nhau.
+
+Sự kết hợp định nghĩa tại sao các element như `<select>`, `<form>`, `<video>`... lại linh động và chấp nhận các element HTML cụ thể làm children của nó để thực hiện các công việc đặc biệt.
+
+Ví dụ, `<select>` biết cách render các element `<option>` thành 1 danh sách dropdown với các item được định nghĩa trước.
+
+Shadow DOM giới thiệu các tính năng sau mà từ đó ta có thể thực hiện tính "kết hợp".
+
+# Light DOM (DOM nhẹ)
+
+Đây là đoạn markup mà user của component của bạn viết ra. DOM này tồn tại bên ngoài Shadow DOM của component. Nó là một children thực của element. Tưởng tượng rằng bạn đã tạo ra 1 custom component có tên `<extended-button>` có thể mở rộng button mặc định của HTML và bạn muốn thêm 1 bức hình, thêm vài đoạn text bên trong nó, thì dưới đây là những gì mà nó nên có:
+
+```html
+<extended-button>
+  <!-- thẻ img và span là Light DOM của extended-button -->
+  <img src="boot.png" slot="image" />
+  <span>Launch</span>
+</extended-button>
+```
+
+extended-button là component tùy chọn mà bạn định nghĩa, đoạn HTML bên trong nó được gọi là **Light DOM** và được thêm vào bởi user của component của bạn.
+
+Shadow DOM ở đây chính là component mà bạn đã tạo ra (tức là `<extended-button>`). Với component thì Shadow DOM là local, nó định nghĩa cho chính bản thân nó cấu trúc nội bộ, CSS trong phạm vi và đóng gói toàn bộ các chi tiết về triển khai.
+
+# Flattened DOM tree (Cây DOM phẳng)
+
+Kết quả của trình duyệt khi phân phối Light DOM - một sản phẩm được tạo ra bởi user và đặt vào trong Shadow DOM của bạn cùng với phần định nghĩa của custom component, sẽ render ra sản phẩm cuối cùng. Cây phẳng (flattened tree) là những gì sau cuối mà bạn thấy trong DevTools và được render trên trang.
+
+```html
+<extended-button>
+  #shadow-root
+  <style>
+    …
+  </style>
+  <slot name="image">
+    <img src="boot.png" slot="image" />
+  </slot>
+  <span id="container">
+    <slot>
+      <span>Launch</span>
+    </slot>
+  </span>
+</extended-button>
+```
+
+# Templates
+
+Khi bạn phải tái sử dụng liên tục 1 vài đoạn markup nào đó trên trang web, cách tốt hơn là ta sử dụng 1 kiểu template hơn là cứ lặp đi lặp lại cùng 1 cấu trúc đó hết lần này đến lần khác. Trước đây vẫn làm được điều này nhưng bây giờ thì dễ hơn nhiều với element HTML `<template>` hỗ trợ sẵn bởi rất nhiều trình duyệt hiện đại. Element này và nội dung của nó không được render trên DOM nhưng nó vẫn có thể tham chiếu đến bằng Javascript.
+
+Cùng xem 1 ví dụ đơn giản nào:
+
+```html
+<template id="my-paragraph">
+  <p>Paragraph content.</p>
+</template>
+```
+
+Đoạn code đó sẽ không hiển thị trên trang của bạn trừ khi bạn tham chiếu đến nó bằng Javascript và nối nó vào DOM bằng 1 cách nào đó, chẳng hạn như:
+
+```javascript
+var template = document.getElementById('my-paragraph');
+var templateContent = template.content;
+document.body.appendChild(templateContent);
+```
+
+Giờ đây, để đạt được cùng 1 mục đích chung thì có nhiều kỹ thuật khác nhau để lựa chọn nhưng như đã đề cập trước đây, sẽ dễ dàng hơn nhiều nếu như các kỹ thuật đó được hỗ trợ natively. template được các trình duyệt hỗ trợ khá tốt (trừ IE)
+
+![](https://cdn-images-1.medium.com/max/1000/0*3SRCEtv7rMhWpB5s)
+
+Tự bản thân template đã rất có ích rồi, nhưng nó còn hoạt động tốt hơn nữa với các custom element. Chúng ta sẽ định nghĩa vài custom element trong 1 bài viết khác, còn bây giờ, trong lúc này thì bạn nên biết là có 1 API customElement trên trình duyệt cho phép chúng ta định nghĩa thẻ (tag) riêng của ta với các tùy chọn render.
+
+Giờ ta sẽ định nghĩa 1 web component sử dụng template trên làm nội dung cho Shadow DOM, chúng ta gọi nó là `<my-paragraph>`:
+
+```javascript
+customElements.define(
+  'my-paragraph',
+  class extends HTMLElement {
+    constructor() {
+      super();
+
+      let template = document.getElementById('my-paragraph');
+      let templateContent = template.content;
+      const shadowRoot = this.attachShadow({ mode: 'open' }).appendChild(
+        templateContent.cloneNode(true)
+      );
+    }
+  }
+);
+```
+
+Điểm then chốt cần chú ý ở đây là chúng ta nối 1 bản sao của nội dung template vào shadow root - thứ được tạo ra bằng phương thức [Node.cloneNode()](https://developer.mozilla.org/en-US/docs/Web/API/Node/cloneNode)
+
+Và bởi vì ta nối nội dung của nó với 1 Shadow DOM nên ta có thể đưa thêm 1 vài thông tin về style bên trong template với element [`<style>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/style), sau đó phần style này sẽ được đóng gói bên trong custom element. Phần này sẽ không hoạt động nếu ta chỉ nối nó vào 1 DOM bình thường.
+
+Ví dụ ta đổi template thành như sau:
+
+```html
+<template id="my-paragraph">
+  <style>
+    p {
+      color: white;
+      background-color: #666;
+      padding: 5px;
+    }
+  </style>
+  <p>Paragraph content.</p>
+</template>
+```
+
+Giờ thì component tùy chọn ta đã định nghĩa với template trên có thể được dùng như thế này:
+`<my-paragraph></my-paragraph>`
+
+# Slots (khe trống)
+
+Templates có một vài nhược điểm, 1 trong số đó là nội dung của nó thuộc loại "tĩnh", không cho phép ta render kèm theo các dữ liệu hoặc biến để làm cho nó hoạt động theo cách bình thường như các template HTML tiêu chuẩn mà ta thường sử dụng.
+
+Và đây là lúc mà `<slot>` xuất hiện.
+
+Bạn có thể tưởng tượng rằng slots giống như người giữ chỗ, nó cho phép bạn đặt HTML riêng của mình vào trong template. Nó giúp cho bạn tạo ra các template HTML linh động hơn, dễ tùy biến hơn bằng cách thêm vào nhiều slot.
+
+Viết lại template ở phần trên với slot:
+
+```html
+<template id="my-paragraph">
+  <p>
+    <slot name="my-text">Default text</slot>
+  </p>
+</template>
+```
+
+Nếu như nội dung của slot không được định nghĩa khi element được đính kèm theo markup, hoặc nếu như trình duyệt không hỗ trợ slot thì `<my-paragraph>` sẽ chỉ hiện dòng nội dung backup "Default text".
+
+Để định nghĩa nội dung slot, ta cần đính kèm 1 cấu trúc HTML bên trong element `<my-paragraph>` với thuộc tính [slot](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-slot) và gán giá trị của nó với name của slot mà ta muốn nó truyền vào.
+
+Giống như code dưới đây:
+
+```html
+<my-paragraph>
+  <span slot="my-text">Let's have some different text!</span>
+</my-paragraph>
+```
+
+Các element có thể được chèn vào trong slot được gọi là [Slotable](https://developer.mozilla.org/en-US/docs/Web/API/Slotable); khi 1 element được chèn vào trong slot thì ta nói nó đã bị slotted.
+
+Để ý rằng ví dụ trên chúng ta đã chèn 1 element `<span>` vào, nó chính là slotted element. Nó có 1 thuộc tính slot giá trị bằng my-text - cùng giá trị với thuộc tính name trong phần định nghĩa của slot ở template.
+
+Sau khi được render trên trình duyệt, đoạn code trên sẽ tạo ra 1 cây Flattened DOM như sau:
+
+```html
+<my-paragraph>
+  #shadow-root
+  <p>
+    <slot name="my-text">
+      <span slot="my-text">Let's have some different text!</span>
+    </slot>
+  </p>
+</my-paragraph>
+```
+
+Lưu ý đến phần tử #shadow-root - nó xuất hiện như 1 chỉ thị rằng Shadow DOM đang tồn tại ở đây.
+
+# Styling
+
+Một component sử dụng Shadow DOM có thể được tùy chỉnh style từ trang chính, có thể định nghĩa style của riêng nó hoặc cung cấp hook dưới dạng [thuộc tính tùy chỉnh CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables) để user có thể ghi đè những thiết lập mặc định.
+
+## Định nghĩa style cho component
+
+**Scoped CSS** (CSS trong phạm vi) là 1 trong số các tính năng tuyệt vời nhất của Shadow DOM:
+
+- Các CSS selector từ trang bên ngoài sẽ không áp dụng được vào bên trong component của bạn
+- Các style định nghĩa bên trong component sẽ không ảnh hưởng đến toàn bộ trang. Chúng được đóng gói trong phạm vi của element chủ.
+
+Các CSS selector được dùng bên trong Shadow DOM áp dụng với component một cách cục bộ. Trong thực tiễn thì điều này nghĩa là ta có thể dùng nhiều lần các tên id/class phổ biến mà không cần lo về sự xung đột giữa chúng trên trang. CSS selector càng đơn giản thì càng có hiệu năng tốt hơn.
+
+Giờ ta cùng xem 1 đoạn #shadow-root dưới đây định nghĩa style:
+
+```html
+#shadow-root
+<style>
+  #container {
+    background: white;
+  }
+  #container-items {
+    display: inline-flex;
+  }
+</style>
+
+<div id="container"></div>
+<div id="container-items"></div>
+```
+
+Tất cả style ở ví dụ trên đều nằm trong vùng local của #shadow-root
+
+Bạn có thể dùng element `<link>` để chèn thêm stylesheets ở ngoài vào trong #shadow-root và nó cũng sẽ thuộc về vùng local.
+
+# pseudo-class :host
+
+_Ai chưa biết về pseudo-class thì có thể tham khảo ở đây: [https://www.w3schools.com/css/css_pseudo_classes.asp](https://www.w3schools.com/css/css_pseudo_classes.asp)_
+
+:host cho phép bạn chọn và chỉnh style cho element làm host (chủ) của shadow tree:
+
+```css
+<style>
+  :host {
+    display: block; /* mặc định thì các custom element có thuộc tính display: inline */
+  }
+</style>
+```
+
+Có 1 điều bạn cần phải cẩn thận khi sử dụng :host: phần định nghĩa :host trong các trang cha (parent) sẽ có ưu tiên cao hơn định :host định nghĩa trong element. Điều này cho phép người dùng có thể ghi đè phần định nghĩa style cao nhất từ bên ngoài. Bên cạnh đó, :host chỉ hoạt động trong ngữ cảnh của 1 shadow root, vì vậy bạn không thể dùng nó bên ngoài Shadow DOM.
+
+Dạng function `:host(<selector>)` cho phép bạn trỏ trực tiếp đến host nếu nó khớp với 1 `<selector>`. Đây là 1 cách rất tuyệt vời để component của bạn có thể đóng gói các hành vi phản hồi đến các tương tác hoặc trạng thái người dùng và chỉnh style cho các node bên trong dựa trên host:
+
+```css
+<style>
+  :host {
+    opacity: 0.4;
+  }
+
+  :host(:hover) {
+    opacity: 1;
+  }
+
+  :host([disabled]) { /* style khi host có thuộc tính disabled */
+    background: grey;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  :host(.pink) > #tabs {
+    color: pink; /* tô màu cho node #tabs khi host có class="pink" */
+  }
+</style>
+```
+
+# Dựng chủ đề (theme) và element với pseudo-class `:host-context(<selector>)`
+
+Pseudo-class `:host-context(<selector>)` khớp host element nếu nó hoặc bất kỳ element cha (ancestor) nào của nó khớp với `<selector>`.
+
+Một ví dụ phổ biến cho trường hợp này là làm việc với chủ để (theming). Thực tế là có rất nhiều người khi làm theme đều thêm class vào thẻ `<html>` hoặc `<body>`:
+
+```html
+<body class="lightheme">
+  <custom-container> … </custom-container>
+</body>
+```
+
+`:host-context(.lightheme)` sẽ chỉnh style cho `<fancy-tabs>` khi nó là con cháu (descendant) của `.lightheme`:
+
+```css
+:host-context(.lightheme) {
+  color: black;
+  background: white;
+}
+```
+
+:host-context() có thể có ích cho theming nhưng có 1 cách khác còn tốt hơn nữa, đó là định nghĩa 1 style hooks sử dụng các thuộc tính custom của CSS, bạn có thể xem ở đây: [https://developers.google.com/web/fundamentals/web-components/shadowdom#stylehooks](https://developers.google.com/web/fundamentals/web-components/shadowdom#stylehooks)
+
+# Chỉnh style cho host element của component từ bên ngoài
+
+Bạn có thể chỉnh style cho host element của component từ bên ngoài vào bằng cách dùng tag name của nó như 1 selector, kiểu vậy nè:
+
+```css
+custom-container {
+  color: red;
+}
+```
+
+Style bên ngoài có mức ưu tiên cao hơn style định nghĩa bên trong Shadow DOM.
+
+Ví dụ, nếu user viết 1 selector như sau:
+
+```css
+custom-container {
+  width: 500px;
+}
+```
+
+...thì nó sẽ ghi đè lên rule của component:
+
+```css
+:host {
+  width: 300px;
+}
+```
+
+Tức là width lúc này có giá trị 500px
+
+Styling chính component thì chỉ có thể đến mức này thôi. Vậy nếu bạn muốn style các thành phần sâu hơn bên trong của component thì sao? Ta sẽ cần đến các thuộc tính custom của CSS.
+
+# Tạo style hook sử dụng thuộc tính custom của CSS
+
+User có thể dùng mẹo để chỉnh style cho các thành phần bên trong nếu như tác giả của component đó có cung cấp styling hook sử dụng [thuộc tính custom của CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_variables).
+
+Ý tưởng tương tự với `<slot>` nhưng áp dụng cho style.
+
+Cùng xem ví dụ bên dưới:
+
+```html
+<!-- main page -->
+<style>
+  custom-container {
+    margin-bottom: 60px;
+    - custom-container-bg: black;
+  }
+</style>
+
+<custom-container background>…</custom-container>
+```
+
+bên trong Shadow DOM của nó:
+
+```css
+:host([background]) {
+  background: var( - custom-container-bg, #cecece);
+  border-radius: 10px;
+  padding: 10px;
+}
+```
+
+Trong trường hợp này, component sẽ sử dụng màu black làm giá trị cho background bởi vì user muốn thế. Nếu không thì nó sẽ dùng giá trị mặc định là #CECECE.
+
+Nếu là tác giả của component, bạn có trách nhiệm cho developer biết về những thuộc tính custom của CSS mà họ có thể sử dụng. Hãy xem như đó là luật bất thành văn khi public một component.
+
+# Javascript API cho slot
+
+Shadow DOM API cung cấp nhiều tiện ích hữu dụng để làm việc với slot
+
+## Sự kiện slotchange
+
+Sự kiện slotchange được bắn ra khi node phân phối của slot bị thay đổi. Ví dụ, nếu user thêm/bớt children từ light DOM.
+
+```javascript
+var slot = this.shadowRoot.querySelector('#some_slot');
+slot.addEventListener('slotchange', function (e) {
+  console.log('Light DOM change');
+});
+```
+
+Để kiểm soát các kiểu thay đổi khác trên light DOM, bạn có thể dùng MutationObserver trong constructor của element. Chúng ta đã từng thảo luận về nó trong [Phần 10](https://kipalog.com/posts/Duc-khoet-Javascript--Phan-10---Quan-sat-thay-doi-tren-DOM-bang-MutationObserver) rồi.
+
+## Phương thức assignedNodes()
+
+Sẽ rất có ích khi biết rằng các element có liên kết với slot. Gọi `slot.assignedNodes()` sẽ cho phép bạn biết những element nào mà slot render. Option `{flatten: true}` cũng sẽ trả về nội dung fallback của slot (nếu như không có node nào đang được phân phối).
+
+Cùng xem ví dụ sau đây:
+
+```html
+<slot name="slot1"><p>Default content</p></slot>
+```
+
+Giả sử nó nằm trong 1 component gọi là `<my-container>`
+
+Giờ ta sẽ test thử các cách sử dụng khác nhau của component này và kết quả trả về của `assignedNodes()`:
+
+Trường hợp đầu tiên, ta sẽ thêm nội dung vào slot:
+
+```html
+<my-container>
+  <span slot="slot1"> container text </span>
+</my-container>
+```
+
+Gọi `assignedNodes()` sẽ có kết quả `[<span slot='slot1'> container text </span>]`. Để ý rằng kết quả là 1 array các node.
+
+Trong trường hợp thứ 2, ta để nội dung trống trơn:
+`<my-container> </my-container>`
+
+Kết quả khi gọi `assignedNodes()` là 1 array rỗng [].
+
+Tuy nhiên nếu như bạn đẩy thêm option `{flatten: true}` thì nó sẽ lấy giá trị mặc định và trả về [<p>Default content</p>].
+
+Ngoài ra, để có thể chạm tới 1 element bên trong slot, bạn có thể gọi `assignedNodes()` để xem nếu có element nào đang được gán vào component slot hay không.
+
+# Mô hình sự kiện (event model)
+
+Thật thú vị khi để ý thấy điều gì xảy ra khi 1 sự kiện nằm trong Shadow DOM được bắn ra.
+
+Mục tiêu của sự kiện được điều chỉnh để bảo trì sự đóng gói, cô lập bởi Shadow DOM. Khi 1 sự kiện được tái-mục-tiêu (re-target), trông giống như là nó xuất phát từ chính component hơn là từ các element bên trong của Shadow DOM - vốn là 1 phần của component.
+
+Dưới đây là danh sách các sự kiện có thể phát ra ngoài Shadow DOM (1 số thì không):
+
+- **Sự kiện Focus**: blur, focus, focusin, focusout
+- **Sự kiện cho con trỏ chuột**: click, dbclick, mousedown, mouseenter, mousemove, vân vân.
+- **Sự kiện cho con lăn chuột**: wheel
+- **Sự kiện cho input**: beforeinput, input
+- **Sự kiện cho bàn phím**: keydown, keyup
+- **Sự kiện kết hợp**: compositionstart, compositionupdate, compositionend
+- **Sự kiện kéo-thả**: dragstart, drag, dragend, drop, vân vân.
+
+# Các sự kiện custom
+
+Các sự kiện custom mặc định thì không phát ra bên ngoài Shadow DOM. Nếu bạn muốn điều phối 1 sự kiện custom và muốn nó phát ra ngoài, bạn cần thêm 2 option: bubbles: true và composed: true
+
+Ví dụ:
+
+```javascript
+var container = this.shadowRoot.querySelector('#container');
+container.dispatchEvent(
+  new Event('containerchanged', { bubbles: true, composed: true })
+);
+```
+
+Sự hỗ trợ trình duyệt: Để xác định xem trình duyệt có sẵn hỗ trợ cho Shadow DOM hay không thì ta có thể kiểm tra sự tồn tại của attachShadow:
+
+```javascript
+const supportsShadowDOMV1 = !!HTMLElement.prototype.attachShadow;
+```
+
+Nhưng nói chung là không được nhiều cho lắm:
+
+![](https://cdn-images-1.medium.com/max/1000/0*k0vSOmvdDkRJzcpW)
+
+Nhìn chung thì Shadow DOM có lối hành xử rất khác với DOM thường. Team SessionStack có 1 chút kinh nghiệm khi sử dụng chúng trong thư viện của họ. Thư viện đó khi được tích hợp vào trong webapp thì sẽ bắt đầu thu thập các thông tin chẳng hạn như sự kiện người dùng, dữ liệu mạng, biệt lệ, thông báo debug, thay đổi trên DOM, vân vân, và gửi chúng về cho server của họ.
+
+Sau đó, họ sẽ xử lý các dữ liệu thu được để cho phép bạn có thể dùng SessionStack để tái hiện lại các vấn đề xảy ra trong sản phẩm của bạn. Sự khó khăn họ gặp phải trong quá trình phát triển khi sử dụng Shadow DOM: họ phải kiểm soát mọi thay đổi trên DOM để có thể tái tạo lại sau này. Họ dùng MutationObserver để làm việc đó. Tuy nhiên, Shadow DOM không trigger các sự kiện MutationObserver trong phạm vi toàn cục, nghĩa là họ phải xử lý các component này theo 1 cách hoàn toàn khác.
+Họ cũng nhận thấy rằng ngày nay, có rất nhiều webapp đang tận dụng sức mạnh của Shadow DOM nên có vẻ như công nghệ này sẽ có 1 tương lai rất rạng ngời.

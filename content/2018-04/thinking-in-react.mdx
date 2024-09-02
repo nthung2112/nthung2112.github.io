@@ -1,0 +1,135 @@
+---
+title: Thinking in React
+author: Hung Tan Nguyen
+tags:
+  - react
+  - javascript
+categories: []
+sourceUrl: 'https://reactjs.org/docs/thinking-in-react.html'
+coverImage: ''
+date: 2018-04-30 16:47:00
+slug: /thinking-in-react
+---
+
+> React is, in our opinion, the premier way to build big, fast Web apps with JavaScript. It has scaled very well for us at Facebook and Instagram.
+
+Một trong những phần quan trọng nhất của React là cách nó tạo ra cách nghĩ của bạn về các ứng dụng mà bạn xây dựng. Trong tài liệu này, chúng tôi sẽ hướng dẫn bạn cách để xây dựng một ứng dụng tìm kiếm sản phẩm trong table với React.
+
+# Bắt đầu
+
+Giả dụ bạn đã có sẵn một JSON API và giao diện đã sẵn sàng gọi đến nó. Cụ thể như ảnh sau:
+
+![](https://reactjs.org/static/thinking-in-react-mock-1071fbcc9eed01fddc115b41e193ec11-4dd91.png)
+
+Dữ liệu trả về có dạng như sau:
+
+```javascript
+[
+  {
+    category: 'Sporting Goods',
+    price: '$49.99',
+    stocked: true,
+    name: 'Football',
+  },
+  {
+    category: 'Sporting Goods',
+    price: '$9.99',
+    stocked: true,
+    name: 'Baseball',
+  },
+  {
+    category: 'Sporting Goods',
+    price: '$29.99',
+    stocked: false,
+    name: 'Basketball',
+  },
+  {
+    category: 'Electronics',
+    price: '$99.99',
+    stocked: true,
+    name: 'iPod Touch',
+  },
+  {
+    category: 'Electronics',
+    price: '$399.99',
+    stocked: false,
+    name: 'iPhone 5',
+  },
+  { category: 'Electronics', price: '$199.99', stocked: true, name: 'Nexus 7' },
+];
+```
+
+## Bước 1: Chia UI thành component theo bậc
+
+Việc đầu tiên bạn sẽ phải vẽ các hộp xung quanh mỗi component ( và subcomponent ) và đặt tên cho chúng. Nhưng bạn phân vân không biết khi nào nên tạo ra component? Đối với component, một kĩ thuật được sử dụng rộng rãi để design component là sử dụng [nguyên tắc đơn nhiệm](https://en.wikipedia.org/wiki/Single_responsibility_principle). Khi các component được sinh ra quá nhiều, bạn hãy tách chúng ra thành nhiều subcomponent. Đối với việc thuường xuyên hiển thị dữ liệu JSON, bạn nên đảm bảo về tính đúng đắn của model, liệu rằng nó sẽ được map chính xác với UI ( các component ) của bạn? Bởi vì UI và các model luôn phải dính liền với cấu trúc của thông tin, có nghĩa là công việc phân chia UI sang component là không đáng kể. Cứ chia ra thành các component và hiển thị chính xác từng mẩu dữ liệu của bạn là ổn.
+
+![](https://reactjs.org/static/thinking-in-react-components-eb8bda25806a89ebdc838813bdfa3601-82965.png)
+
+Đối với dữ liệu trong ảnh, bạn sẽ nghĩ đến 5 component tương ứng với mỗi màu phải không? Sau đây là chi tiết cho từng component đó:
+
+1.  **FilterableProductTable (cam)**: chứa toàn bộ ví dụ
+2.  **SearchBar (xanh)**: nhận dữ liệu từ người dùng
+3.  **ProductTable (xanh lá cây)**: hiển thị và lọc dữ liệu dựa trên user input
+4.  **ProductCategoryRow (lam)**: hiển thị tiêu đề cho mỗi category
+5.  **ProductRow (đỏ)**: mỗi hàng là 1 sản phẩm
+
+Nếu bạn nhìn vào ProductTable , bạn sẽ thấy có header (bao gồm nhãn "Name" và "Price") không phải là chính component của nó. Đây là vấn đề của việc tinh chỉnh. Ví dụ, chúng ta để phần header thuộc component ProductTable vì nó là một phần của việc render ra dữ liệu, đó là trách nhiệm của ProductTable. Tuy nhiên, nếu header này khi được sử dụng một cách phức tạp (như là tương tác với sắp xếp), nó sẽ phải tạo thêm một component riêng cho header gọi là ProductTableHeader chẳng hạn. Tóm lại, bạn nên phân chia cấu trúc của component và các subcomponent như sau:
+
+- FilterableProductTable
+  - SearchBar
+  - ProductTable
+    - ProductCategoryRow
+    - ProductRow
+
+## Bước 2: Xác định mức tối thiểu (nhưng hoàn chỉnh)
+
+Để UI của bạn tương tác tốt, bạn cần xác định các thay đổi đến dữ liệu thuộc tầng dưới (underlying data model) . Hãy sử dụng **state** của React.
+
+Đầu tiên bạn nên nghĩ đến việc tối giản các mutable state. Chìa khóa thành công ở đây là **DRY:** _**Don't Repeat Yourself**_ . Ví dụ với ứng dụng TODO, bạn chỉ cần giữ mảng các TODO item, không cần đến các state khác như để đếm số lượng. Thay vào đó, khi bạn muốn đếm số lượng của TODO item, đơn giản là lấy ra length của TODO item array.
+
+Cụ thể với dữ liệu mẫu trong bài viết này, chúng ta có:
+
+- Nguyên mẫu danh sách sản phẩm
+- Text tìm kiếm mà user nhập vào
+- Value của checkbox
+- Danh sách đã lọc sản phẩm
+
+Hãy suy nghĩ về việc bạn nên để cái nào là state, trong thời gian suy nghĩ, hãy đọc các câu hỏi dưới về luồng data:
+
+1.  Có thể pass từ parent component thông qua props không? Nếu có, state là không cần thiết.
+2.  Nó có giữ nguyên trạng thái dữ liệu suốt không? Nếu có, state không thể sử dụng được.
+3.  Bạn có đoán được data dựa vào bất kì state hay props nào trong component không? Nếu có, chỗ này càng không phải chỗ cho state.
+
+Danh sách sản phẩm nguyên bản được pass thông qua props. Text tìm kiếm và checkbox dường như sẽ thích hợp với state vì nó có thể được thay đổi bất kì lúc nào bởi người dùng. Vậy cuối cùng, danh sách lọc sản phẩm cũng không thể nào là state bởi vì chúng có thể được tính toán thông qua list sản phẩm ban đầu dựa vào search text và checkbox.
+
+Tóm lại, bạn nên sử dụng state cho:
+
+- Search text mà user nhập vào
+- Giá trị của checkbox khi user sử dụng
+
+## Bước 4: Xác định nơi sinh sống của state
+
+Hãy nhớ rằng, React là luồng dữ liệu một chiều, phụ thuộc theo luồng của các cấp component. Bạn không thể đoán ngay được component này sẽ có những state gì. **Đây là việc chiếm nhiều thời gian và công sức nhất dành cho người mới tìm hiểu về react**, hãy nhớ: đừng vội khẳng định state A thuộc component A. Để hình dung ra một cách rõ ràng, hãy theo các bước sau:
+
+- Phân loại mỗi component sẽ render ra những gì dựa vào state đó.
+- Tìm thử trong component cha
+- Nếu component cha không có, tìm tiếp ở component cao hơn component cha đó
+- Nếu bạn không tìm ra được component đang giữ state, thử tạo một conponent mới để giữ state đó và thêm nó ở đâu đó trong cấp thư mục cao hơn thư mục chứa component cha.
+
+Ví dụ cụ thể:
+
+- ProductTable cần filter sản phẩm dựa vào state và SearchBar cần phải hiển thị text được nhập và state của checkbox.
+- Component cha sẽ là FilterableProductTable
+- Tất nhiên theo lẽ tự nhiên, search text và giá trị của checkbox sẽ được lưu ở trong FilterableProductTable.
+
+## Bước 5: Thêm luồng dữ liệu
+
+...
+
+Và đây là kết quả
+
+<Codepen url="//codepen.io/gaearon/embed/LzWZvb" width="100%" height="600px" />
+
+## Kết
+
+Hy vọng rằng, bài viết này cho bạn ý tưởng làm thế nào để suy nghĩ về việc xây dựng các component với React. Mặc dù có thể khiến bạn gõ nhiều code hơn, hãy nhớ rằng code được đọc nhiều hơn nó được viết. Khi bạn bắt đầu xây dựng các thư viện component lớn, bạn sẽ đánh giá cao sự rõ ràng và tính mô đun, và với việc tái sử dụng code, các dòng code của bạn sẽ bắt đầu co lại.

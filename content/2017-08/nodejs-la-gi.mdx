@@ -1,0 +1,157 @@
+---
+title: Nodejs là gì
+author: Hung Tan Nguyen
+sourceUrl: https://sotatek.com/blog/nodejs-la-gi/
+tags: [nodejs]
+date: 2017-08-20 22:56:00
+slug: /nodejs-la-gi
+---
+
+Trong bài viết giới thiệu về asynchronous, event-driven và non-blocking I/O, mình có treo tên Nodejs lên trên tiêu đề nhưng thật ra bài viết ấy lại không đả động đến Nodejs được bao nhiêu. Nó chỉ giới thiệu ý nghĩa của các khái niệm trên trong ngữ cảnh mà Nodejs sử dụng. Lần này là một bài viết chân thật về Nodejs. Hãy cùng nhau trả lời một câu hỏi mang tính bản thể luận về Nodejs: Bản chất của Nodejs là gì?
+
+Trong bài viết giới thiệu về asynchronous, event-driven và non-blocking I/O, mình có treo tên Nodejs lên trên tiêu đề nhưng thật ra bài viết ấy lại không đả động đến Nodejs được bao nhiêu. Nó chỉ giới thiệu ý nghĩa của các khái niệm trên trong ngữ cảnh mà Nodejs sử dụng. Lần này là một bài viết chân thật về Nodejs. Hãy cùng nhau trả lời một câu hỏi mang tính bản thể luận về Nodejs: Bản chất của Nodejs là gì?
+
+> Node.js is a JavaScript `runtime` built on Chrome’s V8 JavaScript `Engine`.
+
+JavaScript thì dễ hiểu rồi (Thật ra Chrome cũng dễ hiểu), nhưng còn `Runtime` với `Engine` là gì? Mối quan hệ giữa chúng như thế nào?
+
+`JavaScript Engine` có thể được định nghĩa một cách đơn giản như sau: Một chương trình hoặc thư viện thực thi mã JavaScript, cung cấp các cơ chế khởi tạo object, gọi function,… Có thể đơn giản là một `interpreter` hoặc một `JIT compiler` to bytecode.
+
+Tất nhiên, vì cả bài viết này chỉ nhằm nhiệm vụ trả lời Nodejs là gì, mà biết được JavaScript Engine là gì tức là đã xong 50% vấn đề, nên ta sẽ giải thích lại, một cách phức tạp và dài dòng hơn, bắt đầu từ những khái niệm cơ bản hơn như `Interpreter` và `Compiler`.
+
+# Interpreter và Compiler
+
+- **Interpreter** (của ngôn ngữ A): Một thành phần có chức năng trực tiếp thực thi một đoạn code (được viết bằng ngôn ngữ A). Có thể coi CPU như một interpreter của tập chỉ lệnh tương ứng. Ngày nay, interpreter thường hiểu theo ý nghĩa trực tiếp một chương trình từ source code mà không qua chuyển đổi thành machine code.
+- **Compiler**: Dịch từ ngôn ngữ A sang ngôn ngữ B sao cho khi thực thi thu được kết quả tương đương. Thường được sử dụng để dịch source code từ ngôn ngữ bậc cao A sang ngôn ngữ B có bậc thấp hơn dễ dàng `interprete` hơn, và tất nhiên ngôn ngữ dễ interprete nhất là machine code.
+
+Thời gian cần để compile thường không phải là nhỏ, nhất là khi cần tối ưu hoá kết quả. Để giảm thiểu thời gian compile, có một cách (đánh đổi bởi tốc độ thực thi sau khi compile) là không dịch trực tiếp source code ra machine code mà dịch sang một ngôn ngữ trung gian và sử dụng interpreter cho ngôn ngữ trung gian này, thường gọi là `bytecode`, với đặc điểm là thời gian compile từ ngôn ngữ nguồn sang bytecode nhanh hơn sang machine code, tốc độ thực thi nhanh hơn việc trực tiếp interprete source code, mặc dù chậm hơn machine code.
+
+Từ `interpreter` và `bytecode` trong định nghĩa về JavaScript Engine đã rõ ràng, vậy còn `JIT compiler`?
+
+Để có một cái nhìn về `JIT compiler`, chúng ta cần xem xét nó trong một mối quan hệ biện chứng giữa nó và một khái niệm khác: `AOT compiler`.
+
+`Ahead-of-Time` (AOT) và `Just-in-Time` (JIT) compilation: Từ `time` được nhắc đến ở đây là `runtime`. AOT dịch toàn bộ source code trước khi bắt đầu chạy chương trình, JIT thì trái lại compile source code trong thời gian chạy. Triết lý của JIT compilation là thay vì phải chờ compiler dịch toàn bộ source, việc có thể mất nhiều thời gian, ta dịch từng phần mà ta cần dùng trước rồi bắt đầu chạy với chúng ngay lập tức.
+
+Interpreter và compiler có thể kết hợp trở thành `engine` của một ngôn ngữ theo 1 trong 2 cách:
+
+- **AOT kết hợp interpreter:** Source code được compile toàn bộ thành machine code hoặc bytecode trước khi khởi chạy chương trình, sau đó sử dụng một interpreter để thực thi. Ví dụ Python được AOT compiler dịch thành cpython bytecode trong chớp nhoáng và cpython được chạy trên interpreter.
+- **JIT kết hợp interpreter:** Thực tế là full compiled code chạy nhanh hơn nhưng tốn nhiều thời gian trước khi bắt đầu chạy, trực tiếp interprete source code thì có thể bắt đầu chạy ngay nhưng tốc độ thực thi chậm. Giải pháp trung hoà là sử dụng interpreter để khởi chạy nhanh chóng source code, rồi dùng JIT compiler để dịch và thay thế source code bằng compiled code sau khi đã dịch xong.
+
+# V8 Engine
+
+`V8` là một open source JavaScript engine viết bằng `C++`, phát triển bởi Google như là một phần trong dự án `Chromium`, phát hành lần đầu cùng với phiên bản đầu tiên của trình duyêt Chrome. V8 compile trực tiếp JavaScript thành `native machine code` thay vì sử dụng interpreting bytecode theo cách truyền thống.
+
+Nodejs được xây dựng lần đầu trên V8 do tốc độ thực thi đáng kinh ngạc so với các JavaScript Engine trước đó, đủ sức đảm đương một hệ thống yêu cầu hiệu năng cao trên `server-side`. Ngày nay thì các Engine của các hãng khác cũng đã bắt kịp V8 rồi, vừa rồi Nodejs cũng đã phát hành một phiên bản sử dụng `Chakra Engine `của Microsoft tại [https://github.com/nodejs/node-chakracore](https://github.com/nodejs/node-chakracore), nhưng có lẽ khi nhắc đến Nodejs thì ta chỉ cần giới thiệu về V8 là đủ.
+
+`V8 Engine` được Google lựa chọn quả thật là một cái tên mang nhiều cảm xúc, gợi lên hình ảnh về những động cơ ô tô mạnh mẽ, sản sinh công suất lớn từ thiết kế 8 xy-lanh sắp xếp hình chữ V mà hiếm khi nào có tổng dung tích dưới 3.0 L, thậm chí lên đến hơn 8.0 L, ví như động cơ của chiếc Audi R8 trong hình dưới.
+
+![19694591288_6fe46defe8_o](http://sotatek.com/wp-content/uploads/2016/11/19694591288_6fe46defe8_o.jpg)
+
+Khá chắc là các kỹ sư của Google cũng rất mê xe, bởi họ tiếp tục đặt tên cho các thành phần trong động cơ V8 của mình là `Crankshaft`, `TuborFan` và `Ignition`, các thành phần kỹ thuật của động cơ đốt trong hiện đại mà chúng ta sẽ bắt gặp trong phần sau của bài viết.
+
+Lan man vậy thôi, bây giờ, ba yếu tố then chốt tạo nên hiệu năng cao của V8 là:
+
+- `Fast Property Access`
+- `Dynamic Machine Code Generation`
+- `Efficient Garbage Collection`
+
+### Fast Property Access
+
+JavaScript là một `dynamic programming language`, có nghĩa, các `property` có thể được thêm, bớt, thay đổi trong thời gian chạy. Hầu hết các JavaScript Engine sử dụng một cấu trúc dữ liệu dạng `dictionary` để lưu giữ các property trong object, mỗi truy cập đến property yêu cầu một `dictionary dynamic lookup` để tìm ra vị trí của property trong memory, chậm hơn cách truy cập trực tiếp đến property trong các `class-based` language truyền thống.
+
+Để tránh dynamic lookup, V8 tự động ngầm tạo một `hidden class` cho mỗi object, biến object trong JavaScript thành class-based. Mỗi khi object được thêm property, V8 `tạo mới` một hidden class và object chuyển hidden class của nó sang class mới này.
+
+![map_trans_c](http://sotatek.com/wp-content/uploads/2016/11/map_trans_c.png)
+
+_Nguồn ảnh: v8project.blogspot.com_
+
+Kể từ khi object trong JavaScript trở thành class-based, một kỹ thuật compiler optimization kinh điển trở nên khả thi và được đưa vào V8, `Inline Caching`, giúp tăng lực cho JavaScript lên thậm chí vài chục lần với long runtime.
+
+### Dynamic Machine Code Generation
+
+V8 dịch trực tiếp JavaScript source code sang native machine code, cho tốc độ interprete cao, đồng thời có khả năng linh động `tối ưu hoá` (và tái tối ưu) compiled code trong thời gian chạy dựa trên các dữ liệu thu thập được từ profiler.
+
+V8 có 2 compiler, ban đầu, tất cả source code của bạn sẽ được phân tích cú pháp, chuyển thành `AST` rồi đẩy vào `Full-Codegen Compiler`, nơi sẽ cho ra phiên bản machine code đầu tiên của chương trình.
+
+**Full-Codegen Compiler:** Nhiệm vụ là chuyển source code của bạn thành machine code `nhanh nhất` có thể, khỏi optimize gì luôn. Nó cũng thêm vào một ít `type-feedback code` thu thập thông tin để phục vụ công việc optimize code sau này. Compiler không tiến hành bất cứ phân tích và không biết gì về kiểu dữ liệu trong source code tại thời điểm này.
+
+Để gia tăng hiệu năng, V8 tiếp tục theo dõi chương trình trong runtime bằng một `profiler`, một thành phần trong kiến trúc của V8, sẽ thu thập thông tin và tìm xem function nào là `hot function`, tức được dùng đi dùng lại rất nhiều lần, đó là thời điểm cần tiến hành optimize cho một compiled code tốt hơn. Và đó là thời điểm `Crankshaft` vào cuộc.
+
+**Optimizing compiler:** `Crankshaft` (và mới đây là `TuborFan` được thêm vào) đưa ra những dự đoán về function dựa vào những thông tin thu được từ profiler, re-compile và thay thế phần code chưa được optimize bằng cách sử dụng `on-stack replacement` (OSR).
+
+Nếu những giả định là sai lầm, ví dụ nó cho rằng `a`, `b` sẽ luôn là `number` trong phép tính `a + b` ở đâu đó, và sử dụng thẳng phép cộng 2 số ở đây thay vì lần nào cũng phải kiểm tra kiểu và sử dụng `+` operator thích hợp, mà bất chợt `b` lại nhận kiểu là `string`, thì nó chỉ đơn giản là `de-optimizing` và tái sử dụng phần code chưa optimize.
+
+Đây là cách V8 đối xử với source code của chúng ta:
+
+![ignitionpipeline](http://sotatek.com/wp-content/uploads/2016/11/ignitionpipeline.png)
+
+_Nguồn ảnh: v8project.blogspot.com_
+
+Trong năm 2016, một interpreter mang tên `Ingition` được thêm vào V8 với mục đích giảm thiểu chiếm dụng bộ nhớ trên những hệ thống có memory nhỏ như Android.
+
+### Efficient Garbage Collection
+
+`Garbage collector` của V8, được quảng cáo là một stop-the-world, generational, accurate, garbage collector làm nhiệm vụ thu hồi memory đối với những object không còn được process sử dụng một cách rất hiệu quả. Còn nó hiệu quả như thế nào, tại sao hay thậm chí nó có thật sự hiệu quả hơn các engine khác hay không thì mình cũng không rõ.
+
+Ban đầu, JavaScript được thiết kế để thực hiện một số nhiệm vụ nhỏ nhoi và ngắn ngủi, ví dụ như đặt một `event listener` cho một element trên browser, engine lúc ấy chỉ đơn giản là một interpreter đọc và thực thi JavaScript source code. Dần dần, theo thời gian, chúng ta yêu cầu nhiều hơn từ nó.
+
+Ứng dụng đầu tiên giao phó những nhiệm vụ nặng nề cho JavaScript là `Google Map`. Từ đây người ta nhận ra sự cần thiết của một JavaScript nhanh hơn, trong một runtime dài hơi hơn.
+
+JIT compilation cần nhiều thời gian để khởi tạo hơn interpretation, nhưng nhanh hơn rất nhiều trong runtime dài. Với những web application dùng nhiều JavaScript của mình, Google đã dành nhiều công sức để thúc đẩy các trình duyệt cải thiện hiệu suất của JavaScript, và V8 ra đời như một kết quả.
+
+Giờ đây, một process JavaScript chạy càng lâu, càng được optimize và càng sở hữu hiệu năng cao hơn, mọi người cảm thấy nó đã khả thi để xuất hiện trong một môi trường khắc nghiệt hơn là trên web browser, `server-side`.
+
+# JavaScript Runtime
+
+Được giới thiệu là một JavaScript `Runtime`, Nodejs có gì khác biệt với một JavaScript `Engine`? Lấy cảm hứng từ một câu trả lời trên Stackoverflow, chúng ta có thể tạm hiểu như sau:
+
+JavaScript chạy trên một `container` – một chương trình sẽ nhận source code của bạn và thực thi nó. Chương trình này làm hai điều:
+
+- Phân thích source code và thực thi từng đơn vị có thể.
+- Cung cấp một vài object để JavaScript có thể tương tác với thế giới bên ngoài.
+
+Phần đầu, gọi là `Engine`. Phần còn lại, gọi là `Runtime`.
+
+Trên thực tế, V8 implement một `ECMAScript` theo đúng chuẩn, tức là những gì ngoài chuẩn thì không có mặt trong V8.
+
+Để tương tác với môi trường, V8 cung cấp các lớp `template` bọc ngoài các object và function viết bởi `C++`. Các C++ function này có thể làm nhiệm vụ đọc/ghi file system, thao tác networking hoặc giao tiếp với các process khác trong hệ thống. Bằng cách thiết lập một `JavaScript context` với `global scope` chứa các `JavaScript instance` tạo ra từ các template và chạy source code của chúng ta trong context này, mã của chúng ta đã sẵn sàng để giao tiếp với thế giới.
+
+Và đó là nhiệm vụ của một `Runtime Library`: Tạo ra một runtime environment cung cấp các thư viện `built-in` dưới dạng các biến global để mã của bạn có thể sử dụng trong thời gian chạy, đón nhận source code như là một `argument` và thực thi nó trong context đã tạo.
+
+Với `browser runtime environment` như Chrome, context mà Chrome cung cấp cho V8 bao gồm các biến global như `window`, `console`, `DOM object`, `XMLHttpRequest` và timer `setTimeout()`.
+
+Tất cả những thứ ấy đến từ Chrome, không phải từ bản thân V8. Thay vào đó, V8 cung cấp các built-in object chuẩn, có mặt trong mọi environment của JavaScript, được miêu tả trong `ECMAScript Standard`, bao gồm các kiểu dữ liệu, operator, một số object và function đặc biệt như các value property (`Infinity`, `NaN`, `null`, `undefined`), `Object`, `Function`, `Boolean`, `String`, `Number`, `Map`, `Set`, `Array`, `parseInt()`, `eval()`,…
+
+Rời xa thế giới browser, rời xa DOM, Nodejs mang đến cho chúng ta nhiều built-in library hơn như `fs` để giao tiếp với file system, `http` và `https` cho networking, `tls`, `tty`, `cluster`, `os`,… Vấn đề là không phải lúc nào ta cũng cần tất cả những thứ này, việc tạo một context mang quá nhiều global variable không cần thiết như vậy rõ ràng không phải là một cách làm hay.
+
+Nodejs bởi vậy nhóm nhiều chức năng vào các module khác nhau và thực hiện một cơ chế `module loading` thông qua từ khoá `require` và `exports`, cho phép tạo ra những context linh động hơn. Tất nhiên, cơ chế này được implement bằng C/C++.
+
+Đó là diễn giải đằng sau lời giới thiệu runtime built on Chrome’s V8 JavaScript Engine của Nodejs, và đó là cách mã JavaScript của bạn thao tác với các `low-level API`, theo một cách `đồng bộ` (synchronous). V8 chạy mã của bạn trong một single thread, tuần tự từng lệnh một, sử dụng một cấu trúc để quản lý các active subroutine gọi là `call stack`.
+
+# Call Stack và Event Loop
+
+Call stack không phải là một điều gì đó mới mẻ, thực tế chúng ta luôn luôn phải sử dụng nó để đảm bảm chương trình thực thi một cách đúng đắn, chẳng qua trong các ngôn ngữ bậc cao, việc cung cấp một call stack được ẩn đi và tự động hoá. Nếu push quá nhiều stack frame vào và tiêu tốn hết không gian được cấp cho call stack, chúng ta sẽ đối diện với `Stackoverflow` huyền thoại.
+
+Câu chuyện về call stack của JavaScript có lẽ chúng ta đều đã được nghe kể rất nhiều lần. Ta đều biết rằng stack frame được push mỗi khi một hàm được gọi, và được pop với lệnh return. Sau khi lần lượt xử lý hết các lệnh trong chương trình, call stack trở nên rỗng ruột, một phép màu mang tên `event loop` sẽ nhặt các hàm callback trong một tạo vật gọi là `event queue` (hay task queue), đẩy vào trong call stack, và V8 engine tiếp tục thực thi hàm đang nằm trong call stack này.
+
+Đây là cách JavaScript thực hiện `asynchronous call`. Đây cũng là lý do tại sao gọi timer `setTimeout()` với đối số là 0, hàm callback của chúng ta vẫn phải chờ cho đến khi tất cả code trong chương trình thực thi xong (call stack trở thành empty) thì mới được invoke.
+
+![Event-loop](http://sotatek.com/wp-content/uploads/2016/11/Event-loop.png)
+
+_Nguồn ảnh: appsdev.is.ed.ac.uk_
+
+V8 nhận event loop như là một đối số đầu vào khi khởi tạo environment, các môi trường khác nhau sẽ có event loop và API để tạo `asynchronous request`, thứ mà sẽ đẩy `callback function` của ta vào trong event queue rồi vật vờ ngồi đợi, của riêng mình.
+
+Với Nodejs, event loop implementation của nó là `libuv`. Thiếu đi libuv, bức tranh về một Nodejs event-driven asynchronous non-blocking I/O sẽ không thể hoàn thiện. V8 thì thậm chí còn chẳng biết I/O là cái gì chứ đừng nói đến blocking hay không blocking.
+
+Về libuv và cách nó hoạt động lại là một câu chuyện dài mà thời lượng ở đây không cho phép mình giới thiệu. Xin hẹn được chia sẻ về nó trong một bài viết khác, mà chính xác ra thì là bài viết này:
+
+[http://sotatek.com/nodejs-hieu-asynchronous-event-drivent-nonblocking-io/](http://sotatek.com/nodejs-hieu-asynchronous-event-drivent-nonblocking-io/)
+
+# Tổng kết
+
+Đến đây, có lẽ ta đã có thể tự vẽ một bức tranh khá đầy đủ về Nodejs system cho riêng mình. Còn nếu bạn lười vẽ, không sao cả, Richard Key đã vẽ cho bạn rồi đây:
+
+![Bt5ywJrIEAAKJQt](http://sotatek.com/wp-content/uploads/2016/11/Bt5ywJrIEAAKJQt.jpg)
+
+_Nguồn ảnh: twitter.com/BusyRich_

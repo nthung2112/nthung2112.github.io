@@ -1,0 +1,285 @@
+---
+title: Giới thiệu về Composing Software
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - hof
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/1600/1*uVpU7iruzXafhU2VLeH4lw.jpeg'
+sourceUrl: >-
+  https://medium.com/javascript-scene/composing-software-an-introduction-27b72500d6ea
+date: 2018-05-22 08:09:00
+slug: /gioi-thieu-ve-composing-software
+---
+
+> Ghi chú: Đây là phần giới thiệu về loạt bài "Composing Software" về việc học các kỹ năng functional programming và compositional software trong JavaScript ES6+ từ đầu. Hãy theo dõi còn rất nhiều thứ khác nữa!
+> [_Bài viết Kế tiếp >_](https://medium.com/javascript-scene/the-rise-and-fall-and-rise-of-functional-programming-composable-software-c2d91b424c8c)
+
+> Composition: “Hành động kết hợp các parts hoặc elements để tạo thành một tổng thể.”
+
+Trong lớp học lập trình đầu tiên của tôi, tôi đã nói rằng phát triển phần mềm là “hành động phá vỡ một vấn đề phức tạp thành các vấn đề nhỏ hơn, và soạn các giải pháp đơn giản để tạo thành một giải pháp hoàn chỉnh cho vấn đề phức tạp.”
+
+Một trong những hối tiếc lớn nhất của tôi trong cuộc sống là tôi đã không hiểu ý nghĩa của bài học đó từ sớm. Tôi đã học được bản chất của thiết kế phần mềm quá muộn trong cuộc sống.
+
+Tôi đã phỏng vấn hàng trăm developers. Những gì tôi đã học được từ những buổi đó là Tôi không đơn độc. Rất ít developers phần mềm làm việc mà có nắm bắt tốt về bản chất của phát triển phần mềm. Họ không nhận thức được các công cụ quan trọng nhất chúng ta có thể có để xử lý hoặc làm thế nào để đưa chúng vào sử dụng cho tốt. 100% đã đấu tranh để trả lời một hoặc cả hai câu hỏi quan trọng nhất trong lĩnh vực phát triển phần mềm:
+
+- What is function composition?
+- What is object composition?
+
+Vấn đề là bạn không thể tránh được 'composition' chỉ vì bạn không biết về nó. Bạn vẫn làm điều đó - nhưng bạn làm điều đó rất tệ. Bạn viết mã với nhiều lỗi hơn và làm cho các developers khác khó hiểu hơn. Đây là một vấn đề lớn. Các ảnh hưởng ấy tốn nhất nhiều chi phí. Chúng tôi dành nhiều thời gian hơn để duy trì phần mềm hơn là chúng tôi tạo ra nó từ đầu và các lỗi của chúng tôi tác động đến hàng tỷ người trên khắp thế giới.
+
+Cả thế giới chạy trên phần mềm ngày nay. Mỗi chiếc xe mới là một siêu máy tính mini trên bánh xe, và các vấn đề với thiết kế phần mềm gây ra tai nạn thực sự và chi phí cuộc sống thực của con người. Vào năm 2013, Ban giám khảo đã tìm thấy nhóm phát triển phần mềm của Toyota có tội ["Liều lĩnh không để ý"](http://www.safetyresearch.net/blog/articles/toyota-unintended-acceleration-and-big-bowl-%E2%80%9Cspaghetti%E2%80%9D-code) sau khi một cuộc điều tra tai nạn cho thấy spaghetti code với 10000 biến global.
+
+[Hackers và governments stockpile bugs](https://www.technologyreview.com/s/607875/should-the-government-keep-stockpiling-software-bugs/) để theo dõi mọi người, ăn cắp thẻ tín dụng, khai thác tài nguyên máy tính để khởi chạy các cuộc tấn công từ chối dịch vụ phân tán (DDoS), crack mật khẩu và thậm chí [điều khiển cuộc bầu cử](https://www.technologyreview.com/s/604138/the-fbi-shut-down-a-huge-botnet-but-there-are-plenty-more-left/).
+
+Chúng ta phải làm tốt hơn.
+
+### You Compose Software Every Day
+
+Nếu bạn là nhà phát triển phần mềm, bạn lập trình các chức năng và cấu trúc dữ liệu mỗi ngày, cho dù bạn có biết hay không. Bạn có thể làm điều đó một cách có ý thức (và tốt hơn), hoặc bạn có thể làm điều đó một cách vô tình, with duct-tape and crazy glue.
+
+Quá trình phát triển phần mềm là chia nhỏ các vấn đề lớn thành các vấn đề nhỏ hơn, xây dựng các thành phần giải quyết những vấn đề nhỏ hơn, sau đó kết hợp các thành phần lại với nhau để tạo thành một ứng dụng hoàn chỉnh.
+
+### Composing Functions
+
+Function composition là quá trình áp dụng một function là output của function khác. Trong đại số, có hai hàm số, `f` và `g`, `(f ∘ g)(x) = f(g(x))`. Vòng tròn là toán tử kết hợp. Nó thường được phát âm "kết hợp với" hoặc là "theo sau". Bạn có thể nói như "f _kết hợp với_ g bằng f of g of x", or "f _theo sau_ g bằng f of g of x". Chúng ta nói f _theo sau_ g bởi vì g is giá trị đầu, sau đó output của nó được chuyển thành đối số f.
+
+Mỗi lần bạn viết code như thế này, nó là composing functions:
+
+```javascript
+const g = (n) => n + 1;
+const f = (n) => n * 2;
+const doStuff = (x) => {
+  const afterG = g(x);
+  const afterF = f(afterG);
+  return afterF;
+};
+doStuff(20); // 42
+```
+
+Mỗi khi bạn viết một chuỗi promise, nó là composing functions:
+
+```javascript
+const g = (n) => n + 1;
+const f = (n) => n * 2;
+const wait = (time) =>
+  new Promise((resolve, reject) => setTimeout(resolve, time));
+wait(300)
+  .then(() => 20)
+  .then(g)
+  .then(f)
+  .then((value) => console.log(value)); // 42
+```
+
+Tương tự như vậy, mỗi khi bạn thực hiện các gọi các chuỗi phương thức mảng, các hàm lodash, observables (RxJS, etc…) nó là composing functions. Nếu là một chuỗi, thì nó là composing. Nếu bạn chuyển một giá trị trả về vào những functions khác, nó cũng là composing. Nếu bạn gọi hai hàm theo trình tự, nó là composing nếu sử dụng dữ liệu hàm này làm dữ liệu đầu vào cho hàm kia.
+
+> Nếu là một chuỗi, thì nó là composing.
+
+Khi bạn viết một functions có chủ ý, bạn sẽ làm tốt hơn.
+
+Composing functions có chủ ý, chúng ta có thể cải thiện hàm doStuff() thành 1 dòng đơn giản:
+
+```javascript
+const g = (n) => n + 1;
+const f = (n) => n * 2;
+const doStuffBetter = (x) => f(g(x));
+doStuffBetter(20); // 42
+```
+
+Một trong những phản đối chung về kiểu này là khó để debug. Ví dụ, chúng ta sẽ viết function composition bằng cách nào?
+
+```javascript
+const doStuff = (x) => {
+  const afterG = g(x);
+  console.log(`after g: ${afterG}`);
+  const afterF = f(afterG);
+  console.log(`after f: ${afterF}`);
+  return afterF;
+};
+
+doStuff(20); // =>
+/*
+"after g: 21"
+"after f: 42"
+*/
+```
+
+Đầu tiên, hãy trừu tượng rằng “after f”, “after g” và viết vào một tiện ích nhỏ gọi là trace():
+
+```javascript
+const trace = (label) => (value) => {
+  console.log(`${label}: ${value}`);
+  return value;
+};
+```
+
+Now we can use it like this:
+
+```javascript
+const doStuff = (x) => {
+  const afterG = g(x);
+  trace('after g')(afterG);
+  const afterF = f(afterG);
+  trace('after f')(afterF);
+  return afterF;
+};
+
+doStuff(20); // =>
+/*
+"after g: 21"
+"after f: 42"
+*/
+```
+
+Thư viện functional programming phổ biến như Lodash và Ramda bao gồm các tiện ích để thực hiện function composition dễ hơn. Bạn có thể viết lại hàm trên như thế này:
+
+```javascript
+import pipe from 'lodash/fp/flow';
+const doStuffBetter = pipe(g, trace('after g'), f, trace('after f'));
+
+doStuffBetter(20); // =>
+/*
+"after g: 21"
+"after f: 42"
+*/
+```
+
+If you want to try this code without importing something, you can define pipe like this:
+Nếu bạn muốn thử code này mà không cần nhập gì, bạn có thể xác định pipe như thế này:
+
+```javascript
+// pipe(...fns: [...Function]) => x => y
+const pipe =
+  (...fns) =>
+  (x) =>
+    fns.reduce((y, f) => f(y), x);
+```
+
+Đừng lo lắng nếu bạn chưa thể theo dõi cách hoạt động. Sau đó, chúng tôi sẽ khám phá function composition chi tiết hơn. In fact, it’s so essential, you’ll see it defined and demonstrated many times throughout this text. The point is to help you become so familiar with it that its definition and usage becomes automatic. Be one with the composition.
+
+pipe() creates a pipeline of functions, passing the output of one function to the input of another. When you use pipe() (and its twin, compose()) You don't need intermediary variables. Writing functions without mention of the arguments is called **point-free style.** To do it, you'll call a function that returns the new function, rather than declaring the function explicitly. That means you won't need the function keyword or the arrow syntax (=>).
+
+Point-free style can be taken too far, but a little bit here and there is great because those intermediary variables add unnecessary complexity to your functions.
+
+There are several benefits to reduced complexity:
+
+#### Working Memory
+
+Bộ não con người trung bình chỉ có một vài tài nguyên được chia sẻ cho lượng tử rời rạc trong bộ nhớ làm việc [working memory](http://www.nature.com/neuro/journal/v17/n3/fig_tab/nn.3655_F2.html), và mỗi biến có khả năng tiêu thụ một trong những lượng tử đó. As you add more variables, our ability to accurately recall the meaning of each variable is diminished. Working memory models typically involve 4–7 discrete quanta. Above those numbers, error rates dramatically increase.
+
+Using the pipe form, we eliminated 3 variables — freeing up almost half of our available working memory for other things. That reduces our cognitive load significantly. Software developers tend to be better at chunking data into working memory than the average person, but not so much more as to weaken the importance of conservation.
+
+#### Signal to Noise Ratio
+
+Concise code also improves the signal-to-noise ratio of your code. It’s like listening to a radio — when the radio is not tuned properly to the station, you get a lot of interfering noise, and it’s harder to hear the music. When you tune it to the correct station, the noise goes away, and you get a stronger musical signal.
+
+Code is the same way. More concise code expression leads to enhanced comprehension. Some code gives us useful information, and some code just takes up space. If you can reduce the amount of code you use without reducing the meaning that gets transmitted, you’ll make the code easier to parse and understand for other people who need to read it.
+
+#### Surface Area for Bugs
+
+Take a look at the before and after functions. It looks like the function went on a diet and lost a ton of weight. That’s important because extra code means extra surface area for bugs to hide in, which means more bugs will hide in it.
+
+> _Less code = less surface area for bugs = fewer bugs._
+
+### Composing Objects
+
+> “Favor object composition over class inheritance” the Gang of Four, [“Design Patterns: Elements of Reusable Object Oriented Software”](https://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612/ref=as_li_ss_tl?ie=UTF8&qid=1494993475&sr=8-1&keywords=design+patterns&linkCode=ll1&tag=eejs-20&linkId=6c553f16325f3939e5abadd4ee04e8b4)
+
+> “In computer science, a composite data type or compound data type is any data type which can be constructed in a program using the programming language’s primitive data types and other composite types. […] The act of constructing a composite type is known as composition.” ~ Wikipedia
+
+These are primitives:
+
+```javascript
+const firstName = 'Claude';
+const lastName = 'Debussy';
+```
+
+And this is a composite:
+
+```javascript
+const fullName = {
+  firstName,
+  lastName,
+};
+```
+
+Likewise, all Arrays, Sets, Maps, WeakMaps, TypedArrays, etc… are composite datatypes. Any time you build any non-primitive data structure, you’re performing some kind of object composition.
+
+Note that the Gang of Four defines a pattern called the **composite pattern** which is a specific type of recursive object composition which allows you to treat individual components and aggregated composites identically. Some developers get confused, thinking that the composite pattern is _the only form of object composition._ Don’t get confused. There are many different kinds of object composition.
+
+The Gang of Four continues, “you’ll see object composition applied again and again in design patterns”, and then they catalog three kinds of object compositional relationships, including **delegation** (as used in the state, strategy, and visitor patterns), **acquaintance** (when an object knows about another object by reference, usually passed as a parameter: a uses-a relationship, e.g., a network request handler might be passed a reference to a logger to log the request — the request handler _uses_ a logger), and **aggregation** (when child objects form part of a parent object: a has-a relationship, e.g., DOM children are component elements in a DOM node — A DOM node _has_ children).
+
+Class inheritance can be used to construct composite objects, but it’s a restrictive and brittle way to do it. When the Gang of Four says “favor object composition over class inheritance”, they’re advising you to use flexible approaches to composite object building, rather than the rigid, tightly-coupled approach of class inheritance.
+
+We’ll use a more general definition of object composition from [“Categorical Methods in Computer Science: With Aspects from Topology”](https://www.amazon.com/Categorical-Methods-Computer-Science-Topology/dp/0387517227/ref=as_li_ss_tl?ie=UTF8&qid=1495077930&sr=8-3&keywords=Categorical+Methods+in+Computer+Science:+With+Aspects+from+Topology&linkCode=ll1&tag=eejs-20&linkId=095afed5272832b74357f63b41410cb7) (1989):
+
+> “Composite objects are formed by putting objects together such that each of the latter is ‘part of’ the former.”
+
+Another good reference is “Reliable Software Through Composite Design”, Glenford J Myers, 1975\. Both books are long out of print, but you can still find sellers on Amazon or eBay if you’d like to explore the subject of object composition in more technical depth.
+
+_Class inheritance is just one kind of composite object construction._ All classes produce composite objects, but not all composite objects are produced by classes or class inheritance. “Favor object composition over class inheritance” means that you should form composite objects from small component parts, rather than inheriting all properties from an ancestor in a class hierarchy. The latter causes a large variety of well-known problems in object oriented design:
+
+- **The tight coupling problem:** Because child classes are dependent on the implementation of the parent class, class inheritance is the tightest coupling available in object oriented design.
+- **The fragile base class problem:** Due to tight coupling, changes to the base class can potentially break a large number of descendant classes — potentially in code managed by third parties. The author could break code they’re not aware of.
+- **The inflexible hierarchy problem:** With single ancestor taxonomies, given enough time and evolution, all class taxonomies are eventually wrong for new use-cases.
+- **The duplication by necessity problem:** Due to inflexible hierarchies, new use cases are often implemented by duplication, rather than extension, leading to similar classes which are unexpectedly divergent. Once duplication sets in, it’s not obvious which class new classes should descend from, or why.
+- **The gorilla/banana problem:** “…the problem with object-oriented languages is they’ve got all this implicit environment that they carry around with them. You wanted a banana but what you got was a gorilla holding the banana and the entire jungle.” ~ Joe Armstrong, [“Coders at Work”](http://www.amazon.com/gp/product/1430219483?ie=UTF8&camp=213733&creative=393185&creativeASIN=1430219483&linkCode=shr&tag=eejs-20&linkId=3MNWRRZU3C4Q4BDN)
+
+The most common form of object composition in JavaScript is known as **object concatenation** (aka mixin composition). It works like ice-cream. You start with an object (like vanilla ice-cream), and then mix in the features you want. Add some nuts, caramel, chocolate swirl, and you wind up with nutty caramel chocolate swirl ice cream.
+
+Building composites with class inheritance:
+
+```javascript
+class Foo {
+  constructor() {
+    this.a = 'a';
+  }
+}
+class Bar extends Foo {
+  constructor(options) {
+    super(options);
+    this.b = 'b';
+  }
+}
+const myBar = new Bar(); // {a: 'a', b: 'b'}
+```
+
+Building composites with mixin composition:
+
+```javascript
+const a = {
+  a: 'a',
+};
+const b = {
+  b: 'b',
+};
+const c = { ...a, ...b }; // {a: 'a', b: 'b'}
+```
+
+We’ll explore other styles of object composition in more depth later. For now, your understanding should be:
+
+1.  There’s more than one way to do it.
+2.  Some ways are better than others.
+3.  You want to select the simplest, most flexible solution for the task at hand.
+
+### Conclusion
+
+This isn’t about functional programming (FP) vs object-oriented programming (OOP), or one language vs another. Components can take the form of functions, data structures, classes, etc… Different programming languages tend to afford different atomic elements for components. Java affords classes, Haskell affords functions, etc… But no matter what language and what paradigm you favor, you can’t get away from composing functions and data structures. In the end, that’s what it all boils down to.
+
+We’ll talk a lot about functional programming, because functions are the simplest things to compose in JavaScript, and the functional programming community has invested a lot of time and effort formalizing function composition techniques.
+
+What we won’t do is say that functional programming is better than object-oriented programming, or that you must choose one over the other. OOP vs FP is a false dichotomy. Every real Javascript application I’ve seen in recent years mixes FP and OOP extensively.
+
+We’ll use object composition to produce datatypes for functional programming, and functional programming to produce objects for OOP.
+
+_No matter how you write software, you should compose it well._
+
+> The essence of software development is composition.
+
+A software developer who doesn’t understand composition is like a home builder who doesn’t know about bolts or nails. Building software without awareness of composition is like a home builder putting walls together with duct tape and crazy glue.
+
+It’s time to simplify, and the best way to simplify is to get to the essence. The trouble is, almost nobody in the industry has a good handle on the essentials. We as an industry have failed you, the software developer. It’s our responsibility as an industry to train developers better. We must improve. We need to take responsibility. Everything runs on software today, from the economy to medical equipment. There is literally no corner of human life on this planet that is not impacted by the quality of our software. We need to know what we’re doing.
+
+It’s time to learn how to compose software.
+
+[Continued in “The Rise and Fall and Rise of Functional Programming”](https://medium.com/javascript-scene/the-rise-and-fall-and-rise-of-functional-programming-composable-software-c2d91b424c8c)

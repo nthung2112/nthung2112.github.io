@@ -1,0 +1,492 @@
+---
+title: 10 mẹo CSS hữu ích bạn nên biết
+author: Hung Tan Nguyen
+tags:
+  - css
+categories: []
+coverImage: >-
+  https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2016/01/Internalcss-tips-01-700x461.png
+sourceUrl: 'https://blog.siliconstraits.vn/10-meo-css-huu-ich-ban-nen-biet/'
+date: 2018-06-27 08:01:00
+slug: /10-meo-css-huu-ich-ban-nen-biet
+---
+
+**Pagespeed Optimization** (tối ưu hóa tốc độ trang) là một công việc mà hầu như mọi Web developer đều quan tâm và nên biết, mục đích của nó là đưa nội dung website đến với người xem nhanh nhất có thể.
+
+Front-end developer thường làm việc với HTML, CSS, Javascript và các hình ảnh. Do đó, đây cũng là các đối tượng chính để chúng ta tối ưu tốc độ tải trang cho website. Tốc độ tải trang của website ngoài các yếu tố liên quan do server thì còn phụ thuộc vào kích thước và số lượng file phải tải về, do đó càng giảm được kích thước file lẫn số lượng file cần phải tải về thì cũng đồng thời tăng tốc độ tải file và giảm số lượng request lên server.
+
+Ở bài này mình sẽ giới thiệu với các bạn 10 mẹo CSS hữu ích giúp giảm kích thước, số lượng file CSS, tối ưu file CSS và phát triển CSS dễ dàng hơn, nội dung bài gồm những phần sau:
+
+1.  [Hạn chế sử dụng @import](#01-han-che-su-dung-import)
+2.  [Sử dụng cách viết ngắn gọn (shorthand properties)](#02-su-dung-cach-viet-ngan-gon)
+3.  [Khai báo class bổ trợ (Helper classes)](#03-khai-bao-class-bo-tro)
+4.  [Hạn chế sử dụng CSS trong element của HTML (inline CSS attributes in HTML elements)](#04-han-che-su-dung-inline-css-trong-elements)
+5.  [Giảm số lượng file CSS (Combine external CSS)](#05-giam-so-luong-file-css)
+6.  [Giảm kích thước file CSS](#06-giam-kich-thuoc-file-css)
+7.  [Áp dụng OOCSS (Object Oriented CSS)](#07-ap-dung-ky-thuat-oocss)
+8.  [Đặt tên class và id một cách khoa học](#08-to-chuc-class-va-id-mot-cach-khoa-hoc)
+9.  [Ngôn ngữ tiền xử lý CSS (CSS Preprocessor)](#09-ngon-ngu-tien-xu-ly-css)
+10. [Sử dụng Koala-app khi làm việc với CSS](#10-gioi-thieu-so-luoc-koala-app)
+
+## 1\. Hạn chế sử dụng @import
+
+Hạn chế sử dụng @import hoặc tốt nhất là không nên sử dụng @import trong file CSS, vì nó sẽ **làm chậm quá trình tải** và **không sử dụng được khả năng tải file đồng thời của browser**. Để dễ hiểu bạn hãy xem ví dụ sau:
+
+Mình có 2 file CSS là a.css và b.css được nhúng vào trang web như sau:
+
+```html
+<link rel="stylesheet" type="text/css" href="a.css" />
+<link rel="stylesheet" type="text/css" href="b.css" />
+```
+
+Trong file b.css, bạn import file c.css:
+
+```css
+@import url(c.css);
+```
+
+Kết quả khi browser tải trang sẽ như thế này:
+
+HTML downloada.cssb.cssc.css
+
+Chú thích:
+
+- Request 1: browser gửi request để lấy HTML về
+- Request 2: browser gửi request để lấy a.css
+- Request 3: browser gửi request để lấy b.css
+- Request 4: browser gửi request để lấy c.css
+
+Như các bạn thấy ở hình trên, để tải được c.css thì browser phải chờ để tải xong a.css.
+
+**Lý do**: Vì browser khi đã tải xong b.css và bắt đầu đọc nội dung bên trong thì thấy **@import** yêu cầu phải tải thêm c.css, lúc này browser phải đứng chờ cho nhóm proccess trước đó chạy xong (trong trường hợp này là chờ a.css) thì mới bắt đầu tải tiếp c.css và tiếp tục render sau khi đã tải xong.
+
+Trong khi đó nếu bạn loại bỏ @import url(c.css) trong b.css đi và nhúng trực tiếp c.css vào trang HTML
+
+```html
+<link rel="stylesheet" type="text/css" href="a.css" />
+<link rel="stylesheet" type="text/css" href="b.css" />
+<link rel="stylesheet" type="text/css" href="c.css" />
+```
+
+thì bạn sẽ có kết quả như sau:
+
+HTML downloada.cssb.cssc.css
+
+Lúc này browser sẽ bắt đầu tải file đồng thời không cần phải chờ cho a.css tải xong, sẽ rút ngắn được thời gian tải file xuống.
+
+Như tiêu đề mình nói rằng nên **Hạn chế** sử dụng @import, vậy một câu hỏi nhỏ đặt ra là **khi nào thì nên dùng @import?**.
+
+Theo mình thì khi **những định nghĩa CSS cần lệ thuộc vào một định nghĩa ở file CSS khác trước – thì khi đó nên dùng @import**, ví dụ bạn sử dụng các bộ thư viện reset CSS như [Normalize.css](https://necolas.github.io/normalize.css/), bạn cần reset tất cả các định nghĩa CSS về một chuẩn chung trước khi viết định nghĩa CSS tiếp theo – lúc này bạn sẽ dùng @import để import file Normalize.css vào trong file định nghĩa CSS của bạn, lý do sử dụng @import ở đây là để tránh cơ chế tải file đồng thời của browser và bắt buộc browser phải tải và áp định nghĩa CSS của Normalize.css trước rồi mới đến các định nghĩ CSS ở bên dưới @import.
+
+Một câu hỏi tiếp theo **Nếu nhất thiết phải dùng @import như ví dụ trên, thì các nào khác để giải quyết thay vì dùng @import hay không?**.
+
+Tất nhiên là có cách, đó là bạn copy toàn bộ nội dung của file Normalize.css vào trong file CSS của bạn, hay còn gọi là **Combine external CSS** mình sẽ giới thiệu phía bên dưới.
+
+## 2\. Sử dụng cách viết ngắn gọn
+
+Sử dụng cách viết ngắn gọn (shorthand properties) để dễ dàng thiết lập một số thuộc tính chỉ trên một dòng, đây cũng là một cách để bạn dễ dàng kiểm soát – theo dõi code của mình, đồng thời cũng hỗ trợ giảm số lượng ký tự trong file css và giảm kích thước file.
+
+Lấy ví dụ đơn giản về cách thiết lập thuộc tính hình ảnh cho background
+
+```css
+background-color: #000;
+background-image: url(bg-image.jpg);
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-position: center center;
+```
+
+Bạn có thể viết thành
+
+```css
+background: #000 url(bg-image.jpg) no-repeat fixed center center;
+```
+
+Cấu trúc shorthand của thuộc tính background như sau
+
+```css
+background: <color> <image> <repeat> <attachment> <position>;
+```
+
+Ngoài background thì còn có một số thuộc tính khác cũng có thể sử dụng shorthand như margin, padding, border, outline, … bạn có thể tham khảo thêm trên [Mozilla Developer Network (MDN)](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties). Ở cuối trang này có danh sách các thuộc tính có thể áp dụng shorthand.
+
+Bên cạnh đó, nếu bạn thích khai báo mã màu HEX thì đối với một số mã màu thông dụng bạn cũng có thể viết ngắn gọn lại ví dụ như #FFF thay cho #FFFFFF hay #000 thay cho #000000\. Bạn có thể tham khảo cách chuyển đổi tại [CSS Color Converter](http://maettig.com/?page=PHP/CSS_Color_Converter).
+
+## 3\. Khai báo class bổ trợ
+
+Class bổ trợ (Helper classes) là những class được định nghĩa sẵn một số thuộc tính đơn giản và thường hay sử dụng. Ví dụ như text-align, font-weight, color… Class bổ trợ trong quá trình viết HTML các bạn chỉ cần thêm class đó vào mà không cần phải định nghĩa lại thuộc tính. Cách làm này khá hữu dụng khi bạn sử dụng một CSS framework và cần custom “rất ít” thuộc tính, hoặc bạn không chọn được tên class phù hợp cho element đó, hay element đó không cần xác định class để làm gì đó với javascript.
+
+Điểm lợi của việc này ngoài việc bạn không cần định nghĩa lại một số thuộc tính không cần thiết, thì nếu CSS càng nhiều thì bạn sẽ tiết kiệm được khá nhiều thuộc tính cần khai báo lại và sẽ giảm được kích thước file CSS. Ví dụ:
+
+Mình có các element sau cần viết CSS và mình đang dùng framework bootstrap:
+
+```html
+<p class="text-center">
+  <button type="button" class="btn btn-success btn-md text-uppercase">
+    Show More
+  </button>
+</p>
+```
+
+Thay vì mình cần phải viết CSS như sau để custom lại theo ý mình
+
+```css
+p {
+  text-align: center;
+  padding-top: 20px;
+}
+p > button {
+  background-color: #fff;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+```
+
+Thì mình sẽ khai báo class bổ trợ để có thể tái sử dụng cho nhiều trường hợp khác về sau ( Những class có sẵn của bootstrap mình sẽ không liệt kê vào, vì hiện giờ mình cần custom các element này )
+
+```css
+.padding-top-20 {
+  padding-top: 20px;
+}
+.padding-right-30 {
+  padding-right: 30px;
+}
+.padding-left-30 {
+  padding-left: 30px;
+}
+.btn.btn-bg-white {
+  background-color: #fff;
+}
+```
+
+Như vậy trong HTML mình sẽ khai báo như sau
+
+```html
+<p class="padding-top-20 text-center">
+  <button
+    type="button"
+    class="btn btn-success btn-md btn-bg-white text-uppercase padding-right-30 padding-left-30"
+  >
+    Show More
+  </button>
+</p>
+```
+
+Như vậy thì về sau những class này mình có thể tái sử dụng rất nhiều lần ở rất nhiều element, và mình có thể bỏ đi khá nhiều công đoạn phải gõ lại code CSS khi có phát sinh thêm element mới.
+
+Điều này mình học hỏi từ bootstrap và cảm thấy nó khá là hay. Bạn có thể tham khảo thêm các [helper class](https://getbootstrap.com/css/#helper-classes) hoặc [typography](https://getbootstrap.com/css/#type) của bootstrap để hiểu rõ hơn.
+
+## 4\. Hạn chế sử dụng Inline CSS trong các elements
+
+Ở đây, mình chỉ khuyên các bạn nên hạn chế sử dụng, vì điều này sẽ làm các bạn khó kiểm soát code CSS của mình. “Vạn bất đắc dĩ” cần giải quyết nhanh (hotfix) thì hãy dùng hoặc nếu chỉ dùng một lần hoặc là CSS động từ javascript thì có thể chấp nhận được.
+
+Theo như [Google Pagespeed Insights](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery#CSSattributes) thì việc này sẽ làm code bị lặp lại không cần thiết và vi phạm [Chính sách Bảo mật Nội dung của W3](https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery#CSSattributes), trong một số trường hợp thì các attribute này sẽ bị chặn.
+
+## 5\. Giảm số lượng file CSS
+
+Gom các file CSS lại với nhau (Combine external CSS) là việc dễ làm nhất, thay vì phải viết thành nhiều file như header.css, navigation.css, footer.css… vào trong văn bản HTML thì bạn hãy gom các file này thành một file duy nhất. Nội dung file này sẽ chứa toàn bộ nội dung của các file trên, như vậy bạn sẽ giảm được nhiều request đến server và giảm tải cho server khá nhiều.
+
+Thay vì sử dụng như vầy
+
+```html
+<link rel="stylesheet" href="/css/header.css" />
+<link rel="stylesheet" href="/css/navigation.css" />
+<link rel="stylesheet" href="/css/footer.css" />
+```
+
+Nên gom chúng lại thành
+
+```html
+<link rel="stylesheet" href="/css/style.css" />
+```
+
+## 6\. Giảm kích thước file CSS
+
+Giảm kích thước file CSS được thực hiện bằng cách loại bỏ các khoảng trắng không cần thiết, dấu xuống hàng, dấu chấm phẩy cuối cùng trong class hoặc id… Công đoạn này còn được gọi là **minify**. Để tiện phân biệt giữa file chưa minify và file đã minify thì bạn nên thêm **.min** vào tên file đã minify. Ví dụ style.css sau khi minify sẽ thành style.min.css.
+
+Bạn có thể truy cập vào [Clean CSS](http://www.cleancss.com/css-minify/) để thực hiện minify css hoặc sử dụng tool Koala-app mình sẽ giới thiệu bên dưới để tự động xuất file minify trong quá trình viết code.
+
+## 7\. Áp dụng kỹ thuật OOCSS
+
+**OOCSS** (Object Oriented CSS) – CSS hướng đối tượng, thật ra hướng đối tượng ở đây có nghĩa là bạn gom các thuộc tính giống nhau của 2 class cùng áp dụng cho một element thành một class để giảm thiểu sự lặp lại. Ví dụ:
+
+Thay vì khai báo 2 class cho button như sau
+
+```css
+.btn-primary {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn-success {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+}
+```
+
+Mình sẽ gom một số thuộc tính của 2 class này thành một class khác có tên là btn:
+
+```css
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.btn.btn-primary {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn.btn-success {
+  color: #fff;
+  background-color: #5cb85c;
+  border-color: #5cb85c;
+}
+```
+
+Như vậy nếu sau này có thay đổi gì về một số thuộc tính chung của 2 class thì mình chỉ cần thay đổi class btn thì sẽ dễ dàng và nhanh hơn.
+
+## 8\. Tổ chức class và id một cách khoa học
+
+Việc này để hỗ trợ bạn sau này khi xem lại code của mình dễ dàng hơn và không bị rối với cách đặt tên của mình, đồng thời cũng dễ dàng nếu có áp dụng một số CSS preprocessor hay BEM.
+
+Thay vì đặt tên
+
+```css
+.titlepost {
+}
+
+.headerpost {
+}
+
+.contentpost {
+}
+```
+
+thì nên đặt thành
+
+```css
+.post {
+}
+
+.post-title {
+}
+
+.post-header {
+}
+
+.post-content {
+}
+```
+
+hoặc tổ chức thành
+
+```css
+.post {
+}
+
+.post > .title {
+}
+
+.post > .header {
+}
+
+.post > .content {
+}
+```
+
+## 9\. Ngôn ngữ tiền xử lý CSS
+
+**Tiền xử lý CSS** (CSS Preprocessor) – là một cách mở rộng của CSS hoặc cũng có thể coi nó là một ngôn ngữ riêng. Mục đích của CSS preprocessor là để bạn dễ dàng cấu trúc các đoạn code CSS, giảm thời gian phải viết đi viết lại một đoạn code, dễ dàng áp dụng OOCSS… Nói cách khác bạn có thể hiểu CSS preprocessor gần như là một ngôn ngữ lập trình vì nó cũng có biến, kế thừa class, và dễ dàng tạo ra một thư viện riêng cho bạn quản lý, kế thừa và tái sử dụng ở những dự án khác.
+
+CSS preprocessor hiện nay có rất nhiều nhưng phổ biến nhất hiện nay là [**Less**](http://lesscss.org/) và [**Sass.**](http://sass-lang.com/) Ở đây mình giới thiệu các bạn về Sass vì mình đang sử dụng nó thay cho Less, và CSS framework phổ biến – [Bootstrap, kể từ phiên bản 4 đã chuyển từ Less qua Sass](https://blog.getbootstrap.com/2015/08/19/bootstrap-4-alpha/). Về Sass các bạn xem [hướng dẫn cài đặt trên trang chủ](http://sass-lang.com/install).
+
+Khi bắt đầu với một dự án có áp dụng Sass, việc đầu tiên mình thường làm là cấu trúc CSS thành nhiều file nhỏ để tránh nhồi nhét CSS vào một file và dễ dàng cho việc quản lý, tìm kiếm khi cần thiết. Mình thường cấu trúc các file Sass như sau:
+
+```
+scss
+|-- style.scss
+|-- _variable.scss
+|-- _helper.scss
+|-- _mixins.scss
+|-- components
+|-- -- _header.scss
+|-- -- _footer.scss
+|-- mixins
+|-- -- button.scss
+|-- -- label.scss
+```
+
+Trong file style.scss nội dung như sau:
+
+```scss
+@import 'variable';
+@impprt "helper";
+@import 'mixins';
+
+// Components
+@import 'components/header';
+@import 'components/footer';
+```
+
+Chú thích:
+
+- \_variable.scss: variable chứa các thông tin về các biến dùng chung
+- \_helper.scss: helper sẽ chứa/import các class helper
+- \_mixins.scss: mixins sẽ chứa/import các class custom hoặc class được tái sử dụng nhiều lần
+
+Nội dung file \_helper.scss như mình đã nói sẽ tạo ra các class helper, nhưng ở đây mình áp dụng tính chất của Scss để tạo ra các class với ít dòng code nhất:
+
+```scss
+$numbersPX:
+  '10' 10px,
+  '15' 15px,
+  '20' 20px,
+  '25' 25px,
+  '30' 30px;
+
+// padding
+@each $i in $numbersPX {
+  .padding-#{nth($i, 1)} {
+    padding: nth($i, 2) !important;
+  }
+  .padding-top-#{nth($i, 1)} {
+    padding-top: nth($i, 2) !important;
+  }
+  .padding-bottom-#{nth($i, 1)} {
+    padding-bottom: nth($i, 2) !important;
+  }
+  .padding-right-#{nth($i, 1)} {
+    padding-right: nth($i, 2) !important;
+  }
+  .padding-left-#{nth($i, 1)} {
+    padding-left: nth($i, 2) !important;
+  }
+}
+```
+
+khi Sass complier ra file CSS thì mình sẽ thu được kết quả như sau
+
+```css
+.padding-10 {
+  padding: 10px !important;
+}
+.padding-top-10 {
+  padding-top: 10px !important;
+}
+.padding-bottom-10 {
+  padding-bottom: 10px !important;
+}
+.padding-right-10 {
+  padding-right: 10px !important;
+}
+.padding-left-10 {
+  padding-left: 10px !important;
+}
+.padding-15 {
+  padding: 15px !important;
+}
+.padding-top-15 {
+  padding-top: 15px !important;
+}
+.padding-bottom-15 {
+  padding-bottom: 15px !important;
+}
+.padding-right-15 {
+  padding-right: 15px !important;
+}
+.padding-left-15 {
+  padding-left: 15px !important;
+}
+.padding-20 {
+  padding: 20px !important;
+}
+.padding-top-20 {
+  padding-top: 20px !important;
+}
+.padding-bottom-20 {
+  padding-bottom: 20px !important;
+}
+.padding-right-20 {
+  padding-right: 20px !important;
+}
+.padding-left-20 {
+  padding-left: 20px !important;
+}
+.padding-25 {
+  padding: 25px !important;
+}
+.padding-top-25 {
+  padding-top: 25px !important;
+}
+.padding-bottom-25 {
+  padding-bottom: 25px !important;
+}
+.padding-right-25 {
+  padding-right: 25px !important;
+}
+.padding-left-25 {
+  padding-left: 25px !important;
+}
+.padding-30 {
+  padding: 30px !important;
+}
+.padding-top-30 {
+  padding-top: 30px !important;
+}
+.padding-bottom-30 {
+  padding-bottom: 30px !important;
+}
+.padding-right-30 {
+  padding-right: 30px !important;
+}
+.padding-left-30 {
+  padding-left: 30px !important;
+}
+```
+
+## 10\. Giới thiệu sơ lược Koala App
+
+[Koala app](http://koala-app.com) là một ứng dụng GUI hỗ trợ biên dịch Less, Sass, Compass và CoffeeScript sang CSS và JS. Koala App chạy được trên cả 3 môi trường Mac OS, Linux và Windows nên rất tiện nếu bạn cần thay đổi qua lại giữa các hệ điều hành. Ngoài ra, Koala App còn hỗ trợ minify cho cả CSS và JS.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2016/01/image01-700x453.png)
+
+Sử dụng Koala App rất đơn giản, bạn chỉ cần mở lên và ấn dấu + trên đầu chương trình để chọn thư mục chứa các file cần xử lý, và Koala App sẽ tự động scan toàn bộ các folder bên trong và theo dõi khi có thay đổi.
+
+Nếu bạn “siêng” thì có thể tham khảo cách để tự cấu hình project để Koala-app hoạt động theo ý mình [tại đây](https://github.com/oklai/koala/wiki/Using-project-settings).
+
+Trên đây là những mẹo CSS rút ra từ kinh nghiệm làm việc của mình. Nếu bạn còn những mẹo hay khác thì đừng ngại chia sẻ bên dưới nhé.

@@ -1,0 +1,537 @@
+---
+title: Tối ưu hiệu suất render để website mượt hơn
+author: Hung Tan Nguyen
+tags:
+  - javascript
+categories: []
+coverImage: >-
+  https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/Internal-Toi-uu-web-1-700x467.jpg
+sourceUrl: 'https://blog.siliconstraits.vn/toi-uu-hieu-suat-render-website/'
+date: 2018-06-26 07:50:00
+slug: /toi-uu-hieu-suat-render-de-website-muot-hon
+---
+
+**Optimizing Performance** (tối ưu hóa hiệu suất) cho website là một công việc mà bất kỳ front-end developer nào cũng nên biết, mục đích là để trang web đáp ứng được 3 tiêu chí:
+
+1.  **NHẸ**: Giảm kích thước trang web và các thành phần đi kèm như javascript, css, hình ảnh… nhằm đảm bảo **thời gian tải xuống ngắn hơn**. Chúng ta có thể dùng các bộ minify cho javascript, css…, nén các tập tin hình ảnh, font chữ, svg… ngoài ra còn có các kĩ thuật như code splitting, browser caching, HTTP caching…
+2.  **NHANH** **Hiển thị nội dung trang web càng sớm càng tốt** bằng cách: chia cấu trúc DOM hợp lý, hạn chế blocking CSS/JS, hạn chế chỉnh sửa DOM tree, chia các file ra thành nhiều module, tải resource bất đồng bộ, tối ưu hóa các selector của CSS và JS…
+3.  **MƯỢT**: Sau khi nội dung trang web đã được tải về và hiển thị thì việc tiếp theo là **bảo đảm các hiệu ứng animation, transition, scrolling… phải mượt**, không bị lag và giật (jank).
+
+Trong 3 tiêu chí này, có 2 tiêu chí mà front-end developer chúng ta hằng ngày đều thực hiện là **nhẹ và nhanh**. Bằng cách sử dụng các framework (angularjs, reactjs…) và các bộ build tool (grunt, gulp, webpack…), các resource trong project ở môi trường production lúc nào cũng được minify và đóng gói đầy đủ, gọn gàng.
+
+Do đó, trong bài này tôi sẽ hướng dẫn cho bạn cách đáp ứng được tiêu chí thứ 3, đó là **MƯỢT**, thứ mà ít có framework hay công cụ nào có thể hỗ trợ bạn được.
+
+[![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image05-700x455.png)](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image05.png)
+
+Trên thực tế, các web page yêu cầu độ mượt cao thường là các webpage có nhiều hiệu ứng, chuyển động, ví dụ như các trang landing page, giới thiệu sản phẩm, HTML5 game, hoặc các ứng dụng có animation chạy trên các thiết bị có cấu hình thấp. Bạn có thể xem qua một số trang sau:
+
+- [http://world.mathigon.org/](http://world.mathigon.org/)
+- [http://matthew.wagerfield.com/parallax/](http://matthew.wagerfield.com/parallax/)
+
+## Làm thế nào để web page “mượt”?
+
+Mượt ở đây chính là “Rendering Performance”, để tối ưu hiệu suất render chúng ta phải hiểu được quá trình render của browser.
+
+### 60
+
+… là số khung hình trên một giây mà các thiết bị phổ biến hiện nay hỗ trợ (60fps). Để cho trang web mượt thì tốc độ render phải đáp ứng được con số này. Tức là trong **1 giây** chúng ta phải cho ra **60 khung hình**. Với mỗi khung hình, chúng ta có 1 / 60 = 16,66 mili giây. Trên thực tế, browser còn có một số tác vụ khác phải làm bên cạnh việc render, vì thế chúng ta trừ hao còn lại khoảng 16ms.
+
+Bất cứ animation hay transition nào, muốn đảm bảo được tốc độ 60fps thì phải cũng phải đảm bảo trong vòng **16ms phải render được một khung hình**, nếu không thì sẽ bị hiện tượng “frame skip”, hiệu ứng sẽ bị giật, lag.
+
+### Cần phải làm những gì trong 16ms đó?
+
+Để cho ra được 1 khung hình, đây là các việc mà browser phải thực hiện (**the pixel pipeline**):
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image19-700x107.png)
+
+Giải thích ngắn gọn:
+
+**1\. JavaScript**: là hoạt động execute code của javascript.
+
+```javascript
+document.getElementById('my-element').style.width = '300px';
+```
+
+**2\. Style calculation**: tính toán các thuộc tính theo các quy tắc từ file CSS (hoặc thẻ `<style>`, thuộc tính style).
+
+```html
+<div id="my-element" style="width: 300px">Hello</div>
+```
+
+**3\. Layout**: browser thực hiện “chia vùng” cho các element khi hiển thị trên màn hình, dựa trên các thuộc tính đã tính toán được từ bước Style.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image28.png)
+
+**4\. Paint**: tô màu cho từng pixel, bao gồm việc: vẽ chữ (render font), hình ảnh, màu, vẽ các hiệu ứng CSS như border, box-shadow… Việc tô màu này được thực hiện trên nhiều “layer” cùng một lúc (phần sau sẽ giải thích rõ hơn về layer). Đây là bước chiếm nhiều thời gian nhất.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image23.png)
+
+**5\. Composite**: gộp các layer đã được vẽ (ở bước Paint) và hiển thị lên màn hình theo đúng thứ tự của các layer đó.
+
+Như vậy, chỉ với 16ms browser phải thực hiện 5 bước như trên để có thể render ra được 1 khung hình. Vậy để đảm bảo mọi thứ đều hoàn thành dưới 16ms, việc chúng ta cần làm là tối ưu từng bước. Cụ thể là:
+
+- **JavaScript:**
+
+- Dùng requestAnimationFrame.
+- Dùng Web workers, Micro-task cho các tác vụ nặng.
+- Profiling with Chrome DevTools.
+
+- **Style:**
+- Giảm độ phức tạp của selector
+- Giảm số lượng element bị ảnh hưởng
+
+- **Layout:**
+- Hạn chế kích hoạt layout
+- Sử dụng Flexbox
+- Hạn chế forced synchronous layout.
+
+- **Paint:**
+- Paint là tác vụ xử lý lâu nhất
+- Box-shadow, large image không tốt cho paint
+- Tạo và quản lý layer hợp lý
+
+- **Composite:**
+- Sử dụng transform và opacity
+- Quản lý các layer bằng Chrome DevTools
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image22-250x203.png)
+
+## Từng bước tối ưu hiệu suất render
+
+### Bước 1: Javascript
+
+#### 1.1\. Sử dụng requestAnimationFrame để thực hiện các thay đổi trên UI.
+
+Khi thực hiện các thay đổi trên UI bằng JavaScript, bạn sẽ muốn thực hiện nó ngay vào lúc bắt đầu của frame, lúc đó browser sẽ có được toàn bộ 16ms để thực hiện các thay đổi (JavaScript ⇒ Style ⇒ Layout ⇒ Paint ⇒ Composite). Để làm được điều này bạn cần dùng hàm requestAnimationFrame. Hàm này có chức năng “hẹn giờ” chạy vào đúng thời điểm của frame tiếp theo.
+
+```javascript
+/**
+ * If run as a requestAnimationFrame callback, this
+ * will be run at the start of the frame.
+ */
+function updateScreen(time) {
+  // Make visual updates here.
+}
+requestAnimationFrame(updateScreen);
+```
+
+Một số đoạn code trên mạng hoặc trong các framework thường sử dụng hàm setTimeout, tuy nhiên hàm được gọi bởi setTimeout sẽ không khởi chạy lúc bắt đầu frame, dẫn đến việc không tận dụng hết được khoảng thời gian 16ms, do đó gây ra hiện tượng frame skip, gây giật, lag.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image071-700x300.png)
+
+#### 1.2\. Chuyển các tác vụ nặng sang Web workers
+
+Đối với các tác vụ nặng như encode/decode, xử lý dữ liệu lớn… chúng ta nên chuyển tác vụ đó sang [Web Workers](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/basic_usage). Web Workers hoạt động trên một thread riêng biệt, sẽ giúp giảm tải cho UI Thread và giúp tiết kiệm được thời gian xử lý.
+
+```javascript
+var dataSortWorker = new Worker('sort-worker.js');
+dataSortWorker.postMesssage(dataToSort);
+
+// The main thread is now free to continue working on other things...
+
+dataSortWorker.addEventListener('message', function (evt) {
+  var sortedData = evt.data;
+  // Update data on screen...
+});
+```
+
+Tuy nhiên, Web Workers không thể tương tác với DOM tree, do đó một số tác vụ không thể chuyển qua Web Workers được. Trong trường hợp này ta có thể áp dụng phương pháp “micro-task”: chia nhỏ task ra, sau đó sử dụng requestAnimationFrame để cập nhật UI. Lúc này, nếu mỗi task nhỏ có thời gian thực thi bé hơn 16ms thì sẽ tránh được hiện tượng giật, lag như khi chạy cả task lớn.
+
+```javascript
+var taskList = breakBigTaskIntoMicroTasks(monsterTaskList);
+requestAnimationFrame(processTaskList);
+
+function processTaskList(taskStartTime) {
+  var taskFinishTime;
+
+  do {
+    // Assume the next task is pushed onto a stack.
+    var nextTask = taskList.pop();
+
+    // Process nextTask.
+    processTask(nextTask);
+
+    // Go again if there’s enough time to do the next task.
+    taskFinishTime = window.performance.now();
+  } while (taskFinishTime - taskStartTime < 3);
+
+  if (taskList.length > 0) requestAnimationFrame(processTaskList);
+}
+```
+
+#### 1.3\. Sử dụng Chrome DevTools để “điều tra” JavaScript execution
+
+Chrome DevTools là công cụ cực kỳ hữu ích. Ở tab “Timeline” của Chrome DevTools, bạn có thể kiểm tra được độ mượt của web page bằng cách:
+
+1.  Nhấn nút Record (hoặc Ctrl + R trên Windows, Command + R trên Mac)
+2.  Thực hiện animation / transition trên trang web chính
+3.  Nhấn nút Stop Record.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image24-700x515.png)
+
+Chrome DevTools sẽ hiển thị toàn bộ các thông tin liên quan đến các tác vụ JavaScript ⇒ Style ⇒ Layout ⇒ Paint ⇒ Composite. Bạn có thể kiếm tra để xem tác vụ nào chiếm nhiều thời gian nhất và gây ra frame skip.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image06.png)
+
+### Bước 2: Style calculation
+
+Cố gắng giữ cho selector của bạn càng đơn giản càng tốt, và giảm số lượng element bị ảnh hưởng bởi selector, ví dụ:
+
+Nên:
+
+```css
+.title {
+  /* styles */
+}
+```
+
+Không nên:
+
+```css
+.box:nth-last-child(-n + 1) .title {
+  /* styles */
+}
+```
+
+Không nên:
+
+```css
+*,
+*:before,
+*:after {
+  /* styles */
+}
+```
+
+Nên:
+
+```css
+body {
+  /* styles */
+}
+```
+
+Việc sử dụng các selector này cần phải cân bằng giữa việc code gọn gàng đẹp đẽ và hiệu suất. Khi sử dụng các selector phức tạp thì browser cần phải thực hiện nhiều tính toán, nhưng nếu chỉ sử dụng các selector đơn giản thì lại khiến code của chúng ta khó quản lý.
+
+Giải pháp ở đây là chúng ta nên sử dụng một số kỹ thuật quản lý style như: [BEM (Block, Element, Modifier)](https://bem.info/), [PostCSS](https://github.com/postcss/postcss). Các công cụ này sẽ giúp chúng ta vừa dễ quản lý code CSS ở môi trường dev, và cũng vừa đảm bảo hiệu suất ở môi trường production sau khi build.
+
+### Bước 3: Layout
+
+#### 3.1\. Hạn chế kích hoạt tính toán layout
+
+Việc thay đổi một số thuộc tính CSS của element có thể kích hoạt browser tính toán lại layout của element đó.
+
+```css
+.box {
+  width: 20px;
+  height: 20px;
+}
+
+/**
+ * Changing width and height
+ * triggers layout.
+ */
+.box--expanded {
+  width: 200px;
+  height: 350px;
+}
+```
+
+Khi một element bị thay đổi layout thì thường là các element khác cũng sẽ bị thay đổi theo (kích thước, vị trí…). Do đó nếu trang của bạn có nhiều element và việc kích hoạt layout diễn ra quá thường xuyên thì hoàn toàn không tốt cho performance.
+
+Bạn có thể sử dụng Chrome DevTools để kiểm tra xem web page của bạn có bị kích hoạt layout quá nhiều hay không.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image02-700x489.png)
+
+Ví dụ trong hình này, bạn có thể thấy sự kiện Layout chiếm tới 20.636ms, vượt qua con số 16ms và tất nhiên là sẽ dẫn đến frame skip, số lượng element cần tính toán lại layout là 1618 (rất nhiều).
+
+Để biết được những thuộc tính nào sẽ kích hoạt Layout (và lý do vì sao), bạn có thể tra cứu ở trang [http://csstriggers.com/](http://csstriggers.com/) – công cụ do một Googler viết cho mục đích tra cứu.
+
+#### 3.2\. Sử dụng các thuộc tính mới của CSS3
+
+CSS3 có cung cấp một số thuộc tính mới không những giúp chúng ta canh chỉnh layout dễ hơn mà còn giúp tăng hiệu suất rất nhiều. Điển hình là Flexbox, việc sử dụng flexbox để canh chỉnh layout sẽ dễ hơn so với cách dùng float truyền thống.
+
+Xem bài hướng dẫn tuyệt vời về Flexbox: [http://css-tricks.com/snippets/css/a-guide-to-flexbox/](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
+Về hiệu suất, dưới đây là 2 hình ảnh đo hiệu suất của việc kích hoạt layout trên 1300 elements.
+
+Sử dụng Float:
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image16-700x476.png)
+
+Sử dụng Flexbox:
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image14-700x454.png)
+
+Có thể thấy con số “Self Time” giảm từ **~14ms** chỉ còn **~3.5ms**, đó là một sự thay đổi rất đáng kể.
+
+#### 3.3\. Hạn chế kích hoạt layout sớm
+
+Hãy xem xét đoạn code sau: thay đổi kích thước của 3 elements
+
+```javascript
+// Read
+var h1 = element1.clientHeight;
+
+// Write (invalidates layout)
+element1.style.height = h1 * 2 + 'px';
+
+// Read (triggers layout)
+var h2 = element2.clientHeight;
+
+// Write (invalidates layout)
+element2.style.height = h2 * 2 + 'px';
+
+// Read (triggers layout)
+var h3 = element3.clientHeight;
+
+// Write (invalidates layout)
+element3.style.height = h3 * 2 + 'px';
+```
+
+Khi một element (DOM) được ghi giá trị mới thì layout sẽ bị đánh dấu **giá trị hết hiệu lực** (invalidates) và sẽ được tính toán lại tại một thời điểm nào đó. Để đảm bảo performance, browser sẽ thực hiện tính toán lại layout vào **thời điểm bắt đầu của frame tiếp theo**.
+
+Tuy nhiên nếu trong thời gian **frame hiện tại chưa kết thúc**, ta muốn lấy giá trị kích thước của element thì lúc này browser buộc phải thực hiện **tính toán layout lại sớm hơn** so với thông thường để có thể trả về kết quả. Hiện tượng này gọi là “forced synchronous layout” – tạm dịch “kích hoạt layout sớm”, và nó gây ra vấn đề về performance khi ta phải thực hiện nhiều tác vụ hơn trong 1 frame.
+
+Để giải quyết, cách nhanh nhất là chúng ta sẽ “đọc trước, ghi sau”.
+
+```javascript
+// Read
+var h1 = element1.clientHeight;
+var h2 = element2.clientHeight;
+var h3 = element3.clientHeight;
+
+// Write (invalidates layout)
+element1.style.height = h1 * 2 + 'px';
+element2.style.height = h2 * 2 + 'px';
+element3.style.height = h3 * 2 + 'px';
+
+// Document reflows at end of frame
+```
+
+Hoặc sử dụng requestAnimationFrame để “hẹn giờ” cho cả 3 thao tác ghi vào frame tiếp theo:
+
+```javascript
+// Read
+var h1 = element1.clientHeight;
+
+// Write
+requestAnimationFrame(function () {
+  element1.style.height = h1 * 2 + 'px';
+});
+
+// Read
+var h2 = element2.clientHeight;
+
+// Write
+requestAnimationFrame(function () {
+  element2.style.height = h2 * 2 + 'px';
+});
+```
+
+Bằng cách này, cả 3 thao tác ghi đều sẽ được thực hiện một lần trong frame tiếp theo, tốt hơn cho hiệu suất.
+
+Bạn sẽ thấy rõ tác dụng của việc hạn chế layout sớm trong một số trường hợp thực tế như sau “Layout thrashing”:
+
+```javascript
+// Puts the browser into a read-write-read-write cycle.
+for (var i = 0; i < paragraphs.length; i++) {
+  paragraphs[i].style.width = box.offsetWidth + 'px';
+}
+```
+
+Như đoạn code trên, layout sẽ liên tục bị trigger và kích hoạt sớm ở trong vòng lặp (read: box.offsetWidth, và write: paragraphs[i].style.width) điều này là thảm họa cho browser
+
+(hình: dấu chấm than vàng là báo hiệu **forced synchronous layout**).
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image17.png)
+
+Nếu đã biết về vấn đề forced synchronous layout, đoạn code trên nên được viết lại như sau:
+
+```javascript
+// Read.
+var width = box.offsetWidth;
+
+function resizeAllParagraphsToMatchBlockWidth() {
+  for (var i = 0; i < paragraphs.length; i++) {
+    // Now write.
+    paragraphs[i].style.width = width + 'px';
+  }
+}
+```
+
+Nếu cảm thấy việc quản lý layout quá phức tạp, bạn có thể tham khảo sử dụng thư viện [FastDOM](https://github.com/wilsonpage/fastdom), thư viện này giúp bạn quản lý các tác vụ read/write để đảm bảo không gây ra forced synchronous layout.
+
+### Bước 4: Paint
+
+#### 4.1\. Dùng Chrome Developer Tools để phát hiện vấn đề performance khi paint
+
+Bất kỳ sự thay đổi nào trên màn hình browser đều yêu cầu quá trình paint, animation, transition, lúc bôi đen đoạn text hay cả con trỏ nhấp nháy ở textbox.
+
+Để biết được browser phải vẽ lại những phần nào trên màn hình, bạn có thể bật chức năng “Show paint rectangles” ở tab “Rendering” trong Chrome Developer Tools.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image18.png)
+
+Những vùng bị vẽ lại sẽ được tô và hiển thị màu xanh lá cây trên màn hình.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image21-700x454.png)
+
+Bạn có thể xem chi tiết hoạt động vẽ của browser bằng cách kích hoạt chế độ “Paint profiler” ở tab “Timeline” khi record.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image03.png)
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image04.png)
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image15-700x454.png)
+
+Ở chế độ này, bạn có thể kiểm tra **quá trình vẽ của tất cả các element** trong web page. Dựa vào các thông tin này bạn có thể phân tích và đưa ra hướng giải quyết phù hợp nếu quá trình paint mất quá nhiều thời gian. Một số yếu tố khiến quá trình paint diễn ra chậm:
+
+- Các hiệu ứng CSS phức tạp: box-shadow, gradient, curves
+- Các element chồng đè lên nhau.
+- Các hình ảnh có kích thước quá lớn
+- …
+
+#### 4.2\. Sử dụng hợp lý các layer
+
+Trên thực tế, quá trình vẽ diễn ra song song trên nhiều các layer khác nhau, việc phân chia các layer hợp lý sẽ giúp tiết kiệm được thời gian vẽ rất nhiều.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image27-700x602.png)
+
+Ví dụ trong trường hợp này, khi bạn cuộn trang thì browser phải vẽ lại layer trên cùng (text), còn layer hình bên dưới có vị trí cố định, không có gì thay đổi nên không cần phải vẽ lại nữa. Các layer này sẽ được gộp lại (ở bước cuối cùng – composite) và hiển thị lên màn hình.
+
+**Làm sao để tạo layer?**
+
+Vẽ – Paint – là tác vụ nặng nhất, chiếm nhiều thời gian nhất trong các bước, do đó bạn có thể thấy rõ được lợi ích của việc **phân chia các layer làm sao cho browser ít phải vẽ lại nhất**.
+
+Một layer (compositor layer) sẽ được tạo khi bạn sử dụng thuộc tính will-change (trên Chrome, Opera, Firefox) thuộc tính này báo hiệu cho browser biết element sẽ có sự thay đổi, do đó sẽ đưa element này vào một layer mới.
+
+```css
+.moving-element {
+  will-change: transform;
+}
+```
+
+Đối với các browser không hỗ trợ will-change bạn có thể sử dụng thuộc tính 3D transform để “ép buộc” tạo layer mới:
+
+```css
+.moving-element {
+  transform: translateZ(0);
+}
+```
+
+Cần lưu ý, việc tạo layer mới sẽ yêu cầu thêm bộ nhớ và tác vụ để quản lý các layer, do đó bạn không nên tạo quá nhiều layer, và chiến lược tao layer ở đây không cố định mà còn tùy thuộc vào tính chất của các animation, transition có trên website của bạn.
+
+**Không nên:** (layer explosions – tạo ra quá nhiều layer không cần thiết)
+
+```css
+* {
+  will-change: transform;
+  transform: translateZ(0);
+}
+```
+
+## Bước 5: Composite
+
+Tại bước này, browser sẽ tiến hành gộp các compositor layer đã được vẽ (ở bước 4) và hiển thị lên màn hình.
+
+Trường hợp lý tưởng nhất cho performance là bỏ qua 2 bước Layout và Paint, công việc của browser chỉ là thay đổi các compositor layer để tạo ra một frame.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image20-700x107.png)
+
+Để làm được điều đó, bạn chỉ được thay đổi các thuộc tính mà Compositor có thể xử lý độc lập (mà không cần phải kích hoạt Layout và Paint). Các thuộc tính đó là **transform** và **opacity**.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image12-700x525.png)
+
+Tuy nhiên trên thực tế chúng ta cần phải thay đổi nhiều thuộc tính hơn nữa để đáp ứng được yêu cầu khi animate các hiệu ứng. Do đó, giải pháp chính là phải **<span class="c0">tạo và quản lý được các layer một cách hợp lý</span>**. Để quản lý được các layer, bạn có thể sử dụng công cụ Chrome Developer Tools.
+
+Trong tab “Timeline” đánh dấu vào mục Paint
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image26.png)
+
+Tiến hành record và chọn phần Paint trên kết quả hiển thị
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image08.png)
+
+Ở đây bạn sẽ thấy thẻ “Layer” trong phần thông tin của frame
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image001.png)
+
+Từ đây bạn có thể tra cứu toàn bộ các frame mà web page đang có.
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image13-700x525.png)
+
+Danh sách các layer được liệt kê dưới dạng cây (layer tree), preview dạng 3D, có thông tin về kích thước, bộ nhớ, lý do layer được tạo…
+
+## Tổng kết
+
+Như vậy là ta đã đi từng bước để có thể tối ưu hiệu suất render cho web page:
+
+- **JavaScript**
+       – Dùng requestAnimationFrame
+       – Dùng Web workers, Micro-task cho tác vụ nặng
+       – Profiling with Chrome DevTools
+
+- **Style**
+       – Giảm độ phức tạp của selector
+       – Giảm số lượng element bị ảnh hưởng
+
+- **Layout**
+       – Hạn chế kích hoạt layout
+       – Sử dụng Flexbox
+       – Hạn chế forced synchronous layout.
+
+- **Paint**
+       – Paint là tác vụ xử lý lâu nhất
+       – Box-shadow, large image không tốt cho paint
+       – Tạo và quản lý layer hợp lý
+
+- **Composite**
+       – Sử dụng transform và opacity
+       – Quản lý các layer bằng Chrome DevTools
+
+Sau khi đã thực hiện những bước trên, web page của bạn sẽ hoạt động mượt mà, trơn tru với 60fps. Chúc bạn thành công!
+
+60FPS FOR THE WIN!
+
+# Chuyện ngoài lề
+
+Ở Silicon Straits Saigon, chúng tôi có một bài test dành cho Front-end Developer, đó là implement hiệu ứng scrolling sau (ảnh động, load hơi lâu): [http://bit.ly/1CCYx9y](https://bit.ly/1CCYx9y)
+
+Các bạn có thể vận dụng những kiến thức có được trong bài viết này để “thử sức” với hiệu ứng trên.
+
+Đây là bài làm của tôi, mặc dù không được hoàn hảo nhưng có thể dùng được cho mục đích tham khảo.
+
+Link: [http://trungdq88.github.io/css-stuffs/delay-scroll/](https://trungdq88.github.io/css-stuffs/delay-scroll/)
+
+Timeline Record:
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image05-700x455.png)
+
+Layers (một phần):
+
+![](https://4qr7k2a2xza2vctux33bisalkw-wpengine.netdna-ssl.com/wp-content/uploads/2015/11/image10-700x299.png)
+
+## Các nguồn tham khảo trong bài viết:
+
+Một số hình ảnh và code mẫu:
+
+- Google Developer: [https://developers.google.com/web/fundamentals/performance/](https://developers.google.com/web/fundamentals/performance/)
+- Preventing Layout Thrashing:[http://wilsonpage.co.uk/preventing-layout-thrashing/](http://wilsonpage.co.uk/preventing-layout-thrashing/)
+
+Các trang web có hiệu ứng đẹp:
+
+- [http://world.mathigon.org/](http://world.mathigon.org/)
+- [http://matthew.wagerfield.com/parallax/](http://matthew.wagerfield.com/parallax/)
+
+Khóa học:
+
+- Udacity Course: Browser Rendering Optimization – Building 60 FPS Web Apps: [https://www.udacity.com/course/browser-rendering-optimization–ud860](https://www.udacity.com/course/browser-rendering-optimization--ud860)
+
+Các nguồn khác:
+
+- Web Workers: [https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/basic_usage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/basic_usage)
+- BEM: [https://bem.info/](https://bem.info/)
+- PostCSS: [https://github.com/postcss/postcss](https://github.com/postcss/postcss)
+- CSS Trigger: [http://csstriggers.com/](http://csstriggers.com/)
+- Guide to Flexbox: [http://css-tricks.com/snippets/css/a-guide-to-flexbox/](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+- FastDOM: [https://github.com/wilsonpage/fastdom](https://github.com/wilsonpage/fastdom)

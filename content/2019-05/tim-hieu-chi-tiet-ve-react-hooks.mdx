@@ -1,0 +1,414 @@
+---
+title: 'Tìm hiểu chi tiết về React Hooks'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - hooks
+categories: []
+sourceUrl: 'https://medium.com/@sdolidze/the-iceberg-of-react-hooks-af0b588f43fb'
+coverImage: 'https://cdn-images-1.medium.com/max/2600/0*D5d-T8nPG86hU5YE.jpg'
+date: 2019-05-01 14:35:00
+slug: /tim-hieu-chi-tiet-ve-react-hooks
+---
+
+React Hooks, unlike Class Components, provide **low-level** building blocks for optimizing and composing applications with minimal boilerplate.
+
+Without in-depth knowledge, performance problems can arise and **code complexity** can increase due to **subtle bugs** and **leaky abstractions**.
+
+I’ve created **12 part case study** to demonstrate common problems and ways to fix them. I’ve also compiled **React Hooks Radar** and **React Hooks Checklist** for small recommendations and quick reference.
+
+---
+
+### Case Study: Implementing Interval
+
+The goal is to implement counter that starts from 0 and increases every 500ms. Three control buttons should be provided: start, stop and clear.
+
+![](https://cdn-images-1.medium.com/max/1600/1*6UeqZz8r6rS9Gdl9fcLSow.gif)
+
+#### Level 0: Hello World
+
+```javascript
+export default function Level00() {
+  console.log('renderLevel00');
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      count => {count}
+      <button onClick={() => setCount(count + 1)}>+</button>
+      <button onClick={() => setCount(count - 1)}>-</button>
+    </div>
+  );
+}
+```
+
+This is a simple, **correctly implemented** counter, which increments or decrements on user click.
+
+#### Level 1: setInterval
+
+```javascript
+export default function Level01() {
+  console.log('renderLevel01');
+  const [count, setCount] = useState(0);
+  setInterval(() => {
+    setCount(count + 1);
+  }, 500);
+  return <div>count => {count}</div>;
+}
+```
+
+Intention of this code is to increase counter every 500ms. This code has a huge **resource leak** and is **implemented incorrectly.** It will easily crash browser tab. Since Level01 function is called every time render happens, this component creates new interval every time render is triggered.
+
+> Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body of a function component (referred to as React’s _render phase_). Doing so will lead to confusing bugs and inconsistencies in the UI.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect)
+
+#### Level 2: useEffect
+
+```javascript
+export default function Level02() {
+  console.log('renderLevel02');
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setInterval(() => {
+      setCount(count + 1);
+    }, 500);
+  });
+  return <div>Level 2: count => {count}</div>;
+}
+```
+
+Most side-effects happen inside [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect). This code also has a huge **resource leak** and is **implemented incorrectly**. Default behavior of useEffect is to run after every render, so new interval will be created every time count changes.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect), [Timing of Effects](https://reactjs.org/docs/hooks-reference.html#timing-of-effects).
+
+#### Level 3: run only once
+
+```javascript
+export default function Level03() {
+  console.log('renderLevel03');
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    setInterval(() => {
+      setCount(count + 1);
+    }, 300);
+  }, []);
+  return <div>count => {count}</div>;
+}
+```
+
+Giving [] as second argument to useEffect will call function once, after mount. Even though setInterval is called only once, this code is **implemented incorrectly.**
+
+count will increase from 0 to 1 and stay that way**.** Arrow functionwill be created once and when that happens, count will be 0.
+
+This code has **subtle resource leak**. Even after component unmounts, setCount will still be called.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect), [Conditionally firing an effect](https://reactjs.org/docs/hooks-reference.html#conditionally-firing-an-effect).
+
+#### Level 4: cleanup
+
+```javascript
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCount(count + 1);
+  }, 300);
+  return () => clearInterval(interval);
+}, []);
+```
+
+To prevent **resource leaks**, everything must be disposed when lifecycle of a hook ends. In this case returned function will be called after component unmounts.
+
+This code **does not have resource leaks**, but is **implemented incorrectly**, just like previous one.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [Cleaning up an effect](https://reactjs.org/docs/hooks-reference.html#cleaning-up-an-effect).
+
+#### Level 5: use count as dependency
+
+```javascript
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCount(count + 1);
+  }, 500);
+  return () => clearInterval(interval);
+}, [count]);
+```
+
+Giving array of dependencies to useEffect will change its lifecycle. In this example useEffect will be called once after mount and every time count changes. Cleanup function will be called every time count changes to dispose previous resource.
+
+This code **works correctly**, without any bugs, but it’s slightly **misleading**. setInterval is created and disposed every 500ms. Each setInterval is always called once.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect), [Conditionally firing an effect](https://reactjs.org/docs/hooks-reference.html#conditionally-firing-an-effect).
+
+#### Level 6: setTimeout
+
+```javascript
+useEffect(() => {
+  const timeout = setTimeout(() => {
+    setCount(count + 1);
+  }, 500);
+  return () => clearTimeout(timeout);
+}, [count]);
+```
+
+This code and the code above **work correctly**. Since useEffect is called every time count changes, using setTimeout has same effect as calling setInterval .
+
+This example is inefficient, new setTimeout is created every time render happens. React has a better way for fixing the problem.
+
+#### Level 7: functional updates for useState
+
+```javascript
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCount((c) => c + 1);
+  }, 500);
+  return () => clearInterval(interval);
+}, []);
+```
+
+In previous example we ran useEffect on each count change. The was necessary because we needed to have always up-to-date current value.
+
+useState provides API to update previous state without capturing the current value. To do that, all we need to do is provide lambda to setState .
+
+This code **works correctly** and more efficiently. We are using a single setInterval during the lifecycle of a component. clearInterval will only be called once after component is **unmounted**.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useState](https://reactjs.org/docs/hooks-reference.html#usestate), [Functional updates](https://reactjs.org/docs/hooks-reference.html#functional-updates).
+
+#### Level 8: local variable
+
+```javascript
+export default function Level08() {
+  console.log('renderLevel08');
+  const [count, setCount] = useState(0);
+  let interval = null;
+  const start = () => {
+    interval = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 500);
+  };
+  const stop = () => {
+    clearInterval(interval);
+  };
+  return (
+    <div>
+      count => {count}
+      <button onClick={start}>start</button>
+      <button onClick={stop}>stop</button>
+    </div>
+  );
+}
+```
+
+We’ve added start and stop buttons. This code is **implemented incorrectly,** stop button does not work. New reference is created during each render, so stop will have reference to null.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [Is there something like instance variables?](https://reactjs.org/docs/hooks-faq.html#is-there-something-like-instance-variables)
+
+#### Level 9: useRef
+
+```javascript
+export default function Level09() {
+  console.log('renderLevel09');
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
+  const start = () => {
+    intervalRef.current = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 500);
+  };
+  const stop = () => {
+    clearInterval(intervalRef.current);
+  };
+  return (
+    <div>
+      count => {count}
+      <button onClick={start}>start</button>
+      <button onClick={stop}>stop</button>
+    </div>
+  );
+}
+```
+
+useRef is the go-to hook if mutable variable is needed. Unlike local variables, React makes sure same reference is returned during each render.
+
+This code seems correct, but has a **subtle bug**. If start is called multiple times, setInterval will be called multiple times triggering **resource leak**.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useRef](https://reactjs.org/docs/hooks-reference.html#useref)
+
+#### Level 10: useCallback
+
+```javascript
+export default function Level10() {
+  console.log('renderLevel10');
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
+  const start = () => {
+    if (intervalRef.current !== null) {
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 500);
+  };
+  const stop = () => {
+    if (intervalRef.current === null) {
+      return;
+    }
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  };
+  return (
+    <div>
+      count => {count}
+      <button onClick={start}>start</button>
+      <button onClick={stop}>stop</button>
+    </div>
+  );
+}
+```
+
+To avoid resource leak, we simply ignore calls if interval is already started. Although calling clearInterval(null) does not trigger any errors, it’s still good practice to dispose resource only once.
+
+This code has **no resource leaks**, is **implemented correctly**, but might have a **performance problem**.
+
+memoization is main performance optimization tool in React. React.memo does shallow comparison and if references are same, render is skipped.
+
+If start and stop were passed to a memoized component, the whole optimization would fail, because new reference is returned after each render.
+
+🔗 [**React Hooks: Memoization**](https://medium.com/@sdolidze/react-hooks-memoization-99a9a91c8853)
+
+#### Level 11: useCallback
+
+```javascript
+export default function Level11() {
+  console.log('renderLevel11');
+  const [count, setCount] = useState(0);
+  const intervalRef = useRef(null);
+  const start = useCallback(() => {
+    if (intervalRef.current !== null) {
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setCount((c) => c + 1);
+    }, 500);
+  }, []);
+  const stop = useCallback(() => {
+    if (intervalRef.current === null) {
+      return;
+    }
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  }, []);
+
+  return (
+    <div>
+      count => {count}
+      <button onClick={start}>start</button>
+      <button onClick={stop}>stop</button>
+    </div>
+  );
+}
+```
+
+To enable React.memo to do its job properly, all we need to do it to memoize functions, using useCallback hook. This way, same reference will be provided after each render.
+
+This code has **no resource leaks**, is **implemented correctly**, has **no performance problem**, but code is **quite complex,** even for a simple counter.
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [useCallback](https://reactjs.org/docs/hooks-reference.html#usecallback)
+
+#### Level 12: custom hook
+
+```javascript
+function useCounter(initialValue, ms) {
+  const [count, setCount] = useState(initialValue);
+  const intervalRef = useRef(null);
+  const start = useCallback(() => {
+    if (intervalRef.current !== null) {
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setCount((c) => c + 1);
+    }, ms);
+  }, []);
+  const stop = useCallback(() => {
+    if (intervalRef.current === null) {
+      return;
+    }
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
+  }, []);
+  const reset = useCallback(() => {
+    setCount(0);
+  }, []);
+
+  return { count, start, stop, reset };
+}
+```
+
+To **simplify code**, we need to encapsulate all complexity inside useCounter custom hook and expose clean api: `{ count, start, stop, reset }` .
+
+```javascript
+export default function Level12() {
+  console.log('renderLevel12');
+  const { count, start, stop, reset } = useCounter(0, 500);
+  return (
+    <div>
+      count => {count}
+      <button onClick={start}>start</button>
+      <button onClick={stop}>stop</button>
+      <button onClick={reset}>reset</button>
+    </div>
+  );
+}
+```
+
+🔗 [Hooks API Reference](https://reactjs.org/docs/hooks-reference.html): [Using a Custom Hook](https://reactjs.org/docs/hooks-custom.html#using-a-custom-hook)
+
+---
+
+### React Hooks Radar
+
+![](https://cdn-images-1.medium.com/max/1600/0*Px-sg5tvCOOlPcJb.jpeg)
+
+All React Hooks are equal, but some hooks are **more equal** than others.
+
+#### ✅ Green
+
+Green hooks are main building blocks of modern React applications. They are safe to use almost everywhere without much thinking.
+
+1.  [useReducer](https://reactjs.org/docs/hooks-reference.html#usereducer)
+2.  [useState](https://reactjs.org/docs/hooks-reference.html#usestate)
+3.  [useContext](https://reactjs.org/docs/hooks-reference.html#usecontext)
+
+#### 🌕 Yellow
+
+Yellow hooks provide useful performance optimizations by using memoization. Managing lifecycle and inputs should be done with caution.
+
+1.  [useCallback](https://reactjs.org/docs/hooks-reference.html#usecallback)
+2.  [useMemo](https://reactjs.org/docs/hooks-reference.html#usememo)
+
+#### 🔴 Red
+
+Red hooks interact with mutable world using side effects. They are most powerful and should be used with extreme caution. Customs hooks are recommended for all non-trivial use-cases.
+
+1.  [useRef](https://reactjs.org/docs/hooks-reference.html#useref)
+2.  [useEffect](https://reactjs.org/docs/hooks-reference.html#useeffect)
+3.  [useLayoutEffect](https://reactjs.org/docs/hooks-reference.html#uselayouteffect)
+
+---
+
+### React Hooks Checklist
+
+![](https://cdn-images-1.medium.com/max/1600/0*yDzaJvKh8gKFHiGH.jpg)
+
+1.  Obey [Rules of Hooks](https://reactjs.org/docs/hooks-rules.html).
+2.  Don’t do any side-effects in main render function.
+3.  Unsubscribe/dispose/destroy all used resources.
+4.  Prefer useReducer or functional updates for useState to prevent reading and writing same value in a hook.
+5.  Don’t use mutable variables inside render function, use useRef instead.
+6.  If what you save in useRef has smaller lifecycle than the component itself, don’t forget to unset the value when disposing the resource.
+7.  Be cautions with infinite recursion and resource starvation.
+8.  Memoize functions and objects when needed to improve performance.
+9.  Correctly capture input dependencies (undefined => every render, [a, b] => when a or b change, [] => only once).
+10. Use customs hooks for non-trivial use-cases.
+
+### GitHub Repo
+
+[**sdolidze/react-hooks-interval**](https://github.com/sdolidze/react-hooks-interval)

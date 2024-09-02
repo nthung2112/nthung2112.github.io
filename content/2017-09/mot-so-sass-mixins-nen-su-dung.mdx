@@ -1,0 +1,574 @@
+---
+title: Một số SASS Mixins nên sử dụng
+author: Hung Tan Nguyen
+date: 2017-09-01 09:53:15
+sourceUrl: http://w3bits.com/sass-mixins/
+tags: [css, sass]
+slug: /mot-so-sass-mixins-nen-su-dung
+---
+
+Danh sách một số SASS mixins mà các Web designers nên có để công việc của họ nhanh hơn.
+
+![Một số SASS Mixins nên sử dụng](http://w3bits.com/wp-content/uploads/must-have-sass-mixins.jpg)
+
+Tôi đã sử dụng SASS không quá lâu, nhưng kể từ khi tôi bắt đầu với nó, Tôi đã sử dụng một số _mixins_ để auto một số thứ trong dự án của tôi. Mixins giống như các hàm tự động tạo ra code CSS và giúp bạn tiết kiệm viết code giống nhau lặp đi lặp lại.
+
+Có một số lượng tốt thư viện SASS mixin sẵn có trên web (eg. bourbon) một hoặc một số trong số đó bạn có thể đã sử dụng. Hoặc như tôi, bạn có thể đã tạo ra một bộ tùy chỉnh bằng cách thu thập các mixins siêu hữu ích từ web.
+
+Tạo thư viện tùy chỉnh luôn luôn phục vụ tốt và gọn gàng. Bằng cách này bạn tránh thêm code không cần thiết và chỉ thêm những gì bạn thực sự cần.
+
+Dưới đây là danh sách một số SASS mixins tiện dụng Tôi đã sử dụng hằng ngày với các dự án của tôi. Một số trong số chúng được thu thập từ web, một số đơn giản là đủ để viết cho mình. Kiểm tra các đoạn mixins dưới đây, cách sử dụng ví dụ, và output của chúng:
+
+## 1. Thêm kích thước
+
+Một mixin đơn giản để cho kích thước vào một box.
+
+```scss
+@mixin box($width, $height=$width) {
+    width: $width;
+    height: $height;
+}
+```
+
+#### Usage
+
+Bạn phải cung cấp ít nhất một tham số để làm cho nó hoạt động:
+
+```scss
+.square {
+  @include box(50px);
+}
+
+.rectangle {
+  @include box(100px, 50px);
+}
+```
+
+#### Output
+
+```scss
+.square {
+    width: 50px;
+    height: 50px;
+}
+
+.rectangle {
+    width: 100px;
+    height: 50px;
+}
+```
+
+## 2. Clearfix
+
+Implementing [micro-clearfix hack](http://w3bits.com/clearfix/) the SASS way.
+
+```scss
+@mixin clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+```
+
+#### Usage
+
+```scss
+.cf {
+  @include clearfix;
+}
+```
+
+#### Output
+
+```scss
+.cf:after {
+    content: '';
+    display: table;
+    clear: both;
+}
+```
+
+## 3. Opacity
+
+CSS Opacity with fallback for IE8+.
+
+```scss
+@mixin opacity($opacity) {
+    opacity: $opacity;
+    $opacity-ie: $opacity * 100;
+    filter: alpha(opacity = $opacity-ie); //IE8
+}
+```
+
+#### Output
+
+```scss
+.fade {
+  @include opacity(.4);
+}
+```
+
+#### Output
+
+```scss
+.fade {
+    opacity: 0.4;
+    filter: alpha(opacity = 40); //IE8
+}
+```
+
+## 4. Positioning
+
+Easy and quick CSS positioning, thanks to [Hugo Giraudel](http://www.sitepoint.com/sass-mixins-kickstart-project/).
+
+```scss
+@mixin position($position, $args) {
+  @each $o in top right bottom left {
+    $i: index($args, $o);
+    @if $i and $i + 1 <= length($args) and type-of(nth($args, $i + 1)) == number {
+      #{$o}: nth($args, $i + 1);
+    }
+  }
+  position: $position;
+}
+
+// Positioning helpers
+@mixin absolute($args: '') {
+  @include position(absolute, $args);
+}
+
+@mixin fixed($args: '') {
+  @include position(fixed, $args);
+}
+
+@mixin relative($args: '') {
+  @include position(relative, $args);
+}
+```
+
+#### Usage
+
+You should only use `absolute()`, `relative()`, and `fixed()` functions to add the respective positioning to the elements. Parameters are optional and can be given as demonstrated below:
+
+```scss
+.menu li {
+  @include relative;
+}
+
+.sub-menu {
+  @include absolute(top 100% left 0);
+}
+
+.sticky-bar {
+  @include fixed(top 0 left 0);
+}
+```
+
+## 5. Rem units
+
+Implementing CSS `rem` units with [pixel fallback](http://w3bits.com/rem-fallback/).
+
+```scss
+@mixin font-size($size, $base: 16) {
+    font-size: $size; // fallback for old browsers
+    font-size: ($size / $base) * 1rem;
+}
+```
+
+#### Usage
+
+```scss
+body {
+  @include font-size(16);
+}
+
+p {
+  @include font-size(12, 10);
+}
+```
+
+Bạn phải cung cấp ít nhất một giá trị khi sử dụng mixin, giá trị này sẽ được coi là font-size và sẽ được xuất ra sau khi được tính toán với font-size mặc định (16). Hoặc bạn có thể cung cấp một giá trị cơ sở khác nếu bạn muốn.
+
+#### Output
+
+```scss
+body {
+    font-size: 16px;
+    font-size: 1rem;
+}
+```
+
+## 6. Vendor prefixing
+
+Vendor prefixing made easy with full control over prefixes, customize as you use:
+
+```scss
+@mixin prefix($property, $value, $vendors: webkit moz ms o, $default: true) {
+  @if $vendors {
+    @each $vendor in $vendors {
+      #{"-" + $vendor + "-" + $property}: #{$value};
+    }
+  }
+  @if $default {
+    #{$property}: #{$value};
+  }
+}
+```
+
+#### Usage
+
+```scss
+html {
+  @include prefix('box-sizing', 'border-box', moz webkit);
+}
+
+*,
+*:before,
+*:after {
+  @include prefix('box-sizing', 'inherit', moz webkit);
+}
+```
+
+As shown above, you may provide the vendor prefixes as the 3rd parameter in the mixin, each separated by a space.
+
+#### Output
+
+```scss
+html {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    -moz-box-sizing: inherit;
+    -webkit-box-sizing: inherit;
+    box-sizing: inherit;
+}
+```
+
+## 7. Media queries
+
+Handling CSS Media queries was never this easy:
+
+```scss
+@mixin screen($size) {
+  $desktop: "(min-width: 1024px)";
+  $tablet: "(min-width: 768px) and (max-width: 1023px)";
+  $mobile: "(max-width: 767px)";
+  @if $size == desktop {
+    @media only screen and #{$desktop} {
+      @content;
+    }
+  }
+  @else if $size == tablet {
+    @media only screen and #{$tablet} {
+      @content;
+    }
+  }
+  @else if $size == mobile {
+    @media only screen and #{$mobile} {
+      @content;
+    }
+  }
+  @else {
+    @media only screen and #{$size} {
+      @content;
+    }
+  }
+}
+```
+
+#### Usage
+
+```scss
+.wrapper {
+  margin: 0 auto;
+  width: 100%;
+  @include screen('tablet') {
+    width: 90%;
+  }
+
+  @include screen('desktop') {
+    width: 85%;
+  }
+}
+```
+
+#### Output
+
+```scss
+.wrapper {
+  margin: 0 auto;
+  width: 100%;
+}
+@media only screen and (min-width: 768px) and (max-width: 1023px) {
+  .wrapper {
+    width: 90%;
+  }
+}
+@media only screen and (min-width: 1024px) {
+  .wrapper {
+    width: 85%;
+  }
+}
+```
+
+In place of 'mobile', 'tablet', or 'desktop', you may also provide a custom breakpoint values, for eg:
+
+```scss
+.wrapper {
+  @include screen('(min-width: 1367px)') {
+    width: 1280px;
+  }
+}
+```
+
+## 8. Retina Images
+
+Show the retina images on retina-friendly devices only:
+
+```scss
+@mixin retina($image, $width, $height) {
+  @media (min--moz-device-pixel-ratio: 1.3),
+  (-o-min-device-pixel-ratio: 2.6/2),
+  (-webkit-min-device-pixel-ratio: 1.3),
+  (min-device-pixel-ratio: 1.3),
+  (min-resolution: 1.3dppx) {
+    /* Serving 2x image on Retina display */
+    background-image: url($image);
+    background-size: $width $height;
+  }
+}
+```
+
+#### Usage
+
+```scss
+.logo {
+background-image: url("img/logo.png");
+  @include retina("img/logo@2x.png", 100px, 21px);
+}
+```
+
+#### Output
+
+```scss
+.logo {
+  background-image: url("img/logo.png");
+}
+@media (min--moz-device-pixel-ratio: 1.3), (-o-min-device-pixel-ratio: 2.6 / 2), (-webkit-min-device-pixel-ratio: 1.3), (min-device-pixel-ratio: 1.3), (min-resolution: 1.3dppx) {
+  .logo {
+    /* Serving HQ image on Retina display */
+    background-image: url("img/logo@2x.png");
+    background-size: 100px 21px;
+  }
+}
+```
+
+The above example usage may not be perfect and you may add more rules for specifying width and height of the element to be optimized for retina screen.
+
+## 9. CSS3 Keyframes
+
+CSS3 keyframes can't be implemented with the vendor prefixing mixin mentioned above. The below mixin is meant to render keyframes correctly with the vendor prefixes:
+
+```scss
+@mixin keyframes($name) {
+  @-webkit-keyframes #{$name} {
+    @content;
+  }
+
+  @-moz-keyframes #{$name} {
+    @content;
+  }
+
+  @keyframes #{$name} {
+    @content;
+  }
+}
+```
+
+#### Usage
+
+```scss
+@include keyframes(animate) {
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+```
+
+#### Output
+
+```scss
+@-webkit-keyframes animate {
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+@-moz-keyframes animate {
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+@keyframes animate {
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+```
+
+## 10. Background Gradient
+
+Quick and simple SASS mixin to implement CSS linear gradients:
+
+```scss
+@mixin gradient($start-color, $end-color, $orientation) {
+  background: $start-color;
+  @if $orientation == 'vertical' {
+    background: -webkit-linear-gradient(top, $start-color, $end-color);
+    background: linear-gradient(to bottom, $start-color, $end-color);
+  } @else if $orientation == 'horizontal' {
+    background: -webkit-linear-gradient(left, $start-color, $end-color);
+    background: linear-gradient(to right, $start-color, $end-color);
+  } @else {
+    background: -webkit-radial-gradient(center, ellipse cover, $start-color, $end-color);
+    background: radial-gradient(ellipse at center, $start-color, $end-color);
+  }
+}
+```
+
+#### Usage
+
+```scss
+.gradient {
+  @include gradient(#07c, #06f, vertical);
+}
+```
+
+#### Output
+
+```scss
+.gradient {
+    background: #07c;
+    background: -webkit-linear-gradient(top, #07c, #06f);
+    background: linear-gradient(to bottom, #07c, #06f);
+}
+```
+
+## 11. @font-face
+
+```scss
+@mixin font-face($font-name, $file-name, $weight: normal, $style: normal) {
+  @font-face {
+    font-family: quote($font-name);
+    src: url($file-name + '.eot');
+    src: url($file-name + '.eot?#iefix')  format('embedded-opentype'),
+    url($file-name + '.woff') format('woff'),
+    url($file-name + '.ttf')  format('truetype'),
+    url($file-name + '.svg##{$font-name}')  format('svg');
+    font-weight: $weight;
+    font-style: $style;
+  }
+}
+```
+
+#### Usage
+
+```scss
+@include font-face('MyFont', 'path/to/MyFont', $style: normal, $weight: normal);
+```
+
+#### Output
+
+```scss
+@font-face {
+    font-family: 'MyFont';
+    src: url('path/to/MyFont.eot');
+    src:
+    url('path/to/MyFont.eot?#iefix') format('embedded-opentype'),
+    url('path/to/MyFont.woff') format('woff'),
+    url('path/to/MyFont.ttf') format('truetype'),
+    url('path/to/MyFont.svg#MyFont') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+```
+
+## 12. Centering a block
+
+```scss
+@mixin center-block {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+```
+
+#### Usage
+
+```scss
+.wrapper {
+  @include center-block;
+}
+```
+
+#### Output
+
+```scss
+.wrapper {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+```
+
+## 13. Vertical centering
+
+```scss
+@mixin center-vertically {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  @include prefix(transform, translate(-50%, -50%), 'webkit' 'ms');
+}
+```
+
+#### Usage
+
+```scss
+.vc-box {
+  @include center-vertically;
+}
+```
+
+#### Output
+
+```scss
+.vc-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+```
+
+Kết thúc ở đây, hy vọng nó có ích. Vui lòng chỉ ra vấn đề hoặc chia sẻ các đề xuất của bạn qua nhận xét. Thanks :)

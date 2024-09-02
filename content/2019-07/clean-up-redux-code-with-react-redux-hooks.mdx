@@ -1,0 +1,212 @@
+---
+title: 'Clean Up Redux Code with React-Redux Hooks'
+author: Hung Tan Nguyen
+tags:
+  - react
+  - redux
+categories: []
+sourceUrl: 'https://medium.com/swlh/clean-up-redux-code-with-react-redux-hooks-71587cfcf87a'
+coverImage: 'https://miro.medium.com/max/5744/1*Zn4l19pXloVA4c8aQVVCww.png'
+date: 2019-07-23 08:20:00
+slug: /clean-up-redux-code-with-react-redux-hooks
+---
+
+If you search “Redux hooks” on Google, you won’t find a lot of resources about the cool new [React-Redux hooks API](https://react-redux.js.org/api/hooks). What you _will_ find are bunch of articles about how to use React hooks as a replacement for Redux and other state management libraries.
+
+But this was never the point of hooks. [React hooks](https://reactjs.org/docs/hooks-intro.html) were made to allow developers to write functional components that can do all the things we once needed class components for, like using state or lifecycle methods. React hooks improve the developer experience by optimizing the organization, maintainability, and readability of React code. They allow us to share logic between components without using complicated design patterns like [render props](https://reactjs.org/docs/render-props.html) or [higher-order components](https://reactjs.org/docs/higher-order-components.html), and they cut down on the dense boilerplate required by JavaScript classes. They don’t really add any new functionality to React; functional components using hooks can’t do anything that class components can’t. But they _do_ allow us to write much cleaner code.
+
+If these improvements make you feel comfortable with using React to manage your application state without an external library, go for it! But React hooks are by no means the death of state management libraries like Redux. In fact, [React-Redux version 7.1.0](https://github.com/reduxjs/react-redux/releases/tag/v7.1.0), released in June 2019, provides developers with its own set of hooks, with methods like [useSelector()](https://react-redux.js.org/next/api/hooks#useselector) and [useDispatch()](https://react-redux.js.org/next/api/hooks#usedispatch). Like React’s hooks API, these hooks let us cleanly organize our logic within the body of a functional component. They also eliminate the need to wrap our components in a higher-order [connect()](https://react-redux.js.org/api/connect) component to connect to our store.
+
+Let’s look at a ridiculously simple example to see how this works. (This assumes basic knowledge of how React and Redux applications work.)
+
+![](https://miro.medium.com/max/626/1*z1BSgaeufKhRDYVCAk2TjQ.png)
+
+Here we have a web page that lets you increment and decrement a counter. Super exciting, right? Behind the scenes, we have a whole React and Redux app setup to manage the state of the counter. (Fork this [GitHub repo](https://github.com/maximiliangonzalez/counter) and play around with the code!)
+
+```javascript
+export const increment = (count) => ({
+  type: 'CHANGE_COUNT',
+  payload: count + 1,
+});
+
+export const decrement = (count) => ({
+  type: 'CHANGE_COUNT',
+  payload: count - 1,
+});
+```
+
+Here are some action creators to increment and decrement the counter in our store. I could have declared a CHANGE_COUNT constant to protect against misspellings, but the store is small enough to skip that step.
+
+```javascript
+import { createStore } from 'redux';
+
+const initialState = {
+  count: 0,
+};
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case 'CHANGE_COUNT':
+      return {
+        ...state,
+        count: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+```
+
+This is business as usual for Redux. The new hooks API doesn’t reduce this part of the boilerplate. Now let’s look at how we connect our store to the React app with the counter:
+
+```javascript
+import React from 'react';
+import { render } from 'react-dom';
+import App from './components/App.jsx';
+import { Provider } from 'react-redux';
+import store from './reducers/counterReducer';
+
+render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+Now let’s look at how our App component would get access to data from the Redux store without using the React-Redux hooks API:
+
+```javascript
+import React from 'react';
+import { connect } from 'react-redux';
+import * as actions from '../actions/actions';
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { count, increment, decrement } = this.props;
+
+    return (
+      <div>
+        <h1>The count is {count}</h1>
+        <button onClick={() => increment(count)}>+</button>
+        <button onClick={() => decrement(count)}>-</button>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (store) => ({
+  count: store.count,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  increment: (count) => dispatch(actions.increment(count)),
+  decrement: (count) => dispatch(actions.decrement(count)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+This is how we get our simple counter app to work with React and Redux. But that’s a lot of boilerplate for something so simple. Let’s take a look at what’s going on here. First of all, we have a constructor that does nothing but give our class component access to the props being passed down to it. This component doesn’t actually need to be a class component since it’s not using local state or any lifecycle methods, so let’s quickly refactor it to a functional component so we can bring in the hooks:
+
+```javascript
+import React from 'react';
+import { connect } from 'react-redux';
+import * as actions from '../actions/actions';
+
+const App = (props) => {
+  const { count, increment, decrement } = props;
+
+  return (
+    <div>
+      <h1>The count is {count}</h1>
+      <button onClick={() => increment(count)}>+</button>
+      <button onClick={() => decrement(count)}>-</button>
+    </div>
+  );
+};
+
+const mapStateToProps = (store) => ({
+  count: store.count,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  increment: (count) => dispatch(actions.increment(count)),
+  decrement: (count) => dispatch(actions.decrement(count)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+```
+
+Okay, that’s a bit nicer, but it’s still more complicated than it needs to be. We still need to definemapStateToProps() and mapDispatchToProps()functions to connect to the Redux store, and wrap our App component in the connect()higher-order component so we can pass these pieces of the store and dispatching functions down to our App component as props. We also have to write this.props over and over again (or, to avoid that, we can use [object destructuring](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Object_destructuring) assignment like I did to assign our props to variables) in order to access these pieces of the store and dispatching functions. It’s all a bit messy, isn’t it? Let’s clean this up a bit.
+
+First, let’s look at [useSelector()](https://react-redux.js.org/next/api/hooks#useselector). This new React-Redux hook takes the place of mapStateToProps() and allows you to directly hook into your Redux store without needing to pass state as props from a higher-order component. This function takes a callback as an argument. That callback takes the entire Redux store as its argument, but you don’t have to worry about grabbing the store yourself, because useSelector() gets it from the Provider that we wrapped our App component in. In the body of the callback, you can return whichever piece of the store you want to have access to and save it as a variable in your component.
+
+Since our Redux store’s initial state has a countproperty with the initial value of 0, we can write _const count = useSelector(store => store.count)\_which \_selects_ the countproperty from our store and assigns it to the countconstant we just declared. Before we press any buttons, that variable will have the value of0. Let’s refactor our component to use the useSelector() hook.
+
+```javascript
+import React from 'react';
+import { useSelector, connect } from 'react-redux';
+import * as actions from '../actions/actions';
+
+const App = (props) => {
+  const { increment, decrement } = props;
+  const count = useSelector((store) => store.count);
+
+  return (
+    <div>
+      <h1>The count is {count}</h1>
+      <button onClick={() => increment(count)}>+</button>
+      <button onClick={() => decrement(count)}>-</button>
+    </div>
+  );
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  increment: (count) => dispatch(actions.increment(count)),
+  decrement: (count) => dispatch(actions.decrement(count)),
+});
+
+export default connect(null, mapDispatchToProps)(App);
+```
+
+This is a lot nicer already. We can get direct access to values from our Redux store now, and not rely on some higher-order component we didn’t write to pass it to our component as props. We can reference our count constant anywhere in the body of our component and it will have the current value from our Redux store. If any actions are dispatched that update the countproperty in our store, our countconstant will be updated as well. We can simply call useSelector()again with a different selector and assign it to another variable if we need to make another selection from the store.
+
+But, speaking of dispatching actions, our mapDispatchToProps() function still forces us to use connect() to get functions as props that we’d rather directly access in our component. Let’s do something about this.
+
+The other main React-Redux hook, [useDispatch()](https://react-redux.js.org/next/api/hooks#usedispatch), takes care of this for us. This one is super simple. Just call useDispatch() in your component, and it will return a function you can use to dispatch actions to your Redux store. Pass a call to an action creator to this returned function, and it will work just like a function from mapDispatchToProps().
+
+Let’s refactor our component one last time to implement the useDispatch() hook:
+
+```javascript
+import React from 'react';
+import * as actions from '../actions/actions';
+import { useSelector, useDispatch } from 'react-redux';
+
+const App = () => {
+  const dispatch = useDispatch();
+  const count = useSelector((store) => store.count);
+
+  return (
+    <div>
+      <h1>The count is {count}</h1>
+      <button onClick={() => dispatch(actions.increment(count))}>+</button>
+      <button onClick={() => dispatch(actions.decrement(count))}>-</button>
+    </div>
+  );
+};
+
+export default App;
+```
+
+Now that we can access our store and the dispatch function directly in our component, there’s no longer any need to wrap App in a higher-order component to pass anything to it as props. This results in much cleaner code where everything is defined where it’s relevant. If you need to change any logic pertaining to Redux, you won’t have to look outside of the body your component anymore. Now, everything is nicely contained.
+
+Obviously, this example is so simple that it hardly makes sense to use Redux here (or even React, really). But these hooks can be used the exact same way they are here, even if they’re in a more complex component that also uses React hooks like [useState()](https://reactjs.org/docs/hooks-state.html) or [useEffect()](https://reactjs.org/docs/hooks-effect.html).
+
+Admittedly, there still is a lot of time-consuming boilerplate writing you need to do to set up a React-Redux app, even if you’re using the hooks APIs. Prototyping apps such as [preducks](https://www.preducks.com/) (pictured at the top of the article) can help you eliminate a lot of the mindless setup and truly optimize your developer experience. (There’s even a [node module](https://www.npmjs.com/package/preducks?activeTab=readme) for extremely quick setup: think [_create-react-app_](https://www.npmjs.com/package/create-react-app) but with Redux boilerplate too). preducks also uses [TypeScript](https://www.typescriptlang.org/). Much like hooks, TypeScript also improves your developer experience by bringing strict, static type checking into JavaScript, letting you eliminate bugs and keep better track of the shape you expect your data to be. This gets useful when your React-Redux apps get large and your data gets complex. Give preducks a try if you’re interested in seeing React Redux hooks in action (along with React hooks and TypeScript).
+
+(For a more complex example of how to use React-Redux hooks along with TypeScript, check out this [GitHub repo](https://github.com/palgorhythm/todoTShooks) showing how to build a to-do app with these technologies.)

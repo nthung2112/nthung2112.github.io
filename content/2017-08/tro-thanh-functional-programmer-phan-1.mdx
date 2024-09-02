@@ -1,0 +1,288 @@
+---
+title: Trở thành Functional Programmer - Phần 1
+author: Hung Tan Nguyen
+sourceUrl: >-
+  https://medium.com/@cscalfani/so-you-want-to-be-a-functional-programmer-part-1-1f15e387e536#.zea49999j
+coverImage: 'https://viblo.asia/uploads/e85b8079-5076-40ca-af63-f1a136d06516.png'
+date: 2017-08-23 23:19:26
+tags:
+slug: /tro-thanh-functional-programmer-phan-1
+---
+
+Việc sáng tỏ, ngộ ra concept của `Functional Programming` thường là một trong những bước phát triển quan trọng nhất trong sự nghiệp lập trình của bạn, và đôi khi cũng là bước khó khăn nhất. Tuy nhiên chúng ta có thể vượt qua nó một cách dễ dàng với cách tiếp cận đúng đắn. Bài viết sau đây sẽ hướng dẫn mọi người đến được với vùng chân lý đó.
+
+## Bắt đầu từ việc học lái xe
+
+![](https://viblo.asia/uploads/31209131-a7ee-4033-bd39-bbaf95277b01.png)
+
+Lần đầu lái xe thường là những kỉ niệm đau thương và khốn khổ nhất của chúng ta. Sẽ thật dễ dàng khi nhìn người khác lái, nhưng khi thực sự đặt tay vào vô-lăng, mọi thứ bỗng trở nên khó khăn hơn chúng ta tưởng. Và chúng ta sẽ phải tập luyện bằng xe của gia đình cho đến khi có thể làm chủ những đoạn đường xung quanh nhà trước khi thoát xác lên cung đường cao tốc. Nhưng cuối cùng thì thông qua quá trình luyện tập lặp đi lặp lại và một số khoảng thời gian khiến gia đình thót tim, cuối cùng bạn cũng sẽ học được cách lái xe và có bằng lái cho riêng mình.
+
+Với tấm bằng lái trong tay, chúng ta có thể lái bất cứ cái xe nào nếu có thể nổ máy. Và với mỗi chuyến đi, sự tự tin, làm chủ tay lái sẽ ngày càng được củng cố. Và cũng sẽ đến cái ngày chúng ta phải lái xe cuả người khác, hay là phải thay chiếc xe cà tàng bằng một chiếc mới hiện đại hơn.
+
+Cảm xúc khi lái một **chiếc xe khác** sẽ như thế nào nhỉ? Liệu có giống với cảm xúc khi **lần đầu chạm tay vào vô lăng**? Không hẳn. Lần đầu tiên lái xe, chúng ta hoàn toàn bỡ ngỡ. Mặc dù trước đó đã ngồi trên xe nhưng chúng ta chỉ có vai trò là hành khách. Còn lầu đầu tiên lái xe là khi có qtoàn quyền điều khiển chiếc xe đó. Còn với lần lái chiếc xe thứ hai trở đi, chúng ta chỉ tìm kiếm câu trả lời cho những câu hỏi đơn giản : _Chìa khóa ở đâu nhỉ? Đèn ở đâu nhỉ? Chỉnh gương với đèn chiếu ở đâu ta?_ Sau những thắc mắc đó, mọi thứ diễn ra thật tự nhiên như nước chảy mây trôi, việc lái xe thật dễ dàng hơn không biết bao nhiêu lần so với lần đầu cầm lái.
+
+Nguyên do cho sự việc trên là chiếc xe mới sẽ vận hành giống _gần hết_ chiếc xe cũ. Cả 2 chiếc xe đều có những thứ cơ bản cho việc lái xe, và các thứ đó hầu hết đều ở cùng một vị trí
+
+Một vài thứ nho nhỏ sẽ được thay đổi, hoặc thêm chí có thêm vài tính năng mới, nhưng chúng ta hầu hết sẽ không dùng chúng vào lần đầu tiên, thậm chí lần thứ 2\. Dần dần sau cùng chúng ta mới học sử dụng các tính năng mới, mà chỉ là các tính năng mà chúng ta quan tâm thôi.
+
+Việc học lập trình cũng tương tự như học lái xe vậy. Lần đầu tiên bao giờ cũng là lần khó khăn nhất. Nhưng khi bạn đã quen rồi, thì những lần sau sẽ trở nên dễ dàng hơn rất nhiều.
+
+Mỗi khi bạn bắt đầu việc học một ngôn ngữ mới, sẽ có một số câu hỏi bạn sẽ thường tự hỏi mình như là : _Làm thế nào để tạo một module? Làm thế nào để tìm kiếm trong 1 mảng? Tham số cho hàm thay thế chuỗi là gì? _
+
+Bạn hoàn toàn tự tin rằng mình sẽ sử đụng được ngôn ngữ mới này, bởi vì nó gợi nhớ lại cho bạn những kỉ niệm, hiểu biết với ngôn ngữ cũ, cùng với một vài điều mới mẻ với hy vọng rằng làm cho cuộc đời của bạn trở nên đẹp đẽ hơn.
+
+## Đến con tàu vũ trụ đầu tiên
+
+![](https://viblo.asia/uploads/9615ce9c-8664-4c1e-9d96-6caa8505233f.png)
+
+Giờ hãy thử tưởng tượng rằng bạn đã lái hàng tá xe ô tô trong cuộc đời, rồi đến một ngày bạn được đặt vào khoang điều khiển của một chiếc **Tàu không gian**. Lúc này bạn bỗng trở nên hoang mang, không biết rằng liệu những kinh nghiệm lái xe có giúp ích được gì cho mình không. Bạn cảm giác như mình đang bắt đầu lại từ con số 0 tròn trĩnh. (_Chúng ta là lập trình viên, chúng ta đếm từ số 0_)
+
+Bạn có thể bắt đầu việc luyện tập với cảm giác rằng mọi thứ sẽ trở nên rất khác ở trong không gian, và cách vận hành con tàu khác hoàn toàn này sẽ rất khác so với việc lái xe trên mặt đất.
+
+Tuy nhiên thì các định luật vật lý đều không thay đổi. Chỉ khác ở chỗ cách bạn di chuyển trong cùng một vũ trụ mà thôi.
+
+Và với việc học _Functional Programming_ (lập trình hàm) cũng tương tự như vậy. Bạn dự đoán, cảm giác rằng mọi thứ sẽ rất khác. Khác đến nỗi mà khiến cho những kinh nghiệm, kiến thức đã từng có được sẽ bị xóa sổ, không quay lại được như xưa nữa. Và mọi thứ sẽ được mở đầu bằng câu nói kinh điển dưới đây.
+
+## Quên tất cả những thứ đã biết
+
+![](https://viblo.asia/uploads/d98cb0e0-584a-4e8c-a1ef-81d967045010.png)
+Mọi người rất thích câu nói sau đây, và nó cũng khá đúng trong hầu hết các trường hợp: **Học lập trình hàm (FP) cũng giống như bắt đầu lại mọi thứ vậy**. Không hoàn toàn là như vậy, nhưng đó là một suy nghĩ khá hiệu quả khi tiếp xúc với FP. Có rất nhiều concepts giống nhau giữa lập trình mà bạn đã biết và FP, nhưng việc tiếp cận FP với tư tưởng rằng mình sẽ phải **học lại tất cả mọi thứ** thường tỏ ra hiệu quả nhất.
+
+Với cách tiếp cận chính xác, bạn sẽ có những tư tưởng, suy nghĩ đúng đắn, là những thứ sẽ giúp bạn không bỏ cuộc khi việc học hành trở nên khó khăn.
+
+Bạn sẽ phải xác định rằng có rất nhiều thứ mà bạn đã từng học và làm quen trên con đường làm lâp trình viên từ trước đến giờ, khi đến với FP, sẽ biến mất hoặc không thể sử dụng được nữa.
+
+Liên hệ với việc lái xe, bạn có thể quen với việc dùng số lùi để đậu xe. Tuy nhiên một con tùa không gian sẽ _không có số lùi_. Có thể bạn sẽ nghĩ rằng : _CÁI GÌ CƠ? KHÔNG CÓ SỐ LÙi!?! TÔI LÁI TÀU THẾ QUÁI NÀO KHI KHÔNG CÓ SỐ LÙI BÂY GIỜ?!_
+
+Thực tế là tàu không gian có thể di chuyển trong không gian 3 chiều (ô tô là 2 chiều), nên sẽ không cần số lùi. Khi bạn nắm rõ cách hoạt động của tàu không gian, bạn sẽ không cần phải sử dụng số lùi thêm một lần nào nữa. Và rồi bạn sẽ thấy rằng mấy cái xe thật là cùi =)) Với FP cũng vậy, tuy nhiên:
+
+> Học FP sẽ mất thời gian. Vì thế hãy kiên nhẫn
+
+Và giờ chúng ta cùng đến với miền đất hứa của **Functional Programming**, bỏ qua vùng đất lạnh lẽo, nhàm chán của _Imperative Programming_ đã quá quen thuộc.
+
+Những gì dược viêt tiếp theo đây là một series bài viết giới thiệu các Concepts của FP với mục đích giúp người đọc làm quen trước khi đi vào bất kì ngôn ngữ lập trình FP nào. Hoặc nếu bạn đã sử dụng FP rồi, thì đây sẽ là bài viết giúp bạn hiểu rõ hơn những việc mình đang làm .
+
+Và mong các bạn không vội vàng. Hãy dành thời gian đọc những gì tôi sắp viết sau đây, cũng như dành thời gian để hiểu những đoạn code ví dụ. Bạn có thể tạm dừng sau mỗi đoạn để kiến thức ngấm hoàn toàn vào người, sau đó hãy quay lại và tiếp tục.
+
+Điều quan trọng nhất là **kiến thức của bạn**.
+
+## Concept 1: Purity - Sự thuần khiết
+
+![](https://viblo.asia/uploads/7e82f09d-32b1-41fb-9a78-6715833a744f.png)
+
+Khi những lập trình viên FP nói về Purity, đó là khi họ muốn đề cập đến _Pure Function_ .
+
+_Pure Function_ là những hàm hết sức đơn giản, chỉ thao tác dựa trên tham số đầu vào.
+
+Đây là một ví dụ về một hàm được gọi là _Pure_ trong Javascript :
+
+```
+var z = 10;
+function add(x, y) {
+    return x + y;
+}
+
+```
+
+Bạn có thể nhận thấy rằng hàm `add` không hề đụng vào biến `z`. Hàm đó không đọc giá trị của biến `z`, cũng như không thay đổi giá trị biến `z`. Nó chỉ đơn giản là đọc 2 tham số `x` và `y`, là 2 tham số đầu vào, rồi trả về giá trị là tổng của 2 tham số đó.
+
+Hàm `add`, vì lý do đó, được gọi là `Pure Function`. Nếu hàm `add` có bất kỳ xử lý nào liên quan đến biến `z`, hàm đó sẽ không còn là `pure` nữa.
+
+Chúng ta cùng tham khảo một hàm khác:
+
+```
+function justTen() {
+    return 10;
+}
+
+```
+
+Nếu hàm `justTen` là pure, thì nó chỉ có thể trả về một giá trị duy nhất, cố định.
+
+Nguyên nhân là vì hàm này không có bất kì một tham số nào. Và để đảm bảo nó là `pure function`, hàm này sẽ không thể truy cập bất kì giá trị nào ngoài các tham số của nó. Ở đây không có tham số nào, nên giá trị trả về của hàm này lúc nào cũng là một giá trị cố định.
+
+Và `pure function` mà không có tham số nào để thực hiện thì có vẻ hơi vô nghĩa, và chúng ta nên thay thế hàm `justTen` bằng một hằng số (constant) thì tốt hơn.
+
+> Hầu hết các Pure Function đều có ít nhất một tham số.
+
+Tiếp theo chúng ta đến với một hàm khác:
+
+```
+function addNoReturn(x, y) {
+    var z = x + y
+}
+
+```
+
+Dễ dàng nhận thấy rằng hàm `addNoReturn` không có giá trị trả về. Hàm này chỉ đơn giản là xử lý việc cộng 2 tham số `x` và `y` rồi lưu vào biến `z`, nhưng không trả về giá trị tông.
+Đây mặc dù vẫn là một `pure function` khi nó chỉ xử lý các tham số của chính mình. Nó thực hiện việc cộng 2 input, nhưng vì không trả về bất cứ giá trị gì, nên nó vô dụng (vì chúng ta không có cách nào lấy được giá trị đã được xử lý).
+
+> Một Pure Function chỉ có giá trị sử dụng khi có giá trị trả về.
+
+Và giờ chúng ta quay lại hàm `add` lúc đầu một lần nữa :
+
+```
+function add(x, y) {
+    return x + y;
+}
+console.log(add(1, 2)); // prints 3
+console.log(add(1, 2)); // still prints 3
+console.log(add(1, 2)); // WILL ALWAYS print 3
+
+```
+
+Có thể thấy rằng việc thực hiện `add(1,2)` luôn trả về giá trị `3`. Không phải là một điều gì quá ngạc nhiên, nhưng điều này chỉ có thể thực hiện nếu hàm đó là `pure function`. Nếu hàm `add` sử dụng bất kì một biến nào ở bên ngoài, thì bạn sẽ _không bao giờ dự đoán được kết quả trả về_
+
+> Pure Function sẽ luôn trả về cùng output với cùng input, bất kể có thực hiện bao nhiêu lần.
+
+Vì `pure function` sẽ không tác động đến các biến nằm ngoài chúng, nên các hàm sau sẽ được coi là _impure_ (không thuần khiết =)) ):
+
+```
+writeFile(fileName);
+updateDatabaseTable(sqlCmd);
+sendAjaxRequest(ajaxRequest);
+openSocket(ipAddress);
+
+```
+
+Tất cả các hàm này đều có một đặc tính chung được gọi là _Side Effects_ (tác dụng phụ). Khi bạn gọi và thực thi chúng, các hàm này sẽ thay đổi file, cập nhật cơ sử dữ liệu, gửi data về phía server hoặc gọi hệ điều hành để lấy socket. Chúng làm nhiều thứ hơn là chỉ thao tác với tham số đầu vào và trả về output. Vì thế, bạn có thể _không bao giờ_ dự đoán được giá trị mà những hàm này sẽ trả về.
+
+> Pure Function đảm bảo việc hàm sẽ không có Side Effects.
+
+Trong các ngôn ngữ _Imperative Language_ như là Javascript, Java, hay C#, Side Effects xuất hiện **ở khắp mọi nơi**. Điều này khiến cho việc debug rất khó vì biến có thể được thay đổi ở **bất kỳ đâu** trong chương trình. Vì thế khi có một lỗi xảy ra do một biến thay đổi thành giá trị không muốn muốn, bạn sẽ phải tìm ở đâu? Khắp mọi ngóc ngách? Điều đó thật không tốt chút nào.
+
+Đến đây, có thể bạn sẽ thắc mắc rằng: _VẬY LÀM THẾ QUÁI NÀO MÀ TÔI CÓ THỂ LÀM VIỆC CHỈ VỚI PURE FUNCTION CHỨ?!_
+
+Trong FP, Pure Function không phải là thứ duy nhất mà bạn sẽ vieests.
+
+FP không thể loại trừ hoàn toàn Side Effects, mà chỉ có thể cô lập chúng. Vì các phần mềm phải giao tiếp, thao tác với thế giới thực, nên một số thành phần bắt buộc phải _impure_. Mục tiêu của FP là tối thiểu hóa hết mức có thể số lượng _impure code_ và tách biệt chúng hoàn toàn khỏi các phần khác của chương trình.
+
+## Concept 2 - Immutability : Sự bất biến
+
+![](https://viblo.asia/uploads/97ab72fe-c5c3-4eea-9a5f-43199c09da63.jpeg)
+
+Bạn còn nhớ lần đầu nhìn thấy dòng code kiểu như này chứ :
+
+```
+var x = 1;
+x = x + 1;
+
+```
+
+Khi đó, hẳn là người nào đó dạy bạn lâp trình đã nói rằng : _Hãy quên những gì đã học ở môn Toán đi? Vì trong toán học, x không bao giờ bằng x+1 được cả_
+
+Nhưng trong các ngỗn ngữ _Imperative Programming_, các câu lệnh trên có nghĩa là, lấy giá trị hiện tại của biến `x`, cộng nó thêm 1 và gán kết quả trả về vào lại biến `x`.
+
+Tuy nhiên sang đến FP, `x = x + 1` lại trở thành _không đúng, không được phép_. Và bạn sẽ phải nhớ lại những gì mà bạn đã bị bắt phải quên trước đó về toán học. Hmm...
+
+> Trong Functional Programming không có khái niệm về biến (variable)
+
+Để lưu trữ các giá trị, khái niệm _biến (variable)_ vẫn được sử dụng, nhưng các biến này _đều là hằng số (constant)_, tức là nếu biến `x` đã lưu một giá trị nào đó (là 1 chẳng hạn), thì giá trị của biến `x` sẽ không thay đổi, vẫn giữ nguyên là 1 như ban đầu được set (và chúng ta gọi là _biến hằng số - constant variable_)
+
+Nếu bạn đang lo lắng về bộ nhớ, thì bạn có thể an tâm khi trong FP, `x` thường chỉ là biến cục nên thời gian tồn tại thường rất ngắn. Tuy nhiên trong suốt thời gian tồn tại, giá chị của `x` là bất biến.
+
+Đây là một ví dụ về _biến hằng số_ trong Elm, một ngôn ngữ thuần FP cho lập trình Web:
+
+```
+addOneToSum y z =
+    let
+        x = 1
+    in
+        x + y + z
+
+```
+
+Nếu bạn không quen với syntax dạng `ML-Style` , hãy để tôi giải thích. Hàm `addOneToSum` nhận 2 tham số là `y` và `z`.
+
+Trong block của `let`, biến `x` được gán với giá trị 1, tức là `x` sẽ giữ giá trị đó trong suốt phần đời của nó. Vòng đời của `x` sẽ kết thúc khi hàm kết thúc chạy, cụ thể hơn là sau khi block `let` được thực hiện.
+
+Bên trong block `in`, các dòng lệnh có thể chứa và tham chiếu đến các giá trị được định nghĩa trông phần block `let`, ở đây là `x`. Kết quả của việc tính toán `x + y + z` được xử lý và trả về, cụ thể hơn ở đây là `1 + y + z` sẽ được tính toán trả về, vì `x = 1`.
+
+Và bạn có thể thấy bối rối mà thắc mắc rằng : _TÔI LÀM TRÌNH KIỂU MÉO GÌ KHI MÀ KHÔNG CÓ BIẾN SỐ ĐÂY?!_
+
+Hãy bình tĩnh và nghĩ đến thời điểm mà bạn muốn thay đổi giá trị của biến số. Sẽ có 2 trường hợp cơ bản nhảy ra trong đầu bạn : Thay đổi biến số chứa nhiều giá trị (vd như thay đổi một/nhiều thuộc tính của một đối tượng hoặc bản ghi) và thay đổi biến số chứa một giá trị (vd như bộ đếm trong vòng lặp).
+
+FP xử lý việc thay đổi các giá trị trong một bản ghi bằng cách tạo ra một bản sao của bản ghi với dữ liệu được cập nhật. FP xử lý trường hợp thay đổi giá trị này bằng cách: không copy lại tất cả các thành phần của bản ghi, mà sử dụng các cấu trúc dữ liệu để thực hiện việc này một cách hiệu quả nhất.
+
+Về việc xử lý trường hợp thay đổi biến số chứa một giá trị, FP cũng làm tương tự như trên, cũng bằng cách tạo ra một bản sao của biến số đó.
+
+Và sẽ **KHÔNG** có vòng lặp trong FP đâu.
+
+_ĐẦU TIÊN THÌ KHÔNG CÓ BIẾN, VÀ GIỜ THÌ KHÔNG CÓ VÒNG LẶP?! GHÉT RỒI ĐẤY_
+
+Bình tình nào. Không phải là chúng ta không thể tạo ra các vòng lặp trong FP (tôi không chơi chữ đâu nhé), mà chỉ đơn giản là chúng ta sẽ không có các cấu trúc lặp như là **for, while, do, repeat, ...** thôi.
+
+> Functional Programming sử dụng đệ quy cho việc lặp.
+
+Dưới đây là 2 cách thực hiện vòng lặp trong Javascript:
+
+```
+// simple loop construct
+var acc = 0;
+for (var i = 1; i <= 10; ++i)
+    acc += i;
+console.log(acc); // prints 55
+// without loop construct or variables (recursion)
+function sumRange(start, end, acc) {
+    if (start > end)
+        return acc;
+    return sumRange(start + 1, end, acc + start)
+}
+console.log(sumRange(1, 10, 0)); // prints 55
+
+```
+
+Bạn có thể thấy rằng, bằng việc sử dụng đệ quy, chúng ta có thể thực hiện được đúng như những gì mà vòng lặp `for` phía trên đã thực hiện. Với việc sử dụng hàm `sumRange` gọi lại chính nó sau mỗi lần chạy với tham số `start` mới (`start + 1`) và tham số `acc` mới (`acc + start`). Hàm này không hề thay đổi các giá trị mới. Thay vào đó nó sử dụng các giá trị mới được tính toán từ các giá trị cũ.
+
+Thật không may, việc này khá là khó để có thể nhìn thấy rõ ràng trong Javascript, kể cả bạn đã bỏ ra chút thời gian để nghiên cứu về nó, bởi 2 lý do sau đây. Thứ nhất là do syntax trong Javascript khá là khó nhìn và thứ hai, là bạn có thể không quen với tư duy suy nghĩ theo đệ quy.
+
+Nếu sử dụng Elm, việc đọc sẽ trở nên dễ dàng hơn, và do đó, dễ hiểu hơn đối với bạn:
+
+```
+sumRange start end acc =
+    if start > end then
+        acc
+    else
+        sumRange (start + 1) end (acc + start)
+
+```
+
+Đây là kết quả đoạn code trên thực hiện:
+
+```
+sumRange 1 10 0 =      -- sumRange (1 + 1)  10 (0 + 1)
+sumRange 2 10 1 =      -- sumRange (2 + 1)  10 (1 + 2)
+sumRange 3 10 3 =      -- sumRange (3 + 1)  10 (3 + 3)
+sumRange 4 10 6 =      -- sumRange (4 + 1)  10 (6 + 4)
+sumRange 5 10 10 =     -- sumRange (5 + 1)  10 (10 + 5)
+sumRange 6 10 15 =     -- sumRange (6 + 1)  10 (15 + 6)
+sumRange 7 10 21 =     -- sumRange (7 + 1)  10 (21 + 7)
+sumRange 8 10 28 =     -- sumRange (8 + 1)  10 (28 + 8)
+sumRange 9 10 36 =     -- sumRange (9 + 1)  10 (36 + 9)
+sumRange 10 10 45 =    -- sumRange (10 + 1) 10 (45 + 10)
+sumRange 11 10 55 =    -- 11 > 10 => 55
+55
+
+```
+
+Bạn có thể cho rằng vòng lặp `for` sẽ dễ hiểu hơn. Trong khi vấn đề này vẫn đang được tranh cãi khá là nhiều, mà có thể nguyên nhân chủ yếu là do _sự quen thuộc_, thì có một sự thật là các vòng lặp `for` cần đến khả năng biến đổi của hàm số, mà điều này được cho là không tốt trong FP.
+
+Tôi sẽ không giải thích chi tiết những lợi ít của tính bất biến trong bài viết này, nhưng bạn có thể xem phần _Global Mutate State_ trong bài viết [Vì sao Lập trình viên cần có giới hạn](https://medium.com/@cscalfani/why-programmers-need-limits-3d96e1a0a6db) để biết thêm chi tiết.
+
+Một lợi ích rõ ràng của tính bất biến, đó là nếu bạn phải truy cập đến một giá trị bất kỳ trong chương trình của bạn, bạn chỉ có thể có quyền đọc nó, và điều đó tương đương với việc không ai có thể thay đổi giá trị của nó. Kể cả chính bạn. Và do đó sẽ tránh được những thay đổi không mong muốn.
+
+Và nếu chương trình của bạn hỗ trợ đa luồng (multi-threaded), thì sẽ không có bất kỳ một thread nào có thể khiến bạn đau đầu. Giá trị được set sẽ là hằng số, và nếu bất kì một thread nào muốn thay đổi nó, thread đó sẽ phải tạo một giá trị mới từ cái cũ.
+
+Quay trở lại những năm 90, tôi đã từng viết một Game Engine cho trò chơi [Creature Crunch](https://www.youtube.com/watch?v=uIOYSjBRORM) , và nguyên nhân gây ra nhiều bug nhất chính là các vấn đề liên quan đến xử lý đa luồng. Tôi ước gì mình đã biết về Tính bất biến lúc đó. Mà thực ra điều tôi quan tâm nhất khi ấy là sự khác nhau giữa tốc độ đọc 2x và 4x của ổ đĩa CD-ROM sẽ ảnh hưởng thế nào đến hiệu năng chạy game.
+
+> Tính bất biến tạo ra các dòng code đơn giản hơn và an toàn hơn
+
+## Đầu của tôi!!!!
+
+Tạm thời đến đây thôi là đủ.
+
+Trong các phần sau của bài viết này, tôi sẽ nói về các vấn đề như là _High-order Function, Functional Composition, Curring_, v..v...
+
+Nếu bạn muốn tham gia vào cộng đồng các nhà phát triển web muốn học và giúp đỡ lẫn nhau về FP trong Elm, mời các bạn tham gia Group Facebook sau: [Learn Elm Programming](https://www.facebook.com/groups/learnelm/)
+
+Và đây là Twitter của tác giả : [@cscalfani](https://twitter.com/cscalfani)

@@ -1,0 +1,109 @@
+---
+title: Giải thích React Lifecycle - componentDidMakeSense
+author: Hung Tan Nguyen
+date: 2017-11-04 23:42:53
+sourceUrl: https://medium.com/gitconnected/componentdidmakesense-react-lifecycle-explanation-393dcb19e459
+tags: [react]
+slug: /giai-thich-react-lifecycle-componentdidmakesense
+---
+
+## Learn the React lifecycle methods and when/how to use them
+
+![](https://cdn-images-1.medium.com/max/1600/1*u8hTumGAPQMYZIvfgQMfPA.jpeg)
+
+React is incredible because it allows you to build your UI using a declarative API. You tell React what you want the interface to look like, and it handles the rest.
+
+As users interact with the application, the state changes which causes updates to the DOM. React provides a set of methods to seamlessly intercept the changes at any point during the updates and take control of the UI. The component lifecycle is typically one of the final pieces to truly mastering React, and this article will ensure that you have a firm grasp.
+
+The lifecycle of a component can be defined as the time from when the component is first being inserted into the DOM, the entire time the component is in the DOM, and the point when the component is being removed from the DOM. There is a unique lifecycle for every React component in your code.
+
+### [Check out gitconnected >](https://gitconnected.com)
+
+_The community and network for developers and software engineers._
+
+#### Overview of the lifecycle
+
+The lifecycle methods are hooks to allow you to read state changes and control UI updates. The lifecycle can be broken down into 3 categories:
+
+1.  **Mounting:** The component is being added to the DOM.
+2.  **Updates:** The component receives changes props or state and is called when the component is being re-rendered.
+3.  **Unmounting:** The component is being removed from the DOM.
+
+The lifecycle methods provide entry points to take over any of these steps. Any method that begins with componentWill means you access it before the event occurs and any method prepended with componentDid means you capture it after the event occurs.
+
+![](https://cdn-images-1.medium.com/max/1600/1*EjHABzqbwHBPBP_xPRP_4A.png)
+
+#### Mounting
+
+- constructor()
+- componentWillMount()
+- render()
+- componentDidMount()
+
+#### Updating
+
+- componentWillReceiveProps()
+- shouldComponentUpdate()
+- componentWillUpdate()
+- render()
+- componentDidUpdate()
+
+#### Unmounting
+
+- componentWillUnmount()
+
+### constructor
+
+This method is called when your component is being created and before mounting (being added to the DOM). Its primary use is to initialize state and .bind(this) for the component’s methods. If you do neither of these, then there is no need for a constructor.
+
+<Gist id="e6877a12b3da2c62116d78816b680eaf" />
+
+### componentWillMount
+
+This method is executed right before a component is added to the DOM / render(). It is generally recommended that you use the constructor, but this method is still included in the API mostly for backwards compatibility.
+
+You should avoid calling any functions that cause side effects in this method as setState won’t trigger a change and there is no DOM to interact with.
+
+_Note that this is also the only lifecycle method called on the server._
+
+### componentDidMount
+
+Your component has now been rendered and exists in the DOM. This is the point when you should initiate AJAX requests, add event listeners, and perform any set up that requires a DOM. Calling setState during this method or any time after will cause a re-render.
+
+<Gist id="a85dc866528ba30dbec1becfd9d8fa0f" />
+
+### componentWillReceiveProps
+
+When your component receives new props from its parent, componentWillReceiveProps(nextProps) is triggered. This is a great time to check if there are changes in the incoming props when compared to your current props and trigger a state change based on the new values. A common use-case for this is resetting state based on a change.
+
+<Gist id="7a6e5de3b54d65b89d5ce0a51fbdd8eb" />
+
+### shouldComponentUpdate
+
+This method exists purely for performance improvements. Renders and [reconciliations](https://reactjs.org/docs/reconciliation.html) are expensive in React. shouldComponentUpdate(nextProps, nextState) provides the developer the ability to return a boolean true/false from this method which controls whether React should perform the reconciliation operations and DOM updates.
+
+The default behavior is for React to render every update, which works in most cases. If shouldComponentUpdate() returns false, then componentWillUpdate(), render(), and componentDidUpdate() will not be invoked.
+
+<Gist id="13688d13d0cf500438011780c76901eb" />
+
+### componentWillUpdate
+
+React invokes this method immediately before rendering when new props or state are being received. There is not much use for componentWillUpdate(nextProps, nextState) and should probably be avoided (similar to componentWillMount). You should not do anything that would change the state at this point — use componentWillReceiveProps if you need to do anything before a render.
+
+_Note that this method is not called on the initial render._
+
+### componentDidUpdate
+
+Immediately after React builds you a shiny new UI, componentDidUpdate(prevProps, prevState) is invoked. This is a great time to interact with the DOM or instantiate a new network request based on what the new interface should look like.
+
+### componentWillUnmount
+
+Your component had a great life and now it’s time for it to leave the UI. This is the moment to clean up everything that was associated with adding and maintaining your component while it was living on the UI.
+
+<Gist id="c3fdd539a7d1abe0d695c7a25cd51af7" />
+
+### BONUS: componentDidCatch
+
+componentDidCatch(error, info) is a new lifecycle that was added in React 16\. React was notorious for crashing the an entire application if a JavaScript error was thrown inside the React app. It corrupted React’s internal state which blew up the app and yielded cryptic error messages. componentDidCatch solves this by catching any JavaScript error occurring in a component’s tree for the children of the component that implements the method. It is able to capture the error and display a fallback UI.
+
+<Gist id="8728583fd2985bd0cab1dfa403ba49ec" />

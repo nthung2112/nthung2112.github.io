@@ -1,0 +1,549 @@
+---
+title: Hiểu sâu về React Higher Order Components
+author: Hung Tan Nguyen
+tags:
+  - javascript
+  - react
+  - hoc
+categories: []
+coverImage: 'https://cdn-images-1.medium.com/max/2000/1*p7Fb6uAwTDrWhrf5XCt6Fw.jpeg'
+sourceUrl: >-
+  https://medium.com/@franleplant/react-higher-order-components-in-depth-cf9032ee6c3e
+date: 2018-04-30 15:08:00
+slug: /hieu-sau-ve-react-higher-order-components
+---
+
+# Giới thiệu
+
+Chắc hẳn rất nhiều người trong chúng ta đã và đang sử dụng React, và tất nhiên là kèm theo hằng tá thư viện đi kèm hỗ trợ nó (lol) Và chắc hẳn bạn đã từng gặp thư viện yêu cầu bạn viết một đoạn code kiểu này để thư viện có thể hoạt động:
+
+```javascript
+import { connect } from 'react-redux';
+...
+export default connect(mapStateToProps, mapDispatchToProps)(Component);
+// Kết nối Component với Store của Redux bằng thư viện react-redux
+```
+
+Hoặc là thế này
+
+```javascript
+var Radium = require('radium');
+@Radium
+class Button extends React.Component {
+...
+}
+// Radium thư viện hỗ trợ inline style cho React element
+```
+
+Và boom Component của chúng ta nhận được props, styles và thậm chí là render ra một view khác
+
+![](https://viblo.asia/uploads/8dd3d81c-5fc7-431b-867c-e96a511abb83.gif)
+
+Các bạn đã bao giờ tự hỏi `connect()` `@Radium` kia là gì, tại sao lại viết như vậy. Vâng trong bài viết này chúng ta sẽ cùng tìm hiểu về một khái niệm nâng cao trong React - **Higher-Order Components.**
+
+![](https://viblo.asia/uploads/d0174b65-4df5-4a89-8b4d-01a14fc0c757.gif)
+
+# Higher-Order Components In a Nutshell
+
+## What are Higher-Order Components (HoCs)?
+
+Về bản chất, HoC không phải là một phần của React API, nó là một pattern xuất hiện từ những thành phần đặc tính của React. Thường được implement như một function, mà về cơ bản, là một class factory (vâng, là một class factory!)
+
+> Higher Order Component (HoC) là một function nhận vào một component và trả về một component mới. EnhancedComponent = higherOrderComponent(WrappedComponent);
+
+## What can I do with HOCs?
+
+Ở cấp độ cao, HoC cho phép chúng ta:
+
+- Code reuse, logic và tự động trừu tượng hóa (bootstrap abstraction)
+- Chiếm quyền render (Render Highjacking)
+- Trừu tượng hóa (abstraction) và điều khiển (manipulation) State
+- Điều khiển Props
+
+Chúng ta sẽ xem chi tiết về những mục này, nhưng trước tiên, chúng ta sẽ học cách implement HoCs bởi vì việc implement cho chúng ta thấy những điều có thể và hạn chế mà chúng ta thực sự có thể làm với HoC.
+
+# HOC factory implementations
+
+Có 2 cách implement HoCs thường thấy trong React: **Props Proxy (PP)** và **Inheritance Inversion (II)**. Cả 2 cách cho phép các cách khác nhau để thao tác với WrappedComponent.
+
+Trước khi bắt đầu chúng ta cần một project
+
+```javascript
+create-react-app learnHOC
+cd learnHOC/src/
+touch HOC.js
+npm start
+```
+
+## Props Proxy
+
+Props Proxy (PP) được implement thông thường theo cách sau:
+
+```javascript
+function pP(WrappedComponent) {
+  return class PP extends React.Component {
+    render() {
+      return <WrappedComponent {...this.props} />;
+    }
+  };
+}
+```
+
+Phần quan trọng nhất ở đây là method render của HoC trả về một React Element của kiểu WrappedComponent. Chúng ta cũng truyền props mà HoC nhận được, vì thế phương pháp này mới có tên Props Proxy.
+
+### What can be done with Props Proxy?
+
+- Điều khiển props
+- Truy cập instance thông qua Refs
+- Trừu tượng hóa (Abstracting) State
+- Bao WrappedComponent với elements khác
+
+#### Điều khiển props
+
+Chúng ta có thể đọc, thêm, sửa đổi và xóa props được truyền cho WrappedComponent.
+
+Nhưng cẩn thận với việc xóa hay sửa đổi các prop quan trọng, chúng ta nên đặt namespace cho HoC props để nó không phá vỡ WrappedComponent.
+
+Ví dụ: Thêm mới props.
+
+```javascript
+// HOC.js
+import React from 'react';
+
+function pP(WrappedComponent) {
+  return class PP extends React.Component {
+    render() {
+      const newProps = {
+        newProps: 'something news',
+      };
+
+      return <WrappedComponent {...this.props} {...newProps} />;
+    }
+  };
+}
+
+module.exports = {
+  pP,
+};
+```
+
+Sửa lại file App một chút
+
+```javascript
+// App.js
+import {pP} from './HoC'
+
+class App extends Component {
+  render() {
+    console.group('App');
+    console.log('render');
+    console.log(this.props);
+    console.groupEnd();
+    ...
+  }
+}
+
+export default pP(App);
+```
+
+Và ở console chúng ta có kết quả ![](https://viblo.asia/uploads/48e1c152-e99c-48a3-9074-b6be4df55b6a.png)
+
+#### Truy cập instance thông qua Refs
+
+Chúng ta có thể truy cập this (instance của WrappedComponent) với ref, nhưng chúng ta sẽ cần một quá trình render đầy đủ của WrappedComponent để ref có thể được tính toán. Điều này có nghĩa là chúng ta cần trả về WrappedComponent element từ method render của HoC, để React có thể làm quá trình đối chiếu (reconciliation process) và chúng ta sẽ có ref đến WrappedComponent instance.
+
+Ví dụ: Chúng ta sẽ tìm hiểu làm thế nào để truy cập instance methods và instance của chính WrappedComponent thông qua refs
+
+```javascript
+// HOC.js
+function refsPP(WrappedComponent) {
+  return class RefsPP extends React.Component {
+    proc(wrappedComponentInstance) {
+      console.group('refs Proc');
+      console.log(wrappedComponentInstance);
+      wrappedComponentInstance.test();
+      console.groupEnd();
+    }
+
+    render() {
+      const props = Object.assign({}, this.props, {
+        ref: this.proc.bind(this),
+      });
+      return <WrappedComponent {...props} />;
+    }
+  };
+}
+
+module.exports = {
+  pP,
+  refsPP,
+};
+```
+
+Sửa file App một chút
+
+```javascript
+import {pP, refsPP} from './HoC'
+
+class App extends Component {
+  test() {
+    console.log('call Test');
+  }
+  .....
+  }
+}
+
+export default refsPP(App);
+```
+
+Và ở console chúng ta có kết quả ![](https://viblo.asia/uploads/ff5e3971-58bf-406c-ae1b-ff012e790bee.png) Khi WrappedComponent được render xong thì ref callback sẽ được thực thi, và chúng ta sẽ có ref đến WrappedComponent instance. Điều này có thể được sử dụng để đọc/thêm các props và gọi các instance method.
+
+#### Trừu tượng hóa (Abstracting) State
+
+Chúng ta có thể trừu tượng hóa state bằng cách cung cấp props và callbacks cho WrappedComponent, tương tự như [Container Components làm với Presentational components](https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0). Ví dụ: Chúng ta sẽ thực hiện trừu tượng hóa state để kiểm soát input
+
+```javascript
+// HOC.js
+function statePP(WrappedComponent) {
+  return class StatePP extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { fields: {} };
+    }
+
+    getField(fieldName) {
+      if (!this.state.fields[fieldName]) {
+        this.state.fields[fieldName] = {
+          value: '',
+          onChange: (event) => {
+            this.state.fields[fieldName].value = event.target.value;
+            this.forceUpdate();
+          },
+        };
+      }
+
+      return {
+        value: this.state.fields[fieldName].value,
+        onChange: this.state.fields[fieldName].onChange,
+      };
+    }
+
+    render() {
+      const props = Object.assign({}, this.props, {
+        fields: this.getField.bind(this),
+      });
+
+      return <WrappedComponent {...props} />;
+    }
+  };
+}
+```
+
+Sửa file App một chút
+
+```javascript
+// App.js
+import { pP, refsPP, statePP } from './HoC';
+class App extends Component {
+  test() {
+    console.log('call Test');
+  }
+
+  render() {
+    console.group('App');
+    console.log('render');
+    console.log('name', this.props.fields('name'));
+    console.log('email', this.props.fields('email'));
+    console.groupEnd();
+    return (
+      <div className="App">
+        ....
+        <form>
+          <label>Automatically controlled input!</label>
+          <input
+            type="text"
+            placeholder="Name"
+            {...this.props.fields('name')}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            {...this.props.fields('email')}
+          />
+        </form>
+      </div>
+    );
+  }
+}
+```
+
+Và chúng ta có kết quả ![](https://viblo.asia/uploads/ea2e3283-f7ba-4b7e-a282-cc3a504b3324.png)
+
+Việc trừu tượng hóa state có nhiều ứng dụng, và được sử dụng khá nhiều trong việc giải quyết các vấn đề mà Stateless component gặp phải như không có ref chẳng hạn.
+
+#### Bao WrappedComponent với elements khác
+
+Chúng ta có thể bao WrappedComponent với component hoặc element khác để styling, layout hoặc mục đích khác. Cách sử dụng cơ bản có thể hoàn thành bởi Parent Components nhưng chúng ta có nhiều sự linh hoạt hơn với HoCs như đã mô tả ở trên.
+
+```javascript
+// HOC.js
+function elmWrapPP(WrappedComponent) {
+  return class ElmWrapPP extends React.Component {
+    render() {
+      return (
+        <div style={{ display: 'block' }}>
+          <WrappedComponent {...this.props} />
+        </div>
+      );
+    }
+  };
+}
+```
+
+## Inheritance Inversion
+
+Inheritance Inversion (II) thường được implement như sau:
+
+```javascript
+function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      return super.render();
+    }
+  };
+}
+```
+
+Như các bạn thấy, HOC trả về class (Enhancer) kế thừa (extends) WrappedComponent. Phương pháp này gọi là Inheritance Inversion là do thay vì WrappedComponent mở rộng (kế thừa) Enhancer class nào đó, nó lại được mở rộng (kế thừa) bởi Enhancer. Theo cách này, mối quan hệ giữa chúng dường như bị đảo ngược.
+
+II cho phép HoC truy cập vào WrappedComponent instance thông qua this, điều này có nghĩa là **HoC có quyền truy cập state, props, component lifecycle hooks và cả phương thức render.**
+
+Chúng ta sẽ không đi sau vào chi tiết chúng ta có thể làm gì với component lifecycle hooks, đó không phải là những gì cụ thể HoC làm, nó là React. Nhưng lưu ý rằng chúng ta hoàn toàn có thể tạo ra lifecycle hooks mới cho WrappedComponent. Và nhớ răng luôn gọi _super.[lifecycleHook]_ để không phá vỡ WrappedComponent.
+
+#### Quá trình đối chiếu (Reconciliation process)
+
+Trước khi bắt đầu chúng ta cần tóm tát vài lý thuyết.
+
+React Elements mô tả những gì sẽ hiển thị khi React chạy quá trình đối chiếu của nó.
+
+React Elements có thể có 2 loại: String và Function. String Type React Element (STRE) đại diện các DOM node và Function Type React Element (FTRE) đại diện các Component được tạo ra bằng cách mở rộng React.Component. Đọc thêm tại [post](https://facebook.github.io/react/blog/2015/12/18/react-components-elements-and-instances.html).
+
+FTRE sẽ được phân giải ra thành cây STRE trong quá trình đối chiếu của React (kết quả cuối cùng luôn là các DOM Element).
+
+Điều này rất quan trọng và nó có nghĩa là:
+
+> Inheritance Inversion High Order Components không đảm bảo là đã giải quyết được toàn bộ cây con. Điều này sẽ được chứng thực khi học Render Highjacking.
+
+### What can you do with Inheritance Inversion?
+
+- Chiếm quyền render (Render Highjacking)
+- Điều khiển state (Manipulating state)
+
+#### Render Highjacking
+
+Phương pháp này gọi là Render Highjacking bởi vì HoC kiểm soát render output của WrappedComponent và chúng ta có thể làm bất kì điều gì với nó.
+
+Trong Render Highjacking chúng ta có thể
+
+- Đọc, thêm, sửa, xóa props trong bất kì React Elements nào xuất ra bởi render.
+- Đọc và sửa đổi React elements tree xuất ra bởi render.
+- Hiển thị elements tree theo điều kiện.
+- Bao element tree cho mục đích styling (giống như đã nói ở PP)\
+
+_Note: render đề cấp đến WrappedComponent.render_
+
+> Chúng ta không thể chỉnh sửa hoặc tạo props của WrappedComponent instace, bởi vì một React Component không thể chỉnh sửa props mà nó nhận được, nhưng chúng ta có thể thay đổi các props của các element xuất ra từ phương thức render.
+
+Như chúng ta đã nói ở trên, II HoCs không đảm bảo toàn bộ cây con được giải quyết, điều này hàm ý một số giới hạn với kỹ thuật Render Highjacking. Quy tắc chung là với Render Highjacking chúng ta có thể thao tác với element tree mà WrappedComponent.render xuất ra không nhiều hơn cũng không ít hơn. Nếu Element tree đó có chưa một _[Function Type React Component](https://facebook.github.io/react/docs/components-and-props.html#functional-and-class-components)_ thì chúng ta sẽ không thể thao tác được với các con của Component đó. (Do chúng được hoãn lại bởi quá trình đối chiếu của React cho đến khi nó thực sự được render)
+
+- Ví dụ 1: **Render có điều kiện** HOC sẽ render chính xác những gì mà WrappedComponent sẽ render trừ khi this.props.loggedIn = false. (Giả định là HoC sẽ nhận được loggedIn prop).
+
+```javascript
+// HOC.js
+function rHII(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      if (this.props.loggedIn) {
+        return super.render();
+      } else {
+        return <div>Not loggedIn</div>;
+      }
+    }
+  };
+}
+```
+
+Và tất nhiên App của chúng ta không có props loggedIn (Lười quá (lol) ) nên kết quả sẽ là ![](https://viblo.asia/uploads/2ab60c9f-0e2b-4a5f-8f02-6bd187c6a718.png)
+
+- Ví dụ 2: **Sửa đổi React Element tree** xuất ra bởi render.
+
+```javascript
+// HOC.js
+function treeII(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      const elementsTree = super.render()
+      let newProps = {};
+      var newChilds = elementsTree.props.children.map(function (child) {
+        if (child.type === 'input') {
+            var childNewProps = {value: 'may the force be with you'};
+            var childProps = Object.assign({}, child.props, childNewProps)
+            return React.cloneElement(child, childProps, child.props.children);
+        }
+
+        return child;
+      });
+
+      const props = Object.assign({}, elementsTree.props, newProps)
+      const newElementsTree = React.cloneElement(elementsTree, props, newChilds)
+      return newElementsTree
+    }
+  }
+}<span class="hljs-comment">// App.js</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">App</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Component</span></span> {
+  render() {
+    <span class="hljs-keyword">return</span> (
+      <div className="App">
+        <div className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <h2>Welcome to React</h2>
+        </div>
+        <p className="App-intro" ref="appIntro">
+          To get started, edit <code>src/App.js</code> and save to reload.
+        </p>
+        <input type="text" placeholder="Name"/>
+      </div>
+    );
+  }
+}
+
+ export default treeII(App);
+```
+
+Trong ví dụ trên, nếu output render bởi WrappedComponent có chứa element con có type là `input' thì HoC sẽ thay đổi value của nó thành 'may the force be with you'.
+
+Chúng ta có thể làm mọi thứ ở đây, chúng ta có thể duyệt qua toàn bộ các phần tử của element tree và thay đổi bất kì props của bất kì element nào trong tree. Và đây chính xác là những gì [Radium](https://github.com/FormidableLabs/radium) thực hiện.
+
+> Note: Chúng ta không thể Render Highjack với Props Proxy. Mặc dù vẫn có thể truy cập vào phương thức render thông qua WrappedComponent.prototype.render, chúng ta sẽ cần phải mô phỏng WrappedComponent instance và các props của nó, và có khả năng là phải tự xử lý component lifecycle thay vì để React làm nó. Trong thực nghiệm của tôi, nó không có giá trị nhiều lắm và nếu chúng ta muốn Render Highjacking chúng ta nên sử dụng II thay vì PP. Hãy nhớ rằng React xử lý các component instances nội bộ và cách duy nhất để chúng ta thao tác với instances là thông qua refs.
+
+#### Manipulating state
+
+HOC có thể đọc, chỉnh sửa và xóa state của WrappedComponent instance, và chúng ta cũng có thể thêm state nếu cần. Hãy nhớ rằng chúng ta đang làm rối state của WrappedComponent, điều có thể dẫn chúng ta đến việc hủy hoại mọi thứ. Hầu hết các HOC nên được giới hạn để đọc hoặc thêm state, và sau đó được đặt tên (namespace) để không làm rối state của WrappedComponent.
+
+Ví dụ: Debugging bằng cách truy cập props và state của WrappedComponent
+
+```javascript
+function IIHOCDEBUGGER(WrappedComponent) {
+  return class II extends WrappedComponent {
+    render() {
+      return (
+        <div>
+          <h2>HOC Debugger Component</h2>
+          <p>Props</p> <pre>{JSON.stringify(this.props, null, 2)}</pre>
+          <p>State</p>
+          <pre>{JSON.stringify(this.state, null, 2)}</pre>
+          {super.render()}
+        </div>
+      );
+    }
+  };
+}
+```
+
+HOC này sẽ bao WrappedComponent với element khác đồng thời hiện các props và state của WrappedComponent.
+
+## Naming
+
+Khi bao một component với HOC chúng ta đánh mất tên của WrappedComponent, điều này sẽ ảnh hưởng đến chúng ta trong quá trình dev và debugging.
+
+Mọi người thường làm là tùy chỉnh tên của HOC bằng cách lấy tên của WrappedComponent và đặt trước một cái gì đó. Dưới đây trích từ React-Redux:
+
+```javascript
+HOC.displayName = `HOC(${getDisplayName(WrappedComponent)})`
+//or
+class HOC extends ... {
+  static displayName = `HOC(${getDisplayName(WrappedComponent)})`
+  ...
+}
+```
+
+Function getDisplayName được định nghĩa như sau
+
+```javascript
+function getDisplayName(WrappedComponent) {
+  return WrappedComponent.displayName ||
+         WrappedComponent.name ||
+         ‘Component’
+}
+```
+
+Chúng ta thực sự không phải viết lại nó vì thư viện [recompose](https://github.com/acdlite/recompose) đã cung cấp function này rồi.
+
+## Phụ lục
+
+### HOC and parameters
+
+Đôi khi rất hữu ích khi sử dụng các parameters cho HOCs. Điều này ẩn trong những ví dụ bên trên và nên được phát triển tự nhiên đến Javascript developers trung gian, nhưng vì lợi ích làm cho bài viết đầy đủ, chúng ta sẽ lướt qua nó một cách nhanh chóng.
+
+Ví dụ: HOC parameters với Props Proxy thông thường. Điều quan trọng là HOCFactoryFactory function.
+
+```javascript
+function HOCFactoryFactory(...params) {
+  // do something with params
+  return function HOCFactory(WrappedComponent) {
+    return class HOC extends React.Component {
+      render() {
+        return <WrappedComponent {...this.props} />;
+      }
+    };
+  };
+}
+```
+
+Và chúng ta có thể sử dụng như thế này
+
+```javascript
+HOCFactoryFactory(params)(WrappedComponent);
+//or
+@HOCFatoryFactory(params)
+class WrappedComponent extends React.Component {}
+```
+
+### Difference with Parent Components
+
+Như đã nói ở phần 'Bao WrappedComponent với elements khác', ở một số cách cơ bản cảu HOC ta có thể hoàn thành với Parent Component. Vậy điểm khác biệt giữ HOC và Parent Component là gì?
+
+> Parent Components là React Components có vài components con. React có APIs để truy cập và thao tác với component con.
+
+Ví dụ:
+
+```javascript
+class Parent extends React.Component {
+    render() {
+      return (
+        <div>
+          {this.props.children}
+        </div>
+      )
+    }
+  }
+}
+
+render((<Parent>{children}</Parent> ),  mountNode);
+```
+
+Giờ chúng ta sẽ duyệt qua xem Parent Components có và không thể làm gì khi so sánh với HOCs và thêm vài thông tin quan trọng:
+
+- Có thể Render Highjacking tương tự như với II HOC
+- Có thể điều khiển inner props tương tự như với II HOC
+- Có thể trừu tượng hóa state, nhưng có nhược điểm. Chúng ta sẽ không thể truy cập state của Parent Component từ bên ngoài trừ khi chúng ta tạo hooks cho nó. Điều này hạn chế tính hữu ích của nó.
+- Bao các elements với elements khác. Đây có thể là trường hợp duy nhất Parent component làm tốt hơn HOC. Nhưng tất nhiên là HOC cũng làm đc.
+- Thao tác với child component gặp một số vấn đề. Ví dụ nếu childrent không chỉ có 1 root element (nhiều hơn 1 first level childrent), thì chúng ta phải thêm 1 element để bao tất cả children lại, mà điều này có thể gây rườm ra cho markup của chúng ta. Trong HOCs 1 top level children root được đảm bảo bởi React/JSX.
+- Parent Components có thể được sử dụng tự do trong Elements tree, chúng không bị hạn chế 1 Component 1 lần như HOC.
+
+Nói chung, nếu chúng ta có thể làm được nó với Parent Components thì chúng ta nên làm nó, bởi vì Parent Components ít "hack não" hơn HOCs, nhưng như những điều đã nói, với State nó kém linh hoạt hơn so với HoCs.
+
+## Conclusion
+
+Hi vọng là sau khi đọc bài này, mọi người sẽ hiểu hơn một chút về React HOCs. Chúng thực sự có ý nghĩa và đã được chứng minh khá tốt trong nhiều thư viện khác nhau. React mang lại rất nhiều sự đổi mới và những thư viện như Radium, React-Redux, React-Router trong số rất nhiều thư viện khác là những bằng chứng về điều đó.
