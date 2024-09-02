@@ -2,33 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-::selection {
-  background-color: #47a3f3;
-  color: #fefefe;
-}
-
-:root {
-  --sh-class: #2d5e9d;
-  --sh-identifier: #354150;
-  --sh-sign: #8996a3;
-  --sh-property: #0550ae;
-  --sh-entity: #249a97;
-  --sh-jsxliterals: #6266d1;
-  --sh-string: #00a99a;
-  --sh-keyword: #f47067;
-  --sh-comment: #a19595;
-  scrollbar-gutter: stable;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sh-class: #4c97f8;
-    --sh-identifier: white;
-    --sh-keyword: #f47067;
-    --sh-string: #0fa295;
-  }
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -60,6 +33,17 @@
     --ring: 0 0% 3.9%;
 
     --radius: 0.5rem;
+
+    --sh-property: #0550ae;
+    --sh-entity: #249a97;
+    --sh-class: #383a42; /* Soft Black */
+    --sh-identifier: #407f5c; /* Forest Green */
+    --sh-sign: #d55fde; /* Soft Pink */
+    --sh-string: #b59f3b; /* Mustard Yellow */
+    --sh-keyword: #0170c1; /* Medium Blue */
+    --sh-comment: #a0a1a7; /* Dark Gray */
+    --sh-jsxliterals: #7960a9; /* Muted Purple */
+    scrollbar-gutter: stable;
   }
 
   .dark {
@@ -90,6 +74,10 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
+
+    --sh-class: #4c97f8;
+    --sh-keyword: #c678dd;
+    --sh-string: #0fa295;
   }
 }
 
