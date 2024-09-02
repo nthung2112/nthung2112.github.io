@@ -1,27 +1,39 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: string) {
-  let currentDate = new Date().getTime();
-  if (!date.includes("T")) {
+function getTargetDate(date?: string | Date) {
+  if (!date) {
+    return new Date();
+  }
+
+  if (date instanceof Date) {
+    return date;
+  }
+
+  if (!date.includes('T')) {
     date = `${date}T00:00:00`;
   }
-  let targetDate = new Date(date).getTime();
-  let timeDifference = Math.abs(currentDate - targetDate);
-  let daysAgo = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  return new Date(date);
+}
 
-  let fullDate = new Date(date).toLocaleString("en-us", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
+export function formatDate(date: string) {
+  const currentDate = new Date().getTime();
+  const targetDate = getTargetDate(date);
+  const timeDifference = Math.abs(currentDate - targetDate.getTime());
+  const daysAgo = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+  const fullDate = targetDate.toLocaleString('en-us', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
   });
 
   if (daysAgo < 1) {
-    return "Today";
+    return 'Today';
   } else if (daysAgo < 7) {
     return `${fullDate} (${daysAgo}d ago)`;
   } else if (daysAgo < 30) {

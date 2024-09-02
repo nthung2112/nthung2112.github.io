@@ -14,7 +14,7 @@ export async function generateMetadata({
 }): Promise<Metadata | undefined> {
   let post = await getPost(params.slug);
 
-  let { title, publishedAt: publishedTime, summary: description, image } = post.metadata;
+  let { title, date: publishedTime, summary: description, image } = post.metadata;
   let ogImage = image ? `${DATA.url}${image}` : `${DATA.url}/og?title=${title}`;
 
   return {
@@ -71,8 +71,8 @@ export default async function Blog({
             '@context': 'https://schema.org',
             '@type': 'BlogPosting',
             headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
+            datePublished: post.metadata.date,
+            dateModified: post.metadata.date,
             description: post.metadata.summary,
             image: post.metadata.image
               ? `${DATA.url}${post.metadata.image}`
@@ -91,7 +91,7 @@ export default async function Blog({
       <div className="flex justify-between items-center mt-2 mb-8 text-sm max-w-[650px]">
         <Suspense fallback={<p className="h-5" />}>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {formatDate(post.metadata.publishedAt)}
+            {formatDate(post.metadata.date)}
           </p>
         </Suspense>
       </div>

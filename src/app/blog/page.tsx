@@ -20,7 +20,7 @@ export default async function BlogPage() {
       {posts
         .sort((a, b) => {
           if (
-            new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
+            a.metadata.date > b.metadata.date
           ) {
             return -1;
           }
@@ -35,7 +35,7 @@ export default async function BlogPage() {
               <div className="w-full flex flex-col">
                 <p className="tracking-tight">{post.metadata.title}</p>
                 <p className="h-6 text-xs text-muted-foreground">
-                  {post.metadata.publishedAt}
+                  {post.metadata.date.toLocaleString()}
                 </p>
               </div>
             </Link>
