@@ -1,22 +1,17 @@
-"use client";
+import { MoonIcon, SunIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useTheme } from "next-themes";
+import { cn } from "@/utils/styles";
 
-export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+export function ModeToggle({ className }: { className?: string }) {
+  const toggleTheme = () => {
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  };
 
   return (
-    <Button
-      variant="ghost"
-      type="button"
-      size="icon"
-      className="px-2"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-    >
-      <SunIcon className="h-[1.2rem] w-[1.2rem] text-neutral-800 dark:hidden dark:text-neutral-200" />
-      <MoonIcon className="hidden h-[1.2rem] w-[1.2rem] text-neutral-800 dark:block dark:text-neutral-200" />
-    </Button>
+    <button type="button" aria-label="Toggle theme" onClick={toggleTheme} className={cn(className)}>
+      <SunIcon className="size-[1.2rem] text-neutral-800 dark:hidden dark:text-neutral-200" />
+      <MoonIcon className="hidden size-[1.2rem] text-neutral-800 dark:block dark:text-neutral-200" />
+    </button>
   );
 }

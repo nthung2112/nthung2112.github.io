@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "es5",
+  "singleQuote": false,
+  "semi": true,
+  "printWidth": 100,
+  "arrowParens": "avoid",
+  "sortPackageJson": false,
+  "sortImports": {
+    "customGroups": [
+      {
+        "groupName": "react",
+        "elementNamePattern": ["react", "react/*", "react/**"]
+      },
+      {
+        "groupName": "src",
+        "elementNamePattern": ["src", "src/*", "src/**"]
+      }
+    ],
+    "groups": [
+      "react",
+      ["builtin", "external"],
+      "internal",
+      "src",
+      ["parent", "sibling", "index", "style", "side_effect", "side_effect_style"],
+      "unknown"
+    ],
+    "newlinesBetween": true
+  },
+  "sortTailwindcss": {
+    "stylesheet": "src/global.css"
+  },
+  "ignorePatterns": [
+    ".github",
+    ".next",
+    "node_modules/",
+    "out",
+    "public",
+    "*-lock.json",
+    "tsconfig.json",
+    "build",
+    "src/routeTree.gen.ts"
+  ]
+}

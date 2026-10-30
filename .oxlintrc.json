@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["build", "src/routeTree.gen.ts"],
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "vitest"],
+  "rules": {
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-explicit-any": "off",
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_",
+        "fix": {
+          "imports": "safe-fix"
+        }
+      }
+    ],
+    "no-empty": "error",
+    "no-irregular-whitespace": "error",
+    "prefer-const": "error",
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": "off"
+  }
+}
